@@ -33,6 +33,7 @@ Vous pouvez...
 
 ## Installation
 
+### En utilisant un environnement virtuel (recommandé)
 Je vous recommande d'utiliser un environnement virtuel Python pour isoler l'installation des dépendances :
 
 ```bash
@@ -60,6 +61,25 @@ pip install .[dev]
 
 pip install .'[dev]'
 ```
+
+### Avec Docker
+#### Pour windows
+Construire et lancer le container
+```bash
+./script/docker_build_and_run.bat
+```
+
+Démarrer le serveur prefect une fois dans le container
+```bash
+./script/start_server_in_docker.sh
+```
+Le serveur est accessible sur le navigateur à l'adresse http://127.0.0.1:4200/
+
+Lancer le script
+```bash
+python src/flows.py
+```
+WARNING : En testant le script se kill (OOM) au moment de la commande "save_to_sqlite(df, "datalab", "data.economie.2019.2022")", sauf si on a sauté les premiers save_to_sqlite. Est ce un soucis seulement sous docker ?
 
 ## Test
 
