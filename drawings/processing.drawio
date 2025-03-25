@@ -1,0 +1,97 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36" version="26.1.1">
+  <diagram name="Page-1" id="8ce9d11a-91a2-4d17-14d8-a56ed91bf033">
+    <mxGraphModel dx="1069" dy="831" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;" edge="1" parent="1" source="17ea667e15c223fc-8" target="CQpyJpuCwKYfmjIRMZHl-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="17ea667e15c223fc-8" value="Téléchargement&lt;span style=&quot;color: rgba(0, 0, 0, 0); font-family: monospace; font-size: 0px; text-align: start; text-wrap-mode: nowrap;&quot;&gt;%3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20value%3D%22DECP%20CSV%20data.economie%20valides%26lt%3Bbr%26gt%3B(format%202019)%22%20style%3D%22shape%3Dparallelogram%3Bperimeter%3DparallelogramPerimeter%3BwhiteSpace%3Dwrap%3Bhtml%3D1%3BfixedSize%3D1%3B%22%20vertex%3D%221%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%2290%22%20y%3D%22140%22%20width%3D%22180%22%20height%3D%2280%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Helvetica;fontSize=12;align=center;strokeColor=default;verticalAlign=middle;fontColor=default;fillColor=default;" parent="1" vertex="1">
+          <mxGeometry x="170" y="190" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-30" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;" edge="1" parent="1" source="CQpyJpuCwKYfmjIRMZHl-1" target="CQpyJpuCwKYfmjIRMZHl-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-1" value="DECP CSV data.economie valides&lt;br&gt;(format 2022)" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="370" y="30" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-29" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;" edge="1" parent="1" source="CQpyJpuCwKYfmjIRMZHl-2" target="17ea667e15c223fc-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-2" value="DECP CSV data.economie valides&lt;br&gt;(format 2019)" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="25" width="180" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;" edge="1" parent="1" source="CQpyJpuCwKYfmjIRMZHl-4" target="CQpyJpuCwKYfmjIRMZHl-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-4" value="Téléchargement&lt;span style=&quot;color: rgba(0, 0, 0, 0); font-family: monospace; font-size: 0px; text-align: start; text-wrap-mode: nowrap;&quot;&gt;%3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20value%3D%22DECP%20CSV%20data.economie%20valides%26lt%3Bbr%26gt%3B(format%202019)%22%20style%3D%22shape%3Dparallelogram%3Bperimeter%3DparallelogramPerimeter%3BwhiteSpace%3Dwrap%3Bhtml%3D1%3BfixedSize%3D1%3B%22%20vertex%3D%221%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%2290%22%20y%3D%22140%22%20width%3D%22180%22%20height%3D%2280%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Helvetica;fontSize=12;align=center;strokeColor=default;verticalAlign=middle;fontColor=default;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="400" y="190" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-5" value="&lt;font face=&quot;Courier New&quot;&gt;get_merge_clean() &amp;gt; get_and_merge_decp()&lt;/font&gt;" style="swimlane;whiteSpace=wrap;html=1;rounded=1;shadow=0;strokeColor=#66B2FF;strokeWidth=1;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="110" y="150" width="510" height="810" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-26" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;" edge="1" parent="CQpyJpuCwKYfmjIRMZHl-5" source="CQpyJpuCwKYfmjIRMZHl-8" target="CQpyJpuCwKYfmjIRMZHl-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-8" value="Suppression de &lt;b&gt;TypePrix&lt;/b&gt; car conflit avec typePrix dans SQLite" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Helvetica;fontSize=12;align=center;strokeColor=default;verticalAlign=middle;fontColor=default;fillColor=default;" vertex="1" parent="CQpyJpuCwKYfmjIRMZHl-5">
+          <mxGeometry x="60" y="150" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-34" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;" edge="1" parent="CQpyJpuCwKYfmjIRMZHl-5" source="CQpyJpuCwKYfmjIRMZHl-9" target="CQpyJpuCwKYfmjIRMZHl-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-9" value="Sauvegarde dans bdd SQLite (table &quot;data.economie.2022.ori&quot;)" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Helvetica;fontSize=12;align=center;strokeColor=default;verticalAlign=middle;fontColor=default;fillColor=default;" vertex="1" parent="CQpyJpuCwKYfmjIRMZHl-5">
+          <mxGeometry x="280" y="260" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-27" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;" edge="1" parent="CQpyJpuCwKYfmjIRMZHl-5" source="CQpyJpuCwKYfmjIRMZHl-10" target="CQpyJpuCwKYfmjIRMZHl-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-10" value="Sauvegarde dans bdd SQLite (table &quot;data.economie.2019.ori&quot;)" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Helvetica;fontSize=12;align=center;strokeColor=default;verticalAlign=middle;fontColor=default;fillColor=default;" vertex="1" parent="CQpyJpuCwKYfmjIRMZHl-5">
+          <mxGeometry x="50" y="260" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-28" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;" edge="1" parent="CQpyJpuCwKYfmjIRMZHl-5" source="CQpyJpuCwKYfmjIRMZHl-11" target="CQpyJpuCwKYfmjIRMZHl-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-11" value="Ajout d&#39;une colonne &lt;b&gt;&quot;source_open_data&quot;&lt;/b&gt; avec &quot;data.economie valides 2019&quot;" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Helvetica;fontSize=12;align=center;strokeColor=default;verticalAlign=middle;fontColor=default;fillColor=default;" vertex="1" parent="CQpyJpuCwKYfmjIRMZHl-5">
+          <mxGeometry x="50" y="370" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;" edge="1" parent="CQpyJpuCwKYfmjIRMZHl-5" source="CQpyJpuCwKYfmjIRMZHl-13" target="CQpyJpuCwKYfmjIRMZHl-23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-13" value="Ajout d&#39;une colonne &lt;b&gt;&quot;source_open_data&quot;&lt;/b&gt; avec &quot;data.economie valides 2022&quot;" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Helvetica;fontSize=12;align=center;strokeColor=default;verticalAlign=middle;fontColor=default;fillColor=default;" vertex="1" parent="CQpyJpuCwKYfmjIRMZHl-5">
+          <mxGeometry x="280" y="370" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-31" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;" edge="1" parent="CQpyJpuCwKYfmjIRMZHl-5" source="CQpyJpuCwKYfmjIRMZHl-15" target="CQpyJpuCwKYfmjIRMZHl-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-15" value="Suppression des colonnes abandonnées dans le format 2022" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Helvetica;fontSize=12;align=center;strokeColor=default;verticalAlign=middle;fontColor=default;fillColor=default;" vertex="1" parent="CQpyJpuCwKYfmjIRMZHl-5">
+          <mxGeometry x="50" y="480" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;" edge="1" parent="CQpyJpuCwKYfmjIRMZHl-5" source="CQpyJpuCwKYfmjIRMZHl-19" target="CQpyJpuCwKYfmjIRMZHl-23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-19" value="Alignement de noms de colonnes avec format 2022" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Helvetica;fontSize=12;align=center;strokeColor=default;verticalAlign=middle;fontColor=default;fillColor=default;" vertex="1" parent="CQpyJpuCwKYfmjIRMZHl-5">
+          <mxGeometry x="50" y="590" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-23" value="Concaténation des données dans une seule table" style="rounded=1;whiteSpace=wrap;html=1;shadow=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Helvetica;fontSize=12;align=center;strokeColor=default;verticalAlign=middle;fontColor=default;fillColor=default;" vertex="1" parent="CQpyJpuCwKYfmjIRMZHl-5">
+          <mxGeometry x="170" y="710" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-18" value="Colonnes supprimées :&lt;br&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &quot;created_at&quot;,&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &quot;updated_at&quot;,&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &quot;booleanModification&quot;,&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; # seront réintégrées bientôt depuis les référentiels officiels (SIRENE, etc.)&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &quot;acheteur.nom&quot;,&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &quot;lieuExecution.nom&quot;,&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &quot;titulaire_denominationSociale_1&quot;,&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &quot;titulaire_denominationSociale_2&quot;,&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &quot;titulaire_denominationSociale_3&quot;,&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; # Supprimés pour l&#39;instant, possiblement réintégrées plus tard&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &quot;actesSousTraitance&quot;,&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &quot;titulairesModification&quot;,&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &quot;modificationsActesSousTraitance&quot;,&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &quot;objetModification&quot;,&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;strokeColor=default;strokeWidth=1;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="660" y="450" width="490" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.846;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;strokeColor=#B3B3B3;dashed=1;endArrow=none;startFill=0;" edge="1" parent="1" source="CQpyJpuCwKYfmjIRMZHl-15" target="CQpyJpuCwKYfmjIRMZHl-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-21" value="Colonnes renommées :&lt;br&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&amp;nbsp;&lt;span style=&quot;background-color: transparent;&quot;&gt;&quot;technique&quot;: &quot;techniques&quot;,&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &quot;modaliteExecution&quot;: &quot;modalitesExecution&quot;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;strokeColor=default;strokeWidth=1;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="660" y="745" width="490" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CQpyJpuCwKYfmjIRMZHl-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=default;labelBackgroundColor=none;strokeColor=#B3B3B3;dashed=1;endArrow=none;startFill=0;" edge="1" parent="1" source="CQpyJpuCwKYfmjIRMZHl-19" target="CQpyJpuCwKYfmjIRMZHl-21">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="680" as="sourcePoint" />
+            <mxPoint x="670" y="680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

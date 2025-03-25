@@ -10,7 +10,8 @@ from pathlib import Path
 from tasks.output import save_to_sqlite
 
 
-@task(retries=10, retry_delay_seconds=5)
+
+@task(retries=5, retry_delay_seconds=5)
 def get_decp_csv(date_now: str, year: str):
     """Téléchargement des DECP publiées par Bercy sur data.economie.gouv.fr."""
     print(f"-- téléchargement du format {year}")
@@ -25,7 +26,9 @@ def get_decp_csv(date_now: str, year: str):
         decp_augmente_valides_file: Path = Path(csv_url)
 
     if not (os.path.exists(decp_augmente_valides_file)):
-        request = get(csv_url)
+        request = get(
+            csv_url,
+        )
         with open(decp_augmente_valides_file, "wb") as file:
             file.write(request.content)
     else:
@@ -62,7 +65,7 @@ def get_decp_csv(date_now: str, year: str):
 
 
 @task
-def get_and_merge_decp_csv(date_now: str):
+def get_merge_decp(date_now: str):
     df_get = []
     for year in ("2019", "2022"):
         df_get.append(get_decp_csv.submit(date_now, year))

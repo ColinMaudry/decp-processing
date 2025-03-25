@@ -2,7 +2,7 @@ import polars as pl
 from numpy import nan
 
 
-def clean_official_decp(df: pl.DataFrame):
+def clean_decp(df: pl.DataFrame):
     # Remplacement des valeurs nulles
     df = df.with_columns(
         pl.col(pl.String).str.replace_many(
@@ -11,7 +11,7 @@ def clean_official_decp(df: pl.DataFrame):
     )
 
     # Nettoyage des identifiants de marchés
-    df = df.with_columns(pl.col("id").str.replace_all(r"[,\\./]", "_"))
+    df = df.with_columns(pl.col("id").str.replace_all(r"[ ,\\./]", "_"))
 
     # Ajout du champ uid
     # TODO: à déplacer autre part, dans transform

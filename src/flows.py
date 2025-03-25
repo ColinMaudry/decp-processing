@@ -24,12 +24,12 @@ DATE_NOW = datetime.now().isoformat()[0:10]  # YYYY-MM-DD
 @flow(log_prints=True)
 def get_merge_clean():
     print("Récupération des données source...")
-    df: pl.DataFrame = get_and_merge_decp_csv(DATE_NOW)
+    df: pl.DataFrame = get_merge_decp(DATE_NOW)
     print(f"DECP officielles: nombre de lignes: {df.height}")
     save_to_sqlite(df, "datalab", "data.economie.2019.2022")
 
     print("Nettoyage des données source...")
-    df = clean_official_decp(df)
+    df = clean_decp(df)
 
     print("Typage des colonnes...")
     df = fix_data_types(df)
