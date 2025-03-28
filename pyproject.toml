@@ -38,3 +38,7 @@ env = [
     "DECP_ENRICHIES_VALIDES_2022_URL=data/decp_augmente_valides_2022_test.csv"
 ]
 addopts = "-p no:warnings"
+
+[tool.prefect]
+logging.level = "INFO"
+ui.api_url = "https://127.0.0.1:4200/api"
