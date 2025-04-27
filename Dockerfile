@@ -12,7 +12,9 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 COPY . /app
 
 # Install any needed packages specified in pyproject.toml
-RUN pip install .
+RUN pip install .[dev]
+
+ENV DECP_JSON_FILES_PATH=data/decp_json_files_test.json
 
 # Run main.py when the container launches
 CMD ["python", "src/flows.py"]

@@ -621,6 +621,65 @@
         "origineUE": null,
         "origineFrance": null,
         "_type": "Marché"
+      },
+      {
+        "id": "2024CULT05",
+        "acheteur": {
+          "id": "21060029200010"
+        },
+        "nature": "Marché",
+        "objet": "RESIDENCE COMPAGNIE SIMONNE RIZZO AU THEATRE DE LA LICORNE 2024 A 2026",
+        "codeCPV": "92300000-4",
+        "procedure": "Procédure adaptée",
+        "lieuExecution": {
+          "code": "06029",
+          "typeCode": "Code commune"
+        },
+        "dureeMois": 23,
+        "dateNotification": "2024-08-07",
+        "datePublicationDonnees": "2024-09-04",
+        "montant": 40000.0,
+        "formePrix": "Forfaitaire",
+        "offresRecues": "NC",
+        "ccag": "Pas de CCAG",
+        "typeGroupementOperateurs": "Pas de groupement",
+        "titulaires": [
+          {
+            "titulaire": {
+              "typeIdentifiant": "SIRET",
+              "id": "75255609200043"
+            }
+          }
+        ],
+        "considerationsSociales": {
+          "considerationSociale": [
+            "Pas de considération sociale"
+          ]
+        },
+        "considerationsEnvironnementales": {
+          "considerationEnvironnementale": [
+            "Pas de considération environnementale"
+          ]
+        },
+        "modalitesExecution": {
+          "modaliteExecution": [
+            "Sans objet"
+          ]
+        },
+        "techniques": {
+          "technique": [
+            "Sans objet"
+          ]
+        },
+        "typesPrix": {
+          "typePrix": [
+            "Définitif ferme"
+          ]
+        },
+        "_type": "Marché",
+        "marcheInnovant": "NC",
+        "attributionAvance": "NC",
+        "sousTraitanceDeclaree": "NC"
       }
     ]
   }

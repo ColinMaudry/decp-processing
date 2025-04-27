@@ -295,7 +295,7 @@ def handle_modifications_marche(df: pl.DataFrame):
     df_base = df.select([col for col in df.columns if col != "modifications"])
 
     # Étape 2: Explode le DataFrame pour avoir une ligne par modification
-    df_exploded = df.select("id", "modifications").explode("modifications")
+    df_exploded = df.select("id", "modifications").explode("modifications").drop_nulls()
 
     # Étape 3: Extraire les données des modifications
     df_mods = df_exploded.select(
@@ -312,7 +312,7 @@ def handle_modifications_marche(df: pl.DataFrame):
                             .with_columns(pl.lit(0).alias("modification_id"))
                             .select("id", "modification_id", "dateNotification", "datePublicationDonnees", "montant", "dureeMois"),
                             df_mods], how="vertical_relaxed")
-                        .sort(["id", "dateNotification"], descending=True)
+                        .sort(["id", "dateNotification"], descending=[False, True])
                         .with_columns(pl.col("datePublicationDonnees").str.to_datetime(format="%Y-%m-%d"))
                         .with_columns(pl.col("dateNotification").str.to_datetime(format="%Y-%m-%d"))
                         .with_columns(pl.when(pl.col("dateNotification") == pl.col("dateNotification").max().over("id")).then(True).otherwise(False).alias("estDerniereNotification"))

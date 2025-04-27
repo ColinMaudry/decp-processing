@@ -95,9 +95,9 @@ def get_decp_json() -> list:
                 pl.lit(f"data.gouv.fr {filename}.json").alias("source_open_data")
             )
 
-            # print(f"avant modifications [{filename}] {df.shape}")
-            # df = handle_modifications_marche(df)
-            # print(f"après modifications [{filename}] {df.shape}")
+            print(f"avant modifications [{filename}] {df.shape}")
+            df = handle_modifications_marche(df)
+            print(f"après modifications [{filename}] {df.shape}")
             # Pour l'instant on ne garde pas les champs qui demandent une explosion
             # ou une eval à part titulaires
 
