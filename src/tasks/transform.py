@@ -44,6 +44,62 @@ def explode_titulaires(df: pl.DataFrame):
 
     return df
 
+def remove_modfications_duplicates(df):
+    """On supprime les marches avec un suffixe correspondant à un autre marché"""
+    if "modifications" not in df.collect_schema().names():
+        return df
+    # Index sans les suffixes
+    df_cleaned = df.with_columns(short_id=pl.col("uid").str.head(-2),
+                        modifications_len=pl.col("modifications").list.len())
+    df_cleaned = df_cleaned.with_columns(modif_id=pl.col("short_id") + pl.col("objet"))
+    df_cleaned = df_cleaned.with_columns(uid=pl.when(pl.col("modif_id").is_duplicated())
+                            .then(pl.col("short_id"))
+                            .otherwise(pl.col("uid")))
+    df_cleaned = df_cleaned.sort("modifications_len").unique("modif_id", keep="last")
+    return df_cleaned
+
+
+def replace_by_modification_data(df):
+    if "modifications" not in df.collect_schema().names():
+        return df
+    df = df.explode("modifications")
+    df = df.unnest("modifications")
+    modification_columns = ['id', 'montant', 'dureeMois']
+    df = df.with_columns(
+        pl.col("modification").struct.rename_fields([
+            f"modification.{field}" for field in
+            modification_columns
+        ])
+    ).unnest("modification")
+    # On conserve la dernière valeur non_null pour tous les champs de modification
+    df = df.with_columns(**{f"last_{_col}": pl.col(f"modification.{_col}")
+                            .forward_fill()
+                            .over("modif_id")
+                        for _col in modification_columns})
+    df = df.drop([
+            f"modification.{field}" for field in
+            modification_columns
+        ])
+    # On remplace les valeurs par la dernière valeur modifiée
+    _schema = df.collect_schema()
+    for _col in modification_columns:
+        if not isinstance(_schema[f"last_{_col}"], pl.List):
+            df = df.with_columns(**{_col: pl.when(pl.col(f"last_{_col}").is_not_null()).then(pl.col(f"last_{_col}")).otherwise(pl.col(_col))})
+            print(f"{_col} a été remplacé par la valeur de la modification")
+        else:
+            print(f"{_col} a un type imprévu:", df.filter(pl.col(f"last_{_col}").is_not_null()).select(f"last_{_col}"))
+        pass
+    df = df.drop([
+            f"last_{_col}" for _col in
+            modification_columns
+    ])
+    df = df.unique("modif_id", keep="last")
+    return df
+
+def process_modifications(df):
+    df = remove_modfications_duplicates(df)
+    df = replace_by_modification_data(df)
+    return df
 
 def normalize_tables(df):
     # MARCHES

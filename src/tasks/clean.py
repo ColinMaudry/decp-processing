@@ -2,7 +2,7 @@ import polars as pl
 import os
 from tasks.output import save_to_files
 from prefect import task
-from tasks.transform import explode_titulaires
+from tasks.transform import explode_titulaires, process_modifications
 from config import DIST_DIR
 
 
@@ -37,12 +37,12 @@ def clean_decp_json(files: list):
         # TODO: à déplacer autre part, dans transform
         df = df.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
 
+        df = process_modifications(df)
         # Suppression des lignes en doublon par UID (acheteur id + id)
         # Exemple : 20005584600014157140791205100
         # index_size_before = df.height
         # df = df.unique(subset=["uid"], maintain_order=False)
         # print("-- ", index_size_before - df.height, " doublons supprimés (uid)")
-
         # Dates
         date_replacements = {
             # ID marché invalide et SIRET de l'acheteur
@@ -129,5 +129,7 @@ def fix_data_types(df: pl.LazyFrame):
             "true"
         )
     )
-
+    df = df.with_columns(
+        pl.col(["origineFrance", "origineUE"]).cast(pl.Boolean)
+    )
     return df
