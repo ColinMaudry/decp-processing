@@ -25,7 +25,7 @@ from config import DECP_PROCESSING_PUBLISH, DIST_DIR
 def get_clean_merge():
     if os.path.exists(DIST_DIR):
         shutil.rmtree(DIST_DIR)
-    os.mkdir(DIST_DIR)
+    os.makedirs(DIST_DIR)
 
     print("Récupération des données source...")
     files = get_decp_json()

@@ -9,6 +9,7 @@ from pathlib import Path
 
 from tasks.output import save_to_files
 from tasks.setup import create_table_artifact
+from tasks.transform import handle_modifications_marche
 from config import DIST_DIR, DECP_JSON_FILES, DATE_NOW
 
 
@@ -94,6 +95,9 @@ def get_decp_json() -> list:
                 pl.lit(f"data.gouv.fr {filename}.json").alias("source_open_data")
             )
 
+            # print(f"avant modifications [{filename}] {df.shape}")
+            # df = handle_modifications_marche(df)
+            # print(f"après modifications [{filename}] {df.shape}")
             # Pour l'instant on ne garde pas les champs qui demandent une explosion
             # ou une eval à part titulaires
 

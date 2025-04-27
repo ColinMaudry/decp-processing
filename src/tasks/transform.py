@@ -282,3 +282,49 @@ def rename_titulaire_sirene_columns(df_sirets_titulaires: pl.DataFrame):
     df_sirets_titulaires = df_sirets_titulaires.rename(columns=renaming)
 
     return df_sirets_titulaires
+
+def handle_modifications_marche(df: pl.DataFrame):
+    """
+    Gère les modifications dans le DataFrame des DECP.
+    Cette fonction extrait les informations des modifications et les fusionne avec le DataFrame de base en ajoutant une ligne par modification 
+    (chaque ligne contient les informations complètes à jour à la date de notification)
+    Elle ajoute également la colonne "estDerniereNotification" pour indiquer si la notification est la plus récente.
+    """
+
+    # Étape 1: Créer une copie du DataFrame initial sans la colonne "modifications"
+    df_base = df.select([col for col in df.columns if col != "modifications"])
+
+    # Étape 2: Explode le DataFrame pour avoir une ligne par modification
+    df_exploded = df.select("id", "modifications").explode("modifications")
+
+    # Étape 3: Extraire les données des modifications
+    df_mods = df_exploded.select(
+        "id",
+        pl.col("modifications").struct.field("modification").struct.field("id").alias("modification_id"),
+        pl.col("modifications").struct.field("modification").struct.field("dateNotificationModification").alias("dateNotification"),
+        pl.col("modifications").struct.field("modification").struct.field("datePublicationDonneesModification").alias("datePublicationDonnees"),
+        pl.col("modifications").struct.field("modification").struct.field("montant").alias("montant"),
+        pl.col("modifications").struct.field("modification").struct.field("dureeMois").alias("dureeMois"),
+    )
+
+    # Étape 4: Joindre les données de base pour chaque ligne de modification
+    df_concat = (pl.concat([df_base
+                            .with_columns(pl.lit(0).alias("modification_id"))
+                            .select("id", "modification_id", "dateNotification", "datePublicationDonnees", "montant", "dureeMois"),
+                            df_mods], how="vertical_relaxed")
+                        .sort(["id", "dateNotification"], descending=True)
+                        .with_columns(pl.col("datePublicationDonnees").str.to_datetime(format="%Y-%m-%d"))
+                        .with_columns(pl.col("dateNotification").str.to_datetime(format="%Y-%m-%d"))
+                        .with_columns(pl.when(pl.col("dateNotification") == pl.col("dateNotification").max().over("id")).then(True).otherwise(False).alias("estDerniereNotification"))
+                )
+
+    # Étape 5: Remplir les valeurs nulles en utilisant les dernières valeurs non-nulles pour chaque id
+    df_concat = df_concat.with_columns(pl.col("montant").fill_null(strategy="backward").over("id"),
+                                    pl.col("dureeMois").fill_null(strategy="backward").over("id")
+                                    )
+
+    # Étape 5: Ajouter les données du DataFrame de base
+    df_final = df_concat.join(df_base.drop(["dateNotification", "datePublicationDonnees", "montant", "dureeMois"]),
+                            on="id", how="left")
+
+    return df_final
