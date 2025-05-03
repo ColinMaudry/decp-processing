@@ -1,8 +1,8 @@
-from flows import decp_processing
+from flows import sirene_preprocess
 from tests.fixtures import prefect_test_harness
 
 
 class TestFlow:
-    def test_decp_processing(self):
+    def test_sirene_preprocess(self):
         with prefect_test_harness(server_startup_timeout=10):
-            decp_processing()
+            sirene_preprocess()

@@ -1,7 +1,11 @@
 import polars as pl
 from httpx import get
+from prefect import task
+from config import SIRENE_DATA_DIR
+import os
 
 from tasks.output import save_to_sqlite
+import zipfile
 
 
 def explode_titulaires(df: pl.DataFrame):
@@ -94,7 +98,7 @@ def normalize_tables(df):
     # TODO ajouter les sous-traitants quand ils seront ajoutés aux données
 
 
-def merge_decp_json(files: list) -> pl.DataFrame:
+def concat_decp_json(files: list) -> pl.DataFrame:
     dfs = []
     for file in files:
         df: pl.DataFrame = pl.read_parquet(f"{file}.parquet")
@@ -113,35 +117,6 @@ def merge_decp_json(files: list) -> pl.DataFrame:
     )
     print("-- ", index_size_before - df.height, " doublons supprimés")
 
-    # Ordre des colonnes
-    df = df.select(
-        "uid",
-        "id",
-        "nature",
-        "acheteur_id",
-        "titulaire_id",
-        "titulaire_typeIdentifiant",
-        "objet",
-        "montant",
-        "codeCPV",
-        "procedure",
-        "dureeMois",
-        "dateNotification",
-        "datePublicationDonnees",
-        "formePrix",
-        "attributionAvance",
-        "offresRecues",
-        "marcheInnovant",
-        "ccag",
-        "sousTraitanceDeclaree",
-        "typeGroupementOperateurs",
-        "tauxAvance",
-        "origineUE",
-        "origineFrance",
-        "lieuExecution_code",
-        "lieuExecution_typeCode",
-        "idAccordCadre",
-    )
     return df
 
 
@@ -175,36 +150,69 @@ def make_decp_sans_titulaires(df: pl.DataFrame):
     return df_decp_sans_titulaires
 
 
+def extract_unique_acheteurs_siret(df: pl.LazyFrame):
+    # Extraction des SIRET des DECP dans une copie du df de base
+    df = df.select("acheteur_id")
+    df = df.unique().filter(pl.col("acheteur_id") != "")
+    df = df.sort(by="acheteur_id")
+    return df
+
+
+def extract_unique_titulaires_siret(df: pl.LazyFrame):
+    # Extraction des SIRET des DECP dans une copie du df de base
+    df = df.select("titulaire_id", "titulaire_typeIdentifiant")
+    df = df.unique().filter(
+        pl.col("titulaire_id") != "", pl.col("titulaire_typeIdentifiant") == "SIRET"
+    )
+    df = df.sort(by="titulaire_id")
+    return df
+
+
+@task
+def get_prepare_unites_legales():
+    sirene_data_dir = SIRENE_DATA_DIR
+
+    unites_legales_path = f"{sirene_data_dir}/StockUniteLegale_utf8"
+    if not os.path.exists(f"{unites_legales_path}.zip"):
+        print("Téléchargement des unités légales...")
+        unites_legales_url = os.getenv("SIRENE_UNITES_LEGALES_URL")
+
+        request = get(unites_legales_url, follow_redirects=True)
+        with open(f"{unites_legales_path}.zip", "wb") as file:
+            file.write(request.content)
+
+    if not os.path.exists(f"{unites_legales_path}.csv"):
+        print("Décompression des unités légales...")
+        with zipfile.ZipFile(f"{unites_legales_path}.zip", "r") as zip_ref:
+            zip_ref.extractall(sirene_data_dir)
+
+    print("-- sélection des colonnes et enregistrement au format parquet...")
+    lf_ul = pl.scan_csv(f"{unites_legales_path}.csv", infer_schema=None)
+    lf_ul = lf_ul.select(["siren", "denominationUniteLegale"])
+    lf_ul = lf_ul.sort(by="siren")
+    lf_ul.collect(engine="streaming").write_parquet(
+        f"{sirene_data_dir}/unites_legales.parquet"
+    )
+
+
+def sort_columns(df: pl.DataFrame, config_columns):
+    # Les colonnes présentes mais absentes des colonnes attendues sont mises à la fin de la liste
+    other_columns = []
+    for col in df.columns:
+        if not col in config_columns:
+            other_columns.append(col)
+
+    print("Colonnes inattendues:", other_columns)
+
+    return df.select(config_columns + other_columns)
+
+
 #
 # ⬇️⬇️⬇️ Fonctions à refactorer avec Polars et le format DECP 2022 ⬇️⬇️⬇️
 #
 
 
-def extract_unique_acheteurs_siret(df: pl.DataFrame):
-    # Extraction des SIRET des DECP
-    decp_acheteurs_df = df[["acheteur_id"]]
-    decp_acheteurs_df = decp_acheteurs_df.drop_duplicates().loc[
-        decp_acheteurs_df["acheteur_id"] != ""
-    ]
-    print(f"{decp_acheteurs_df.index.size} acheteurs uniques")
-
-    return decp_acheteurs_df
-
-
-def extract_unique_titulaires_siret(df: pl.DataFrame):
-    # Extraction des SIRET des DECP
-    df_sirets_titulaires = df[["titulaire_id", "titulaire_typeIdentifiant"]]
-
-    df_sirets_titulaires = df_sirets_titulaires.drop_duplicates()
-    df_sirets_titulaires = df_sirets_titulaires[
-        df_sirets_titulaires["titulaire_typeIdentifiant"] == "SIRET"
-    ]
-    print(f"{len(df_sirets_titulaires)} titulaires uniques")
-
-    return df_sirets_titulaires
-
-
-def make_acheteur_nom(decp_acheteurs_df: pl.DataFrame):
+def make_acheteur_nom(decp_acheteurs_df: pl.LazyFrame):
     # Construction du champ acheteur_id
 
     from numpy import nan as NaN

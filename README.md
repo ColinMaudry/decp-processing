@@ -84,7 +84,14 @@ Le serveur est accessible sur le navigateur à l'adresse http://127.0.0.1:4200/
 
 ## Lancer le traitement des données
 
-Lancer le script
+Le pré-traitement des données SIRENE doit être fait une fois pour que le traitement principal soit fonctionnel.
+
+```bash
+pytest tests/test_sirene_preprocess.py
+```
+
+Lancement du traitement principal (datalab + decp.info)
+
 ```bash
 python src/flows.py
 ```
@@ -93,6 +100,16 @@ python src/flows.py
 
 Pour lancer les tests unitaires :
 
+### Du pre-process des données SIRENE
+
+Ce traitement doit être fait une fois pour que le test du traitement principal soit fonctionnel.
+
+```bash
+pytest tests/test_sirene_preprocess.py
 ```
-pytest
+
+### Du traitement principal (datalab + decp.info)
+
+```bash
+pytest tests/test_main.py
 ```

@@ -9,13 +9,13 @@ authors = [
 dependencies = [
     "python-dotenv",
     "pandas",
-    "polars",
+    "polars==1.27.0",
     "pyarrow",
     "tableschema",
     "frictionless==4.40.11",
     "datapackage-to-datasette",
     "ipykernel",
-    "prefect",
+    "prefect==3.3.5",
 ]
 
 [project.optional-dependencies]
@@ -34,7 +34,8 @@ testpaths = [
 ]
 env = [
     "DECP_JSON_FILES_PATH=data/decp_json_files_test.json",
-    "PREFECT_API_URL="
+    "PREFECT_API_URL=",
+    "DECP_PROCESSING_PUBLISH="
 ]
 addopts = "-p no:warnings"
 

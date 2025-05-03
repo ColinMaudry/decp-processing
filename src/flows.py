@@ -1,28 +1,33 @@
 import os.path
 import shutil
-from prefect import flow, task
+from prefect import flow, task, engine
 import polars as pl
 
 from tasks.get import get_decp_json
 from tasks.clean import clean_decp_json
 from tasks.transform import (
-    merge_decp_json,
+    concat_decp_json,
     normalize_tables,
     setup_tableschema_columns,
     make_decp_sans_titulaires,
+    extract_unique_acheteurs_siret,
+    extract_unique_titulaires_siret,
+    get_prepare_unites_legales,
+    sort_columns,
 )
 from tasks.output import (
     save_to_files,
     save_to_sqlite,
     make_data_package,
 )
+
+from tasks.enrich import add_unite_legale_data
 from tasks.publish import publish_to_datagouv
-from tasks.test import validate_decp_against_tableschema
-from config import DECP_PROCESSING_PUBLISH, DIST_DIR
+from config import DECP_PROCESSING_PUBLISH, DIST_DIR, SIRENE_DATA_DIR, BASE_DF_COLUMNS
 
 
 @task(log_prints=True)
-def get_clean_merge():
+def get_clean_concat():
     if os.path.exists(DIST_DIR):
         shutil.rmtree(DIST_DIR)
     os.mkdir(DIST_DIR)
@@ -34,11 +39,16 @@ def get_clean_merge():
     files = clean_decp_json(files)
 
     print("Fusion des dataframes...")
-    df = merge_decp_json(files)
+    df = concat_decp_json(files)
 
     print("Taille après merge: ", df.shape)
 
+    print("Ajout des données SIRENE...")
+    lf: pl.LazyFrame = enrich_from_sirene(df.lazy())
+
     print("Enregistrement des DECP aux formats CSV, Parquet...")
+    df: pl.DataFrame = lf.collect(engine="streaming")
+    df = sort_columns(df, BASE_DF_COLUMNS)
     save_to_files(df, f"{DIST_DIR}/decp")
 
 
@@ -82,8 +92,9 @@ def make_decpinfo_data():
 
     # CREATION D'UN DATA PACKAGE (FRICTIONLESS DATA)
 
-    print("Validation des données DECP avec le TableSchema...")
-    validate_decp_against_tableschema()
+    # Pas la priorité pour le moment, prend du temps
+    # print("Validation des données DECP avec le TableSchema...")
+    # validate_decp_against_tableschema()
 
     print("Création du data package (JSON)....")
     make_data_package()
@@ -105,7 +116,7 @@ def make_decpinfo_data():
 @flow(log_prints=True)
 def decp_processing():
     # Données nettoyées et fusionnées
-    get_clean_merge()
+    get_clean_concat()
 
     # Fichiers dédiés à l'Open Data et decp.info
     make_decpinfo_data()
@@ -115,27 +126,26 @@ def decp_processing():
 
 
 @task(log_prints=True)
-def enrich_from_sirene(df):
+def enrich_from_sirene(df: pl.LazyFrame):
+    assert os.path.exists(SIRENE_DATA_DIR + "/unites_legales.parquet")
+
     # DONNÉES SIRENE ACHETEURS
 
-    # Enrichissement des données pas prioritaire
-    # cf https://github.com/ColinMaudry/decp-processing/issues/17
-
-    # print("Extraction des SIRET des acheteurs...")
-    # df_sirets_acheteurs = extract_unique_acheteurs_siret(df)
+    print("Extraction des SIRET des acheteurs...")
+    df_sirets_acheteurs = extract_unique_acheteurs_siret(df.clone())
 
     # print("Ajout des données établissements (acheteurs)...")
-    # df_sirets_acheteurs = add_etablissement_data_to_acheteurs(df_sirets_acheteurs)
+    # df_sirets_acheteurs = add_etablissement_data(
+    #     df_sirets_acheteurs, ["enseigne1Etablissement"], "acheteur_id"
+    # )
 
-    # print("Ajout des données unités légales (acheteurs)...")
-    # df_sirets_acheteurs = add_unite_legale_data_to_acheteurs(df_sirets_acheteurs)
+    print("Ajout des données unités légales (acheteurs)...")
+    df = add_unite_legale_data(
+        df, df_sirets_acheteurs, siret_column="acheteur_id", type_siret="acheteur"
+    )
 
-    # print("Construction du champ acheteur_id à partir des données SIRENE...")
+    # print("Construction du champ acheteur_nom à partir des données SIRENE...")
     # df_sirets_acheteurs = make_acheteur_nom(df_sirets_acheteurs)
-
-    # print("Jointure des données acheteurs enrichies avec les DECP...")
-    # df = merge_sirets_acheteurs(df, df_sirets_acheteurs)
-    # del df_sirets_acheteurs
 
     # print("Enregistrement des DECP aux formats CSV et Parquet...")
     # save_to_files(df, f"{DIST_DIR}/decp")
@@ -150,15 +160,16 @@ def enrich_from_sirene(df):
     # Enrichissement des données pas prioritaire
     # cf https://github.com/ColinMaudry/decp-processing/issues/17
 
-    # print("Extraction des SIRET des titulaires...")
-    # df_sirets_titulaires = extract_unique_titulaires_siret(df)
+    print("Extraction des SIRET des titulaires...")
+    df_sirets_titulaires = extract_unique_titulaires_siret(df)
 
     # print("Ajout des données établissements (titulaires)...")
     # df_sirets_titulaires = add_etablissement_data_to_titulaires(df_sirets_titulaires)
 
-    # print("Ajout des données unités légales (titulaires)...")
-    # df_sirets_titulaires = add_unite_legale_data_to_titulaires(df_sirets_titulaires)
-
+    print("Ajout des données unités légales (titulaires)...")
+    df = add_unite_legale_data(
+        df, df_sirets_titulaires, siret_column="titulaire_id", type_siret="titulaire"
+    )
     # print("Amélioration des données unités légales des titulaires...")
     # df_sirets_titulaires = improve_titulaire_unite_legale_data(df_sirets_titulaires)
 
@@ -174,6 +185,23 @@ def enrich_from_sirene(df):
     # del df_decp_titulaires
 
     return df
+
+
+@flow(log_prints=True)
+def sirene_preprocess():
+    """Prétraitement mensuel des données SIRENE afin d'économiser du temps lors du traitement quotidien des DECP.
+    Pour chaque ressource (unités légales, établissements), un fichier parquet est produit.
+    """
+    sirene_data_dir = SIRENE_DATA_DIR
+
+    if not os.path.exists(sirene_data_dir):
+        os.mkdir(sirene_data_dir)
+
+    # preparer les données établissements
+
+    # préprare les données unités légales
+    print("Prépararion des unités légales...")
+    get_prepare_unites_legales()
 
 
 if __name__ == "__main__":
