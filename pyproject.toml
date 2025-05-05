@@ -1,7 +1,7 @@
 [project]
 name = "decp-processing"
 description = "An introductory project to Prefect"
-version = "2.0.0"
+version = "2.0.1"
 requires-python = ">= 3.9"
 authors = [
     { name = "Colin Maudry", email = "colin+decp@maudry.com" }

@@ -2,7 +2,7 @@ import polars as pl
 import os
 from tasks.output import save_to_files
 from prefect import task
-from tasks.transform import explode_titulaires
+from tasks.transform import explode_titulaires, process_modifications
 from config import DIST_DIR
 
 
@@ -76,6 +76,9 @@ def clean_decp_json(files: list):
         # Fix datatypes
         df = fix_data_types(df)
 
+        # Handle modifications
+        df = process_modifications(df)
+
         file = f"{DIST_DIR}/clean/{file.split('/')[-1]}"
         return_files.append(file)
         if not os.path.exists(f"{DIST_DIR}/clean"):
@@ -130,4 +133,7 @@ def fix_data_types(df: pl.LazyFrame):
         )
     )
 
+    df = df.with_columns(
+        pl.col(["origineFrance", "origineUE"]).cast(pl.Boolean)
+    )
     return df

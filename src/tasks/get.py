@@ -104,7 +104,6 @@ def get_decp_json() -> list:
                 "considerationsSociales_considerationSociale",
                 "techniques_technique",
                 "modalitesExecution_modaliteExecution",
-                "modifications",
                 "actesSousTraitance",
                 "modificationsActesSousTraitance",
                 # Champs de concessions
