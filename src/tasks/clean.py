@@ -129,7 +129,5 @@ def fix_data_types(df: pl.LazyFrame):
             "true"
         )
     )
-    df = df.with_columns(
-        pl.col(["origineFrance", "origineUE"]).cast(pl.Boolean)
-    )
+    df = df.with_columns(pl.col(["origineFrance", "origineUE"]).cast(pl.Boolean))
     return df
