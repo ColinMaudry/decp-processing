@@ -7,7 +7,7 @@ from httpx import get
 from polars.polars import ColumnNotFoundError
 from prefect import task
 
-from config import DATE_NOW, DECP_JSON_FILES, DIST_DIR
+from config import DATA_DIR, DATE_NOW, DECP_JSON_FILES, DIST_DIR
 from tasks.output import save_to_files
 from tasks.setup import create_table_artifact
 
@@ -19,7 +19,7 @@ def get_json(date_now, json_file: dict):
 
     if url.startswith("https"):
         # Prod file
-        decp_json_file: Path = Path(f"data/{filename}_{date_now}.json")
+        decp_json_file: Path = DATA_DIR / f"{filename}_{date_now}.json"
         if not (os.path.exists(decp_json_file)):
             request = get(url, follow_redirects=True)
             with open(decp_json_file, "wb") as file:
@@ -43,7 +43,7 @@ def get_json_metadata(json_file: dict) -> dict:
 
 
 @task
-def get_decp_json() -> list:
+def get_decp_json() -> list[Path]:
     """Téléchargement des DECP publiées par Bercy sur data.gouv.fr."""
 
     json_files = DECP_JSON_FILES
@@ -140,12 +140,11 @@ def get_decp_json() -> list:
                 print(f"{filename}: colonnes à supprimer absentes : {absent_columns}")
             print(f"[{filename}]", df.shape)
 
-            file = f"{DIST_DIR}/get/{filename}_{date_now}"
-            if not os.path.exists(f"{DIST_DIR}/get"):
-                os.mkdir(f"{DIST_DIR}/get")
-            save_to_files(df, file, ["parquet"])
+            file_path = DIST_DIR / "get" / f"{filename}_{date_now}"
+            file_path.parent.mkdir(exist_ok=True)
+            save_to_files(df, file_path, ["parquet"])
 
-            return_files.append(file)
+            return_files.append(file_path)
             downloaded_files.append(filename + ".json")
 
     # Stock les statistiques dans prefect
