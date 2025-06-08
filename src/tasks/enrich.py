@@ -1,5 +1,3 @@
-from os import getenv
-
 import polars as pl
 
 from config import SIRENE_DATA_DIR
@@ -18,8 +16,9 @@ def add_etablissement_data(
         "codeCommuneEtablissement": "object",
         "etatAdministratifEtablissement": "category",
     }
+    # TODO: fix
     etablissement_df_chunked = pl.scan_csv(
-        getenv(f"{SIRENE_DATA_DIR}/etablissements.parquet"),
+        SIRENE_DATA_DIR / "etablissements.parquet",
         dtype=schema_etablissements,
         index_col=None,
         usecols=["siret"] + etablissement_columns,
@@ -42,7 +41,7 @@ def add_unite_legale_data(
     df_sirets = df_sirets.with_columns(pl.col(siret_column).str.head(9).alias("siren"))
 
     # Récupération des données des unités légales issues du flow de preprocess
-    unites_legales_lf = pl.scan_parquet(SIRENE_DATA_DIR + "/unites_legales.parquet")
+    unites_legales_lf = pl.scan_parquet(SIRENE_DATA_DIR / "unites_legales.parquet")
 
     # Pas besoin de garder les SIRET qui ne matchent pas dans ce df intermédiaire, puisqu'on
     # merge in fine avec le reste des données

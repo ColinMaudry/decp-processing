@@ -1,11 +1,12 @@
 import sqlite3
+from pathlib import Path
 
 import polars as pl
 
 from config import DIST_DIR
 
 
-def save_to_files(df: pl.DataFrame, path: str, file_format=None):
+def save_to_files(df: pl.DataFrame, path: str | Path, file_format=None):
     if file_format is None:
         file_format = ["csv", "parquet"]
     if "csv" in file_format:
@@ -36,7 +37,7 @@ def save_to_sqlite(df: pl.DataFrame, database: str, table_name: str, primary_key
     create_table_sql = f'CREATE TABLE "{table_name}" ({", ".join(column_definitions)}, {primary_key_definition})'  # Add quotes
 
     # Éxecution de la requête
-    connection = sqlite3.connect(f"{DIST_DIR}/{database}.sqlite")
+    connection = sqlite3.connect(DIST_DIR / f"{database}.sqlite")
     cursor = connection.cursor()
     # Important de "DROP TABLE IF EXISTS", le fichier sqlite de la veille pré-existera en général
     cursor.execute(f'DROP TABLE IF EXISTS "{table_name}"')
@@ -62,14 +63,14 @@ def make_data_package():
 
     outputs = [
         {
-            "csv": f"{DIST_DIR}/decp.csv",
+            "csv": str(DIST_DIR / "decp.csv"),
             "steps": common_steps
             + [
                 steps.field_update(name="titulaire_id", descriptor={"type": "string"}),
             ],
         },
         {
-            "csv": f"{DIST_DIR}/decp-sans-titulaires.csv",
+            "csv": str(DIST_DIR / "decp-sans-titulaires.csv"),
             "steps": common_steps,
         },
         # {
@@ -96,4 +97,4 @@ def make_data_package():
         description="Données essentielles de la commande publique (FR) au format tabulaire v2.",
         resources=resources,
         # it's possible to provide all the official properties like homepage, version, etc
-    ).to_json(f"{DIST_DIR}/datapackage.json")
+    ).to_json(DIST_DIR / "datapackage.json")

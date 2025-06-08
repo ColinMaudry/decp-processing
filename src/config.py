@@ -2,28 +2,37 @@ import json
 import os
 import shutil
 from datetime import datetime
+from pathlib import Path
 
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 
-if not os.path.exists(".env"):
+dotenv_path = find_dotenv()
+if dotenv_path == "":
     print("Création du fichier .env à partir de template.env")
-    shutil.copyfile("template.env", ".env")
+    template_dotenv_path = Path(find_dotenv("template.env"))
+    dotenv_path = template_dotenv_path.with_name(".env")
+    shutil.copyfile(template_dotenv_path, dotenv_path)
 
-# Les variables configurées sur le serveur doivent avoir la priorité
-load_dotenv(override=False)
+load_dotenv(dotenv_path, override=False)
 
 DATE_NOW = datetime.now().isoformat()[0:10]  # YYYY-MM-DD
 MONTH_NOW = DATE_NOW[2:10]
 
 DECP_PROCESSING_PUBLISH = os.environ.get("DECP_PROCESSING_PUBLISH", "")
 
-SIRENE_DATA_DIR = os.getenv("SIRENE_DATA_DIR", "./data/sirene")
-DIST_DIR = os.getenv("DECP_DIST_DIR", "./dist")
+BASE_DIR = Path(__file__).parent.parent
 
-if not os.path.exists(DIST_DIR):
-    os.mkdir(DIST_DIR)
+# Les variables configurées sur le serveur doivent avoir la priorité
+DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
+DATA_DIR.mkdir(exist_ok=True)
 
-with open(os.getenv("DECP_JSON_FILES_PATH", "data/decp_json_files.json")) as f:
+DIST_DIR = Path(os.getenv("DECP_DIST_DIR", BASE_DIR / "dist"))
+DIST_DIR.mkdir(exist_ok=True)
+
+SIRENE_DATA_DIR = Path(os.getenv("SIRENE_DATA_DIR", DATA_DIR / "sirene"))
+SIRENE_DATA_DIR.mkdir(exist_ok=True)
+
+with open(os.getenv("DECP_JSON_FILES_PATH", DATA_DIR / "decp_json_files.json")) as f:
     DECP_JSON_FILES = json.load(f)
 
 # Liste et ordre des colonnes pour le mono dataframe de base (avant normalisation et spécialisation)

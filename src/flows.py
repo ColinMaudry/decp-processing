@@ -1,10 +1,9 @@
-import os.path
 import shutil
 
 import polars as pl
 from prefect import flow, task
 
-from config import BASE_DF_COLUMNS, DECP_PROCESSING_PUBLISH, DIST_DIR, SIRENE_DATA_DIR
+from config import BASE_DF_COLUMNS, DECP_PROCESSING_PUBLISH, DIST_DIR
 from tasks.analyse import generate_stats
 from tasks.clean import clean_decp_json
 from tasks.enrich import add_unite_legale_data
@@ -27,9 +26,9 @@ from tasks.transform import (
 
 @task(log_prints=True)
 def get_clean_concat():
-    if os.path.exists(DIST_DIR):
+    if DIST_DIR.exists():
         shutil.rmtree(DIST_DIR)
-    os.mkdir(DIST_DIR)
+    DIST_DIR.mkdir(exist_ok=True)
 
     print("Récupération des données source...")
     files = get_decp_json()
@@ -49,15 +48,15 @@ def get_clean_concat():
 
     print("Enregistrement des DECP aux formats CSV, Parquet...")
     df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
-    save_to_files(df, f"{DIST_DIR}/decp")
+    save_to_files(df, DIST_DIR / "decp")
 
 
-@flow
+@flow(log_prints=True)
 def make_datalab_data():
     """Tâches consacrées à la transformation des données dans un format
     adapté aux activités du Datalab d'Anticor."""
 
-    df: pl.DataFrame = pl.read_parquet(f"{DIST_DIR}/decp.parquet")
+    df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
 
     print("Enregistrement des DECP aux formats SQLite...")
     save_to_sqlite(
@@ -82,10 +81,10 @@ def make_decpinfo_data():
     """Tâches consacrées à la transformation des données dans un format
     # adapté à decp.info"""
 
-    df: pl.DataFrame = pl.read_parquet(f"{DIST_DIR}/decp.parquet")
+    df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
 
     # DECP sans titulaires
-    save_to_files(make_decp_sans_titulaires(df), f"{DIST_DIR}/decp-sans-titulaires")
+    save_to_files(make_decp_sans_titulaires(df), DIST_DIR / "decp-sans-titulaires")
 
     # print("Ajout des colonnes manquantes...")
     # df = setup_tableschema_columns(df)
@@ -123,8 +122,6 @@ def decp_processing():
 
 @task(log_prints=True)
 def enrich_from_sirene(df: pl.LazyFrame):
-    assert os.path.exists(SIRENE_DATA_DIR + "/unites_legales.parquet")
-
     # DONNÉES SIRENE ACHETEURS
 
     print("Extraction des SIRET des acheteurs...")
@@ -188,12 +185,6 @@ def sirene_preprocess():
     """Prétraitement mensuel des données SIRENE afin d'économiser du temps lors du traitement quotidien des DECP.
     Pour chaque ressource (unités légales, établissements), un fichier parquet est produit.
     """
-    sirene_data_dir = SIRENE_DATA_DIR
-    print("SIRENE directory: " + sirene_data_dir)
-
-    if not os.path.exists(sirene_data_dir):
-        os.mkdir(sirene_data_dir)
-
     # préparer lest données établissements
 
     # préparer les données unités légales
