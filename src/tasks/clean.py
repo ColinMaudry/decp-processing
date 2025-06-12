@@ -3,6 +3,7 @@ import os
 import polars as pl
 import polars.selectors as cs
 from prefect import task
+from tasks.transform import explode_titulaires, process_modifications
 
 from config import DIST_DIR
 from tasks.output import save_to_files
@@ -18,10 +19,6 @@ def clean_decp_json(files: list):
         #
 
         lf: pl.LazyFrame = pl.scan_parquet(f"{file}.parquet")
-
-        # Explosion des titulaires
-        print("Explode titulaires...")
-        lf = explode_titulaires(lf)
 
         # Colonnes exclues pour l'instant
         # lf = df.rename({
@@ -80,13 +77,19 @@ def clean_decp_json(files: list):
         # Fix datatypes
         lf = fix_data_types(lf)
 
+        # Explosion des modifications
+        lf = process_modifications(lf)
+
+        # Explosion des titulaires
+        lf = explode_titulaires(lf)
+
         file = f"{DIST_DIR}/clean/{file.split('/')[-1]}"
         return_files.append(file)
         if not os.path.exists(f"{DIST_DIR}/clean"):
             os.mkdir(f"{DIST_DIR}/clean")
 
-        df: pl.DataFrame = lf.collect()
-        save_to_files(df, file, ["parquet"])
+        lf: pl.DataFrame = lf.collect()
+        save_to_files(lf, file, ["parquet"])
 
     return return_files
 
@@ -104,6 +107,8 @@ def fix_data_types(df: pl.LazyFrame):
         # "montantModificationActeSousTraitance": pl.Float64,
         "tauxAvance": pl.Float64,
         # "variationPrixActeSousTraitance": pl.Float64,
+        "origineFrance": pl.Float64,
+        "origineUE": pl.Float64,
     }
 
     for column, dtype in numeric_dtypes.items():

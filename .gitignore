@@ -17,3 +17,4 @@ todo.md
 data/decp-*.json
 test.*
 wiki
+*.lock

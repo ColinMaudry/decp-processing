@@ -29,7 +29,7 @@ from tasks.transform import (
 def get_clean_concat():
     if os.path.exists(DIST_DIR):
         shutil.rmtree(DIST_DIR)
-    os.mkdir(DIST_DIR)
+    os.makedirs(DIST_DIR)
 
     print("Récupération des données source...")
     files = get_decp_json()
@@ -64,7 +64,7 @@ def make_datalab_data():
         df,
         "datalab",
         "data.gouv.fr.2022.clean",
-        "uid, titulaire_id, titulaire_typeIdentifiant",
+        "uid, titulaire_id, titulaire_typeIdentifiant, modification_id",
     )
 
     print("Normalisation des tables...")
@@ -115,7 +115,7 @@ def decp_processing():
     get_clean_concat()
 
     # Fichiers dédiés à l'Open Data et decp.info
-    make_decpinfo_data()
+    # make_decpinfo_data() -- Erreur de versions des packages : polars.exceptions.ModuleUpgradeRequiredError: pandas >= 2.2 requires sqlalchemy 2.0 or higher (found 1.4.54)
 
     # Base de données SQLite dédiée aux activités du Datalab d'Anticor
     make_datalab_data()
