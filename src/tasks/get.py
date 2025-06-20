@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 import polars as pl
-from httpx import get
+from httpx import get, stream
 from polars.polars import ColumnNotFoundError
 from prefect import task
 
@@ -21,9 +21,10 @@ def get_json(date_now, json_file: dict):
         # Prod file
         decp_json_file: Path = DATA_DIR / f"{filename}_{date_now}.json"
         if not (os.path.exists(decp_json_file)):
-            request = get(url, follow_redirects=True)
-            with open(decp_json_file, "wb") as file:
-                file.write(request.content)
+            with stream("GET", url, follow_redirects=True) as response:
+                with open(decp_json_file, "wb") as file:
+                    for data in response.iter_bytes(1024**2):
+                        file.write(data)
         else:
             print(f"[{filename}] DECP d'aujourd'hui déjà téléchargées ({date_now})")
     else:
