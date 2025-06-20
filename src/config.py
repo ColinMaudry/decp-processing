@@ -4,6 +4,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
+import polars as pl
 from dotenv import find_dotenv, load_dotenv
 
 dotenv_path = find_dotenv()
@@ -69,3 +70,70 @@ BASE_DF_COLUMNS = [
     "idAccordCadre",
     "sourceOpenData",
 ]
+
+TITULAIRE_SCHEMA = pl.Struct(
+    {
+        "typeIdentifiant": pl.String,
+        "id": pl.String,
+    }
+)
+
+CONCESSIONS_SCHEMA = {
+    "autoriteConcedante.id": pl.String,
+    "valeurGlobale": pl.String,
+    "modification.valeurGlobale": pl.String,
+}
+
+FLAT_MOD_SCHEMA = {
+    "modification.id": pl.Int32,  # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
+    "modification.objetModification": pl.String,
+    "modification.dateNotificationModification": pl.String,
+    "modification.datePublicationDonneesModification": pl.String,
+    "modification.typeIdentifiant": pl.String,
+    "modification.montant": pl.String,
+    "modification.dateSignatureModification": pl.String,
+    "modification.dureeMois": pl.String,
+    "modification.titulaires.typeIdentifiant": pl.String,
+    "modification.titulaires.id": pl.String,
+}
+
+BASE_MARCHE_SCHEMA = {
+    "procedure": pl.String,
+    "nature": pl.String,
+    "codeCPV": pl.String,
+    "dureeMois": pl.String,
+    "datePublicationDonnees": pl.String,
+    "titulaires": pl.List(TITULAIRE_SCHEMA),
+    "id": pl.String,
+    "formePrix": pl.String,
+    "dateNotification": pl.String,
+    "objet": pl.String,
+    "montant": pl.String,
+    "acheteur.id": pl.String,
+    "source": pl.String,
+    "lieuExecution.code": pl.String,
+    "lieuExecution.typeCode": pl.String,
+    "_type": pl.String,
+    "uid": pl.String,
+    "uuid": pl.String,
+    "considerationsSociales": pl.List(pl.String),
+    "considerationsEnvironnementales": pl.List(pl.String),
+    # "modaliteExecution": pl.List(pl.String),
+    "marcheInnovant": pl.Boolean,
+    "attributionAvance": pl.Boolean,
+    "sousTraitanceDeclaree": pl.Boolean,
+    "ccag": pl.String,
+    "offresRecues": pl.Float64,
+    "typeGroupementOperateurs": pl.String,
+    "idAccordCadre": pl.String,
+    # "technique": pl.List(pl.String),
+    "TypePrix": pl.String,
+    "tauxAvance": pl.Float64,
+    "origineUE": pl.Float64,
+    "origineFrance": pl.Float64,
+    "created_at": pl.String,
+    "typesPrix": pl.List(pl.String),
+    "typePrix": pl.String,
+    "term.acheteur.id": pl.String,
+    "updated_at": pl.String,
+}
