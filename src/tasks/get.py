@@ -188,7 +188,7 @@ def json_to_df_2019(json_path, artifact_row):
     json_to_ndjson(json_path, ndjson_path, marches_path="marches")
     schema = {**BASE_MARCHE_SCHEMA, **FLAT_MOD_SCHEMA}
     df = pl.scan_ndjson(ndjson_path, schema=schema)
-    artifact_row["columns"] = sorted(schema.items())
+    artifact_row["columns"] = sorted(schema.keys())
     artifact_row["column_number"] = len(schema)
     artifact_row["row_number"] = df.select(pl.len()).collect().item()
     return df
