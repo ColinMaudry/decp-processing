@@ -15,6 +15,7 @@ dependencies = [
     "frictionless==4.40.11",
     "ipykernel",
     "prefect==3.3.3",
+    "ijson",
 ]
 
 [project.optional-dependencies]
