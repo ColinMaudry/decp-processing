@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+import json
 import ijson
 import orjson
 import polars as pl
@@ -67,7 +68,10 @@ def get_decp_json() -> list[Path]:
             decp_json = json.load(f)
 
         # Determiner le format du fichier
-        format = detect_format(decp_json, FORMAT_DETECTION_QUORUM) #'empty', '2019' ou '2022'
+        if json_file['file_name']=='5cd57bf68b4c4179299eb0e9-decp-2022':
+            format = '2022-messy' #pour ce fichier en particulier qui comporte des erreurs, on bypass pour le moment
+        else:
+            format = detect_format(decp_json, FORMAT_DETECTION_QUORUM) #'empty', '2019' ou '2022'
 
         if format == '2022': 
             if json_file["url"].startswith("https"):
@@ -246,9 +250,10 @@ def list_resources_to_process(dataset_ids:list[str]) -> list[dict]:
     -------
     list of dict
         Liste de dictionnaires représentant les ressources à traiter. Chaque dictionnaire contient :
+        - 'dataset_id' : identifiant du dataset,
+        - 'resource_id' : identifiant de la ressource,
         - 'file_name' : nom de fichier généré à partir du dataset et du titre de la ressource,
-        - 'url' : URL de la dernière version de la ressource (`latest`),
-        - 'process' : booléen toujours à True pour indiquer que la ressource doit être traitée.
+        - 'url' : URL de la dernière version de la ressource (`latest`)
 
     Raises
     ------

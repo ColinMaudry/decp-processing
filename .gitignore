@@ -16,7 +16,7 @@ build
 todo.md
 data/decp-*.json
 data/*[0-9][0-9].json
-
+data/*[0-9][0-9].ndjson
 test.*
 wiki
 *.lock
