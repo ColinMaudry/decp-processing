@@ -162,7 +162,7 @@ def get_decp_json() -> list[Path]:
     return return_files
 
 
-def json_to_df(json_path_file, marches_path) -> pl.DataFrame:
+def json_to_df(json_path_file) -> pl.DataFrame:
     ndjson_path = json_path_file.with_suffix(".ndjson")
     json_to_ndjson(json_path_file, ndjson_path)
     schema = MARCHE_SCHEMA_2022
