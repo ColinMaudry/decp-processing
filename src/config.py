@@ -15,6 +15,8 @@ if dotenv_path == "":
 
 load_dotenv(dotenv_path, override=False)
 
+FORMAT_DETECTION_QUORUM=.7 # Seuil de confiance pour la détection du format des données - en pratique c'est inutile car il n'y a qu'un format par fichier
+
 DATE_NOW = datetime.now().isoformat()[0:10]  # YYYY-MM-DD
 MONTH_NOW = DATE_NOW[2:10]
 
@@ -35,6 +37,9 @@ SIRENE_DATA_DIR.mkdir(exist_ok=True)
 with open(os.getenv("DECP_JSON_FILES_PATH", DATA_DIR / "decp_json_files.json")) as f:
     DECP_JSON_FILES = json.load(f)
 
+with open(os.getenv("DATASETS_REFERENCE_FILEPATH", DATA_DIR / "datasets_reference.json"), 'r') as f:
+    TRACKED_DATASETS = json.load(f)
+    
 # Liste et ordre des colonnes pour le mono dataframe de base (avant normalisation et spécialisation)
 BASE_DF_COLUMNS = [
     "uid",
