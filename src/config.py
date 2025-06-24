@@ -72,5 +72,6 @@ BASE_DF_COLUMNS = [
     "lieuExecution_code",
     "lieuExecution_typeCode",
     "idAccordCadre",
+    "source",
     "sourceOpenData",
 ]

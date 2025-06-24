@@ -1,14 +1,16 @@
-import json
 import os
 from pathlib import Path
 
+import ijson
+import orjson
 import polars as pl
 from httpx import get
 from polars.polars import ColumnNotFoundError
 from prefect import task
 
 from config import DATA_DIR, DATE_NOW, FORMAT_DETECTION_QUORUM, DIST_DIR, TRACKED_DATASETS
-from tasks.clean import clean_decp
+from schemas import MARCHE_SCHEMA_2022
+from tasks.clean import load_and_fix_json
 from tasks.output import save_to_files
 from tasks.setup import create_table_artifact
 from tasks.detect_format import detect_format
@@ -80,23 +82,9 @@ def get_decp_json() -> list[Path]:
                     "views": decp_json_metadata["metrics"]["views"],
                 }
 
-
             filename = json_file["file_name"]
-            path = decp_json["marches"]["marche"]
 
-            # Nettoyage des modifications de titulaires
-            path = clean_decp(path)
-
-            df: pl.DataFrame = pl.json_normalize(
-                path,
-                strict=False,
-                # Pas de détection des dtypes, tout est pl.String pour commencer.
-                infer_schema_length=500000,
-                # encoder="utf8",
-                # Remplacement des "." dans les noms de colonnes par des "_" car
-                # en SQL ça oblige à entourer les noms de colonnes de guillemets
-                separator="_",
-            )
+            df: pl.DataFrame = json_to_df(decp_json_file, "marches.marche")
 
             artifact_row["open_data_dataset"] = "data.gouv.fr JSON"
             artifact_row["download_date"] = date_now
@@ -111,15 +99,17 @@ def get_decp_json() -> list[Path]:
             )
 
             # Pour l'instant on ne garde pas les champs qui demandent une explosion
-            # ou une eval à part titulaires
+            # ou une eval à part:
+            # - titulaires
+            # - modifications
 
             columns_to_drop = [
                 # Pas encore incluses
-                "typesPrix_typePrix",
-                "considerationsEnvironnementales_considerationEnvironnementale",
-                "considerationsSociales_considerationSociale",
-                "techniques_technique",
-                "modalitesExecution_modaliteExecution",
+                "typesPrix",
+                "considerationsEnvironnementales",
+                "considerationsSociales",
+                "techniques",
+                "modalitesExecution",
                 "actesSousTraitance",
                 "modificationsActesSousTraitance",
                 # Champs de concessions
@@ -166,6 +156,29 @@ def get_decp_json() -> list[Path]:
     os.environ["downloaded_files"] = ",".join(downloaded_files)
 
     return return_files
+
+
+def json_to_df(json_path_file, marches_path) -> pl.DataFrame:
+    ndjson_path = json_path_file.with_suffix(".ndjson")
+    json_to_ndjson(json_path_file, ndjson_path)
+    schema = MARCHE_SCHEMA_2022
+    dff = pl.read_ndjson(ndjson_path, schema=schema)
+    return dff
+
+
+def json_to_ndjson(json_path: Path, ndjson_path: Path):
+    with open(json_path, "rb") as _in_f:
+        with open(ndjson_path, "wb") as out_f:
+            _data = load_and_fix_json(_in_f)
+            marches = ijson.items(_data, "item", use_float=True)
+            for marche in marches:
+                # Aplatissement de acheteur et lieuExecution (acheteur_id, etc.)
+                marche = pl.convert.normalize._simple_json_normalize(
+                    marche, "_", 10, lambda x: x
+                )
+                marche = orjson.dumps(marche)
+                out_f.write(marche)
+                out_f.write(b"\n")
 
 
 def list_datasets_by_org(org_id:str) -> list[dict]:

@@ -41,9 +41,7 @@
           }
         ],
         "considerationsSociales": {
-          "considerationSociale": [
-            "Pas de considération sociale"
-          ]
+          "considerationSociale": ["Pas de considération sociale"]
         },
         "considerationsEnvironnementales": {
           "considerationEnvironnementale": [
@@ -51,19 +49,13 @@
           ]
         },
         "modalitesExecution": {
-          "modaliteExecution": [
-            "Sans objet"
-          ]
+          "modaliteExecution": ["Sans objet"]
         },
         "techniques": {
-          "technique": [
-            "Sans objet"
-          ]
+          "technique": ["Sans objet"]
         },
         "typesPrix": {
-          "typePrix": [
-            "Définitif révisable"
-          ]
+          "typePrix": ["Définitif révisable"]
         },
         "actesSousTraitance": [
           {
@@ -139,9 +131,7 @@
           }
         ],
         "considerationsSociales": {
-          "considerationSociale": [
-            "Pas de considération sociale"
-          ]
+          "considerationSociale": ["Pas de considération sociale"]
         },
         "considerationsEnvironnementales": {
           "considerationEnvironnementale": [
@@ -149,19 +139,13 @@
           ]
         },
         "modalitesExecution": {
-          "modaliteExecution": [
-            "Sans objet"
-          ]
+          "modaliteExecution": ["Sans objet"]
         },
         "techniques": {
-          "technique": [
-            "Sans objet"
-          ]
+          "technique": ["Sans objet"]
         },
         "typesPrix": {
-          "typePrix": [
-            "Définitif révisable"
-          ]
+          "typePrix": ["Définitif révisable"]
         },
         "modifications": [
           {
@@ -273,9 +257,7 @@
           }
         ],
         "considerationsSociales": {
-          "considerationSociale": [
-            "Pas de considération sociale"
-          ]
+          "considerationSociale": ["Pas de considération sociale"]
         },
         "considerationsEnvironnementales": {
           "considerationEnvironnementale": [
@@ -283,19 +265,13 @@
           ]
         },
         "modalitesExecution": {
-          "modaliteExecution": [
-            "Sans objet"
-          ]
+          "modaliteExecution": ["Sans objet"]
         },
         "techniques": {
-          "technique": [
-            "Sans objet"
-          ]
+          "technique": ["Sans objet"]
         },
         "typesPrix": {
-          "typePrix": [
-            "Définitif révisable"
-          ]
+          "typePrix": ["Définitif révisable"]
         },
         "modifications": [
           {
@@ -303,7 +279,21 @@
               "id": 1,
               "dateNotificationModification": "2025-04-08",
               "datePublicationDonneesModification": "2025-04-08",
-              "montant": 124557.46
+              "montant": 124557.46,
+              "titulaires": [
+                {
+                  "titulaire": {
+                    "id": "81223513300026",
+                    "typeIdentifiant": "SIRET"
+                  }
+                },
+                {
+                  "titulaire": {
+                    "id": "98756638100011",
+                    "typeIdentifiant": "SIRET"
+                  }
+                }
+              ]
             }
           },
           {
@@ -447,9 +437,7 @@
           }
         ],
         "considerationsSociales": {
-          "considerationSociale": [
-            "Pas de considération sociale"
-          ]
+          "considerationSociale": ["Pas de considération sociale"]
         },
         "considerationsEnvironnementales": {
           "considerationEnvironnementale": [
@@ -457,19 +445,13 @@
           ]
         },
         "modalitesExecution": {
-          "modaliteExecution": [
-            "Sans objet"
-          ]
+          "modaliteExecution": ["Sans objet"]
         },
         "techniques": {
-          "technique": [
-            "Sans objet"
-          ]
+          "technique": ["Sans objet"]
         },
         "typesPrix": {
-          "typePrix": [
-            "Définitif révisable"
-          ]
+          "typePrix": ["Définitif révisable"]
         },
         "modifications": [
           {
@@ -630,9 +612,7 @@
           }
         ],
         "considerationsSociales": {
-          "considerationSociale": [
-            "Pas de considération sociale"
-          ]
+          "considerationSociale": ["Pas de considération sociale"]
         },
         "considerationsEnvironnementales": {
           "considerationEnvironnementale": [
@@ -640,19 +620,13 @@
           ]
         },
         "modalitesExecution": {
-          "modaliteExecution": [
-            "Sans objet"
-          ]
+          "modaliteExecution": ["Sans objet"]
         },
         "techniques": {
-          "technique": [
-            "Sans objet"
-          ]
+          "technique": ["Sans objet"]
         },
         "typesPrix": {
-          "typePrix": [
-            "Définitif révisable"
-          ]
+          "typePrix": ["Définitif révisable"]
         },
         "actesSousTraitance": null,
         "modifications": [
@@ -699,9 +673,7 @@
           }
         ],
         "considerationsSociales": {
-          "considerationSociale": [
-            "Pas de considération sociale"
-          ]
+          "considerationSociale": ["Pas de considération sociale"]
         },
         "considerationsEnvironnementales": {
           "considerationEnvironnementale": [
@@ -709,19 +681,13 @@
           ]
         },
         "modalitesExecution": {
-          "modaliteExecution": [
-            "Sans objet"
-          ]
+          "modaliteExecution": ["Sans objet"]
         },
         "techniques": {
-          "technique": [
-            "Sans objet"
-          ]
+          "technique": ["Sans objet"]
         },
         "typesPrix": {
-          "typePrix": [
-            "Définitif ferme"
-          ]
+          "typePrix": ["Définitif ferme"]
         },
         "_type": "Marché",
         "marcheInnovant": "NC",

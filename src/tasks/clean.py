@@ -1,4 +1,7 @@
 import datetime
+import io
+import json
+import math
 from pathlib import Path
 
 import polars as pl
@@ -29,8 +32,6 @@ def clean_decp(files: list[Path]):
         #     "modalitesExecution_modaliteExecution": "modalitesExecution"
         # })
 
-        # Remplacement des valeurs nulles
-        lf = lf.with_columns(pl.col(pl.String).replace("NC", None))
         # Nettoyage des identifiants de marchés
         lf = lf.with_columns(pl.col("id").str.replace_all(r"[ ,\\./]", "_"))
 
@@ -74,14 +75,14 @@ def clean_decp(files: list[Path]):
             )
         )
 
-        # Fix datatypes
-        lf = fix_data_types(lf)
-
         # Explosion et traitement des modifications
         lf = process_modifications(lf)
 
         # Explosion des titulaires
         lf = explode_titulaires(lf)
+
+        # Fix datatypes
+        lf = fix_data_types(lf)
 
         output_file = DIST_DIR / "clean" / file.name
         return_files.append(output_file)
@@ -93,7 +94,7 @@ def clean_decp(files: list[Path]):
     return return_files
 
 
-def fix_data_types(df: pl.LazyFrame):
+def fix_data_types(lf: pl.LazyFrame):
     numeric_dtypes = {
         "dureeMois": pl.Int16,
         # "dureeMoisModification": pl.Int16,
@@ -113,7 +114,7 @@ def fix_data_types(df: pl.LazyFrame):
     for column, dtype in numeric_dtypes.items():
         print("Fixing column", column, "...")
         # Les valeurs qui ne sont pas des chiffres sont converties en null
-        df = df.with_columns(pl.col(column).cast(dtype, strict=False))
+        lf = lf.with_columns(pl.col(column).cast(dtype, strict=False))
 
     # Convert date columns to datetime using str.strptime
     dates_col = [
@@ -127,14 +128,14 @@ def fix_data_types(df: pl.LazyFrame):
         # "datePublicationDonneesModificationModification",
     ]
     print("Fixing dates...")
-    df = df.with_columns(
+    lf = lf.with_columns(
         # Les valeurs qui ne sont pas des dates sont converties en null
         pl.col(dates_col).str.strptime(pl.Date, format="%Y-%m-%d", strict=False)
     )
 
     # Suppression dans dates dans le futur
     for col in dates_col:
-        df = df.with_columns(
+        lf = lf.with_columns(
             pl.when(pl.col(col) > datetime.datetime.now())
             .then(None)
             .otherwise(pl.col(col))
@@ -146,7 +147,7 @@ def fix_data_types(df: pl.LazyFrame):
     cols = ("sousTraitanceDeclaree", "attributionAvance", "marcheInnovant")
     str_cols = cs.by_name(cols) & cs.string()
     float_cols = cs.by_name(cols) & cs.float()
-    df = df.with_columns(
+    lf = lf.with_columns(
         pl.when(str_cols.str.to_lowercase() == "true")
         .then(True)
         .when(str_cols.str.to_lowercase() == "false")
@@ -154,10 +155,10 @@ def fix_data_types(df: pl.LazyFrame):
         .otherwise(None)
         .name.keep()
     ).with_columns(float_cols.fill_nan(None).cast(pl.Boolean).name.keep())
-    return df
+    return lf
 
 
-def clean_decp_json(input_json_):
+def clean_decp_json_modifications(input_json_: dict):
     """
     Nettoyage des données JSON des DECP pour les modifications des titulaires.
     Suppression des données qui ne correspondent pas au format attendu (ex: {"typeIdentifiant": "SIRET", "id": "12345678901234"}).
@@ -204,3 +205,28 @@ def clean_decp_json(input_json_):
         clean_json.append(entry)
     print(f"Nombre de titulaires nettoyés : {titulaires_cleaned_cpt}")
     return clean_json
+
+
+def fix_nan_nc(obj):
+    """Paroure tout le JSON pour remplacer NaN et NC par null."""
+    if (isinstance(obj, float) and math.isnan(obj)) or obj == "NC":
+        return None
+    elif isinstance(obj, dict):
+        return {k: fix_nan_nc(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [fix_nan_nc(item) for item in obj]
+    return obj
+
+
+def load_and_fix_json(input_buffer):
+    json_data = json.load(input_buffer)["marches"]["marche"]
+
+    print("Remplacement des NaN et NC par null...")
+    json_data = fix_nan_nc(json_data)
+    print("Correction de la structure des modifications...")
+    json_data = clean_decp_json_modifications(json_data)
+
+    fixed_buffer = io.StringIO()
+    json.dump(json_data, fixed_buffer)
+    fixed_buffer.seek(0)  # rewind to beginning so it can be read
+    return fixed_buffer
