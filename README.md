@@ -102,13 +102,13 @@ Un nouveau worker doit apparaître dans l'interface de gestion de prefect.
 Construire et lancer le container
 
 ```bash
-./script/docker_build_and_run.bat
+/script/docker_build_and_run.bat
 ```
 
 Démarrer le serveur prefect une fois dans le container
 
 ```bash
-./script/start_server_in_docker.sh
+/script/start_server_in_docker.sh
 ```
 
 Le serveur est accessible sur le navigateur à l'adresse http://127.0.0.1:4200/
