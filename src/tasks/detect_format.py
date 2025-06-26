@@ -1,4 +1,4 @@
-def detect_format_titulaire(titulaire)->str:
+def detect_format_titulaire(titulaire) -> str:
     """
     Détecte le format du champ "titulaire" selon sa structure.
 
@@ -18,14 +18,15 @@ def detect_format_titulaire(titulaire)->str:
         Retourne '2022' ou '2019' selon la structure du champ. Retourne `None` si le format n'est pas reconnu.
     """
     # si titulaire est un dict au format {'titulaire': {'typeIdentifiant', 'id'}} alors format 2022
-    if isinstance(titulaire, dict) and 'titulaire' in titulaire:
-        return '2022'
-    elif isinstance(titulaire, dict) and 'id' in titulaire:
-        return '2019'
+    if isinstance(titulaire, dict) and "titulaire" in titulaire:
+        return "2022"
+    elif isinstance(titulaire, dict) and "id" in titulaire:
+        return "2019"
     else:
         print(f"Format inconnu pour le titulaire : {titulaire}")
 
-def detect_format_multiple_titulaires(data:list, quorum:float)->str:
+
+def detect_format_multiple_titulaires(data: list, quorum: float) -> str:
     """
     Détecte le format dominant parmi plusieurs objets contenant des titulaires.
 
@@ -52,22 +53,23 @@ def detect_format_multiple_titulaires(data:list, quorum:float)->str:
     Exception
         Si aucun format n'a pu être détecté parmi les titulaires présents.
     """
-    formats=[]
+    formats = []
     if len(data) > 0:
         for el in data:
-            if 'titulaires' in el and isinstance(el['titulaires'], list):
-                formats.extend([detect_format_titulaire(t) for t in el['titulaires']])
+            if "titulaires" in el and isinstance(el["titulaires"], list):
+                formats.extend([detect_format_titulaire(t) for t in el["titulaires"]])
         if len(formats) > 0:
-            if formats.count('2019') / len(formats) > quorum:
-                return '2019'
+            if formats.count("2019") / len(formats) > quorum:
+                return "2019"
             else:
-                return '2022'
+                return "2022"
         else:
             raise Exception(data)
     else:
-        return 'empty'
-    
-def detect_format(data, quorum:float)->str:
+        return "empty"
+
+
+def detect_format(data, quorum: float) -> str:
     """
     Détecte automatiquement le format global d’un fichier en analysant ses marchés.
 
@@ -92,12 +94,12 @@ def detect_format(data, quorum:float)->str:
     - Une liste de marchés.
     - Un dictionnaire contenant une clé 'marche' (structure imbriquée).
     """
-    if 'marches' in data:
-        if isinstance(data['marches'], list):
-            _data = data['marches']
-        elif isinstance(data['marches'], dict):
-            if 'marche' in data['marches']:
-                _data = data['marches']['marche']
+    if "marches" in data:
+        if isinstance(data["marches"], list):
+            _data = data["marches"]
+        elif isinstance(data["marches"], dict):
+            if "marche" in data["marches"]:
+                _data = data["marches"]["marche"]
     else:
         _data = []
     return detect_format_multiple_titulaires(_data, quorum=quorum)
