@@ -102,7 +102,7 @@ def get_decp_json() -> list[Path]:
 
             filename = json_file["file_name"]
 
-            df: pl.DataFrame = json_to_df(decp_json_file, "marches.marche")
+            df: pl.DataFrame = json_to_df(decp_json_file)
 
             artifact_row["open_data_dataset"] = "data.gouv.fr JSON"
             artifact_row["download_date"] = date_now

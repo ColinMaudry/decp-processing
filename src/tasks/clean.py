@@ -15,6 +15,7 @@ from tasks.transform import explode_titulaires, process_modifications
 
 @task
 def clean_decp(files: list[Path]):
+    print("Nettoyage des données...")
     return_files = []
     for file in files:
         #
@@ -112,7 +113,6 @@ def fix_data_types(lf: pl.LazyFrame):
     }
 
     for column, dtype in numeric_dtypes.items():
-        print("Fixing column", column, "...")
         # Les valeurs qui ne sont pas des chiffres sont converties en null
         lf = lf.with_columns(pl.col(column).cast(dtype, strict=False))
 
@@ -127,7 +127,6 @@ def fix_data_types(lf: pl.LazyFrame):
         # "datePublicationDonneesModificationActeSousTraitance",
         # "datePublicationDonneesModificationModification",
     ]
-    print("Fixing dates...")
     lf = lf.with_columns(
         # Les valeurs qui ne sont pas des dates sont converties en null
         pl.col(dates_col).str.strptime(pl.Date, format="%Y-%m-%d", strict=False)
@@ -143,7 +142,6 @@ def fix_data_types(lf: pl.LazyFrame):
         )
 
     # Champs booléens
-    print("Fixing booleans...")
     cols = ("sousTraitanceDeclaree", "attributionAvance", "marcheInnovant")
     str_cols = cs.by_name(cols) & cs.string()
     float_cols = cs.by_name(cols) & cs.float()
@@ -203,7 +201,7 @@ def clean_decp_json_modifications(input_json_: dict):
             )
         entry["modifications"] = clean_modifications_entries
         clean_json.append(entry)
-    print(f"Nombre de titulaires nettoyés : {titulaires_cleaned_cpt}")
+    # print(f"Nombre de titulaires nettoyés : {titulaires_cleaned_cpt}")
     return clean_json
 
 
@@ -221,9 +219,9 @@ def fix_nan_nc(obj):
 def load_and_fix_json(input_buffer):
     json_data = json.load(input_buffer)["marches"]["marche"]
 
-    print("Remplacement des NaN et NC par null...")
+    # print("Remplacement des NaN et NC par null...")
     json_data = fix_nan_nc(json_data)
-    print("Correction de la structure des modifications...")
+    # print("Correction de la structure des modifications...")
     json_data = clean_decp_json_modifications(json_data)
 
     fixed_buffer = io.StringIO()
