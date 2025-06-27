@@ -124,5 +124,11 @@
     "dataset_name": "Donn\u00e9es essentielles de la commande publique - fichiers consolid\u00e9s",
     "owner_org_name": "Minist\u00e8re de l'\u00c9conomie, des Finances et de l'Industrie",
     "owner_org_id": "534fff8ea3a7292c64a77f02"
+  },
+  {
+    "dataset_id": "65f18014e9923e9e71f5f258",
+    "dataset_name": "Donn\u00e9es essentielles du profil acheteur M\u00e9galis Bretagne - sch\u00e9ma arr\u00eat\u00e9s 2022",
+    "owner_org_name": "M\u00e9galis Bretagne",
+    "owner_org_id": "534fff8ba3a7292c64a77ed3"
   }
 ]
