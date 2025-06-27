@@ -1,6 +1,6 @@
-import pytest
-from tasks.get import clean_json
 from unittest import TestCase
+
+from tasks.get import clean_json
 
 
 class TestGet:

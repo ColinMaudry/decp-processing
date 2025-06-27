@@ -15,6 +15,7 @@ from tasks.transform import explode_titulaires, process_modifications
 
 @task
 def clean_decp(files: list[Path]):
+    print("Nettoyage des données...")
     return_files = []
     for file in files:
         #
@@ -204,7 +205,7 @@ def clean_decp_json_modifications(input_json_: dict):
             )
         entry["modifications"] = clean_modifications_entries
         clean_json.append(entry)
-    print(f"Nombre de titulaires nettoyés : {titulaires_cleaned_cpt}")
+    # print(f"Nombre de titulaires nettoyés : {titulaires_cleaned_cpt}")
     return clean_json
 
 
@@ -222,9 +223,9 @@ def fix_nan_nc(obj):
 def load_and_fix_json(input_buffer):
     json_data = json.load(input_buffer)["marches"]["marche"]
 
-    print("Remplacement des NaN et NC par null...")
+    # print("Remplacement des NaN et NC par null...")
     json_data = fix_nan_nc(json_data)
-    print("Correction de la structure des modifications...")
+    # print("Correction de la structure des modifications...")
     json_data = clean_decp_json_modifications(json_data)
 
     fixed_buffer = io.StringIO()
