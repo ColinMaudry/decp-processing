@@ -85,6 +85,14 @@ def get_decp_json() -> list[Path]:
             )  #'empty', '2019' ou '2022'
 
         if format == "2022":
+            dataset_name = {
+                d["dataset_id"]: d["dataset_name"] for d in TRACKED_DATASETS
+            }.get(json_file["dataset_id"])
+
+            print(
+                f"Conversion json -> df - format 2022: {json_file['file_name']} ({dataset_name})"
+            )
+
             if json_file["url"].startswith("https"):
                 decp_json_metadata = get_json_metadata(
                     dataset_id=json_file["dataset_id"],
