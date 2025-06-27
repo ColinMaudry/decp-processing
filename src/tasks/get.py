@@ -283,7 +283,7 @@ def list_resources_to_process(dataset_ids: list[str]) -> list[dict]:
         Liste de dictionnaires représentant les ressources à traiter. Chaque dictionnaire contient :
         - 'dataset_id' : identifiant du dataset,
         - 'resource_id' : identifiant de la ressource,
-        - 'file_name' : nom de fichier généré à partir du dataset et du titre de la ressource,
+        - 'file_name' : nom de fichier généré à partir du titre de la source et de son id,
         - 'url' : URL de la dernière version de la ressource (`latest`)
 
     Raises
@@ -314,7 +314,7 @@ def list_resources_to_process(dataset_ids: list[str]) -> list[dict]:
                 {
                     "dataset_id": dataset_id,
                     "resource_id": r["id"],
-                    "file_name": f"{dataset_id}-{r['title'].lower().replace('.json', '')}",
+                    "file_name": f"{r['title'].lower().replace('.json', '')}-{r['id']}",
                     "url": r["latest"],
                 }
                 for r in resources
