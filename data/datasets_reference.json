@@ -130,5 +130,11 @@
     "dataset_name": "Donn\u00e9es essentielles du profil acheteur M\u00e9galis Bretagne - sch\u00e9ma arr\u00eat\u00e9s 2022",
     "owner_org_name": "M\u00e9galis Bretagne",
     "owner_org_id": "534fff8ba3a7292c64a77ed3"
+  },
+  {
+    "dataset_id": "673f078f5c4cba55842cbe57",
+    "dataset_name": "Donn\u00e9es essentielles du profil acheteur ARNIA",
+    "owner_org_name": "Agence R\u00e9gionale du Numérique et de l’intelligence artificielle",
+    "owner_org_id": "5b4f5364c751df0bb1c28756"
   }
 ]
