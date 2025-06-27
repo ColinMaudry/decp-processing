@@ -78,19 +78,19 @@ def get_decp_json() -> list[Path]:
 
         # Determiner le format du fichier
         if json_file["file_name"] == "5cd57bf68b4c4179299eb0e9-decp-2022":
-            format = "2022-messy"  # pour ce fichier en particulier qui comporte des erreurs, on bypass pour le moment
+            format_decp = "2022-messy"  # pour ce fichier en particulier qui comporte des erreurs, on bypass pour le moment
         else:
-            format = detect_format(
+            format_decp = detect_format(
                 decp_json, FORMAT_DETECTION_QUORUM
             )  #'empty', '2019' ou '2022'
 
-        if format == "2022":
+        if format_decp == "2022":
             dataset_name = {
                 d["dataset_id"]: d["dataset_name"] for d in TRACKED_DATASETS
             }.get(json_file["dataset_id"])
 
             print(
-                f"Conversion json -> df - format 2022: {json_file['file_name']} ({dataset_name})"
+                f"JSON -> DF - format 2022: {json_file['file_name']} ({dataset_name})"
             )
 
             if json_file["url"].startswith("https"):
@@ -99,6 +99,8 @@ def get_decp_json() -> list[Path]:
                     resource_id=json_file["resource_id"],
                 )
                 artifact_row = {
+                    "open_data_dataset_id": json_file["dataset_id"],
+                    "open_data_dataset_name": dataset_name,
                     "open_data_filename": decp_json_metadata["title"],
                     "open_data_id": decp_json_metadata["id"],
                     "sha1": decp_json_metadata["checksum"]["value"],
@@ -112,7 +114,7 @@ def get_decp_json() -> list[Path]:
 
             df: pl.DataFrame = json_to_df(decp_json_file)
 
-            artifact_row["open_data_dataset"] = "data.gouv.fr JSON"
+            artifact_row["open_data_dataset_id"] = json_file["dataset_id"]
             artifact_row["download_date"] = date_now
             artifact_row["columns"] = sorted(df.columns)
             artifact_row["column_number"] = len(df.columns)
