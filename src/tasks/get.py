@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from pathlib import Path
 
 import ijson
@@ -10,6 +11,7 @@ from httpx import get
 from polars.polars import ColumnNotFoundError
 from prefect import task
 
+import tasks.bookmarking as bookmarking
 from config import (
     DATA_DIR,
     DATE_NOW,
@@ -24,6 +26,63 @@ from tasks.output import save_to_files
 from tasks.setup import create_table_artifact
 
 
+def clean_xml(xml_str):
+    # Remove invalid XML 1.0 characters
+    return re.sub(r"[^\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD]", "", xml_str)
+
+
+def parse_xml(url: str) -> None:
+    """
+    Fonction utilitaire pour parser un fichier XML en JSON.
+    Utilisée pour convertir les fichiers XML des DECP en JSON.
+    """
+    # Cette fonction est un placeholder pour le moment.
+    # Elle peut être développée si nécessaire.
+
+    request = get(url, follow_redirects=True)
+    data = xmltodict.parse(
+        clean_xml(request.text),
+        force_list={
+            "considerationSociale",
+            "considerationEnvironnementale",
+            "modaliteExecution",
+            "technique",
+            "typePrix",
+            "modification",
+            "titulaire",
+        },
+    )
+
+    if "marches" in data:
+        if "marche" in data["marches"]:
+            # modifications des titulaires et des modifications
+            for row in data["marches"]["marche"]:
+                mods = row.get("modifications", {})
+                if "modification" in mods:
+                    mods_list = mods["modification"]
+                    row["modifications"] = [{"modification": m} for m in mods_list]
+
+                titulaires = row.get("titulaires", {})
+                if "titulaire" in titulaires:
+                    titulaires_list = titulaires["titulaire"]
+                    row["titulaires"] = [{"titulaire": t} for t in titulaires_list]
+
+            for row in data["marches"]["marche"]:
+                mods = row.get("modifications", [])
+                _mods = []
+                for mod in mods:
+                    if "titulaires" in mod["modification"]:
+                        mod["modification"].update(
+                            {"titulaires": [mod["modification"]["titulaires"]]}
+                        )
+                    _mods.append(mod)
+
+                if _mods:
+                    row["modifications"] = _mods
+
+    return data
+
+
 @task(retries=5, retry_delay_seconds=5)
 def get_json(date_now, file_info: dict):
     url = file_info["url"]
@@ -33,15 +92,14 @@ def get_json(date_now, file_info: dict):
         # Prod file
         decp_json_file: Path = DATA_DIR / f"{filename}_{date_now}.json"
         if not (os.path.exists(decp_json_file)):
-            request = get(url, follow_redirects=True)
-
-            if file_info["format"] == "json":
+            if file_info["file_format"] == "json":
+                request = get(url, follow_redirects=True)
                 with open(decp_json_file, "wb") as file:
                     file.write(request.content)
-            elif file_info["format"] == "xml":
+            elif file_info["file_format"] == "xml":
                 # Convert XML to JSON
-                data = xmltodict.parse(request.content)
-                with open(decp_json_file, "wb") as file:
+                data = parse_xml(url)
+                with open(decp_json_file, "w", encoding="utf-8") as file:
                     json.dump(data, file, ensure_ascii=False, indent=2)
         else:
             print(f"[{filename}] DECP d'aujourd'hui déjà téléchargées ({date_now})")
@@ -69,7 +127,7 @@ def get_decp_json() -> list[Path]:
     date_now = DATE_NOW
 
     # Recuperation des fichiers à traiter
-    json_files = list_resources_to_process([d["dataset_id"] for d in TRACKED_DATASETS])
+    json_files = list_resources_to_process(TRACKED_DATASETS)
 
     return_files = []
     downloaded_files = []
@@ -182,6 +240,13 @@ def get_decp_json() -> list[Path]:
             return_files.append(file_path)
             downloaded_files.append(filename + ".json")
 
+            # si le dataset est incrémental, on bookmark la ressource traitée
+            if {
+                dataset["dataset_id"]: dataset["incremental"]
+                for dataset in TRACKED_DATASETS
+            }.get(json_file["dataset_id"], False):
+                bookmarking.bookmark(json_file["resource_id"])
+
     # Stock les statistiques dans prefect
     create_table_artifact(
         table=artefact,
@@ -268,7 +333,7 @@ def list_resources_by_dataset(dataset_id: str) -> list[dict]:
     ).json()["data"]
 
 
-def list_resources_to_process(dataset_ids: list[str]) -> list[dict]:
+def list_resources_to_process(datasets: list[dict]) -> list[dict]:
     """
     Prépare la liste des ressources JSON à traiter pour un ou plusieurs jeux de données.
 
@@ -281,9 +346,11 @@ def list_resources_to_process(dataset_ids: list[str]) -> list[dict]:
 
     Parameters
     ----------
-    dataset_ids : list of str
-        Liste des identifiants de jeux de données (slug ou UUID). La fonction vérifie
-        que l'entrée est bien une liste de chaînes de caractères.
+    dataset_ids : list of dict
+        Liste de dictionnaires contenant les identifiants des datasets à traiter.
+        Chaque dictionnaire doit contenir les clés suivantes :
+        - 'dataset_id' : identifiant du dataset,
+        - 'incremental' : booléen indiquant si le dataset est incrémental.
 
     Returns
     -------
@@ -302,33 +369,44 @@ def list_resources_to_process(dataset_ids: list[str]) -> list[dict]:
         Si une erreur survient lors de l'appel à l'API de data.gouv.fr.
     """
 
-    if not isinstance(dataset_ids, list) or not all(
-        isinstance(d, str) for d in dataset_ids
-    ):
-        raise ValueError("dataset_ids must be a list of strings")
+    if not isinstance(datasets, list) or not all(isinstance(d, dict) for d in datasets):
+        raise ValueError("dataset_ids must be a list of dictionaries")
+
+    if not all("dataset_id" in d.keys() for d in datasets):
+        raise ValueError("Each dataset must contain a 'dataset_id' key")
+
+    if not all("incremental" in d.keys() for d in datasets):
+        raise ValueError("Each dataset must contain an 'incremental' key")
 
     resource_ids = []
 
-    for dataset_id in dataset_ids:
+    for dataset in datasets:
         try:
-            resources = list_resources_by_dataset(dataset_id)
+            resources = list_resources_by_dataset(dataset["dataset_id"])
         except Exception as e:
             raise RuntimeError(
-                f"Erreur lors de la récupération des ressources du dataset '{dataset_id}': {e}"
+                f"Erreur lors de la récupération des ressources du dataset '{dataset['dataset_id']}': {e}"
             )
 
-        resource_ids.extend(
-            [
-                {
-                    "dataset_id": dataset_id,
-                    "resource_id": r["id"],
-                    "file_name": f"{r['title'].lower().replace('.json', '').replace('.xml', '').replace('.', '_')}-{r['id']}",
-                    "url": r["latest"],
-                    "file_format": r["format"],
-                }
-                for r in resources
-                if r["format"] in ["json", "xml"] and ".ocds" not in r["title"].lower()
-            ]
-        )
+        for resource in resources:
+            # On ne garde que les ressources au format JSON ou XML et celles qui ne sont pas des fichiers OCDS
+            if (
+                resource["format"] in ["json", "xml"]
+                and ".ocds" not in resource["title"].lower()
+            ):
+                if dataset.get("incremental", False):
+                    # Pour les datasets incrémentaux, on saute la ressource si elle a déjà été traitée
+                    if bookmarking.is_processed(resource["id"]):
+                        continue
+
+                    resource_ids.append(
+                        {
+                            "dataset_id": dataset["dataset_id"],
+                            "resource_id": resource["id"],
+                            "file_name": f"{resource['title'].lower().replace('.json', '').replace('.xml', '').replace('.', '_')}-{resource['id']}",
+                            "url": resource["latest"],
+                            "file_format": resource["format"],
+                        }
+                    )
 
     return resource_ids

@@ -64,7 +64,8 @@ def detect_format_multiple_titulaires(data: list, quorum: float) -> str:
             else:
                 return "2022"
         else:
-            raise Exception(data)
+            print("Impossible d'identifier le format sur la base des titulaires!")
+            return "empty"
     else:
         return "empty"
 

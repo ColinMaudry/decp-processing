@@ -42,6 +42,10 @@ with open(
 ) as f:
     TRACKED_DATASETS = json.load(f)
 
+BOOKMARK_FILEPATH = Path(
+    os.getenv("BOOKMARK_FILEPATH", DATA_DIR / "system" / "processed_bookmarks.json")
+)
+
 # Liste et ordre des colonnes pour le mono dataframe de base (avant normalisation et spécialisation)
 # Sert aussi à vérifier qu'au moins ces colonnes sont présentes (d'autres peuvent être présentes en plus)
 BASE_DF_COLUMNS = [
