@@ -5,6 +5,7 @@ from pathlib import Path
 import ijson
 import orjson
 import polars as pl
+import xmltodict
 from httpx import get
 from polars.polars import ColumnNotFoundError
 from prefect import task
@@ -24,17 +25,24 @@ from tasks.setup import create_table_artifact
 
 
 @task(retries=5, retry_delay_seconds=5)
-def get_json(date_now, json_file: dict):
-    url = json_file["url"]
-    filename = json_file["file_name"]
+def get_json(date_now, file_info: dict):
+    url = file_info["url"]
+    filename = file_info["file_name"]
 
     if url.startswith("https"):
         # Prod file
         decp_json_file: Path = DATA_DIR / f"{filename}_{date_now}.json"
         if not (os.path.exists(decp_json_file)):
             request = get(url, follow_redirects=True)
-            with open(decp_json_file, "wb") as file:
-                file.write(request.content)
+
+            if file_info["format"] == "json":
+                with open(decp_json_file, "wb") as file:
+                    file.write(request.content)
+            elif file_info["format"] == "xml":
+                # Convert XML to JSON
+                data = xmltodict.parse(request.content)
+                with open(decp_json_file, "wb") as file:
+                    json.dump(data, file, ensure_ascii=False, indent=2)
         else:
             print(f"[{filename}] DECP d'aujourd'hui déjà téléchargées ({date_now})")
     else:
@@ -314,11 +322,12 @@ def list_resources_to_process(dataset_ids: list[str]) -> list[dict]:
                 {
                     "dataset_id": dataset_id,
                     "resource_id": r["id"],
-                    "file_name": f"{r['title'].lower().replace('.json', '')}-{r['id']}",
+                    "file_name": f"{r['title'].lower().replace('.json', '').replace('.xml', '').replace('.', '_')}-{r['id']}",
                     "url": r["latest"],
+                    "file_format": r["format"],
                 }
                 for r in resources
-                if r["format"] == "json" and ".ocds" not in r["title"].lower()
+                if r["format"] in ["json", "xml"] and ".ocds" not in r["title"].lower()
             ]
         )
 
