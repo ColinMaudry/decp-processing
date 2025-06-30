@@ -3,20 +3,30 @@ import json
 from config import BOOKMARK_FILEPATH
 
 
+def create_dir_if_not_exists():
+    """Create the directory for bookmarks if it does not exist."""
+    BOOKMARK_FILEPATH.parent.mkdir(parents=True, exist_ok=True)
+
+
 def load_bookmarks():
-    with open(BOOKMARK_FILEPATH, "r") as f:
-        return set(json.load(f))
-    return set()
+    """Load bookmarks from the bookmark file."""
+    if BOOKMARK_FILEPATH.exists():
+        with open(BOOKMARK_FILEPATH, "r") as f:
+            return set(json.load(f))
+    else:
+        create_dir_if_not_exists()
+        return set()
 
 
 def save_bookmarks(bookmarks):
+    create_dir_if_not_exists()
     with open(BOOKMARK_FILEPATH, "w") as f:
         json.dump(list(bookmarks), f)
 
 
 def reset_bookmarks():
-    with open(BOOKMARK_FILEPATH, "w") as f:
-        json.dump([], f)
+    """Reset the bookmarks by clearing the bookmark file."""
+    save_bookmarks([])
 
 
 def bookmark(resource_id):

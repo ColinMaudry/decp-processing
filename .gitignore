@@ -24,3 +24,4 @@ wiki
 /.ipynb_checkpoints
 
 *.ndjson
+*processed_bookmarks.json
