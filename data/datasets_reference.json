@@ -1,140 +1,310 @@
 [
   {
     "dataset_id": "67271f8e43aad6253355b457",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur Conseil du D\u00e9partemental du Rh\u00f4ne",
+    "dataset_name": "Données essentielles du profil acheteur Conseil du Départemental du Rhône",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "67271f982276221b3ffd463d",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur EPIDE",
+    "dataset_name": "Données essentielles du profil acheteur EPIDE",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "67271f9e05321453957baec7",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur Plateforme Mutualis\u00e9e d'ATEXO",
+    "dataset_name": "Données essentielles du profil acheteur Plateforme Mutualisée d'ATEXO",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "67271fa3f265db6119a6b6b0",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur de la Compagnie du Logement",
+    "dataset_name": "Données essentielles du profil acheteur de la Compagnie du Logement",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "67271fa6290200f00fce1fcc",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur de Vend\u00e9e Habitat",
+    "dataset_name": "Données essentielles du profil acheteur de Vendée Habitat",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "67271fda43aad6253355b458",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur du Groupe France T\u00e9l\u00e9visions",
+    "dataset_name": "Données essentielles du profil acheteur du Groupe France Télévisions",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "67271fe149625899ea32c0d2",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur Alsace March\u00e9s Publics",
+    "dataset_name": "Données essentielles du profil acheteur Alsace Marchés Publics",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "6727201449625899ea32c0d4",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur de l' Association March\u00e9s Publics d'Aquitaine",
+    "dataset_name": "Données essentielles du profil acheteur de l' Association Marchés Publics d'Aquitaine",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "672720321f1de4860c84baff",
-    "dataset_name": "Donn\u00e9es essentielles de la plateforme d\u00e9mat\u00e9rialis\u00e9e des march\u00e9s publics des acheteurs de l\u2019Ain",
+    "dataset_name": "Données essentielles de la plateforme dématérialisée des marchés publics des acheteurs de l’Ain",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "67272093922b37b9b2f1b653",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur GIP Maximilien",
+    "dataset_name": "Données essentielles du profil acheteur GIP Maximilien",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "672720b0b8b33f91e6032bfe",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur Eure Normandie Num\u00e9rique",
+    "dataset_name": "Données essentielles du profil acheteur Eure Normandie Numérique",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "672720b2acd2250747936742",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur A\u00e9roport Marseille Provence",
+    "dataset_name": "Données essentielles du profil acheteur Aéroport Marseille Provence",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "672720b5cc0f6e1e1dba8f00",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur CAS Marseille",
+    "dataset_name": "Données essentielles du profil acheteur CAS Marseille",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "672720b71f1de4860c84bb00",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur Territoire de la C\u00f4te Ouest",
+    "dataset_name": "Données essentielles du profil acheteur Territoire de la Côte Ouest",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "672720bb3b056f39537f239f",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur D\u00e9partement Vienne",
+    "dataset_name": "Données essentielles du profil acheteur Département Vienne",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "672720cb97702d39796f4edc",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur Ville et Communaut\u00e9 Urbaine du Grand Reims",
+    "dataset_name": "Données essentielles du profil acheteur Ville et Communauté Urbaine du Grand Reims",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "672720d97c0997c624f8e336",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur Montpellier M\u00e9diterran\u00e9e M\u00e9tropole",
+    "dataset_name": "Données essentielles du profil acheteur Montpellier Méditerranée Métropole",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "672720dbd3c5ca95c62e7c62",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur ANFH",
+    "dataset_name": "Données essentielles du profil acheteur ANFH",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "672720e0cdbaec7aa4f43f4f",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur CINOR",
+    "dataset_name": "Données essentielles du profil acheteur CINOR",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "672720e2753525dfd8368ac8",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur Creos",
+    "dataset_name": "Données essentielles du profil acheteur Creos",
     "owner_org_name": "ATEXO - DECP",
-    "owner_org_id": "673f323ec296c295e64c5dc0"
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "672720e451bcff5f90f6f9e4",
+    "dataset_name": "Données essentielles du profil acheteur Région Réunion",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "672720e71f1de4860c84bb01",
+    "dataset_name": "Données essentielles du profil acheteur Achat Hôpital",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "672720eb3d9ba78898cbb6aa",
+    "dataset_name": "Données essentielles du profil acheteur Département des Bouches-du-Rhône",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "672720ee720fd33a184a47a3",
+    "dataset_name": "Données essentielles du profil acheteur ADM76",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "672720f0f12888a874bc2861",
+    "dataset_name": "Données essentielles du profil acheteur La Porte du Hainaut",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "672720f51f1de4860c84bb02",
+    "dataset_name": "Données essentielles du profil acheteur Le département de la Meuse",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "672720f8753525dfd8368ac9",
+    "dataset_name": "Données essentielles du profil acheteur Conseil Régional des Pays de la Loire",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "672720fa753525dfd8368aca",
+    "dataset_name": "Données essentielles du profil acheteur Syndicat Intercommunal de Traitement des Déchets du Nord et de l'Est",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "6727210202eee145031c05da",
+    "dataset_name": "Données essentielles du profil acheteur GIP Recia",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "6727210a3b056f39537f23a0",
+    "dataset_name": "Données essentielles du profil acheteur Adullact",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "6727210c720fd33a184a47a4",
+    "dataset_name": "Données essentielles du profil acheteur Gouvernement de Nouvelle-Calédonie",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "6727211e60854f01267aaf19",
+    "dataset_name": "Données essentielles du profil acheteur CDC Habitat",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "67272125cc0f6e1e1dba8f01",
+    "dataset_name": "Données essentielles du profil acheteur Loire-Atlantique",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "6727217e51bcff5f90f6f9e5",
+    "dataset_name": "Données essentielles du profil acheteur Ville de Marseille",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "672721842b370d8b3227704d",
+    "dataset_name": "Données essentielles du profil acheteur Région Guadeloupe",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "67272196d3c5ca95c62e7c63",
+    "dataset_name": "Données essentielles du profil acheteur CNRS",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "67272199922b37b9b2f1b654",
+    "dataset_name": "Données essentielles du profil acheteur CNES",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "672721aaec64ca6d86444166",
+    "dataset_name": "Données essentielles du profil acheteur Métropole Aix Marseille Provence",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "672721d097702d39796f4edd",
+    "dataset_name": "Données essentielles du profil acheteur Nantes Métropole",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
+  },
+  {
+    "dataset_id": "67305b223bb03813db8efe33",
+    "dataset_name": "Données essentielles du profil acheteur Marchés Publics 596280",
+    "owner_org_name": "ATEXO - DECP",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false
   },
   {
     "dataset_id": "5cd57bf68b4c4179299eb0e9",
-    "dataset_name": "Donn\u00e9es essentielles de la commande publique - fichiers consolid\u00e9s",
-    "owner_org_name": "Minist\u00e8re de l'\u00c9conomie, des Finances et de l'Industrie",
-    "owner_org_id": "534fff8ea3a7292c64a77f02"
+    "dataset_name": "Données essentielles de la commande publique - fichiers consolidés",
+    "owner_org_name": "Ministère de l'économie, des Finances et de l'Industrie",
+    "owner_org_id": "534fff8ea3a7292c64a77f02",
+    "incremental": false
   },
   {
     "dataset_id": "65f18014e9923e9e71f5f258",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur M\u00e9galis Bretagne - sch\u00e9ma arr\u00eat\u00e9s 2022",
-    "owner_org_name": "M\u00e9galis Bretagne",
-    "owner_org_id": "534fff8ba3a7292c64a77ed3"
+    "dataset_name": "Données essentielles du profil acheteur Mégalis Bretagne - schéma arrêtés 2022",
+    "owner_org_name": "Mégalis Bretagne",
+    "owner_org_id": "534fff8ba3a7292c64a77ed3",
+    "incremental": false
   },
   {
     "dataset_id": "673f078f5c4cba55842cbe57",
-    "dataset_name": "Donn\u00e9es essentielles du profil acheteur ARNIA",
-    "owner_org_name": "Agence R\u00e9gionale du Numérique et de l’intelligence artificielle",
-    "owner_org_id": "5b4f5364c751df0bb1c28756"
+    "dataset_name": "Données essentielles du profil acheteur ARNIA",
+    "owner_org_name": "Agence Régionale du Numérique et de l’intelligence artificielle",
+    "owner_org_id": "5b4f5364c751df0bb1c28756",
+    "incremental": false
+  },
+  {
+    "dataset_id": "5df410e86f44413a91d34be3",
+    "dataset_name": "AIFE_DE_13001977100018",
+    "owner_org_name": "Agence pour l'Informatique Financière de l'Etat",
+    "owner_org_id": "5b20e610c751df0b90147be9",
+    "incremental": true
   }
 ]
