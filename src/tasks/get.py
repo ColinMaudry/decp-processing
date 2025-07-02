@@ -32,13 +32,19 @@ def clean_xml(xml_str):
     return re.sub(r"[^\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD]", "", xml_str)
 
 
-def parse_xml(url: str) -> None:
+def parse_xml(url: str) -> dict:
     """
-    Fonction utilitaire pour parser un fichier XML en JSON.
-    Utilisée pour convertir les fichiers XML des DECP en JSON.
+    Récupère et parse un fichier XML à partir d'une URL, puis le convertit en JSON.
+
+    Cette fonction est conçue pour traiter les fichiers XML issus des DECP. Elle applique
+    un post-traitement sur les nœuds "modifications" et "titulaires" pour uniformiser leur structure.
+
+    Paramètre :
+        url (str) : L'URL du fichier XML à récupérer et à parser.
+
+    Retour :
+        dict : Une représentation sous forme de dictionnaire du contenu XML, avec une structure adaptée pour un usage en JSON.
     """
-    # Cette fonction est un placeholder pour le moment.
-    # Elle peut être développée si nécessaire.
 
     request = get(url, follow_redirects=True)
     data = xmltodict.parse(
