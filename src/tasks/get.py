@@ -29,7 +29,7 @@ from tasks.setup import create_table_artifact
 
 
 def clean_xml(xml_str):
-    # Remove invalid XML 1.0 characters
+    # Suppresion des caractères invalides XML 1.0
     return re.sub(r"[^\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD]", "", xml_str)
 
 
@@ -105,7 +105,7 @@ def get_json(date_now, file_info: dict):
                 with open(decp_json_file, "wb") as file:
                     file.write(request.content)
             elif file_info["file_format"] == "xml":
-                # Convert XML to JSON
+                # Conversion du XML en JSON
                 data = parse_xml(url)
                 with open(decp_json_file, "w", encoding="utf-8") as file:
                     json.dump(data, file, ensure_ascii=False, indent=2)
