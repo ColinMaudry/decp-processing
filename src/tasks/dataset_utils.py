@@ -136,19 +136,20 @@ def list_resources_to_process(datasets: list[dict]) -> list[dict]:
                 resource["format"] in ["json", "xml"]
                 and ".ocds" not in resource["title"].lower()
             ):
-                if dataset.get("incremental", False):
+                if dataset.get("incremental", False) and bookmarking.is_processed(
+                    resource["id"]
+                ):
                     # Pour les datasets incrémentaux, on saute la ressource si elle a déjà été traitée
-                    if bookmarking.is_processed(resource["id"]):
-                        continue
+                    continue
 
-                    resource_ids.append(
-                        {
-                            "dataset_id": dataset["dataset_id"],
-                            "resource_id": resource["id"],
-                            "file_name": f"{resource['title'].lower().replace('.json', '').replace('.xml', '').replace('.', '_')}-{resource['id']}",
-                            "url": resource["latest"],
-                            "file_format": resource["format"],
-                        }
-                    )
+                resource_ids.append(
+                    {
+                        "dataset_id": dataset["dataset_id"],
+                        "resource_id": resource["id"],
+                        "file_name": f"{resource['title'].lower().replace('.json', '').replace('.xml', '').replace('.', '_')}-{resource['id']}",
+                        "url": resource["latest"],
+                        "file_format": resource["format"],
+                    }
+                )
 
     return resource_ids
