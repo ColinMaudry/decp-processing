@@ -65,13 +65,17 @@ def parse_xml(url: str) -> dict:
         if "marche" in data["marches"]:
             # modifications des titulaires et des modifications
             for row in data["marches"]["marche"]:
-                mods = row.get("modifications", {})
-                if "modification" in mods:
+                mods = row.get("modifications", [])
+                if mods is None:
+                    row["modifications"] = []
+                elif "modification" in mods:
                     mods_list = mods["modification"]
                     row["modifications"] = [{"modification": m} for m in mods_list]
 
-                titulaires = row.get("titulaires", {})
-                if "titulaire" in titulaires:
+                titulaires = row.get("titulaires", [])
+                if titulaires is None:
+                    row["titulaires"] = []
+                elif "titulaire" in titulaires:
                     titulaires_list = titulaires["titulaire"]
                     row["titulaires"] = [{"titulaire": t} for t in titulaires_list]
 
@@ -181,7 +185,7 @@ def get_decp_json() -> list[Path]:
                     "created_at": decp_json_metadata["created_at"],
                     "last_modified": decp_json_metadata["last_modified"],
                     "filesize": decp_json_metadata["filesize"],
-                    "views": decp_json_metadata["metrics"]["views"],
+                    "views": decp_json_metadata["metrics"].get("views", None),
                 }
 
             filename = json_file["file_name"]

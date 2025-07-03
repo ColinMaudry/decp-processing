@@ -182,7 +182,9 @@ def clean_decp_json_modifications(input_json_: dict):
                     "titulaires", []
                 ):
                     # mofification_titulaire = {} représentant un titulaire de la modification
-                    if isinstance(modification_titulaire["titulaire"], dict):
+                    if modification_titulaire is not None and isinstance(
+                        modification_titulaire["titulaire"], dict
+                    ):
                         # Si le titulaire est un dictionnaire, on récupère l'id et le typeIdentifiant
                         modification_titulaires_clean.append(
                             {
