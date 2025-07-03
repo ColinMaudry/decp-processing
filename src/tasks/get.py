@@ -58,6 +58,7 @@ def parse_xml(url: str) -> dict:
             "typePrix",
             "modification",
             "titulaire",
+            "marche",
         },
     )
 
