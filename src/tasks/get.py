@@ -194,6 +194,7 @@ def get_decp_json() -> list[Path]:
             df: pl.DataFrame = json_to_df(decp_json_file)
 
             artifact_row["open_data_dataset_id"] = json_file["dataset_id"]
+            artifact_row["open_data_dataset_name"] = dataset_name
             artifact_row["download_date"] = date_now
             artifact_row["columns"] = sorted(df.columns)
             artifact_row["column_number"] = len(df.columns)
