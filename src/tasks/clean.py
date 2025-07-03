@@ -24,27 +24,12 @@ def clean_decp(files: list[Path]):
 
         lf: pl.LazyFrame = pl.scan_parquet(f"{file}.parquet")
 
-        # Colonnes exclues pour l'instant
-        # lf = df.rename({
-        #     "typesPrix_typePrix": "typesPrix",
-        #     "considerationsEnvironnementales_considerationEnvironnementale": "considerationsEnvironnementales",
-        #     "considerationsSociales_considerationSociale": "considerationsSociales",
-        #     "techniques_technique": "techniques",
-        #     "modalitesExecution_modaliteExecution": "modalitesExecution"
-        # })
-
         # Nettoyage des identifiants de marchés
         lf = lf.with_columns(pl.col("id").str.replace_all(r"[ ,\\./]", "_"))
 
         # Ajout du champ uid
         # TODO: à déplacer autre part, dans transform
         lf = lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
-
-        # Suppression des lignes en doublon par UID (acheteur id + id)
-        # Exemple : 20005584600014157140791205100
-        # index_size_before = df.height
-        # df = df.unique(subset=["uid"], maintain_order=False)
-        # print("-- ", index_size_before - df.height, " doublons supprimés (uid)")
 
         # Dates
         date_replacements = {
