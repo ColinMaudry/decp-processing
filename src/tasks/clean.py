@@ -111,6 +111,7 @@ def fix_data_types(lf: pl.LazyFrame):
         # "variationPrixActeSousTraitance": pl.Float64,
         "origineFrance": pl.Float64,
         "origineUE": pl.Float64,
+        "modification.id": pl.Int32,
     }
 
     # Champs numériques

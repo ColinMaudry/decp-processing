@@ -15,7 +15,7 @@ MODIFICATION_SCHEMA_2022 = pl.Struct(
     {
         "modification": pl.Struct(
             {
-                "id": pl.Int32,
+                "id": pl.String,
                 # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
                 "dateNotificationModification": pl.String,
                 "datePublicationDonneesModification": pl.String,
@@ -28,7 +28,7 @@ MODIFICATION_SCHEMA_2022 = pl.Struct(
 )
 
 MODIFICATION_SCHEMA_PLAT_2022 = {
-    "modification.id": pl.Int32,  # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
+    "modification.id": pl.String,  # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
     "modification.dateNotificationModification": pl.String,
     "modification.datePublicationDonneesModification": pl.String,
     "modification.montant": pl.String,
