@@ -6,7 +6,7 @@ from polars.testing import assert_frame_equal
 from tasks.transform import (
     remove_modifications_duplicates,
     remove_suffixes_from_uid_column,
-    replace_by_modification_data,
+    replace_with_modification_data,
 )
 
 # from abc import ABC, abstractmethod
@@ -287,7 +287,7 @@ class TestHandleModificationsMarche:
         )
 
         # Call the function
-        result_df = replace_by_modification_data(df)
+        result_df = replace_with_modification_data(df)
 
         print(
             expected_df["uid", "dateNotification", "montant", "modification_id"]

@@ -94,7 +94,7 @@ def remove_suffixes_from_uid_column(df):
     return df
 
 
-def replace_by_modification_data(lf: pl.LazyFrame):
+def replace_with_modification_data(lf: pl.LazyFrame):
     """
     Gère les modifications dans le DataFrame des DECP.
     Cette fonction extrait les informations des modifications et les fusionne avec le DataFrame de base en ajoutant une ligne par modification
@@ -192,7 +192,14 @@ def process_modifications(lf: pl.LazyFrame):
     # Pas encore au point, risque de trop gros effets de bord
     # lf = remove_modifications_duplicates(lf)
 
-    lf = replace_by_modification_data(lf)
+    lf = replace_with_modification_data(lf)
+
+    # Si il n'y avait aucun modifications dans le fichier, il faut ajouter les colonnes
+    if "donneesActuelle" not in lf.collect_schema():
+        lf = lf.with_columns(
+            pl.lit(0).alias("modification.id"), pl.lit(True).alias("donneesActuelles")
+        )
+
     return lf
 
 
