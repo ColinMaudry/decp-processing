@@ -67,4 +67,7 @@ MARCHE_SCHEMA_2022 = {
     "offresRecues": pl.String,
     "typeGroupementOperateurs": pl.String,
     "idAccordCadre": pl.String,
+    "tauxAvance": pl.String,
+    "origineUE": pl.String,
+    "origineFrance": pl.String,
 }
