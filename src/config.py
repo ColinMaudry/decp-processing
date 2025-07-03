@@ -82,3 +82,29 @@ BASE_DF_COLUMNS = [
     "source",
     "sourceOpenData",
 ]
+
+COLUMNS_TO_DROP = [
+    # Pas encore incluses
+    "typesPrix",
+    "considerationsEnvironnementales",
+    "considerationsSociales",
+    "techniques",
+    "modalitesExecution",
+    "actesSousTraitance",
+    "modificationsActesSousTraitance",
+    # Champs de concessions
+    "_type",  # Marché ou Contrat de concession
+    "autoriteConcedante",
+    "concessionnaires",
+    "donneesExecution",
+    "valeurGlobale",
+    "montantSubventionPublique",
+    "dateSignature",
+    "dateDebutExecution",
+    # Champs ajoutés par e-marchespublics (decp-2022)
+    "offresRecues_source",
+    "marcheInnovant_source",
+    "attributionAvance_source",
+    "sousTraitanceDeclaree_source",
+    "dureeMois_source",
+]

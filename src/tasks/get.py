@@ -13,6 +13,7 @@ from prefect import task
 
 import tasks.bookmarking as bookmarking
 from config import (
+    COLUMNS_TO_DROP,
     DATA_DIR,
     DATE_NOW,
     DIST_DIR,
@@ -199,39 +200,8 @@ def get_decp_json() -> list[Path]:
                 pl.lit(f"data.gouv.fr {filename}.json").alias("sourceOpenData")
             )
 
-            # Pour l'instant on ne garde pas les champs qui demandent une explosion
-            # ou une eval à part:
-            # - titulaires
-            # - modifications
-
-            columns_to_drop = [
-                # Pas encore incluses
-                "typesPrix",
-                "considerationsEnvironnementales",
-                "considerationsSociales",
-                "techniques",
-                "modalitesExecution",
-                "actesSousTraitance",
-                "modificationsActesSousTraitance",
-                # Champs de concessions
-                "_type",  # Marché ou Contrat de concession
-                "autoriteConcedante",
-                "concessionnaires",
-                "donneesExecution",
-                "valeurGlobale",
-                "montantSubventionPublique",
-                "dateSignature",
-                "dateDebutExecution",
-                # Champs ajoutés par e-marchespublics (decp-2022)
-                "offresRecues_source",
-                "marcheInnovant_source",
-                "attributionAvance_source",
-                "sousTraitanceDeclaree_source",
-                "dureeMois_source",
-            ]
-
             absent_columns = []
-            for col in columns_to_drop:
+            for col in COLUMNS_TO_DROP:
                 try:
                     df = df.drop(col)
                 except ColumnNotFoundError:
