@@ -34,9 +34,6 @@ DIST_DIR.mkdir(exist_ok=True)
 SIRENE_DATA_DIR = Path(os.getenv("SIRENE_DATA_DIR", DATA_DIR / "sirene"))
 SIRENE_DATA_DIR.mkdir(exist_ok=True)
 
-with open(os.getenv("DECP_JSON_FILES_PATH", DATA_DIR / "decp_json_files.json")) as f:
-    DECP_JSON_FILES = json.load(f)
-
 with open(
     os.getenv("DATASETS_REFERENCE_FILEPATH", DATA_DIR / "datasets_reference.json"), "r"
 ) as f:

@@ -96,12 +96,12 @@ def detect_format(data, quorum: float) -> str:
     - Une liste de marchés.
     - Un dictionnaire contenant une clé 'marche' (structure imbriquée).
     """
+    _data = []
     if "marches" in data:
         if isinstance(data["marches"], list):
             _data = data["marches"]
         elif isinstance(data["marches"], dict):
             if "marche" in data["marches"]:
                 _data = data["marches"]["marche"]
-    else:
-        _data = []
+
     return detect_format_multiple_titulaires(_data, quorum=quorum)

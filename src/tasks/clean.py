@@ -211,6 +211,15 @@ def fix_nan_nc(obj):
 def load_and_fix_json(input_buffer):
     json_data = json.load(input_buffer)["marches"]["marche"]
 
+    # if type(json_data["marches"]):
+    #     json_data = fix_nan_nc(json_data["marches"])
+    # elif type(json_data["marches"]["marche"]) == list:
+    #     json_data = fix_nan_nc(json_data["marches"]["marche"])
+    # else:
+    #     print("Structure de fichier JSON non reconnue")
+    #     print(json_data)
+    #     raise ValueError
+
     # print("Remplacement des NaN et NC par null...")
     json_data = fix_nan_nc(json_data)
     # print("Correction de la structure des modifications...")

@@ -123,7 +123,7 @@ def get_json(date_now, file_info: dict):
     return decp_json_file
 
 
-@task(retries=5, retry_delay_seconds=5)
+@task(retries=5, retry_delay_seconds=2)
 def get_json_metadata(dataset_id: str, resource_id: str) -> dict:
     """Téléchargement des métadonnées d'une ressoure (fichier)."""
     api_url = (
@@ -139,15 +139,28 @@ def get_decp_json() -> list[Path]:
 
     date_now = DATE_NOW
 
-    # Recuperation des fichiers à traiter
+    # Récuperation des fichiers à traiter
     json_files = list_resources_to_process(TRACKED_DATASETS)
+    json_files_nb = len(json_files)
+
+    with open(DIST_DIR / "json_files.json", "w", encoding="utf-8") as file:
+        file.write(json.dumps(json_files, ensure_ascii=False, indent=2))
 
     return_files = []
     downloaded_files = []
     artefact = []
 
-    for json_file in json_files:
+    for i, json_file in enumerate(json_files):
+        if json_file["file_name"].startswith("5cd57bf68b4c4179299eb0e9_decp-2022"):
+            continue  # pour ce fichier en particulier qui comporte des erreurs, on bypass pour le moment
+
+        dataset_name = {
+            d["dataset_id"]: d["dataset_name"] for d in TRACKED_DATASETS
+        }.get(json_file["dataset_id"])
+        print(f"➡️  {json_file['file_name']} ({dataset_name}) -- {i}/{json_files_nb}")
+
         artifact_row = {}
+
         # Telechargement du fichier JSON
         decp_json_file: Path = get_json(date_now, json_file)
 
@@ -156,22 +169,11 @@ def get_decp_json() -> list[Path]:
             decp_json = json.load(f)
 
         # Determiner le format du fichier
-        if json_file["file_name"] == "5cd57bf68b4c4179299eb0e9-decp-2022":
-            format_decp = "2022-messy"  # pour ce fichier en particulier qui comporte des erreurs, on bypass pour le moment
-        else:
-            format_decp = detect_format(
-                decp_json, FORMAT_DETECTION_QUORUM
-            )  #'empty', '2019' ou '2022'
+        format_decp = detect_format(
+            decp_json, FORMAT_DETECTION_QUORUM
+        )  #'empty', '2019' ou '2022'
 
         if format_decp == "2022":
-            dataset_name = {
-                d["dataset_id"]: d["dataset_name"] for d in TRACKED_DATASETS
-            }.get(json_file["dataset_id"])
-
-            print(
-                f"JSON -> DF - format 2022: {json_file['file_name']} ({dataset_name})"
-            )
-
             if json_file["url"].startswith("https"):
                 decp_json_metadata = get_json_metadata(
                     dataset_id=json_file["dataset_id"],
@@ -191,6 +193,7 @@ def get_decp_json() -> list[Path]:
 
             filename = json_file["file_name"]
 
+            print("JSON -> DF (format 2022)...")
             df: pl.DataFrame = json_to_df(decp_json_file)
 
             artifact_row["open_data_dataset_id"] = json_file["dataset_id"]
@@ -229,6 +232,8 @@ def get_decp_json() -> list[Path]:
                 for dataset in TRACKED_DATASETS
             }.get(json_file["dataset_id"], False):
                 bookmarking.bookmark(json_file["resource_id"])
+        else:
+            print(f"🙈  Le format {format_decp} n'est pas pris en charge.")
 
     # Stock les statistiques dans prefect
     create_table_artifact(
