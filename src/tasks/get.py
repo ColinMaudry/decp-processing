@@ -115,7 +115,7 @@ def get_json(date_now, file_info: dict):
                 with open(decp_json_file, "w", encoding="utf-8") as file:
                     json.dump(data, file, ensure_ascii=False, indent=2)
         else:
-            print(f"[{filename}] DECP d'aujourd'hui déjà téléchargées ({date_now})")
+            print(f"☑️  DECP déjà téléchargées pour aujourd'hui ({date_now})")
     else:
         # Test file, pas de téléchargement
         decp_json_file: Path = Path(url)
@@ -157,7 +157,10 @@ def get_decp_json() -> list[Path]:
         dataset_name = {
             d["dataset_id"]: d["dataset_name"] for d in TRACKED_DATASETS
         }.get(json_file["dataset_id"])
-        print(f"➡️  {json_file['file_name']} ({dataset_name}) -- {i}/{json_files_nb}")
+        print(
+            f"➡️  {json_file['ori_file_name']} ({dataset_name}) -- {i}/{json_files_nb}"
+        )
+        print("Fichier : ", json_file["file_name"] + ".json")
 
         artifact_row = {}
 
@@ -217,7 +220,7 @@ def get_decp_json() -> list[Path]:
                     absent_columns.append(col)
                     pass
 
-            print(f"[{filename}]", df.shape)
+            print(df.shape)
 
             file_path = DIST_DIR / "get" / f"{filename}_{date_now}"
             file_path.parent.mkdir(exist_ok=True)
