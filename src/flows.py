@@ -123,6 +123,8 @@ def decp_processing():
 
 @task(log_prints=True)
 def enrich_from_sirene(df: pl.LazyFrame):
+    sirene_preprocess()
+
     # DONNÉES SIRENE ACHETEURS
 
     print("Extraction des SIRET des acheteurs...")

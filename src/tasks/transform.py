@@ -313,8 +313,7 @@ def extract_unique_titulaires_siret(df: pl.LazyFrame):
 
 @task
 def get_prepare_unites_legales():
-    sirene_data_dir = SIRENE_DATA_DIR
-    zip_path = sirene_data_dir / "StockUniteLegale_utf8.zip"
+    zip_path = SIRENE_DATA_DIR / "StockUniteLegale_utf8.zip"
     if not zip_path.exists():
         print("Téléchargement des unités légales...")
         unites_legales_url = os.environ["SIRENE_UNITES_LEGALES_URL"]
@@ -323,20 +322,22 @@ def get_prepare_unites_legales():
         with open(zip_path, "wb") as file:
             file.write(request.content)
 
-    csv_path = zip_path.with_suffix(".csv")
+    csv_path = SIRENE_DATA_DIR / "StockUniteLegaleHistorique_utf8.csv"
     if not csv_path.exists():
         print("Décompression des unités légales...")
         with zipfile.ZipFile(zip_path, "r") as zip_ref:
-            zip_ref.extractall(sirene_data_dir)
+            zip_ref.extractall(SIRENE_DATA_DIR)
 
-    print("-- sélection des colonnes et enregistrement au format parquet...")
-    lf_ul = pl.scan_csv(csv_path, infer_schema=None)
-    lf_ul = lf_ul.select(["siren", "denominationUniteLegale"])
-    lf_ul = lf_ul.sort(by="siren")
-    lf_ul.collect(engine="streaming").write_parquet(
-        sirene_data_dir / "unites_legales.parquet"
-    )
-
+    parquet_path = SIRENE_DATA_DIR / "unites_legales.parquet"
+    if not parquet_path.exists():
+        print("-- sélection des colonnes et enregistrement au format parquet...")
+        (pl.scan_csv(csv_path, infer_schema=None)
+        .filter(pl.col("siren").is_not_null())
+        .filter(pl.col("denominationUniteLegale").is_not_null())
+        .sort("dateDebut")
+        .unique(subset=["siren"], keep="last")
+        .select(["siren", "denominationUniteLegale"])
+        .sink_parquet(parquet_path))
 
 def sort_columns(df: pl.DataFrame, config_columns):
     # Les colonnes présentes mais absentes des colonnes attendues sont mises à la fin de la liste
