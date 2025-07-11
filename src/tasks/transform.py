@@ -5,7 +5,7 @@ import polars.selectors as cs
 from httpx import get
 from prefect import task
 
-from config import DATA_DIR, SIRENE_DATA_DIR
+from config import DATA_DIR
 from tasks.output import save_to_sqlite
 
 
@@ -311,19 +311,17 @@ def extract_unique_titulaires_siret(df: pl.LazyFrame):
 
 
 @task
-def get_prepare_unites_legales():
-    processed_parquet_path = SIRENE_DATA_DIR / "unites_legales.parquet"
-    if not processed_parquet_path.exists():
-        print("Téléchargement des données unité légales et sélection des colonnes...")
-        (
-            pl.scan_parquet(os.environ["SIRENE_UNITES_LEGALES_URL"])
-            .filter(pl.col("siren").is_not_null())
-            .filter(pl.col("denominationUniteLegale").is_not_null())
-            .sort("dateDebut", descending=False)
-            .unique(subset=["siren"], keep="last")
-            .select(["siren", "denominationUniteLegale"])
-            .sink_parquet(processed_parquet_path)
-        )
+def get_prepare_unites_legales(processed_parquet_path):
+    print("Téléchargement des données unité légales et sélection des colonnes...")
+    (
+        pl.scan_parquet(os.environ["SIRENE_UNITES_LEGALES_URL"])
+        .filter(pl.col("siren").is_not_null())
+        .filter(pl.col("denominationUniteLegale").is_not_null())
+        .sort("dateDebut", descending=False)
+        .unique(subset=["siren"], keep="last")
+        .select(["siren", "denominationUniteLegale"])
+        .sink_parquet(processed_parquet_path)
+    )
 
 
 def sort_columns(df: pl.DataFrame, config_columns):
