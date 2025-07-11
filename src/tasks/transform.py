@@ -1,5 +1,4 @@
 import os
-import zipfile
 
 import polars as pl
 import polars.selectors as cs
@@ -313,31 +312,19 @@ def extract_unique_titulaires_siret(df: pl.LazyFrame):
 
 @task
 def get_prepare_unites_legales():
-    zip_path = SIRENE_DATA_DIR / "StockUniteLegale_utf8.zip"
-    if not zip_path.exists():
-        print("Téléchargement des unités légales...")
-        unites_legales_url = os.environ["SIRENE_UNITES_LEGALES_URL"]
+    processed_parquet_path = SIRENE_DATA_DIR / "unites_legales.parquet"
+    if not processed_parquet_path.exists():
+        print("Téléchargement des données unité légales et sélection des colonnes...")
+        (
+            pl.scan_parquet(os.environ["SIRENE_UNITES_LEGALES_URL"])
+            .filter(pl.col("siren").is_not_null())
+            .filter(pl.col("denominationUniteLegale").is_not_null())
+            .sort("dateDebut", descending=False)
+            .unique(subset=["siren"], keep="last")
+            .select(["siren", "denominationUniteLegale"])
+            .sink_parquet(processed_parquet_path)
+        )
 
-        request = get(unites_legales_url, follow_redirects=True)
-        with open(zip_path, "wb") as file:
-            file.write(request.content)
-
-    csv_path = SIRENE_DATA_DIR / "StockUniteLegaleHistorique_utf8.csv"
-    if not csv_path.exists():
-        print("Décompression des unités légales...")
-        with zipfile.ZipFile(zip_path, "r") as zip_ref:
-            zip_ref.extractall(SIRENE_DATA_DIR)
-
-    parquet_path = SIRENE_DATA_DIR / "unites_legales.parquet"
-    if not parquet_path.exists():
-        print("-- sélection des colonnes et enregistrement au format parquet...")
-        (pl.scan_csv(csv_path, infer_schema=None)
-        .filter(pl.col("siren").is_not_null())
-        .filter(pl.col("denominationUniteLegale").is_not_null())
-        .sort("dateDebut")
-        .unique(subset=["siren"], keep="last")
-        .select(["siren", "denominationUniteLegale"])
-        .sink_parquet(parquet_path))
 
 def sort_columns(df: pl.DataFrame, config_columns):
     # Les colonnes présentes mais absentes des colonnes attendues sont mises à la fin de la liste
