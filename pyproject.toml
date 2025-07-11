@@ -16,7 +16,8 @@ dependencies = [
     "ipykernel",
     "prefect==3.3.3",
     "orjson",
-    "ijson"
+    "ijson",
+    "xmltodict"
 ]
 
 [project.optional-dependencies]

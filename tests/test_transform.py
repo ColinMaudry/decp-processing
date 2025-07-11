@@ -1,12 +1,13 @@
-import pytest
+from datetime import date
+
 import polars as pl
+from polars.testing import assert_frame_equal
+
 from tasks.transform import (
     remove_modifications_duplicates,
-    replace_by_modification_data,
     remove_suffixes_from_uid_column,
+    replace_with_modification_data,
 )
-from polars.testing import assert_frame_equal
-from datetime import date
 
 # from abc import ABC, abstractmethod
 
@@ -286,7 +287,7 @@ class TestHandleModificationsMarche:
         )
 
         # Call the function
-        result_df = replace_by_modification_data(df)
+        result_df = replace_with_modification_data(df)
 
         print(
             expected_df["uid", "dateNotification", "montant", "modification_id"]

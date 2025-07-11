@@ -1,34 +1,121 @@
+import json
 import os
+import re
 from pathlib import Path
 
 import ijson
 import orjson
 import polars as pl
+import xmltodict
 from httpx import get
 from polars.polars import ColumnNotFoundError
 from prefect import task
 
-from config import DATA_DIR, DATE_NOW, DECP_JSON_FILES, DIST_DIR
+import tasks.bookmarking as bookmarking
+from config import (
+    COLUMNS_TO_DROP,
+    DATA_DIR,
+    DATE_NOW,
+    DIST_DIR,
+    FORMAT_DETECTION_QUORUM,
+    TRACKED_DATASETS,
+)
 from schemas import MARCHE_SCHEMA_2022
 from tasks.clean import load_and_fix_json
+from tasks.dataset_utils import list_resources_to_process
+from tasks.detect_format import detect_format
 from tasks.output import save_to_files
 from tasks.setup import create_table_artifact
 
 
+def clean_xml(xml_str):
+    # Suppresion des caractères invalides XML 1.0
+    return re.sub(r"[^\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD]", "", xml_str)
+
+
+def parse_xml(url: str) -> dict:
+    """
+    Récupère et parse un fichier XML à partir d'une URL, puis le convertit en JSON.
+
+    Cette fonction est conçue pour traiter les fichiers XML issus des DECP. Elle applique
+    un post-traitement sur les nœuds "modifications" et "titulaires" pour uniformiser leur structure.
+
+    Paramètre :
+        url (str) : L'URL du fichier XML à récupérer et à parser.
+
+    Retour :
+        dict : Une représentation sous forme de dictionnaire du contenu XML, avec une structure adaptée pour un usage en JSON.
+    """
+
+    request = get(url, follow_redirects=True)
+    data = xmltodict.parse(
+        clean_xml(request.text),
+        force_list={
+            "considerationSociale",
+            "considerationEnvironnementale",
+            "modaliteExecution",
+            "technique",
+            "typePrix",
+            "modification",
+            "titulaire",
+            "marche",
+        },
+    )
+
+    if "marches" in data:
+        if "marche" in data["marches"]:
+            # modifications des titulaires et des modifications
+            for row in data["marches"]["marche"]:
+                mods = row.get("modifications", [])
+                if mods is None:
+                    row["modifications"] = []
+                elif "modification" in mods:
+                    mods_list = mods["modification"]
+                    row["modifications"] = [{"modification": m} for m in mods_list]
+
+                titulaires = row.get("titulaires", [])
+                if titulaires is None:
+                    row["titulaires"] = []
+                elif "titulaire" in titulaires:
+                    titulaires_list = titulaires["titulaire"]
+                    row["titulaires"] = [{"titulaire": t} for t in titulaires_list]
+
+            for row in data["marches"]["marche"]:
+                mods = row.get("modifications", [])
+                _mods = []
+                for mod in mods:
+                    if "titulaires" in mod["modification"]:
+                        mod["modification"].update(
+                            {"titulaires": [mod["modification"]["titulaires"]]}
+                        )
+                    _mods.append(mod)
+
+                if _mods:
+                    row["modifications"] = _mods
+
+    return data
+
+
 @task(retries=5, retry_delay_seconds=5)
-def get_json(date_now, json_file: dict):
-    url = json_file["url"]
-    filename = json_file["file_name"]
+def get_json(date_now, file_info: dict):
+    url = file_info["url"]
+    filename = file_info["file_name"]
 
     if url.startswith("https"):
         # Prod file
         decp_json_file: Path = DATA_DIR / f"{filename}_{date_now}.json"
         if not (os.path.exists(decp_json_file)):
-            request = get(url, follow_redirects=True)
-            with open(decp_json_file, "wb") as file:
-                file.write(request.content)
+            if file_info["file_format"] == "json":
+                request = get(url, follow_redirects=True)
+                with open(decp_json_file, "wb") as file:
+                    file.write(request.content)
+            elif file_info["file_format"] == "xml":
+                # Conversion du XML en JSON
+                data = parse_xml(url)
+                with open(decp_json_file, "w", encoding="utf-8") as file:
+                    json.dump(data, file, ensure_ascii=False, indent=2)
         else:
-            print(f"[{filename}] DECP d'aujourd'hui déjà téléchargées ({date_now})")
+            print(f"☑️  DECP déjà téléchargées pour aujourd'hui ({date_now})")
     else:
         # Test file, pas de téléchargement
         decp_json_file: Path = Path(url)
@@ -36,11 +123,12 @@ def get_json(date_now, json_file: dict):
     return decp_json_file
 
 
-@task(retries=5, retry_delay_seconds=5)
-def get_json_metadata(json_file: dict) -> dict:
+@task(retries=5, retry_delay_seconds=2)
+def get_json_metadata(dataset_id: str, resource_id: str) -> dict:
     """Téléchargement des métadonnées d'une ressoure (fichier)."""
-    resource_id = json_file["url"].split("/")[-1]
-    api_url = f"http://www.data.gouv.fr/api/1/datasets/5cd57bf68b4c4179299eb0e9/resources/{resource_id}/"
+    api_url = (
+        f"http://www.data.gouv.fr/api/1/datasets/{dataset_id}/resources/{resource_id}/"
+    )
     json_metadata = get(api_url, follow_redirects=True).json()
     return json_metadata
 
@@ -49,35 +137,70 @@ def get_json_metadata(json_file: dict) -> dict:
 def get_decp_json() -> list[Path]:
     """Téléchargement des DECP publiées par Bercy sur data.gouv.fr."""
 
-    json_files = DECP_JSON_FILES
     date_now = DATE_NOW
+
+    # Récuperation des fichiers à traiter
+    json_files = list_resources_to_process(TRACKED_DATASETS)
+    json_files_nb = len(json_files)
+
+    with open(DIST_DIR / "json_files.json", "w", encoding="utf-8") as file:
+        file.write(json.dumps(json_files, ensure_ascii=False, indent=2))
 
     return_files = []
     downloaded_files = []
     artefact = []
 
-    for json_file in json_files:
-        artifact_row = {}
-        if json_file["process"] is True:
-            decp_json_file: Path = get_json(date_now, json_file)
+    for i, json_file in enumerate(json_files):
+        if json_file["file_name"].startswith("5cd57bf68b4c4179299eb0e9_decp-2022"):
+            continue  # pour ce fichier en particulier qui comporte des erreurs, on bypass pour le moment
 
+        dataset_name = {
+            d["dataset_id"]: d["dataset_name"] for d in TRACKED_DATASETS
+        }.get(json_file["dataset_id"])
+        print(
+            f"➡️  {json_file['ori_file_name']} ({dataset_name}) -- {i}/{json_files_nb}"
+        )
+        print("Fichier : ", json_file["file_name"] + ".json")
+
+        artifact_row = {}
+
+        # Telechargement du fichier JSON
+        decp_json_file: Path = get_json(date_now, json_file)
+
+        # Chargement du fichier JSON
+        with open(decp_json_file, encoding="utf8") as f:
+            decp_json = json.load(f)
+
+        # Determiner le format du fichier
+        format_decp = detect_format(
+            decp_json, FORMAT_DETECTION_QUORUM
+        )  #'empty', '2019' ou '2022'
+
+        if format_decp == "2022":
             if json_file["url"].startswith("https"):
-                decp_json_metadata = get_json_metadata(json_file)
+                decp_json_metadata = get_json_metadata(
+                    dataset_id=json_file["dataset_id"],
+                    resource_id=json_file["resource_id"],
+                )
                 artifact_row = {
+                    "open_data_dataset_id": json_file["dataset_id"],
+                    "open_data_dataset_name": dataset_name,
                     "open_data_filename": decp_json_metadata["title"],
                     "open_data_id": decp_json_metadata["id"],
                     "sha1": decp_json_metadata["checksum"]["value"],
                     "created_at": decp_json_metadata["created_at"],
                     "last_modified": decp_json_metadata["last_modified"],
                     "filesize": decp_json_metadata["filesize"],
-                    "views": decp_json_metadata["metrics"]["views"],
+                    "views": decp_json_metadata["metrics"].get("views", None),
                 }
 
             filename = json_file["file_name"]
 
+            print("JSON -> DF (format 2022)...")
             df: pl.DataFrame = json_to_df(decp_json_file)
 
-            artifact_row["open_data_dataset"] = "data.gouv.fr JSON"
+            artifact_row["open_data_dataset_id"] = json_file["dataset_id"]
+            artifact_row["open_data_dataset_name"] = dataset_name
             artifact_row["download_date"] = date_now
             artifact_row["columns"] = sorted(df.columns)
             artifact_row["column_number"] = len(df.columns)
@@ -89,46 +212,15 @@ def get_decp_json() -> list[Path]:
                 pl.lit(f"data.gouv.fr {filename}.json").alias("sourceOpenData")
             )
 
-            # Pour l'instant on ne garde pas les champs qui demandent une explosion
-            # ou une eval à part:
-            # - titulaires
-            # - modifications
-
-            columns_to_drop = [
-                # Pas encore incluses
-                "typesPrix",
-                "considerationsEnvironnementales",
-                "considerationsSociales",
-                "techniques",
-                "modalitesExecution",
-                "actesSousTraitance",
-                "modificationsActesSousTraitance",
-                # Champs de concessions
-                "_type",  # Marché ou Contrat de concession
-                "autoriteConcedante",
-                "concessionnaires",
-                "donneesExecution",
-                "valeurGlobale",
-                "montantSubventionPublique",
-                "dateSignature",
-                "dateDebutExecution",
-                # Champs ajoutés par e-marchespublics (decp-2022)
-                "offresRecues_source",
-                "marcheInnovant_source",
-                "attributionAvance_source",
-                "sousTraitanceDeclaree_source",
-                "dureeMois_source",
-            ]
-
             absent_columns = []
-            for col in columns_to_drop:
+            for col in COLUMNS_TO_DROP:
                 try:
                     df = df.drop(col)
                 except ColumnNotFoundError:
                     absent_columns.append(col)
                     pass
 
-            print(f"[{filename}]", df.shape)
+            print(df.shape)
 
             file_path = DIST_DIR / "get" / f"{filename}_{date_now}"
             file_path.parent.mkdir(exist_ok=True)
@@ -136,6 +228,15 @@ def get_decp_json() -> list[Path]:
 
             return_files.append(file_path)
             downloaded_files.append(filename + ".json")
+
+            # si le dataset est incrémental, on bookmark la ressource traitée
+            if {
+                dataset["dataset_id"]: dataset["incremental"]
+                for dataset in TRACKED_DATASETS
+            }.get(json_file["dataset_id"], False):
+                bookmarking.bookmark(json_file["resource_id"])
+        else:
+            print(f"🙈  Le format {format_decp} n'est pas pris en charge.")
 
     # Stock les statistiques dans prefect
     create_table_artifact(

@@ -15,6 +15,8 @@ if dotenv_path == "":
 
 load_dotenv(dotenv_path, override=False)
 
+FORMAT_DETECTION_QUORUM = 0.7  # Seuil de confiance pour la détection du format des données - en pratique c'est inutile car il n'y a qu'un format par fichier
+
 DATE_NOW = datetime.now().isoformat()[0:10]  # YYYY-MM-DD
 MONTH_NOW = DATE_NOW[2:10]
 
@@ -32,8 +34,14 @@ DIST_DIR.mkdir(exist_ok=True)
 SIRENE_DATA_DIR = Path(os.getenv("SIRENE_DATA_DIR", DATA_DIR / "sirene"))
 SIRENE_DATA_DIR.mkdir(exist_ok=True)
 
-with open(os.getenv("DECP_JSON_FILES_PATH", DATA_DIR / "decp_json_files.json")) as f:
-    DECP_JSON_FILES = json.load(f)
+with open(
+    os.getenv("DATASETS_REFERENCE_FILEPATH", DATA_DIR / "datasets_reference.json"), "r"
+) as f:
+    TRACKED_DATASETS = json.load(f)
+
+BOOKMARK_FILEPATH = Path(
+    os.getenv("BOOKMARK_FILEPATH", DATA_DIR / "system" / "processed_bookmarks.json")
+)
 
 # Liste et ordre des colonnes pour le mono dataframe de base (avant normalisation et spécialisation)
 # Sert aussi à vérifier qu'au moins ces colonnes sont présentes (d'autres peuvent être présentes en plus)
@@ -70,4 +78,30 @@ BASE_DF_COLUMNS = [
     "idAccordCadre",
     "source",
     "sourceOpenData",
+]
+
+COLUMNS_TO_DROP = [
+    # Pas encore incluses
+    "typesPrix",
+    "considerationsEnvironnementales",
+    "considerationsSociales",
+    "techniques",
+    "modalitesExecution",
+    "actesSousTraitance",
+    "modificationsActesSousTraitance",
+    # Champs de concessions
+    "_type",  # Marché ou Contrat de concession
+    "autoriteConcedante",
+    "concessionnaires",
+    "donneesExecution",
+    "valeurGlobale",
+    "montantSubventionPublique",
+    "dateSignature",
+    "dateDebutExecution",
+    # Champs ajoutés par e-marchespublics (decp-2022)
+    "offresRecues_source",
+    "marcheInnovant_source",
+    "attributionAvance_source",
+    "sousTraitanceDeclaree_source",
+    "dureeMois_source",
 ]

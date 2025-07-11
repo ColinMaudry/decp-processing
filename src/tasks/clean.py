@@ -15,6 +15,7 @@ from tasks.transform import explode_titulaires, process_modifications
 
 @task
 def clean_decp(files: list[Path]):
+    print("Nettoyage des données...")
     return_files = []
     for file in files:
         #
@@ -23,27 +24,12 @@ def clean_decp(files: list[Path]):
 
         lf: pl.LazyFrame = pl.scan_parquet(f"{file}.parquet")
 
-        # Colonnes exclues pour l'instant
-        # lf = df.rename({
-        #     "typesPrix_typePrix": "typesPrix",
-        #     "considerationsEnvironnementales_considerationEnvironnementale": "considerationsEnvironnementales",
-        #     "considerationsSociales_considerationSociale": "considerationsSociales",
-        #     "techniques_technique": "techniques",
-        #     "modalitesExecution_modaliteExecution": "modalitesExecution"
-        # })
-
         # Nettoyage des identifiants de marchés
         lf = lf.with_columns(pl.col("id").str.replace_all(r"[ ,\\./]", "_"))
 
         # Ajout du champ uid
         # TODO: à déplacer autre part, dans transform
         lf = lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
-
-        # Suppression des lignes en doublon par UID (acheteur id + id)
-        # Exemple : 20005584600014157140791205100
-        # index_size_before = df.height
-        # df = df.unique(subset=["uid"], maintain_order=False)
-        # print("-- ", index_size_before - df.height, " doublons supprimés (uid)")
 
         # Dates
         date_replacements = {
@@ -81,7 +67,7 @@ def clean_decp(files: list[Path]):
         # Explosion des titulaires
         lf = explode_titulaires(lf)
 
-        # Fix datatypes
+        # Correction des datatypes
         lf = fix_data_types(lf)
 
         output_file = DIST_DIR / "clean" / file.name
@@ -110,6 +96,7 @@ def fix_data_types(lf: pl.LazyFrame):
         # "variationPrixActeSousTraitance": pl.Float64,
         "origineFrance": pl.Float64,
         "origineUE": pl.Float64,
+        "modification.id": pl.Int32,
     }
 
     # Champs numériques
@@ -180,7 +167,9 @@ def clean_decp_json_modifications(input_json_: dict):
                     "titulaires", []
                 ):
                     # mofification_titulaire = {} représentant un titulaire de la modification
-                    if isinstance(modification_titulaire["titulaire"], dict):
+                    if modification_titulaire is not None and isinstance(
+                        modification_titulaire["titulaire"], dict
+                    ):
                         # Si le titulaire est un dictionnaire, on récupère l'id et le typeIdentifiant
                         modification_titulaires_clean.append(
                             {
@@ -204,7 +193,7 @@ def clean_decp_json_modifications(input_json_: dict):
             )
         entry["modifications"] = clean_modifications_entries
         clean_json.append(entry)
-    print(f"Nombre de titulaires nettoyés : {titulaires_cleaned_cpt}")
+    # print(f"Nombre de titulaires nettoyés : {titulaires_cleaned_cpt}")
     return clean_json
 
 
@@ -222,9 +211,18 @@ def fix_nan_nc(obj):
 def load_and_fix_json(input_buffer):
     json_data = json.load(input_buffer)["marches"]["marche"]
 
-    print("Remplacement des NaN et NC par null...")
+    # if type(json_data["marches"]):
+    #     json_data = fix_nan_nc(json_data["marches"])
+    # elif type(json_data["marches"]["marche"]) == list:
+    #     json_data = fix_nan_nc(json_data["marches"]["marche"])
+    # else:
+    #     print("Structure de fichier JSON non reconnue")
+    #     print(json_data)
+    #     raise ValueError
+
+    # print("Remplacement des NaN et NC par null...")
     json_data = fix_nan_nc(json_data)
-    print("Correction de la structure des modifications...")
+    # print("Correction de la structure des modifications...")
     json_data = clean_decp_json_modifications(json_data)
 
     fixed_buffer = io.StringIO()
