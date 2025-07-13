@@ -8,7 +8,7 @@ from httpx import get
 from polars.polars import ColumnNotFoundError
 from prefect import task
 
-from config import DATA_DIR, DATE_NOW, DECP_JSON_FILES, DIST_DIR
+from config import DATA_DIR, DATE_NOW, DECP_JSON_FILES
 from schemas import MARCHE_SCHEMA_2022
 from tasks.clean import load_and_fix_json
 from tasks.output import save_to_files
@@ -22,7 +22,8 @@ def get_json(date_now, json_file: dict):
 
     if url.startswith("https"):
         # Prod file
-        decp_json_file: Path = DATA_DIR / f"{filename}_{date_now}.json"
+        decp_json_file: Path = DATA_DIR / "get" / f"{filename}_{date_now}.json"
+        decp_json_file.parent.mkdir(exist_ok=True)
         if not (os.path.exists(decp_json_file)):
             request = get(url, follow_redirects=True)
             with open(decp_json_file, "wb") as file:
@@ -130,8 +131,7 @@ def get_decp_json() -> list[Path]:
 
             print(f"[{filename}]", df.shape)
 
-            file_path = DIST_DIR / "get" / f"{filename}_{date_now}"
-            file_path.parent.mkdir(exist_ok=True)
+            file_path = DATA_DIR / "get" / f"{filename}_{date_now}"
             save_to_files(df, file_path, ["parquet"])
 
             return_files.append(file_path)

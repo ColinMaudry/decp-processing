@@ -16,7 +16,7 @@ if dotenv_path == "":
 load_dotenv(dotenv_path, override=False)
 
 DATE_NOW = datetime.now().isoformat()[0:10]  # YYYY-MM-DD
-MONTH_NOW = DATE_NOW[2:10]
+MONTH_NOW = DATE_NOW[:7]
 
 DECP_PROCESSING_PUBLISH = os.environ.get("DECP_PROCESSING_PUBLISH", "")
 
@@ -29,8 +29,8 @@ DATA_DIR.mkdir(exist_ok=True)
 DIST_DIR = Path(os.getenv("DECP_DIST_DIR", BASE_DIR / "dist"))
 DIST_DIR.mkdir(exist_ok=True)
 
-SIRENE_DATA_DIR = Path(os.getenv("SIRENE_DATA_DIR", DATA_DIR / "sirene"))
-SIRENE_DATA_DIR.mkdir(exist_ok=True)
+sirene_data_parent_dir = Path(os.getenv("SIRENE_DATA_PARENT_DIR", DATA_DIR))
+SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
 
 with open(os.getenv("DECP_JSON_FILES_PATH", DATA_DIR / "decp_json_files.json")) as f:
     DECP_JSON_FILES = json.load(f)

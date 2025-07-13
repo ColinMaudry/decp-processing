@@ -3,8 +3,15 @@ import shutil
 
 import polars as pl
 from prefect import flow, task
+from prefect.transactions import transaction
 
-from config import BASE_DF_COLUMNS, DECP_PROCESSING_PUBLISH, DIST_DIR
+from config import (
+    BASE_DF_COLUMNS,
+    DATE_NOW,
+    DECP_PROCESSING_PUBLISH,
+    DIST_DIR,
+    SIRENE_DATA_DIR,
+)
 from tasks.analyse import generate_stats
 from tasks.clean import clean_decp
 from tasks.enrich import add_unite_legale_data
@@ -14,6 +21,7 @@ from tasks.output import (
     save_to_sqlite,
 )
 from tasks.publish import publish_to_datagouv
+from tasks.setup import create_sirene_data_dir
 from tasks.transform import (
     concat_decp_json,
     extract_unique_acheteurs_siret,
@@ -57,6 +65,8 @@ def make_datalab_data():
     """Tâches consacrées à la transformation des données dans un format
     adapté aux activités du Datalab d'Anticor."""
 
+    print("🚀  Création des données pour le Datalab d'Anticor...")
+
     df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
 
     print("Enregistrement des DECP aux formats SQLite...")
@@ -76,11 +86,15 @@ def make_datalab_data():
     else:
         print("Publication sur data.gouv.fr désactivée.")
 
+    print("☑️  Fin du flow make_datalab_data.")
+
 
 @flow(log_prints=True)
 def make_decpinfo_data():
     """Tâches consacrées à la transformation des données dans un format
     # adapté à decp.info"""
+
+    print("🚀  Création des données pour decp.info...")
 
     df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
 
@@ -106,11 +120,15 @@ def make_decpinfo_data():
     else:
         print("Publication sur data.gouv.fr désactivée.")
 
+    print("☑️  Fin du flow make_decpinfo_data.")
+
     return df
 
 
 @flow(log_prints=True)
 def decp_processing():
+    print("🚀  Début du flow principal")
+
     # Données nettoyées et fusionnées
     get_clean_concat()
 
@@ -120,9 +138,17 @@ def decp_processing():
     # Base de données SQLite dédiée aux activités du Datalab d'Anticor
     make_datalab_data()
 
+    print("☑️  Fin du flow principal decp_processing.")
+
 
 @task(log_prints=True)
 def enrich_from_sirene(df: pl.LazyFrame):
+    # Préprocessing des données SIRENE si :
+    # - le dossier n'existe pas encore (= les données n'ont pas déjà été preprocessed ce mois-ci)
+    # - on est au moins le 5 du mois (pour être sûr que les données SIRENE ont été mises à jour sur data.gouv.fr)
+    if not SIRENE_DATA_DIR.exists() and int(DATE_NOW[-2:]) >= 5:
+        sirene_preprocess()
+
     # DONNÉES SIRENE ACHETEURS
 
     print("Extraction des SIRET des acheteurs...")
@@ -186,11 +212,21 @@ def sirene_preprocess():
     """Prétraitement mensuel des données SIRENE afin d'économiser du temps lors du traitement quotidien des DECP.
     Pour chaque ressource (unités légales, établissements), un fichier parquet est produit.
     """
-    # préparer lest données établissements
 
-    # préparer les données unités légales
-    print("Prépararion des unités légales...")
-    get_prepare_unites_legales()
+    print("🚀  Pré-traitement des données SIRENE")
+    # Soit les tâches de ce flow vont au bout (success), soit le dossier SIRENE_DATA_DIR est supprimé (voir remove_sirene_data_dir())
+    with transaction():
+        create_sirene_data_dir()
+
+        # TODO préparer lest données établissements
+
+        # préparer les données unités légales
+        processed_parquet_path = SIRENE_DATA_DIR / "unites_legales.parquet"
+        if not processed_parquet_path.exists():
+            print("Prépararion des unités légales...")
+            get_prepare_unites_legales(processed_parquet_path)
+
+    print("☑️  Fin du flow sirene_preprocess.")
 
 
 if __name__ == "__main__":

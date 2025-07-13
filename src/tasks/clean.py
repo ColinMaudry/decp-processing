@@ -8,7 +8,7 @@ import polars as pl
 import polars.selectors as cs
 from prefect import task
 
-from config import DIST_DIR
+from config import DATA_DIR
 from tasks.output import save_to_files
 from tasks.transform import explode_titulaires, process_modifications
 
@@ -84,7 +84,7 @@ def clean_decp(files: list[Path]):
         # Fix datatypes
         lf = fix_data_types(lf)
 
-        output_file = DIST_DIR / "clean" / file.name
+        output_file = DATA_DIR / "clean" / file.name
         return_files.append(output_file)
         output_file.parent.mkdir(exist_ok=True)
 
