@@ -32,17 +32,23 @@ from tasks.transform import (
 
 
 @task(log_prints=True)
-def get_clean_concat(dataset_id: str = None):
-    # Determination de la stratégie de traitement du dataset
-    if dataset_id:
-        is_incremental = {
-            t["dataset_id"]: t.get("incremental", False) for t in TRACKED_DATASETS
-        }.get(dataset_id, False)
-    else:
-        is_incremental = False
+def get_clean_concat(dataset_ids: list = None):
+    print("Récupération des données source en parallèle...")
+    futures = [get_decp_json.submit(dataset_id) for dataset_id in dataset_ids]
+    results: list[(list, list, str)] = [
+        f.result() for f in futures
+    ]  # list of tuples [(files[], processed_resource_ids[], dataset_id)]
+    files = [_file for _files, _, _ in results for _file in _files]
 
-    print("Récupération des données source...")
-    files, processed_resources = get_decp_json(dataset_id=dataset_id)
+    # On garde les ID de ressource à bookmarker à la fin du traitement
+    processed_ressources_to_bookmark = [
+        _processed_resource_id
+        for _, _processed_ressources, _dataset_id in results
+        if {t["dataset_id"]: t.get("incremental", False) for t in TRACKED_DATASETS}.get(
+            _dataset_id, False
+        )
+        for _processed_resource_id in _processed_ressources
+    ]
 
     print("Nettoyage des données source et typage des colonnes...")
     files = clean_decp(files)
@@ -64,22 +70,45 @@ def get_clean_concat(dataset_id: str = None):
     print("Enregistrement des DECP aux formats CSV, Parquet...")
     df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
 
-    if dataset_id:
-        # Si on a passé un dataset, on écrit seulement la partition datagouv_dataset_id correspondante en parquet seulement
-        polars_parquet_write(
-            df,
-            DATA_DIR
-            / "decp_parquet",  # Ce directory n'est jamais supprimé, il contient la copie en parquet de la db DECP-processing
-            partition_keys=["datagouv_dataset_id"],
-            # Si le dataset est paramétré pour être traiter incrémentalement, on passe if_exists ='append'
-            if_exists="append" if is_incremental else "replace",
-        )
-        if is_incremental:
-            # bookmark des ressources traitées
-            bookmark_multiple(processed_resources)
-    else:
-        # compatible avec les versions précédentes
-        save_to_files(df, DIST_DIR / "decp")
+    print("Ecriture des datasets en stratégie replace...")
+    # On écrit les datasets à stratégie if_exist=replace
+    polars_parquet_write(
+        df.filter(
+            pl.col("datagouv_dataset_id").is_in(
+                [
+                    t["dataset_id"]
+                    for t in TRACKED_DATASETS
+                    if not t.get("incremental", False)
+                ]
+            )
+        ),
+        DATA_DIR
+        / "decp_parquet",  # Ce directory n'est jamais supprimé, il contient la copie en parquet de la db DECP-processing
+        partition_keys=["datagouv_dataset_id"],
+        # Si le dataset est paramétré pour être traiter incrémentalement, on passe if_exists ='append'
+        if_exists="replace",
+    )
+
+    # On écrit les datasets à stratégie if_exist=replace
+    print("Ecriture des datasets en stratégie append...")
+    polars_parquet_write(
+        df.filter(
+            pl.col("datagouv_dataset_id").is_in(
+                [
+                    t["dataset_id"]
+                    for t in TRACKED_DATASETS
+                    if t.get("incremental", False)
+                ]
+            )
+        ),
+        DATA_DIR
+        / "decp_parquet",  # Ce directory n'est jamais supprimé, il contient la copie en parquet de la db DECP-processing
+        partition_keys=["datagouv_dataset_id"],
+        # Si le dataset est paramétré pour être traiter incrémentalement, on passe if_exists ='append'
+        if_exists="append",
+    )
+
+    bookmark_multiple(processed_ressources_to_bookmark)
 
 
 @flow(log_prints=True)
@@ -88,7 +117,7 @@ def make_datalab_data(parquet_partitioned=False):
     adapté aux activités du Datalab d'Anticor."""
 
     if parquet_partitioned:
-        df: pl.DataFrame = pl.read_parquet(DATA_DIR / "decp")
+        df: pl.DataFrame = pl.read_parquet(DATA_DIR / "decp_parquet")
     else:
         df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
 
@@ -116,7 +145,7 @@ def make_decpinfo_data(parquet_partitioned=False):
     # adapté à decp.info"""
 
     if parquet_partitioned:
-        df: pl.DataFrame = pl.read_parquet(DATA_DIR / "decp")
+        df: pl.DataFrame = pl.read_parquet(DATA_DIR / "decp_parquet")
     else:
         df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
 
@@ -153,9 +182,7 @@ def decp_processing():
     datasets = [t["dataset_id"] for t in TRACKED_DATASETS]
 
     # Données nettoyées et fusionnées - traitement parallèle avec prefect
-    futures = [get_clean_concat.submit(dataset_id) for dataset_id in datasets]
-    # On attend que toutes les taches soit terminées pour continuer
-    [f.result() for f in futures]
+    get_clean_concat(datasets)
 
     # Fichiers dédiés à l'Open Data et decp.info, pour revenir sur la version de traitement précédente (fichier parquet unique), parquet_partitioned=False
     make_decpinfo_data(parquet_partitioned=True)

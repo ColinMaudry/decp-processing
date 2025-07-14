@@ -9,6 +9,24 @@ import polars as pl
 from config import DIST_DIR
 
 
+def get_parquet_filename(base_path, if_exists):
+    "Helper function qui gère les noms de fichiers et l'écrasement de données précédentes"
+    if if_exists == "append":
+        filename = f"part-{uuid.uuid4().hex}.parquet"
+    elif if_exists == "replace":
+        filename = "data.parquet"
+        # S'il y a déjà des fichiers dans la destination, on les supprime
+        shutil.rmtree(base_path, ignore_errors=True)
+        os.makedirs(base_path, exist_ok=True)
+
+    else:
+        raise AttributeError(
+            'if_exist doit prendre une des valeurs "append" ou "replace"'
+        )
+
+    return os.path.join(base_path, filename)
+
+
 def polars_parquet_write(
     df: pl.DataFrame,
     path: str | Path,
@@ -22,35 +40,18 @@ def polars_parquet_write(
         Column(s) to partition by. A partitioned dataset will be written if this is specified. This parameter is considered unstable and is subject to change.
     """
 
-    def get_filename(base_path, if_exists):
-        "Helper function qui gère les noms de fichiers et l'écrasement de données précédentes"
-        if if_exists == "append":
-            filename = f"part-{uuid.uuid4().hex}.parquet"
-        elif if_exists == "replace":
-            filename = "data.parquet"
-            # S'il y a déjà des fichiers dans la destination, on les supprime
-            shutil.rmtree(base_path, ignore_errors=True)
-            os.makedirs(base_path, exist_ok=True)
-
-        else:
-            raise AttributeError(
-                'if_exist doit prendre une des valeurs "append" ou "replace"'
-            )
-
-        return os.path.join(base_path, filename)
-
     if partition_keys:
         for group in df.partition_by(partition_keys):
             partition_vals = [f"{col}={group[col][0]}" for col in partition_keys]
             partition_path = os.path.join(path, *partition_vals)
 
             os.makedirs(partition_path, exist_ok=True)
-            full_path = get_filename(partition_path, if_exists)
+            full_path = get_parquet_filename(partition_path, if_exists)
 
             group.write_parquet(full_path)
 
     else:
-        full_path = get_filename(path, if_exists)
+        full_path = get_parquet_filename(path, if_exists)
         df.write_parquet(f"{path}")
 
 

@@ -275,7 +275,7 @@ def get_decp_json(dataset_id: str = None) -> list[Path]:
     # Stocke la liste des fichiers pour la réutiliser plus tard pour la création d'un artefact
     os.environ["downloaded_files"] = ",".join(downloaded_files)
 
-    return return_files, processed_resources
+    return return_files, processed_resources, dataset_id
 
 
 def json_to_df(json_path_file) -> pl.DataFrame:
