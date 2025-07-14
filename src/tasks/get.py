@@ -132,6 +132,100 @@ def get_json_metadata(dataset_id: str, resource_id: str) -> dict:
     return json_metadata
 
 
+# test nested parallelism
+@task
+def get_single_resource(i, json_file, json_files_nb):
+    if json_file["file_name"].startswith("5cd57bf68b4c4179299eb0e9_decp-2022"):
+        return (
+            None,
+            None,
+            None,
+            None,
+        )  # pour ce fichier en particulier qui comporte des erreurs, on bypass pour le moment
+
+    dataset_name = get_dataset_name(json_file["dataset_id"])
+
+    print(f"➡️  {json_file['ori_filename']} ({dataset_name}) -- {i}/{json_files_nb}")
+
+    print("Fichier : ", json_file["file_name"] + ".json")
+
+    artifact_row = {}
+
+    # Telechargement du fichier JSON
+    decp_json_file: Path = get_json(DATE_NOW, json_file)
+
+    # Chargement du fichier JSON
+    with open(decp_json_file, encoding="utf8") as f:
+        decp_json = json.load(f)
+
+    # Determiner le format du fichier
+    format_decp = detect_format(
+        decp_json, FORMAT_DETECTION_QUORUM
+    )  #'empty', '2019' ou '2022'
+
+    if format_decp == "2022":
+        if json_file["url"].startswith("https"):
+            decp_json_metadata = get_json_metadata(
+                dataset_id=json_file["dataset_id"],
+                resource_id=json_file["resource_id"],
+            )
+            artifact_row = {
+                "open_data_dataset_id": json_file["dataset_id"],
+                "open_data_dataset_name": dataset_name,
+                "open_data_filename": decp_json_metadata["title"],
+                "open_data_id": decp_json_metadata["id"],
+                "sha1": decp_json_metadata["checksum"]["value"],
+                "created_at": decp_json_metadata["created_at"],
+                "last_modified": decp_json_metadata["last_modified"],
+                "filesize": decp_json_metadata["filesize"],
+                "views": decp_json_metadata["metrics"].get("views", None),
+            }
+
+        filename = json_file["file_name"]
+
+        print("JSON -> DF (format 2022)...")
+        df: pl.DataFrame = json_to_df(decp_json_file)
+
+        artifact_row["open_data_dataset_id"] = json_file["dataset_id"]
+        artifact_row["open_data_dataset_name"] = dataset_name
+        artifact_row["download_date"] = DATE_NOW
+        artifact_row["columns"] = sorted(df.columns)
+        artifact_row["column_number"] = len(df.columns)
+        artifact_row["row_number"] = df.height
+
+        df = df.with_columns(
+            pl.lit(f"data.gouv.fr {filename}.json").alias("sourceOpenData"),
+            # Ajout d'une colonne datagouv_dataset_id
+            pl.lit(json_file["dataset_id"]).alias("datagouv_dataset_id"),
+        )
+
+        absent_columns = []
+        for col in COLUMNS_TO_DROP:
+            try:
+                df = df.drop(col)
+            except ColumnNotFoundError:
+                absent_columns.append(col)
+                pass
+
+        print(df.shape)
+
+        file_path = DIST_DIR / "get" / f"{filename}_{DATE_NOW}"
+        file_path.parent.mkdir(exist_ok=True)
+        save_to_files(df, file_path, ["parquet"])
+
+        return file_path, filename + ".json", json_file["resource_id"], artifact_row
+
+    else:
+        print(f"🙈  Le format {format_decp} n'est pas pris en charge.")
+        return None, None, None, None
+
+
+def get_dataset_name(dataset_id):
+    return {d["dataset_id"]: d["dataset_name"] for d in TRACKED_DATASETS}.get(
+        dataset_id, ""
+    )
+
+
 @task
 def get_decp_json(dataset_id: str = None) -> list[Path]:
     """
@@ -157,90 +251,19 @@ def get_decp_json(dataset_id: str = None) -> list[Path]:
 
     return_files = []
     downloaded_files = []
+    processed_resources = []
     artefact = []
 
-    for i, json_file in enumerate(json_files):
-        if json_file["file_name"].startswith("5cd57bf68b4c4179299eb0e9_decp-2022"):
-            continue  # pour ce fichier en particulier qui comporte des erreurs, on bypass pour le moment
+    futures = [
+        get_single_resource.submit(i, json_file, json_files_nb)
+        for i, json_file in enumerate(json_files)
+    ]
+    results = [f.result() for f in futures]
 
-        dataset_name = {
-            d["dataset_id"]: d["dataset_name"] for d in TRACKED_DATASETS
-        }.get(json_file["dataset_id"])
-        print(
-            f"➡️  {json_file['ori_file_name']} ({dataset_name}) -- {i}/{json_files_nb}"
-        )
-        print("Fichier : ", json_file["file_name"] + ".json")
-
-        artifact_row = {}
-
-        # Telechargement du fichier JSON
-        decp_json_file: Path = get_json(date_now, json_file)
-
-        # Chargement du fichier JSON
-        with open(decp_json_file, encoding="utf8") as f:
-            decp_json = json.load(f)
-
-        # Determiner le format du fichier
-        format_decp = detect_format(
-            decp_json, FORMAT_DETECTION_QUORUM
-        )  #'empty', '2019' ou '2022'
-
-        if format_decp == "2022":
-            if json_file["url"].startswith("https"):
-                decp_json_metadata = get_json_metadata(
-                    dataset_id=json_file["dataset_id"],
-                    resource_id=json_file["resource_id"],
-                )
-                artifact_row = {
-                    "open_data_dataset_id": json_file["dataset_id"],
-                    "open_data_dataset_name": dataset_name,
-                    "open_data_filename": decp_json_metadata["title"],
-                    "open_data_id": decp_json_metadata["id"],
-                    "sha1": decp_json_metadata["checksum"]["value"],
-                    "created_at": decp_json_metadata["created_at"],
-                    "last_modified": decp_json_metadata["last_modified"],
-                    "filesize": decp_json_metadata["filesize"],
-                    "views": decp_json_metadata["metrics"].get("views", None),
-                }
-
-            filename = json_file["file_name"]
-
-            print("JSON -> DF (format 2022)...")
-            df: pl.DataFrame = json_to_df(decp_json_file)
-
-            artifact_row["open_data_dataset_id"] = json_file["dataset_id"]
-            artifact_row["open_data_dataset_name"] = dataset_name
-            artifact_row["download_date"] = date_now
-            artifact_row["columns"] = sorted(df.columns)
-            artifact_row["column_number"] = len(df.columns)
-            artifact_row["row_number"] = df.height
-
-            artefact.append(artifact_row)
-
-            df = df.with_columns(
-                pl.lit(f"data.gouv.fr {filename}.json").alias("sourceOpenData"),
-                # Ajout d'une colonne datagouv_dataset_id
-                pl.lit(json_file["dataset_id"]).alias("datagouv_dataset_id"),
-            )
-
-            absent_columns = []
-            for col in COLUMNS_TO_DROP:
-                try:
-                    df = df.drop(col)
-                except ColumnNotFoundError:
-                    absent_columns.append(col)
-                    pass
-
-            print(df.shape)
-
-            file_path = DIST_DIR / "get" / f"{filename}_{date_now}"
-            file_path.parent.mkdir(exist_ok=True)
-            save_to_files(df, file_path, ["parquet"])
-
-            return_files.append(file_path)
-            downloaded_files.append(filename + ".json")
-        else:
-            print(f"🙈  Le format {format_decp} n'est pas pris en charge.")
+    return_files = [r[0] for r in results if r[0] is not None]
+    downloaded_files = [r[1] for r in results if r[1] is not None]
+    processed_resources = [r[2] for r in results if r[2] is not None]
+    artefact = [r[3] for r in results if r[3] is not None]
 
     # Stock les statistiques dans prefect
     create_table_artifact(
@@ -248,10 +271,11 @@ def get_decp_json(dataset_id: str = None) -> list[Path]:
         key="datagouvfr-json-resources",
         description=f"Les ressources JSON des DECP consolidées au format JSON ({date_now})",
     )
+
     # Stocke la liste des fichiers pour la réutiliser plus tard pour la création d'un artefact
     os.environ["downloaded_files"] = ",".join(downloaded_files)
 
-    return return_files
+    return return_files, processed_resources
 
 
 def json_to_df(json_path_file) -> pl.DataFrame:

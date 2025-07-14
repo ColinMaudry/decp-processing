@@ -1,4 +1,7 @@
+import os
+import shutil
 import sqlite3
+import uuid
 from pathlib import Path
 
 import polars as pl
@@ -6,13 +9,63 @@ import polars as pl
 from config import DIST_DIR
 
 
-def save_to_files(df: pl.DataFrame, path: str | Path, file_format=None):
+def polars_parquet_write(
+    df: pl.DataFrame,
+    path: str | Path,
+    partition_keys: list = None,
+    if_exists: str = "replace",
+):
+    """
+    Compte tenu de la nature instable de la gestion des partitions parquet avec polars et l'absence de strategie replace/append, on créé un helper pour gérer l'écriture parquet
+    --> https://docs.pola.rs/api/python/dev/reference/api/polars.DataFrame.write_parquet.html
+    partition_by
+        Column(s) to partition by. A partitioned dataset will be written if this is specified. This parameter is considered unstable and is subject to change.
+    """
+
+    def get_filename(base_path, if_exists):
+        "Helper function qui gère les noms de fichiers et l'écrasement de données précédentes"
+        if if_exists == "append":
+            filename = f"part-{uuid.uuid4().hex}.parquet"
+        elif if_exists == "replace":
+            filename = "data.parquet"
+            # S'il y a déjà des fichiers dans la destination, on les supprime
+            shutil.rmtree(base_path, ignore_errors=True)
+            os.makedirs(base_path, exist_ok=True)
+
+        else:
+            raise AttributeError(
+                'if_exist doit prendre une des valeurs "append" ou "replace"'
+            )
+
+        return os.path.join(base_path, filename)
+
+    if partition_keys:
+        for group in df.partition_by(partition_keys):
+            partition_vals = [f"{col}={group[col][0]}" for col in partition_keys]
+            partition_path = os.path.join(path, *partition_vals)
+
+            os.makedirs(partition_path, exist_ok=True)
+            full_path = get_filename(partition_path, if_exists)
+
+            group.write_parquet(full_path)
+
+    else:
+        full_path = get_filename(path, if_exists)
+        df.write_parquet(f"{path}")
+
+
+def save_to_files(
+    df: pl.DataFrame, path: str | Path, file_format=None, partition_key: str = None
+):
     if file_format is None:
         file_format = ["csv", "parquet"]
     if "csv" in file_format:
         df.write_csv(f"{path}.csv")
     if "parquet" in file_format:
-        df.write_parquet(f"{path}.parquet")
+        if partition_key:
+            df.write_parquet(f"{path}", partition_by=partition_key)
+        else:
+            df.write_parquet(f"{path}.parquet")
 
 
 def save_to_sqlite(df: pl.DataFrame, database: str, table_name: str, primary_key: str):

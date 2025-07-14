@@ -161,4 +161,4 @@ def list_resources_to_process(datasets: list[dict]) -> list[dict]:
                     }
                 )
 
-    return resource_ids
+    return resource_ids[:200]

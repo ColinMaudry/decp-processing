@@ -3,16 +3,22 @@ import shutil
 
 import polars as pl
 from prefect import flow, task
+from prefect.task_runners import ConcurrentTaskRunner
 
-from config import BASE_DF_COLUMNS, DECP_PROCESSING_PUBLISH, DIST_DIR
+from config import (
+    BASE_DF_COLUMNS,
+    DATA_DIR,
+    DECP_PROCESSING_PUBLISH,
+    DIST_DIR,
+    MAX_PREFECT_WORKERS,
+    TRACKED_DATASETS,
+)
 from tasks.analyse import generate_stats
+from tasks.bookmarking import bookmark_multiple
 from tasks.clean import clean_decp
 from tasks.enrich import add_unite_legale_data
 from tasks.get import get_decp_json
-from tasks.output import (
-    save_to_files,
-    save_to_sqlite,
-)
+from tasks.output import polars_parquet_write, save_to_files, save_to_sqlite
 from tasks.publish import publish_to_datagouv
 from tasks.transform import (
     concat_decp_json,
@@ -26,9 +32,17 @@ from tasks.transform import (
 
 
 @task(log_prints=True)
-def get_clean_concat():
+def get_clean_concat(dataset_id: str = None):
+    # Determination de la stratégie de traitement du dataset
+    if dataset_id:
+        is_incremental = {
+            t["dataset_id"]: t.get("incremental", False) for t in TRACKED_DATASETS
+        }.get(dataset_id, False)
+    else:
+        is_incremental = False
+
     print("Récupération des données source...")
-    files = get_decp_json()
+    files, processed_resources = get_decp_json(dataset_id=dataset_id)
 
     print("Nettoyage des données source et typage des colonnes...")
     files = clean_decp(files)
@@ -45,19 +59,38 @@ def get_clean_concat():
 
     if os.path.exists(DIST_DIR):
         shutil.rmtree(DIST_DIR)
-    os.makedirs(DIST_DIR)
+    os.makedirs(DIST_DIR, exist_ok=True)
 
     print("Enregistrement des DECP aux formats CSV, Parquet...")
     df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
-    save_to_files(df, DIST_DIR / "decp")
+
+    if dataset_id:
+        # Si on a passé un dataset, on écrit seulement la partition datagouv_dataset_id correspondante en parquet seulement
+        polars_parquet_write(
+            df,
+            DATA_DIR
+            / "decp_parquet",  # Ce directory n'est jamais supprimé, il contient la copie en parquet de la db DECP-processing
+            partition_keys=["datagouv_dataset_id"],
+            # Si le dataset est paramétré pour être traiter incrémentalement, on passe if_exists ='append'
+            if_exists="append" if is_incremental else "replace",
+        )
+        if is_incremental:
+            # bookmark des ressources traitées
+            bookmark_multiple(processed_resources)
+    else:
+        # compatible avec les versions précédentes
+        save_to_files(df, DIST_DIR / "decp")
 
 
 @flow(log_prints=True)
-def make_datalab_data():
+def make_datalab_data(parquet_partitioned=False):
     """Tâches consacrées à la transformation des données dans un format
     adapté aux activités du Datalab d'Anticor."""
 
-    df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
+    if parquet_partitioned:
+        df: pl.DataFrame = pl.read_parquet(DATA_DIR / "decp")
+    else:
+        df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
 
     print("Enregistrement des DECP aux formats SQLite...")
     save_to_sqlite(
@@ -78,11 +111,14 @@ def make_datalab_data():
 
 
 @flow(log_prints=True)
-def make_decpinfo_data():
+def make_decpinfo_data(parquet_partitioned=False):
     """Tâches consacrées à la transformation des données dans un format
     # adapté à decp.info"""
 
-    df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
+    if parquet_partitioned:
+        df: pl.DataFrame = pl.read_parquet(DATA_DIR / "decp")
+    else:
+        df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
 
     # DECP sans titulaires
     save_to_files(make_decp_sans_titulaires(df), DIST_DIR / "decp-sans-titulaires")
@@ -109,16 +145,23 @@ def make_decpinfo_data():
     return df
 
 
-@flow(log_prints=True)
+@flow(
+    log_prints=True, task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS)
+)  # definition du maximum de taches executables en parallele
 def decp_processing():
-    # Données nettoyées et fusionnées
-    get_clean_concat()
+    # datasets à traiter
+    datasets = [t["dataset_id"] for t in TRACKED_DATASETS]
 
-    # Fichiers dédiés à l'Open Data et decp.info
-    make_decpinfo_data()
+    # Données nettoyées et fusionnées - traitement parallèle avec prefect
+    futures = [get_clean_concat.submit(dataset_id) for dataset_id in datasets]
+    # On attend que toutes les taches soit terminées pour continuer
+    [f.result() for f in futures]
 
-    # Base de données SQLite dédiée aux activités du Datalab d'Anticor
-    make_datalab_data()
+    # Fichiers dédiés à l'Open Data et decp.info, pour revenir sur la version de traitement précédente (fichier parquet unique), parquet_partitioned=False
+    make_decpinfo_data(parquet_partitioned=True)
+
+    # Base de données SQLite dédiée aux activités du Datalab d'Anticor, pour revenir sur la version de traitement précédente (fichier parquet unique), parquet_partitioned=False
+    make_datalab_data(parquet_partitioned=True)
 
 
 @task(log_prints=True)
