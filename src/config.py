@@ -17,6 +17,9 @@ load_dotenv(dotenv_path, override=False)
 
 FORMAT_DETECTION_QUORUM = 0.7  # Seuil de confiance pour la détection du format des données - en pratique c'est inutile car il n'y a qu'un format par fichier
 
+# Definition de la parallelisation
+MAX_PREFECT_WORKERS = 16
+
 DATE_NOW = datetime.now().isoformat()[0:10]  # YYYY-MM-DD
 MONTH_NOW = DATE_NOW[2:10]
 

@@ -3,16 +3,22 @@ import shutil
 
 import polars as pl
 from prefect import flow, task
+from prefect.task_runners import ConcurrentTaskRunner
 
-from config import BASE_DF_COLUMNS, DECP_PROCESSING_PUBLISH, DIST_DIR
+from config import (
+    BASE_DF_COLUMNS,
+    DATA_DIR,
+    DECP_PROCESSING_PUBLISH,
+    DIST_DIR,
+    MAX_PREFECT_WORKERS,
+    TRACKED_DATASETS,
+)
 from tasks.analyse import generate_stats
+from tasks.bookmarking import bookmark_multiple
 from tasks.clean import clean_decp
 from tasks.enrich import add_unite_legale_data
 from tasks.get import get_decp_json
-from tasks.output import (
-    save_to_files,
-    save_to_sqlite,
-)
+from tasks.output import polars_parquet_write, save_to_files, save_to_sqlite
 from tasks.publish import publish_to_datagouv
 from tasks.transform import (
     concat_decp_json,
@@ -26,9 +32,23 @@ from tasks.transform import (
 
 
 @task(log_prints=True)
-def get_clean_concat():
-    print("Récupération des données source...")
-    files = get_decp_json()
+def get_clean_concat(dataset_ids: list = None):
+    print("Récupération des données source en parallèle...")
+    futures = [get_decp_json.submit(dataset_id) for dataset_id in dataset_ids]
+    results: list[(list, list, str)] = [
+        f.result() for f in futures
+    ]  # list of tuples [(files[], processed_resource_ids[], dataset_id)]
+    files = [_file for _files, _, _ in results for _file in _files]
+
+    # On garde les ID de ressource à bookmarker à la fin du traitement
+    processed_ressources_to_bookmark = [
+        _processed_resource_id
+        for _, _processed_ressources, _dataset_id in results
+        if {t["dataset_id"]: t.get("incremental", False) for t in TRACKED_DATASETS}.get(
+            _dataset_id, False
+        )
+        for _processed_resource_id in _processed_ressources
+    ]
 
     print("Nettoyage des données source et typage des colonnes...")
     files = clean_decp(files)
@@ -45,19 +65,61 @@ def get_clean_concat():
 
     if os.path.exists(DIST_DIR):
         shutil.rmtree(DIST_DIR)
-    os.makedirs(DIST_DIR)
+    os.makedirs(DIST_DIR, exist_ok=True)
 
     print("Enregistrement des DECP aux formats CSV, Parquet...")
     df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
-    save_to_files(df, DIST_DIR / "decp")
+
+    print("Ecriture des datasets en stratégie replace...")
+    # On écrit les datasets à stratégie if_exist=replace
+    polars_parquet_write(
+        df.filter(
+            pl.col("datagouv_dataset_id").is_in(
+                [
+                    t["dataset_id"]
+                    for t in TRACKED_DATASETS
+                    if not t.get("incremental", False)
+                ]
+            )
+        ),
+        DATA_DIR
+        / "decp_parquet",  # Ce directory n'est jamais supprimé, il contient la copie en parquet de la db DECP-processing
+        partition_keys=["datagouv_dataset_id"],
+        # Si le dataset est paramétré pour être traiter incrémentalement, on passe if_exists ='append'
+        if_exists="replace",
+    )
+
+    # On écrit les datasets à stratégie if_exist=replace
+    print("Ecriture des datasets en stratégie append...")
+    polars_parquet_write(
+        df.filter(
+            pl.col("datagouv_dataset_id").is_in(
+                [
+                    t["dataset_id"]
+                    for t in TRACKED_DATASETS
+                    if t.get("incremental", False)
+                ]
+            )
+        ),
+        DATA_DIR
+        / "decp_parquet",  # Ce directory n'est jamais supprimé, il contient la copie en parquet de la db DECP-processing
+        partition_keys=["datagouv_dataset_id"],
+        # Si le dataset est paramétré pour être traiter incrémentalement, on passe if_exists ='append'
+        if_exists="append",
+    )
+
+    bookmark_multiple(processed_ressources_to_bookmark)
 
 
 @flow(log_prints=True)
-def make_datalab_data():
+def make_datalab_data(parquet_partitioned=False):
     """Tâches consacrées à la transformation des données dans un format
     adapté aux activités du Datalab d'Anticor."""
 
-    df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
+    if parquet_partitioned:
+        df: pl.DataFrame = pl.read_parquet(DATA_DIR / "decp_parquet")
+    else:
+        df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
 
     print("Enregistrement des DECP aux formats SQLite...")
     save_to_sqlite(
@@ -78,11 +140,14 @@ def make_datalab_data():
 
 
 @flow(log_prints=True)
-def make_decpinfo_data():
+def make_decpinfo_data(parquet_partitioned=False):
     """Tâches consacrées à la transformation des données dans un format
     # adapté à decp.info"""
 
-    df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
+    if parquet_partitioned:
+        df: pl.DataFrame = pl.read_parquet(DATA_DIR / "decp_parquet")
+    else:
+        df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
 
     # DECP sans titulaires
     save_to_files(make_decp_sans_titulaires(df), DIST_DIR / "decp-sans-titulaires")
@@ -109,16 +174,21 @@ def make_decpinfo_data():
     return df
 
 
-@flow(log_prints=True)
+@flow(
+    log_prints=True, task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS)
+)  # definition du maximum de taches executables en parallele
 def decp_processing():
-    # Données nettoyées et fusionnées
-    get_clean_concat()
+    # datasets à traiter
+    datasets = [t["dataset_id"] for t in TRACKED_DATASETS]
 
-    # Fichiers dédiés à l'Open Data et decp.info
-    make_decpinfo_data()
+    # Données nettoyées et fusionnées - traitement parallèle avec prefect
+    get_clean_concat(datasets)
 
-    # Base de données SQLite dédiée aux activités du Datalab d'Anticor
-    make_datalab_data()
+    # Fichiers dédiés à l'Open Data et decp.info, pour revenir sur la version de traitement précédente (fichier parquet unique), parquet_partitioned=False
+    make_decpinfo_data(parquet_partitioned=True)
+
+    # Base de données SQLite dédiée aux activités du Datalab d'Anticor, pour revenir sur la version de traitement précédente (fichier parquet unique), parquet_partitioned=False
+    make_datalab_data(parquet_partitioned=True)
 
 
 @task(log_prints=True)
