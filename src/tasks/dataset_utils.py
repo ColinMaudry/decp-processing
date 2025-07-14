@@ -1,6 +1,6 @@
 from httpx import get
 
-import tasks.bookmarking as bookmarking
+from config import EXCLUDED_RESOURCES
 
 
 def list_datasets_by_org(org_id: str) -> list[dict]:
@@ -70,12 +70,15 @@ def list_resources_by_dataset(dataset_id: str) -> list[dict]:
         Liste des ressources associées au dataset. Chaque élément est un dictionnaire
         représentant une ressource au format JSON.
     """
-    return handle_paginated_calls(
+
+    resources = handle_paginated_calls(
         f"http://www.data.gouv.fr/api/2/datasets/{dataset_id}/resources/?page=1&page_size=50"
     )
 
+    return resources
 
-def list_resources_to_process(datasets: list[dict]) -> list[dict]:
+
+def list_resources(datasets: list[dict]) -> list[dict]:
     """
     Prépare la liste des ressources JSON à traiter pour un ou plusieurs jeux de données.
 
@@ -120,34 +123,25 @@ def list_resources_to_process(datasets: list[dict]) -> list[dict]:
     if not all("incremental" in d.keys() for d in datasets):
         raise ValueError("Each dataset must contain an 'incremental' key")
 
-    resource_ids = []
+    resources = []
 
     for dataset in datasets:
         try:
-            resources = list_resources_by_dataset(dataset["dataset_id"])
+            all_resources = list_resources_by_dataset(dataset["dataset_id"])
         except Exception as e:
             raise RuntimeError(
                 f"Erreur lors de la récupération des ressources du dataset '{dataset['dataset_id']}': {e}"
             )
 
-        for resource in resources:
+        for resource in all_resources:
             # On ne garde que les ressources au format JSON ou XML et celles qui ne sont pas
             # - des fichiers OCDS
             # - des fichiers XML abandonnés
             if (
                 resource["format"] in ["json", "xml"]
-                and ".ocds"
-                not in resource["title"].lower()  # fichier OCDS, pas le bon format
-                and resource["id"]
-                != "17046b18-8921-486a-bc31-c9196d5c3e9c"  # fichier XML consolidé abandonné
+                and resource["id"] not in EXCLUDED_RESOURCES
             ):
-                if dataset.get("incremental", False) and bookmarking.is_processed(
-                    resource["id"]
-                ):
-                    # Pour les datasets incrémentaux, on saute la ressource si elle a déjà été traitée
-                    continue
-
-                resource_ids.append(
+                resources.append(
                     {
                         "dataset_id": dataset["dataset_id"],
                         "resource_id": resource["id"],
@@ -161,4 +155,4 @@ def list_resources_to_process(datasets: list[dict]) -> list[dict]:
                     }
                 )
 
-    return resource_ids
+    return resources

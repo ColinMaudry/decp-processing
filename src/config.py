@@ -105,3 +105,9 @@ COLUMNS_TO_DROP = [
     "sousTraitanceDeclaree_source",
     "dureeMois_source",
 ]
+
+# Liste des ID de ressources présentes dans un dataset à traiter, mais exclues du traitement
+EXCLUDED_RESOURCES = [
+    "17046b18-8921-486a-bc31-c9196d5c3e9c"  # fichier XML consolidé par le MINEF mais abandonné
+    "68bd2001-3420-4d94-bc49-c90878df322c"  # Fichier au format OCDS, pas DECP
+]
