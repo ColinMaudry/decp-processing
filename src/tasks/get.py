@@ -11,7 +11,6 @@ from httpx import get
 from polars.polars import ColumnNotFoundError
 from prefect import task
 
-import tasks.bookmarking as bookmarking
 from config import (
     COLUMNS_TO_DROP,
     DATA_DIR,
@@ -134,13 +133,23 @@ def get_json_metadata(dataset_id: str, resource_id: str) -> dict:
 
 
 @task
-def get_decp_json() -> list[Path]:
-    """Téléchargement des DECP publiées par Bercy sur data.gouv.fr."""
+def get_decp_json(dataset_id: str = None) -> list[Path]:
+    """
+    Téléchargement des DECP publiées par Bercy sur data.gouv.fr.
+
+    On peut passer un `dataset_id` optionel pour restreindre l'extraction au dataset_id indiqué
+
+    """
 
     date_now = DATE_NOW
 
+    if dataset_id:
+        datasets = [t for t in TRACKED_DATASETS if t["dataset_id"] == dataset_id]
+    else:
+        datasets = TRACKED_DATASETS
+
     # Récuperation des fichiers à traiter
-    json_files = list_resources_to_process(TRACKED_DATASETS)
+    json_files = list_resources_to_process(datasets)
     json_files_nb = len(json_files)
 
     with open(DIST_DIR / "json_files.json", "w", encoding="utf-8") as file:
@@ -209,7 +218,9 @@ def get_decp_json() -> list[Path]:
             artefact.append(artifact_row)
 
             df = df.with_columns(
-                pl.lit(f"data.gouv.fr {filename}.json").alias("sourceOpenData")
+                pl.lit(f"data.gouv.fr {filename}.json").alias("sourceOpenData"),
+                # Ajout d'une colonne datagouv_dataset_id
+                pl.lit(json_file["dataset_id"]).alias("datagouv_dataset_id"),
             )
 
             absent_columns = []
@@ -228,13 +239,6 @@ def get_decp_json() -> list[Path]:
 
             return_files.append(file_path)
             downloaded_files.append(filename + ".json")
-
-            # si le dataset est incrémental, on bookmark la ressource traitée
-            if {
-                dataset["dataset_id"]: dataset["incremental"]
-                for dataset in TRACKED_DATASETS
-            }.get(json_file["dataset_id"], False):
-                bookmarking.bookmark(json_file["resource_id"])
         else:
             print(f"🙈  Le format {format_decp} n'est pas pris en charge.")
 
