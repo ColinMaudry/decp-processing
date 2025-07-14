@@ -146,6 +146,7 @@ def list_resources(datasets: list[dict]) -> list[dict]:
                         "dataset_id": dataset["dataset_id"],
                         "resource_id": resource["id"],
                         "ori_filename": resource["title"],
+                        "checksum": resource["checksum"]["value"],
                         # Dataset id en premier pour grouper les ressources d'un même dataset ensemble
                         # Nom du fichier pour le distinguer des autres fichiers du dataset
                         # Un bout d'id de ressource pour les cas où plusieurs fichiers ont le même nom dans le même dataset (ex : Occitanie)
