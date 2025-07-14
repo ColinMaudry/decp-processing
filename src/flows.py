@@ -4,9 +4,10 @@ import shutil
 import polars as pl
 from prefect import flow, task
 
-from config import BASE_DF_COLUMNS, DECP_PROCESSING_PUBLISH, DIST_DIR
+from config import BASE_DF_COLUMNS, DECP_PROCESSING_PUBLISH, DIST_DIR, TRACKED_DATASETS
 from tasks.analyse import generate_stats
 from tasks.clean import clean_decp
+from tasks.dataset_utils import list_resources
 from tasks.enrich import add_unite_legale_data
 from tasks.get import get_decp_json
 from tasks.output import (
@@ -27,8 +28,11 @@ from tasks.transform import (
 
 @task(log_prints=True)
 def get_clean_concat():
+    print("Liste de toutes les ressources des datasets...")
+    files = list_resources(TRACKED_DATASETS)
+
     print("Récupération des données source...")
-    files = get_decp_json()
+    files = get_decp_json(files)
 
     print("Nettoyage des données source et typage des colonnes...")
     files = clean_decp(files)

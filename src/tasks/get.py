@@ -22,7 +22,6 @@ from config import (
 )
 from schemas import MARCHE_SCHEMA_2022
 from tasks.clean import load_and_fix_json
-from tasks.dataset_utils import list_resources_to_process
 from tasks.detect_format import detect_format
 from tasks.output import save_to_files
 from tasks.setup import create_table_artifact
@@ -134,18 +133,12 @@ def get_json_metadata(dataset_id: str, resource_id: str) -> dict:
 
 
 @task
-def get_decp_json() -> list[Path]:
+def get_decp_json(json_files) -> list[Path]:
     """Téléchargement des DECP publiées par Bercy sur data.gouv.fr."""
 
     date_now = DATE_NOW
 
-    # Récuperation des fichiers à traiter
-    json_files = list_resources_to_process(TRACKED_DATASETS)
     json_files_nb = len(json_files)
-
-    with open(DIST_DIR / "json_files.json", "w", encoding="utf-8") as file:
-        file.write(json.dumps(json_files, ensure_ascii=False, indent=2))
-
     return_files = []
     downloaded_files = []
     artefact = []
