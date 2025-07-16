@@ -100,11 +100,9 @@ def decp_processing():
     print("Liste de toutes les ressources des datasets...")
     resources: list[dict] = list_resources(TRACKED_DATASETS)
 
-    # Données nettoyées et fusionnées
-    # à parralléliser
-    dfs = [pl.LazyFrame]
-    for resource in resources:
-        dfs.append(get_clean(resource))
+    # Traitement parallèle des ressources
+    futures = [get_clean.submit(resource) for resource in resources]
+    dfs: list[pl.LazyFrame] = [f.result() for f in futures]
 
     print("Fusion des dataframes...")
     df = concat_decp_json(dfs)
