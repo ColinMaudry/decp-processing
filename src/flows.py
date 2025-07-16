@@ -3,13 +3,14 @@ import shutil
 
 import polars as pl
 from prefect import flow, task
+from prefect.cache_policies import INPUTS
 
 from config import BASE_DF_COLUMNS, DECP_PROCESSING_PUBLISH, DIST_DIR, TRACKED_DATASETS
 from tasks.analyse import generate_stats
 from tasks.clean import clean_decp
 from tasks.dataset_utils import list_resources
 from tasks.enrich import add_unite_legale_data
-from tasks.get import get_decp_json
+from tasks.get import get_resource
 from tasks.output import (
     save_to_files,
     save_to_sqlite,
@@ -26,15 +27,15 @@ from tasks.transform import (
 )
 
 
-@task(log_prints=True)
-def get_clean(resources):
+@task(log_prints=True, cache_policy=INPUTS)
+def get_clean(resource):
     print("Récupération des données source...")
-    resources = get_decp_json(resources)
+    lf: pl.LazyFrame = get_resource(resource)
 
     print("Nettoyage des données source et typage des colonnes...")
-    resources = clean_decp(resources)
+    lf = clean_decp(lf)
 
-    return resources
+    return lf
 
 
 @flow(log_prints=True)

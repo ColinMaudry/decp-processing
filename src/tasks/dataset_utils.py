@@ -144,7 +144,8 @@ def list_resources(datasets: list[dict]) -> list[dict]:
                 resources.append(
                     {
                         "dataset_id": dataset["dataset_id"],
-                        "resource_id": resource["id"],
+                        "dataset_name": dataset["dataset_name"],
+                        "id": resource["id"],
                         "ori_filename": resource["title"],
                         "checksum": resource["checksum"]["value"],
                         # Dataset id en premier pour grouper les ressources d'un même dataset ensemble
@@ -153,6 +154,10 @@ def list_resources(datasets: list[dict]) -> list[dict]:
                         "file_name": f"{dataset['dataset_id']}_{resource['title'].lower().replace('.json', '').replace('.xml', '').replace('.', '_')}_{resource['id'][:3]}",
                         "url": resource["latest"],
                         "file_format": resource["format"],
+                        "created_at": resource["created_at"],
+                        "last_modified": resource["last_modified"],
+                        "filesize": resource["filesize"],
+                        "views": resource["metrics"].get("views", None),
                     }
                 )
 

@@ -2,82 +2,67 @@ import datetime
 import io
 import json
 import math
-from pathlib import Path
 
 import polars as pl
 import polars.selectors as cs
 from prefect import task
 
-from config import DIST_DIR
-from tasks.output import save_to_files
 from tasks.transform import explode_titulaires, process_modifications
 
 
 @task
-def clean_decp(files: list[Path]):
-    print("Nettoyage des données...")
-    return_files = []
-    for file in files:
-        #
-        # CLEAN DATA
-        #
+def clean_decp(lf: pl.LazyFrame) -> pl.LazyFrame:
+    #
+    # CLEAN DATA
+    #
 
-        lf: pl.LazyFrame = pl.scan_parquet(f"{file}.parquet")
+    # Nettoyage des identifiants de marchés
+    lf = lf.with_columns(pl.col("id").str.replace_all(r"[ ,\\./]", "_"))
 
-        # Nettoyage des identifiants de marchés
-        lf = lf.with_columns(pl.col("id").str.replace_all(r"[ ,\\./]", "_"))
+    # Ajout du champ uid
+    # TODO: à déplacer autre part, dans transform
+    lf = lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
 
-        # Ajout du champ uid
-        # TODO: à déplacer autre part, dans transform
-        lf = lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
+    # Dates
+    date_replacements = {
+        # ID marché invalide et SIRET de l'acheteur
+        "0002-11-30": "",
+        "September, 16 2021 00:00:00": "2021-09-16",  # 2000769
+        # 5800012 19830766200017 (plein !)
+        "16 2021 00:00:00": "",
+        "0222-04-29": "2022-04-29",  # 202201L0100
+        "0021-12-05": "2022-12-05",  # 20222022/1400
+        "0001-06-21": "",  # 0000000000000000 21850109600018
+        "0019-10-18": "",  # 0000000000000000 34857909500012
+        "5021-02-18": "2021-02-18",  # 20213051200 21590015000016
+        "2921-11-19": "",  # 20220057201 20005226400013
+        "0022-04-29": "2022-04-29",  # 2022AOO-GASL0100 25640454200035
+    }
 
-        # Dates
-        date_replacements = {
-            # ID marché invalide et SIRET de l'acheteur
-            "0002-11-30": "",
-            "September, 16 2021 00:00:00": "2021-09-16",  # 2000769
-            # 5800012 19830766200017 (plein !)
-            "16 2021 00:00:00": "",
-            "0222-04-29": "2022-04-29",  # 202201L0100
-            "0021-12-05": "2022-12-05",  # 20222022/1400
-            "0001-06-21": "",  # 0000000000000000 21850109600018
-            "0019-10-18": "",  # 0000000000000000 34857909500012
-            "5021-02-18": "2021-02-18",  # 20213051200 21590015000016
-            "2921-11-19": "",  # 20220057201 20005226400013
-            "0022-04-29": "2022-04-29",  # 2022AOO-GASL0100 25640454200035
-        }
+    # Using replace_many for efficient replacement of multiple date values
+    lf = lf.with_columns(
+        pl.col(["datePublicationDonnees", "dateNotification"])
+        .str.replace_many(date_replacements)
+        .cast(pl.Utf8)
+    )
 
-        # Using replace_many for efficient replacement of multiple date values
-        lf = lf.with_columns(
-            pl.col(["datePublicationDonnees", "dateNotification"])
-            .str.replace_many(date_replacements)
-            .cast(pl.Utf8)
+    # Nature
+    lf = lf.with_columns(
+        pl.col("nature").str.replace_many(
+            {"Marche": "Marché", "subsequent": "subséquent"}
         )
+    )
 
-        # Nature
-        lf = lf.with_columns(
-            pl.col("nature").str.replace_many(
-                {"Marche": "Marché", "subsequent": "subséquent"}
-            )
-        )
+    # Explosion et traitement des modifications
+    lf = process_modifications(lf)
 
-        # Explosion et traitement des modifications
-        lf = process_modifications(lf)
+    # Explosion des titulaires
+    lf = explode_titulaires(lf)
 
-        # Explosion des titulaires
-        lf = explode_titulaires(lf)
+    # Correction des datatypes
+    lf = fix_data_types(lf)
 
-        # Correction des datatypes
-        lf = fix_data_types(lf)
-
-        output_file = DIST_DIR / "clean" / file.name
-        return_files.append(output_file)
-        output_file.parent.mkdir(exist_ok=True)
-
-        df: pl.DataFrame = lf.collect()
-        save_to_files(df, output_file, ["parquet"])
-
-    return return_files
+    return lf
 
 
 def fix_data_types(lf: pl.LazyFrame):
