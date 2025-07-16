@@ -23,6 +23,8 @@ MONTH_NOW = DATE_NOW[2:10]
 DECP_PROCESSING_PUBLISH = os.environ.get("DECP_PROCESSING_PUBLISH", "")
 
 BASE_DIR = Path(__file__).parent.parent
+CACHE_DIR = BASE_DIR / ".prefect" / "results"
+REMOVE_UNUSED_CACHE_AFTER_DAYS = 15
 
 # Les variables configurées sur le serveur doivent avoir la priorité
 DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))

@@ -96,7 +96,7 @@ def make_decpinfo_data():
 
 
 @flow(log_prints=True)
-def decp_processing():
+def decp_processing(remove_unused_cache: bool = False):
     print("Liste de toutes les ressources des datasets...")
     resources: list[dict] = list_resources(TRACKED_DATASETS)
 
@@ -127,6 +127,10 @@ def decp_processing():
 
     # Base de données SQLite dédiée aux activités du Datalab d'Anticor
     make_datalab_data()
+
+    # Suppression des fichiers de cache inutilisés
+    if remove_unused_cache:
+        remove_unused_cache()
 
 
 @task(log_prints=True)
