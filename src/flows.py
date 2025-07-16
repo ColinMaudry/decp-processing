@@ -27,33 +27,14 @@ from tasks.transform import (
 
 
 @task(log_prints=True)
-def get_clean_concat():
-    print("Liste de toutes les ressources des datasets...")
-    files = list_resources(TRACKED_DATASETS)
-
+def get_clean(files):
     print("Récupération des données source...")
     files = get_decp_json(files)
 
     print("Nettoyage des données source et typage des colonnes...")
     files = clean_decp(files)
 
-    print("Fusion des dataframes...")
-    df = concat_decp_json(files)
-
-    print("Ajout des données SIRENE...")
-    lf: pl.LazyFrame = enrich_from_sirene(df.lazy())
-
-    print("Génération de l'artefact (statistiques) sur le base df...")
-    df: pl.DataFrame = lf.collect(engine="streaming")
-    generate_stats(df)
-
-    if os.path.exists(DIST_DIR):
-        shutil.rmtree(DIST_DIR)
-    os.makedirs(DIST_DIR)
-
-    print("Enregistrement des DECP aux formats CSV, Parquet...")
-    df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
-    save_to_files(df, DIST_DIR / "decp")
+    return files
 
 
 @flow(log_prints=True)
@@ -115,8 +96,29 @@ def make_decpinfo_data():
 
 @flow(log_prints=True)
 def decp_processing():
+    print("Liste de toutes les ressources des datasets...")
+    files = list_resources(TRACKED_DATASETS)
+
     # Données nettoyées et fusionnées
-    get_clean_concat()
+    files = get_clean(files)
+
+    print("Fusion des dataframes...")
+    df = concat_decp_json(files)
+
+    print("Ajout des données SIRENE...")
+    lf: pl.LazyFrame = enrich_from_sirene(df.lazy())
+
+    print("Génération de l'artefact (statistiques) sur le base df...")
+    df: pl.DataFrame = lf.collect(engine="streaming")
+    generate_stats(df)
+
+    if os.path.exists(DIST_DIR):
+        shutil.rmtree(DIST_DIR)
+    os.makedirs(DIST_DIR)
+
+    print("Enregistrement des DECP aux formats CSV, Parquet...")
+    df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
+    save_to_files(df, DIST_DIR / "decp")
 
     # Fichiers dédiés à l'Open Data et decp.info
     make_decpinfo_data()
