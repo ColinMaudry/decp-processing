@@ -7,6 +7,7 @@ from prefect.cache_policies import INPUTS
 
 from config import BASE_DF_COLUMNS, DECP_PROCESSING_PUBLISH, DIST_DIR, TRACKED_DATASETS
 from tasks.analyse import generate_stats
+from tasks.cache_management import remove_unused_cache
 from tasks.clean import clean_decp
 from tasks.dataset_utils import list_resources
 from tasks.enrich import add_unite_legale_data
@@ -96,7 +97,7 @@ def make_decpinfo_data():
 
 
 @flow(log_prints=True)
-def decp_processing(remove_unused_cache: bool = False):
+def decp_processing(enable_cache_removal: bool = False):
     print("Liste de toutes les ressources des datasets...")
     resources: list[dict] = list_resources(TRACKED_DATASETS)
 
@@ -129,7 +130,7 @@ def decp_processing(remove_unused_cache: bool = False):
     make_datalab_data()
 
     # Suppression des fichiers de cache inutilisés
-    if remove_unused_cache:
+    if enable_cache_removal:
         remove_unused_cache()
 
 
