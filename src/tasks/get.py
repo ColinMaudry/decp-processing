@@ -95,7 +95,7 @@ def parse_xml(url: str) -> dict:
     return data
 
 
-@task(retries=5, retry_delay_seconds=5)
+@task(retries=3, retry_delay_seconds=3)
 def get_json(date_now, file_info: dict):
     url = file_info["url"]
     filename = file_info["file_name"]

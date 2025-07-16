@@ -27,14 +27,14 @@ from tasks.transform import (
 
 
 @task(log_prints=True)
-def get_clean(files):
+def get_clean(resources):
     print("Récupération des données source...")
-    files = get_decp_json(files)
+    resources = get_decp_json(resources)
 
     print("Nettoyage des données source et typage des colonnes...")
-    files = clean_decp(files)
+    resources = clean_decp(resources)
 
-    return files
+    return resources
 
 
 @flow(log_prints=True)
@@ -97,13 +97,16 @@ def make_decpinfo_data():
 @flow(log_prints=True)
 def decp_processing():
     print("Liste de toutes les ressources des datasets...")
-    files = list_resources(TRACKED_DATASETS)
+    resources: list[dict] = list_resources(TRACKED_DATASETS)
 
     # Données nettoyées et fusionnées
-    files = get_clean(files)
+    # à parralléliser
+    dfs = [pl.LazyFrame]
+    for resource in resources:
+        dfs.append(get_clean(resource))
 
     print("Fusion des dataframes...")
-    df = concat_decp_json(files)
+    df = concat_decp_json(dfs)
 
     print("Ajout des données SIRENE...")
     lf: pl.LazyFrame = enrich_from_sirene(df.lazy())
