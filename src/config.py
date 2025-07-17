@@ -27,7 +27,7 @@ load_dotenv(dotenv_path, override=False)
 FORMAT_DETECTION_QUORUM = 0.7  # Seuil de confiance pour la détection du format des données - en pratique c'est inutile car il n'y a qu'un format par fichier
 
 DATE_NOW = datetime.now().isoformat()[0:10]  # YYYY-MM-DD
-MONTH_NOW = DATE_NOW[2:10]
+MONTH_NOW = DATE_NOW[:7]
 
 DECP_PROCESSING_PUBLISH = os.environ.get("DECP_PROCESSING_PUBLISH", "")
 
@@ -42,7 +42,8 @@ make_dirs_if_not_exist(DATA_DIR)
 DIST_DIR = Path(os.getenv("DECP_DIST_DIR", BASE_DIR / "dist"))
 make_dirs_if_not_exist(DIST_DIR)
 
-SIRENE_DATA_DIR = Path(os.getenv("SIRENE_DATA_DIR", DATA_DIR / "sirene"))
+sirene_data_parent_dir = Path(os.getenv("SIRENE_DATA_PARENT_DIR", DATA_DIR))
+SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
 make_dirs_if_not_exist(SIRENE_DATA_DIR)
 
 PREFECT_CACHE_DIR = Path(os.getenv("PREFECT_CACHE_DIR"))
