@@ -101,11 +101,11 @@ def get_json(file_info: dict) -> dict:
         elif file_info["file_format"] == "xml":
             # Conversion du XML en JSON
             json_content = parse_xml(url)
+        return json_content
     else:
         # Test file, pas de téléchargement
-        json_content = json.load(url)
-
-    return json_content
+        f = open(url, "rb")
+        return json.load(f)
 
 
 @task
@@ -117,16 +117,16 @@ def get_resource(r: dict) -> pl.LazyFrame:
     artefact = []
     artifact_row = {}
 
-    # Telechargement du fichier JSON
+    # Téléchargement du fichier JSON
     decp_json = get_json(r)
 
-    # Determiner le format du fichier
+    # Déterminer le format du fichier
     format_decp = detect_format(
         decp_json, FORMAT_DETECTION_QUORUM
-    )  #'empty', '2019' ou '2022'
+    )  # 'empty', '2019' ou '2022'
 
     if format_decp == "2022":
-        print(f"➡️  {r['ori_file_name']} ({r['dataset_name']})")
+        print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
         if r["url"].startswith("https"):
             artifact_row = {
                 "open_data_dataset_id": r["dataset_id"],
@@ -179,6 +179,7 @@ def json_to_df(decp_json) -> pl.DataFrame:
 
 def json_to_ndjson(decp_json: dict) -> io.BytesIO:
     _data = load_and_fix_json(decp_json)
+    print(_data)
     marches = ijson.items(_data, "item", use_float=True)
     buffer = io.BytesIO()
     for marche in marches:

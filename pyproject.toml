@@ -35,7 +35,7 @@ testpaths = [
     "tests",
 ]
 env = [
-    "DECP_JSON_FILES_PATH=data/decp_json_files_test.json",
+    "DATASETS_REFERENCE_FILEPATH=data/datasets_reference_test.json",
     "PREFECT_API_URL=",
     "DECP_PROCESSING_PUBLISH="
 ]

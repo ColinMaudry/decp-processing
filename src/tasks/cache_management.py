@@ -3,7 +3,7 @@ from pathlib import Path
 
 from prefect import task
 
-from .config import CACHE_DIR, REMOVE_UNUSED_CACHE_AFTER_DAYS
+from src.config import CACHE_DIR, REMOVE_UNUSED_CACHE_AFTER_DAYS
 
 
 @task

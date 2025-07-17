@@ -1,6 +1,4 @@
 import datetime
-import io
-import json
 import math
 
 import polars as pl
@@ -193,8 +191,8 @@ def fix_nan_nc(obj):
     return obj
 
 
-def load_and_fix_json(input_buffer):
-    json_data = json.load(input_buffer)["marches"]["marche"]
+def load_and_fix_json(decp_json: dict):
+    json_data = decp_json["marches"]["marche"]
 
     # if type(json_data["marches"]):
     #     json_data = fix_nan_nc(json_data["marches"])
@@ -205,12 +203,11 @@ def load_and_fix_json(input_buffer):
     #     print(json_data)
     #     raise ValueError
 
-    # print("Remplacement des NaN et NC par null...")
     json_data = fix_nan_nc(json_data)
-    # print("Correction de la structure des modifications...")
+
     json_data = clean_decp_json_modifications(json_data)
 
-    fixed_buffer = io.StringIO()
-    json.dump(json_data, fixed_buffer)
-    fixed_buffer.seek(0)  # rewind to beginning so it can be read
-    return fixed_buffer
+    # fixed_buffer = io.StringIO()
+    # json.dump(json_data, fixed_buffer)
+    # fixed_buffer.seek(0)  # rewind to beginning so it can be read
+    return json_data

@@ -1,6 +1,6 @@
 from httpx import get
 
-from config import EXCLUDED_RESOURCES
+from src.config import EXCLUDED_RESOURCES
 
 
 def list_datasets_by_org(org_id: str) -> list[dict]:
@@ -124,14 +124,21 @@ def list_resources(datasets: list[dict]) -> list[dict]:
         raise ValueError("Each dataset must contain an 'incremental' key")
 
     resources = []
+    all_resources = []
 
     for dataset in datasets:
-        try:
-            all_resources = list_resources_by_dataset(dataset["dataset_id"])
-        except Exception as e:
-            raise RuntimeError(
-                f"Erreur lors de la récupération des ressources du dataset '{dataset['dataset_id']}': {e}"
-            )
+        # Données de test ./data/datasets_reference_test.json
+        if dataset["dataset_id"].startswith("test_"):
+            all_resources += dataset["resources"]
+
+        # Données de production ./data/datasets_reference.json
+        else:
+            try:
+                all_resources = list_resources_by_dataset(dataset["dataset_id"])
+            except Exception as e:
+                raise RuntimeError(
+                    f"Erreur lors de la récupération des ressources du dataset '{dataset['dataset_id']}': {e}"
+                )
 
         for resource in all_resources:
             # On ne garde que les ressources au format JSON ou XML et celles qui ne sont pas
@@ -153,7 +160,7 @@ def list_resources(datasets: list[dict]) -> list[dict]:
                         # Un bout d'id de ressource pour les cas où plusieurs fichiers ont le même nom dans le même dataset (ex : Occitanie)
                         "file_name": f"{dataset['dataset_id']}_{resource['title'].lower().replace('.json', '').replace('.xml', '').replace('.', '_')}_{resource['id'][:3]}",
                         "url": resource["latest"],
-                        "file_format": resource["format"],
+                        "format": resource["format"],
                         "created_at": resource["created_at"],
                         "last_modified": resource["last_modified"],
                         "filesize": resource["filesize"],
