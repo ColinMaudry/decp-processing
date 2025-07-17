@@ -107,6 +107,8 @@ COLUMNS_TO_DROP = [
     "modalitesExecution",
     "actesSousTraitance",
     "modificationsActesSousTraitance",
+    # Inutilisée (on se base sur la date de la modification pour trier les modifications)
+    "modification.id"
     # Champs de concessions
     "_type",  # Marché ou Contrat de concession
     "autoriteConcedante",
