@@ -151,10 +151,6 @@ def get_resource(r: dict) -> pl.LazyFrame:
 
         artefact.append(artifact_row)
 
-        lf = df.lazy()
-        resource_web_url = f"https://www.data.gouv.fr/fr/datasets/{r['dataset_id']}/#/resources/{r['id']}"
-        lf = lf.with_columns(pl.lit(resource_web_url).alias("sourceOpenData"))
-
         absent_columns = []
         for col in COLUMNS_TO_DROP:
             try:
@@ -162,6 +158,14 @@ def get_resource(r: dict) -> pl.LazyFrame:
             except ColumnNotFoundError:
                 absent_columns.append(col)
                 pass
+
+        lf = df.lazy()
+
+        # Exemple https://www.data.gouv.fr/datasets/5cd57bf68b4c4179299eb0e9/#/resources/bb90091c-f0cb-4a59-ad41-b0ab929aad93
+        resource_web_url = (
+            f"https://www.data.gouv.fr/datasets/{r['dataset_id']}/#/resources/{r['id']}"
+        )
+        lf = lf.with_columns(pl.lit(resource_web_url).alias("sourceOpenData"))
 
     else:
         lf = pl.LazyFrame()
