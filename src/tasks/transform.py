@@ -250,17 +250,15 @@ def normalize_tables(df: pl.DataFrame):
     # TODO ajouter les sous-traitants quand ils seront ajoutés aux données
 
 
-def concat_decp_json(files: list) -> pl.DataFrame:
-    dfs = []
-    for file in files:
-        df: pl.DataFrame = pl.read_parquet(f"{file}.parquet")
-        dfs.append(df)
+def concat_decp_json(lfs: list) -> pl.DataFrame:
+    lf = pl.concat(lfs, how="diagonal_relaxed")
 
-    df = pl.concat(dfs, how="diagonal_relaxed")
+    df = lf.collect(engine="streaming")
 
     print(
         "Suppression des lignes en doublon par UID + titulaire ID + titulaire type ID + modification_id"
     )
+
     # Exemple : 20005584600014157140791205100
     index_size_before = df.height
     df = df.unique(
