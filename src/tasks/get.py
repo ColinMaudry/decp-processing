@@ -2,7 +2,6 @@ import io
 import json
 import re
 
-import ijson
 import orjson
 import polars as pl
 import xmltodict
@@ -180,7 +179,11 @@ def json_to_df(decp_json) -> pl.DataFrame:
 def json_to_ndjson(decp_json: dict) -> io.BytesIO:
     _data = load_and_fix_json(decp_json)
     print(_data)
-    marches = ijson.items(_data, "item", use_float=True)
+
+    # Pour l'instant plus de streaming en attendant decp-2019
+    # marches = ijson.items(_data, "item", use_float=True)
+    marches: list = _data
+
     buffer = io.BytesIO()
     for marche in marches:
         # Aplatissement de acheteur et lieuExecution (acheteur_id, etc.)
