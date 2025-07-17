@@ -44,7 +44,7 @@ make_dirs_if_not_exist(DIST_DIR)
 
 sirene_data_parent_dir = Path(os.getenv("SIRENE_DATA_PARENT_DIR", DATA_DIR))
 SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
-make_dirs_if_not_exist(SIRENE_DATA_DIR)
+# SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
 
 PREFECT_CACHE_DIR = Path(os.getenv("PREFECT_CACHE_DIR"))
 make_dirs_if_not_exist(PREFECT_CACHE_DIR)

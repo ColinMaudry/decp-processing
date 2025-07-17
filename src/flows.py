@@ -13,6 +13,7 @@ from config import (
     DIST_DIR,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
+    make_dirs_if_not_exist,
 )
 from tasks.analyse import generate_stats
 from tasks.cache_management import remove_unused_cache
@@ -25,7 +26,6 @@ from tasks.output import (
     save_to_sqlite,
 )
 from tasks.publish import publish_to_datagouv
-from tasks.setup import create_sirene_data_dir
 from tasks.transform import (
     concat_decp_json,
     extract_unique_acheteurs_siret,
@@ -231,7 +231,7 @@ def sirene_preprocess():
     print("🚀  Pré-traitement des données SIRENE")
     # Soit les tâches de ce flow vont au bout (success), soit le dossier SIRENE_DATA_DIR est supprimé (voir remove_sirene_data_dir())
     with transaction():
-        create_sirene_data_dir()
+        make_dirs_if_not_exist(SIRENE_DATA_DIR)
 
         # TODO préparer lest données établissements
 
