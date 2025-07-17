@@ -6,6 +6,15 @@ from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
 
+
+def make_dirs_if_not_exist(path: str or Path) -> None:
+    # os.makedirs() est en erreur si le dossier existe déjà
+    # Path().mkdir ne peut créer qu'un dossier à la fois
+    # donc...
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+
 dotenv_path = find_dotenv()
 if dotenv_path == "":
     print("Création du fichier .env à partir de template.env")
@@ -28,13 +37,19 @@ REMOVE_UNUSED_CACHE_AFTER_DAYS = 15
 
 # Les variables configurées sur le serveur doivent avoir la priorité
 DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
-DATA_DIR.mkdir(exist_ok=True)
+make_dirs_if_not_exist(DATA_DIR)
 
 DIST_DIR = Path(os.getenv("DECP_DIST_DIR", BASE_DIR / "dist"))
-DIST_DIR.mkdir(exist_ok=True)
+make_dirs_if_not_exist(DIST_DIR)
 
 SIRENE_DATA_DIR = Path(os.getenv("SIRENE_DATA_DIR", DATA_DIR / "sirene"))
-SIRENE_DATA_DIR.mkdir(exist_ok=True)
+make_dirs_if_not_exist(SIRENE_DATA_DIR)
+
+PREFECT_CACHE_DIR = Path(os.getenv("PREFECT_CACHE_DIR"))
+make_dirs_if_not_exist(PREFECT_CACHE_DIR)
+PREFECT_RESULTS_DIR = Path(os.getenv("PREFECT_RESULTS_DIR"))
+make_dirs_if_not_exist(PREFECT_RESULTS_DIR)
+
 
 with open(
     os.getenv("DATASETS_REFERENCE_FILEPATH", DATA_DIR / "datasets_reference.json"), "r"
