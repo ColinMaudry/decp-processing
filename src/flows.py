@@ -103,16 +103,17 @@ def decp_processing(enable_cache_removal: bool = False):
 
     # Traitement parallèle des ressources
     futures = [get_clean.submit(resource) for resource in resources]
-    dfs: list[pl.LazyFrame] = [f.result() for f in futures]
+    lfs: list[pl.LazyFrame] = [f.result() for f in futures]
 
     print("Fusion des dataframes...")
-    df = concat_decp_json(dfs)
+    df: pl.DataFrame = concat_decp_json(lfs)
 
     print("Ajout des données SIRENE...")
     lf: pl.LazyFrame = enrich_from_sirene(df.lazy())
 
     print("Génération de l'artefact (statistiques) sur le base df...")
     df: pl.DataFrame = lf.collect(engine="streaming")
+
     generate_stats(df)
 
     if os.path.exists(DIST_DIR):
