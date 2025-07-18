@@ -3,12 +3,10 @@ import math
 
 import polars as pl
 import polars.selectors as cs
-from prefect import task
 
 from tasks.transform import explode_titulaires, process_modifications
 
 
-@task
 def clean_decp(lf: pl.LazyFrame) -> pl.LazyFrame:
     #
     # CLEAN DATA

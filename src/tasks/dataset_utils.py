@@ -1,6 +1,6 @@
 from httpx import get
 
-from src.config import EXCLUDED_RESOURCES
+from config import EXCLUDED_RESOURCES
 
 
 def list_datasets_by_org(org_id: str) -> list[dict]:

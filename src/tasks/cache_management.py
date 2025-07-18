@@ -3,16 +3,16 @@ from pathlib import Path
 
 from prefect import task
 
-from src.config import CACHE_DIR, REMOVE_UNUSED_CACHE_AFTER_DAYS
+from config import CACHE_EXPIRATION_TIME_HOURS, PREFECT_LOCAL_STORAGE_PATH
 
 
 @task
 def remove_unused_cache(
-    cache_dir: Path = CACHE_DIR,
-    remove_unused_cache_after_days: int = REMOVE_UNUSED_CACHE_AFTER_DAYS,
+    cache_dir: Path = PREFECT_LOCAL_STORAGE_PATH,
+    cache_expiration_time_hours: int = CACHE_EXPIRATION_TIME_HOURS,
 ):
     now = time.time()
-    age_limit = remove_unused_cache_after_days * 86400  # seconds
+    age_limit = cache_expiration_time_hours * 3600  # seconds
     if cache_dir.exists():
         for file in cache_dir.rglob("*"):
             if file.is_file():

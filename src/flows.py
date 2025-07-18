@@ -1,16 +1,20 @@
+import datetime
 import os
 import shutil
 
 import polars as pl
 from prefect import flow, task
 from prefect.cache_policies import INPUTS
+from prefect.task_runners import ConcurrentTaskRunner
 from prefect.transactions import transaction
 
 from config import (
     BASE_DF_COLUMNS,
+    CACHE_EXPIRATION_TIME_HOURS,
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
+    MAX_PREFECT_WORKERS,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
     make_dirs_if_not_exist,
@@ -37,13 +41,23 @@ from tasks.transform import (
 )
 
 
-@task(log_prints=True, cache_policy=INPUTS)
+@task(
+    log_prints=True,
+    persist_result=True,
+    cache_policy=INPUTS,
+    cache_expiration=datetime.timedelta(hours=CACHE_EXPIRATION_TIME_HOURS),
+)
 def get_clean(resource):
-    print("Récupération des données source...")
-    lf: pl.LazyFrame = get_resource(resource)
+    # Récupération des données source...
+    with transaction():
+        lf: pl.LazyFrame = get_resource(resource)
 
-    print("Nettoyage des données source et typage des colonnes...")
-    lf = clean_decp(lf)
+        # Nettoyage des données source et typage des colonnes...
+        # si la ressource est dans un format supporté
+        if lf is not None:
+            lf = clean_decp(lf)
+
+        # Il ne faut pas que lf == None car ça casse concat_decp_json()
 
     return lf
 
@@ -113,7 +127,9 @@ def make_decpinfo_data():
     return df
 
 
-@flow(log_prints=True)
+@flow(
+    log_prints=True, task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS)
+)
 def decp_processing(enable_cache_removal: bool = False):
     print("🚀  Début du flow principal")
 

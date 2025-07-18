@@ -24,16 +24,23 @@ if dotenv_path == "":
 
 load_dotenv(dotenv_path, override=False)
 
-FORMAT_DETECTION_QUORUM = 0.7  # Seuil de confiance pour la détection du format des données - en pratique c'est inutile car il n'y a qu'un format par fichier
+# Seuil de confiance pour la détection du format des données - en pratique c'est inutile car il n'y a qu'un format par fichier
+FORMAT_DETECTION_QUORUM = 0.7
+
+# Nombre maximal de workers utilisables par Prefect. Défaut : 16
+MAX_PREFECT_WORKERS = int(os.getenv("MAX_PREFECT_WORKERS", 16))
+
+# Durée avant l'expiration du cache des ressources (en heure). Défaut : 168 (7 jours)
+CACHE_EXPIRATION_TIME_HOURS = int(os.getenv("CACHE_EXPIRATION_TIME_HOURS", 168))
 
 DATE_NOW = datetime.now().isoformat()[0:10]  # YYYY-MM-DD
-MONTH_NOW = DATE_NOW[:7]
+MONTH_NOW = DATE_NOW[:7]  # YYYY-MM
 
+# Publication ou non des fichiers produits sur data.gouv.fr
 DECP_PROCESSING_PUBLISH = os.environ.get("DECP_PROCESSING_PUBLISH", "")
 
+# Dossier racine
 BASE_DIR = Path(__file__).parent.parent
-CACHE_DIR = BASE_DIR / ".prefect" / "results"
-REMOVE_UNUSED_CACHE_AFTER_DAYS = 15
 
 # Les variables configurées sur le serveur doivent avoir la priorité
 DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
@@ -46,10 +53,10 @@ sirene_data_parent_dir = Path(os.getenv("SIRENE_DATA_PARENT_DIR", DATA_DIR))
 SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
 # SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
 
-PREFECT_CACHE_DIR = Path(os.getenv("PREFECT_CACHE_DIR"))
-make_dirs_if_not_exist(PREFECT_CACHE_DIR)
-PREFECT_RESULTS_DIR = Path(os.getenv("PREFECT_RESULTS_DIR"))
-make_dirs_if_not_exist(PREFECT_RESULTS_DIR)
+# Dossier de stockage des résultats de tâches et du cache
+# https://docs.prefect.io/v3/advanced/results#default-persistence-configuration
+PREFECT_LOCAL_STORAGE_PATH = Path(os.getenv("PREFECT_LOCAL_STORAGE_PATH"))
+make_dirs_if_not_exist(PREFECT_LOCAL_STORAGE_PATH)
 
 
 with open(
