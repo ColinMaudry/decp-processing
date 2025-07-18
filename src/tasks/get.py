@@ -136,7 +136,7 @@ def get_resource(r: dict) -> pl.LazyFrame:
                 "created_at": r["created_at"],
                 "last_modified": r["last_modified"],
                 "filesize": r["filesize"],
-                "views": r["view"],
+                "views": r["views"],
             }
 
         print("JSON -> DF (format 2022)...")
