@@ -134,7 +134,7 @@ def clean_decp_json_modifications(input_json_: dict):
     titulaires_cleaned_cpt = 0
     for entry in input_json_:
         # entry = {} représentant un marché
-        modifications_entries = entry.get("modifications", [])
+        modifications_entries = entry.get("modifications", []) or []
         # modifications_entries = [] représentant les modifications du marché
         clean_modifications_entries = []
         for modification_entry in modifications_entries:
@@ -142,8 +142,8 @@ def clean_decp_json_modifications(input_json_: dict):
             modification_entry_clean = modification_entry["modification"]
             if "titulaires" in modification_entry_clean.keys():
                 modification_titulaires_clean = []
-                for modification_titulaire in modification_entry_clean.get(
-                    "titulaires", []
+                for modification_titulaire in (
+                    modification_entry_clean.get("titulaires", []) or []
                 ):
                     # mofification_titulaire = {} représentant un titulaire de la modification
                     if modification_titulaire is not None and isinstance(
