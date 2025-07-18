@@ -115,6 +115,7 @@ def get_resource(r: dict) -> pl.LazyFrame:
 
     artefact = []
     artifact_row = {}
+    lf = pl.LazyFrame()
 
     # Téléchargement du fichier JSON
     decp_json = get_json(r)
@@ -139,7 +140,7 @@ def get_resource(r: dict) -> pl.LazyFrame:
                 "views": r["views"],
             }
 
-        print("JSON -> DF (format 2022)...")
+        # JSON -> DF
         df: pl.DataFrame = json_to_df(decp_json)
 
         artifact_row["open_data_dataset_id"] = r["dataset_id"]
@@ -157,7 +158,6 @@ def get_resource(r: dict) -> pl.LazyFrame:
                 df = df.drop(col)
             except ColumnNotFoundError:
                 absent_columns.append(col)
-                pass
 
         lf = df.lazy()
 
@@ -182,7 +182,6 @@ def json_to_df(decp_json) -> pl.DataFrame:
 
 def json_to_ndjson(decp_json: dict) -> io.BytesIO:
     _data = load_and_fix_json(decp_json)
-    print(_data)
 
     # Pour l'instant plus de streaming en attendant decp-2019
     # marches = ijson.items(_data, "item", use_float=True)
