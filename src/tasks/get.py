@@ -168,7 +168,7 @@ def get_resource(r: dict) -> pl.LazyFrame:
         lf = lf.with_columns(pl.lit(resource_web_url).alias("sourceOpenData"))
 
     else:
-        lf = pl.LazyFrame()
+        print(f"▶️  Format non reconnu : {r['ori_filename']} ({r['dataset_name']})")
 
     return lf
 

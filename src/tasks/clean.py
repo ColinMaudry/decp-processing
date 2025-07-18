@@ -62,7 +62,6 @@ def clean_decp(lf: pl.LazyFrame) -> pl.LazyFrame:
 
 
 def fix_data_types(lf: pl.LazyFrame):
-    print("Correction des datatypes...")
     numeric_dtypes = {
         "dureeMois": pl.Int16,
         # "dureeMoisModification": pl.Int16,

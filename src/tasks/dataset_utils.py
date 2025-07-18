@@ -167,5 +167,6 @@ def list_resources(datasets: list[dict]) -> list[dict]:
                         "views": resource["metrics"].get("views", None),
                     }
                 )
+        print(f"- {dataset['dataset_name']}")
 
     return resources
