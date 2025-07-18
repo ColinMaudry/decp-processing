@@ -194,7 +194,7 @@ def process_modifications(lf: pl.LazyFrame):
     lf = replace_with_modification_data(lf)
 
     # Si il n'y avait aucun modifications dans le fichier, il faut ajouter les colonnes
-    if "donneesActuelle" not in lf.collect_schema():
+    if "donneesActuelles" not in lf.collect_schema():
         lf = lf.with_columns(
             pl.lit(0).alias("modification_id"), pl.lit(True).alias("donneesActuelles")
         )

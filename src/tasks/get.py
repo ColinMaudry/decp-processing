@@ -94,10 +94,10 @@ def get_json(file_info: dict) -> dict:
 
     if url.startswith("https"):
         # Prod file
-        if file_info["file_format"] == "json":
+        if file_info["format"] == "json":
             request = get(url, follow_redirects=True)
             json_content = json.loads(request.text)
-        elif file_info["file_format"] == "xml":
+        elif file_info["format"] == "xml":
             # Conversion du XML en JSON
             json_content = parse_xml(url)
         return json_content

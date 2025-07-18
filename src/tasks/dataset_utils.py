@@ -139,7 +139,6 @@ def list_resources(datasets: list[dict]) -> list[dict]:
                 raise RuntimeError(
                     f"Erreur lors de la récupération des ressources du dataset '{dataset['dataset_id']}': {e}"
                 )
-
         for resource in all_resources:
             # On ne garde que les ressources au format JSON ou XML et celles qui ne sont pas
             # - des fichiers OCDS
