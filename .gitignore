@@ -15,13 +15,11 @@ build
 .idea
 todo.md
 data/decp-*.json
-data/*[0-9][0-9].json
 test.*
 wiki
 *.lock
-
-*.ipynb
-/.ipynb_checkpoints
-
+data/get
+data/clean
+data/sirene*
+system
 *.ndjson
-*processed_bookmarks.json

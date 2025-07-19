@@ -9,10 +9,10 @@ from config import DIST_DIR
 def save_to_files(df: pl.DataFrame, path: str | Path, file_format=None):
     if file_format is None:
         file_format = ["csv", "parquet"]
-    if "csv" in file_format:
-        df.write_csv(f"{path}.csv")
     if "parquet" in file_format:
         df.write_parquet(f"{path}.parquet")
+    if "csv" in file_format:
+        df.write_csv(f"{path}.csv")
 
 
 def save_to_sqlite(df: pl.DataFrame, database: str, table_name: str, primary_key: str):

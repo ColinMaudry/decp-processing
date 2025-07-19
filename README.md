@@ -164,3 +164,8 @@ pytest tests/test_sirene_preprocess.py
 ```bash
 pytest tests/test_main.py
 ```
+
+# Contributeurs ❤️
+
+- Colin Maudry
+- [FranckMaseo](https://github.com/frankmaseo)
