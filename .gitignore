@@ -14,12 +14,8 @@ build
 .vscode
 .idea
 todo.md
-data/decp-*.json
 test.*
 wiki
 *.lock
-data/get
-data/clean
 data/sirene*
-system
-*.ndjson
+data/storage

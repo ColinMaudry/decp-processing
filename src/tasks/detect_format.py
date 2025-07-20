@@ -1,4 +1,4 @@
-def detect_format_titulaire(titulaire) -> str:
+def detect_format_titulaire(titulaire) -> str or None:
     """
     Détecte le format du champ "titulaire" selon sa structure.
 
@@ -24,6 +24,7 @@ def detect_format_titulaire(titulaire) -> str:
         return "2019"
     else:
         print(f"Format inconnu pour le titulaire : {titulaire}")
+        return None
 
 
 def detect_format_multiple_titulaires(data: list, quorum: float) -> str:
@@ -64,7 +65,6 @@ def detect_format_multiple_titulaires(data: list, quorum: float) -> str:
             else:
                 return "2022"
         else:
-            print("Impossible d'identifier le format sur la base des titulaires !")
             # Dans le doute, on tente le format 2022
             return "2022"
     else:
