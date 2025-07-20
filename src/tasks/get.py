@@ -108,14 +108,13 @@ def get_json(file_info: dict) -> dict:
 
 
 @task
-def get_resource(r: dict) -> pl.LazyFrame:
+def get_resource(r: dict) -> pl.LazyFrame or None:
     """Téléchargement de la ressource."""
 
     date_now = DATE_NOW
 
     artefact = []
     artifact_row = {}
-    lf = pl.LazyFrame()
 
     # Téléchargement du fichier JSON
     decp_json = get_json(r)
@@ -166,11 +165,13 @@ def get_resource(r: dict) -> pl.LazyFrame:
             f"https://www.data.gouv.fr/datasets/{r['dataset_id']}/#/resources/{r['id']}"
         )
         lf = lf.with_columns(pl.lit(resource_web_url).alias("sourceOpenData"))
+        return lf
 
     else:
-        print(f"▶️  Format non reconnu : {r['ori_filename']} ({r['dataset_name']})")
-
-    return lf
+        print(
+            f"▶️  Format non supporté : {format_decp} {r['ori_filename']} ({r['dataset_name']})"
+        )
+        return None
 
 
 def json_to_df(decp_json) -> pl.DataFrame:

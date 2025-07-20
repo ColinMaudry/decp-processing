@@ -138,7 +138,7 @@ def decp_processing(enable_cache_removal: bool = False):
 
     # Traitement parallèle des ressources
     futures = [get_clean.submit(resource) for resource in resources]
-    lfs: list[pl.LazyFrame] = [f.result() for f in futures]
+    lfs: list[pl.LazyFrame] = [f.result() for f in futures if f.result() is not None]
 
     print("Fusion des dataframes...")
     df: pl.DataFrame = concat_decp_json(lfs)
