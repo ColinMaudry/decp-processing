@@ -1,4 +1,8 @@
+import datetime
+
 from httpx import get
+from prefect import task
+from prefect.cache_policies import INPUTS
 
 from config import EXCLUDED_RESOURCES
 
@@ -78,6 +82,13 @@ def list_resources_by_dataset(dataset_id: str) -> list[dict]:
     return resources
 
 
+@task(
+    retries=3,
+    retry_delay_seconds=3,
+    persist_result=True,
+    cache_policy=INPUTS,
+    cache_expiration=datetime.timedelta(hours=20),
+)
 def list_resources(datasets: list[dict]) -> list[dict]:
     """
     Prépare la liste des ressources JSON à traiter pour un ou plusieurs jeux de données.
