@@ -149,8 +149,8 @@ def list_resources(datasets: list[dict]) -> list[dict]:
             ):
                 resources.append(
                     {
-                        "dataset_id": dataset["dataset_id"],
-                        "dataset_name": dataset["dataset_name"],
+                        "dataset_id": dataset["id"],
+                        "dataset_name": dataset["name"],
                         "dataset_code": dataset["code"],
                         "id": resource["id"],
                         "ori_filename": resource["title"],

@@ -1,7 +1,7 @@
 [
   {
-    "dataset_id": "test_dataset",
-    "dataset_name": "Dataset de test",
+    "id": "test_dataset",
+    "name": "Dataset de test",
     "owner_org_name": "decp-processing",
     "owner_org_id": "673f323ec296c295e64c5dc0",
     "incremental": false,
