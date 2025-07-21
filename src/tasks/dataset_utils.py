@@ -151,6 +151,7 @@ def list_resources(datasets: list[dict]) -> list[dict]:
                     {
                         "dataset_id": dataset["dataset_id"],
                         "dataset_name": dataset["dataset_name"],
+                        "dataset_code": dataset["code"],
                         "id": resource["id"],
                         "ori_filename": resource["title"],
                         "checksum": resource["checksum"]["value"],

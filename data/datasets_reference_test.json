@@ -5,6 +5,7 @@
     "owner_org_name": "decp-processing",
     "owner_org_id": "673f323ec296c295e64c5dc0",
     "incremental": false,
+    "code": "test_dataset",
     "resources": [
       {
         "id": "resource_id1234",
