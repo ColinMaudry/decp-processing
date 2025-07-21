@@ -1,37 +1,56 @@
+import os
+import shutil
+import time
 from datetime import datetime
+from pathlib import Path
 
 import polars as pl
+from prefect import task
+from prefect.artifacts import create_table_artifact
 
-from config import DATE_NOW
-from tasks.setup import create_table_artifact
+from config import (
+    CACHE_EXPIRATION_TIME_HOURS,
+    DATE_NOW,
+    PREFECT_LOCAL_STORAGE_PATH,
+    SIRENE_DATA_DIR,
+)
 
 
-def list_data_issues(df: pl.LazyFrame):
-    df = df.collect()
+def create_artifact(
+    data,
+    key: str,
+    description: str = None,
+):
+    if data is list:
+        create_table_artifact(key=key, table=data, description=description)
 
-    # Dates impossibles
 
-    date_columns = [
-        "dateNotification",
-        "dateNotificationActeSousTraitance",
-        "dateNotificationModificationModification",
-        "dateNotificationModificationSousTraitanceModificationActeSousTraitance",
-        "datePublicationDonnees",
-        "datePublicationDonneesActeSousTraitance",
-        "datePublicationDonneesModificationActeSousTraitance",
-        "datePublicationDonneesModificationModification",
-    ]
+@task
+def create_sirene_data_dir():
+    os.makedirs(SIRENE_DATA_DIR, exist_ok=True)
 
-    for column in date_columns:
-        print(
-            "Dates impossibles dans la colonne ",
-            column,
-            ":",
-            df.filter(
-                (pl.col(column) < pl.date(2015, 1, 1))
-                | (pl.col(column) > datetime.now())
-            ).height,
-        )
+
+# Si une tâche postérieure échoue dans le même flow que create_sirene_data_dir(), le dossier est supprimé
+# Ainsi on garantie que si le dossier est présent, c'est que le flow (sirene_preprocess) est allé au bout
+# https://docs.prefect.io/v3/advanced/transactions
+@create_sirene_data_dir.on_rollback
+def remove_sirene_data_dir(transaction):
+    shutil.rmtree(SIRENE_DATA_DIR)
+
+
+@task
+def remove_unused_cache(
+    cache_dir: Path = PREFECT_LOCAL_STORAGE_PATH,
+    cache_expiration_time_hours: int = CACHE_EXPIRATION_TIME_HOURS,
+):
+    now = time.time()
+    age_limit = cache_expiration_time_hours * 3600  # seconds
+    if cache_dir.exists():
+        for file in cache_dir.rglob("*"):
+            if file.is_file():
+                if now - file.stat().st_atime > age_limit:
+                    print(f"Deleting cache file: {file}")
+                    file.unlink()
 
 
 def generate_stats(df: pl.DataFrame):
