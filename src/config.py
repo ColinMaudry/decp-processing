@@ -140,5 +140,5 @@ EXCLUDED_RESOURCES = [
     "17046b18-8921-486a-bc31-c9196d5c3e9c",  # decp.xml : fichier XML consolidé par le MINEF mais abandonné
     "68bd2001-3420-4d94-bc49-c90878df322c",  # decp.ocds.json : fichier au format JSON mais OCDS, pas DECP
     "59ba0edb-cf94-4bf1-a546-61f561553917",  # decp-2022.json : format bizarre, entre 2019 et 2022 ~8000 marchés
-    "16962018-5c31-4296-9454-5998585496d2",  # decp-2019.json : format DECP 2019, par encore supporté
+    "16962018-5c31-4296-9454-5998585496d2",  # decp-2019.json : format DECP 2019, pas encore supporté
 ]
