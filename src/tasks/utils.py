@@ -1,4 +1,3 @@
-import os
 import shutil
 import time
 from datetime import datetime
@@ -27,7 +26,7 @@ def create_artifact(
 
 @task
 def create_sirene_data_dir():
-    os.makedirs(SIRENE_DATA_DIR, exist_ok=True)
+    SIRENE_DATA_DIR.mkdir(exist_ok=True, parents=True)
 
 
 # Si une tâche postérieure échoue dans le même flow que create_sirene_data_dir(), le dossier est supprimé
