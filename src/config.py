@@ -6,15 +6,6 @@ from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
 
-
-def make_dirs_if_not_exist(path: str or Path) -> None:
-    # os.makedirs() est en erreur si le dossier existe déjà
-    # Path().mkdir ne peut créer qu'un dossier à la fois
-    # donc...
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-
 dotenv_path = find_dotenv()
 if dotenv_path == "":
     print("Création du fichier .env à partir de template.env")
@@ -44,10 +35,10 @@ BASE_DIR = Path(__file__).parent.parent
 
 # Les variables configurées sur le serveur doivent avoir la priorité
 DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
-make_dirs_if_not_exist(DATA_DIR)
+DATA_DIR.mkdir(exist_ok=True, parents=True)
 
 DIST_DIR = Path(os.getenv("DECP_DIST_DIR", BASE_DIR / "dist"))
-make_dirs_if_not_exist(DIST_DIR)
+DIST_DIR.mkdir(exist_ok=True, parents=True)
 
 sirene_data_parent_dir = Path(os.getenv("SIRENE_DATA_PARENT_DIR", DATA_DIR))
 SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
@@ -56,7 +47,7 @@ SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
 # Dossier de stockage des résultats de tâches et du cache
 # https://docs.prefect.io/v3/advanced/results#default-persistence-configuration
 PREFECT_LOCAL_STORAGE_PATH = Path(os.getenv("PREFECT_LOCAL_STORAGE_PATH"))
-make_dirs_if_not_exist(PREFECT_LOCAL_STORAGE_PATH)
+PREFECT_LOCAL_STORAGE_PATH.mkdir(exist_ok=True, parents=True)
 
 
 with open(
@@ -140,5 +131,5 @@ EXCLUDED_RESOURCES = [
     "17046b18-8921-486a-bc31-c9196d5c3e9c",  # decp.xml : fichier XML consolidé par le MINEF mais abandonné
     "68bd2001-3420-4d94-bc49-c90878df322c",  # decp.ocds.json : fichier au format JSON mais OCDS, pas DECP
     "59ba0edb-cf94-4bf1-a546-61f561553917",  # decp-2022.json : format bizarre, entre 2019 et 2022 ~8000 marchés
-    "16962018-5c31-4296-9454-5998585496d2",  # decp-2019.json : format DECP 2019, par encore supporté
+    "16962018-5c31-4296-9454-5998585496d2",  # decp-2019.json : format DECP 2019, pas encore supporté
 ]
