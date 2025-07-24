@@ -1,0 +1,22 @@
+[
+  {
+    "dataset_id": "test_dataset",
+    "dataset_name": "Dataset de test",
+    "owner_org_name": "decp-processing",
+    "owner_org_id": "673f323ec296c295e64c5dc0",
+    "incremental": false,
+    "resources": [
+      {
+        "id": "resource_id1234",
+        "title": "decp_123.json",
+        "checksum": { "value": "8888888888888888888888888888888888" },
+        "latest": "./data/decp_test.json",
+        "format": "json",
+        "created_at": "2025-07-08T18:00:00Z",
+        "last_modified": "2025-07-08T19:00:00Z",
+        "filesize": 766654,
+        "metrics": { "views": 10 }
+      }
+    ]
+  }
+]

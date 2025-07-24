@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 
 import polars as pl
@@ -38,13 +37,18 @@ def list_data_issues(df: pl.LazyFrame):
 def generate_stats(df: pl.DataFrame):
     now = datetime.now()
     df_uid: pl.DataFrame = df.select(
-        "uid", "acheteur_id", "datePublicationDonnees", "dateNotification", "montant"
+        "uid",
+        "acheteur_id",
+        "datePublicationDonnees",
+        "dateNotification",
+        "montant",
+        "sourceOpenData",
     ).unique(subset=["uid"])
 
     stats = {
         "datetime": now.isoformat()[:-7],  # jusqu'aux secondes
         "date": DATE_NOW,
-        "fichiers": os.environ["downloaded_files"].split(","),
+        "resources": df_uid["sourceOpenData"].unique().to_list(),
         "nb_lignes": df.height,
         "colonnes_triées": sorted(df.columns),
         "nb_colonnes": len(df.columns),

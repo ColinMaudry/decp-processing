@@ -1,6 +1,6 @@
 from httpx import get
 
-import tasks.bookmarking as bookmarking
+from config import EXCLUDED_RESOURCES
 
 
 def list_datasets_by_org(org_id: str) -> list[dict]:
@@ -70,12 +70,15 @@ def list_resources_by_dataset(dataset_id: str) -> list[dict]:
         Liste des ressources associées au dataset. Chaque élément est un dictionnaire
         représentant une ressource au format JSON.
     """
-    return handle_paginated_calls(
+
+    resources = handle_paginated_calls(
         f"http://www.data.gouv.fr/api/2/datasets/{dataset_id}/resources/?page=1&page_size=50"
     )
 
+    return resources
 
-def list_resources_to_process(datasets: list[dict]) -> list[dict]:
+
+def list_resources(datasets: list[dict]) -> list[dict]:
     """
     Prépare la liste des ressources JSON à traiter pour un ou plusieurs jeux de données.
 
@@ -120,45 +123,49 @@ def list_resources_to_process(datasets: list[dict]) -> list[dict]:
     if not all("incremental" in d.keys() for d in datasets):
         raise ValueError("Each dataset must contain an 'incremental' key")
 
-    resource_ids = []
+    resources = []
+    all_resources = []
 
     for dataset in datasets:
-        try:
-            resources = list_resources_by_dataset(dataset["dataset_id"])
-        except Exception as e:
-            raise RuntimeError(
-                f"Erreur lors de la récupération des ressources du dataset '{dataset['dataset_id']}': {e}"
-            )
+        # Données de test ./data/datasets_reference_test.json
+        if dataset["dataset_id"].startswith("test_"):
+            all_resources += dataset["resources"]
 
-        for resource in resources:
+        # Données de production ./data/datasets_reference.json
+        else:
+            try:
+                all_resources = list_resources_by_dataset(dataset["dataset_id"])
+            except Exception as e:
+                raise RuntimeError(
+                    f"Erreur lors de la récupération des ressources du dataset '{dataset['dataset_id']}': {e}"
+                )
+        for resource in all_resources:
             # On ne garde que les ressources au format JSON ou XML et celles qui ne sont pas
             # - des fichiers OCDS
             # - des fichiers XML abandonnés
             if (
                 resource["format"] in ["json", "xml"]
-                and ".ocds"
-                not in resource["title"].lower()  # fichier OCDS, pas le bon format
-                and resource["id"]
-                != "17046b18-8921-486a-bc31-c9196d5c3e9c"  # fichier XML consolidé abandonné
+                and resource["id"] not in EXCLUDED_RESOURCES
             ):
-                if dataset.get("incremental", False) and bookmarking.is_processed(
-                    resource["id"]
-                ):
-                    # Pour les datasets incrémentaux, on saute la ressource si elle a déjà été traitée
-                    continue
-
-                resource_ids.append(
+                resources.append(
                     {
                         "dataset_id": dataset["dataset_id"],
-                        "resource_id": resource["id"],
+                        "dataset_name": dataset["dataset_name"],
+                        "id": resource["id"],
                         "ori_filename": resource["title"],
+                        "checksum": resource["checksum"]["value"],
                         # Dataset id en premier pour grouper les ressources d'un même dataset ensemble
                         # Nom du fichier pour le distinguer des autres fichiers du dataset
                         # Un bout d'id de ressource pour les cas où plusieurs fichiers ont le même nom dans le même dataset (ex : Occitanie)
                         "file_name": f"{dataset['dataset_id']}_{resource['title'].lower().replace('.json', '').replace('.xml', '').replace('.', '_')}_{resource['id'][:3]}",
                         "url": resource["latest"],
-                        "file_format": resource["format"],
+                        "format": resource["format"],
+                        "created_at": resource["created_at"],
+                        "last_modified": resource["last_modified"],
+                        "filesize": resource["filesize"],
+                        "views": resource["metrics"].get("views", None),
                     }
                 )
+        print(f"- {dataset['dataset_name']}")
 
-    return resource_ids
+    return resources

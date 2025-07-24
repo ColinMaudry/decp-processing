@@ -1,12 +1,11 @@
 import os
-import zipfile
 
 import polars as pl
 import polars.selectors as cs
 from httpx import get
 from prefect import task
 
-from config import DATA_DIR, SIRENE_DATA_DIR
+from config import DATA_DIR
 from tasks.output import save_to_sqlite
 
 
@@ -195,9 +194,9 @@ def process_modifications(lf: pl.LazyFrame):
     lf = replace_with_modification_data(lf)
 
     # Si il n'y avait aucun modifications dans le fichier, il faut ajouter les colonnes
-    if "donneesActuelle" not in lf.collect_schema():
+    if "donneesActuelles" not in lf.collect_schema():
         lf = lf.with_columns(
-            pl.lit(0).alias("modification.id"), pl.lit(True).alias("donneesActuelles")
+            pl.lit(0).alias("modification_id"), pl.lit(True).alias("donneesActuelles")
         )
 
     return lf
@@ -250,17 +249,15 @@ def normalize_tables(df: pl.DataFrame):
     # TODO ajouter les sous-traitants quand ils seront ajoutés aux données
 
 
-def concat_decp_json(files: list) -> pl.DataFrame:
-    dfs = []
-    for file in files:
-        df: pl.DataFrame = pl.read_parquet(f"{file}.parquet")
-        dfs.append(df)
-
+def concat_decp_json(dfs: list) -> pl.DataFrame:
     df = pl.concat(dfs, how="diagonal_relaxed")
+
+    del dfs
 
     print(
         "Suppression des lignes en doublon par UID + titulaire ID + titulaire type ID + modification_id"
     )
+
     # Exemple : 20005584600014157140791205100
     index_size_before = df.height
     df = df.unique(
@@ -319,29 +316,16 @@ def extract_unique_titulaires_siret(df: pl.LazyFrame):
 
 
 @task
-def get_prepare_unites_legales():
-    sirene_data_dir = SIRENE_DATA_DIR
-    zip_path = sirene_data_dir / "StockUniteLegale_utf8.zip"
-    if not zip_path.exists():
-        print("Téléchargement des unités légales...")
-        unites_legales_url = os.environ["SIRENE_UNITES_LEGALES_URL"]
-
-        request = get(unites_legales_url, follow_redirects=True)
-        with open(zip_path, "wb") as file:
-            file.write(request.content)
-
-    csv_path = zip_path.with_suffix(".csv")
-    if not csv_path.exists():
-        print("Décompression des unités légales...")
-        with zipfile.ZipFile(zip_path, "r") as zip_ref:
-            zip_ref.extractall(sirene_data_dir)
-
-    print("-- sélection des colonnes et enregistrement au format parquet...")
-    lf_ul = pl.scan_csv(csv_path, infer_schema=None)
-    lf_ul = lf_ul.select(["siren", "denominationUniteLegale"])
-    lf_ul = lf_ul.sort(by="siren")
-    lf_ul.collect(engine="streaming").write_parquet(
-        sirene_data_dir / "unites_legales.parquet"
+def get_prepare_unites_legales(processed_parquet_path):
+    print("Téléchargement des données unité légales et sélection des colonnes...")
+    (
+        pl.scan_parquet(os.environ["SIRENE_UNITES_LEGALES_URL"])
+        .filter(pl.col("siren").is_not_null())
+        .filter(pl.col("denominationUniteLegale").is_not_null())
+        .sort("dateDebut", descending=False)
+        .unique(subset=["siren"], keep="last")
+        .select(["siren", "denominationUniteLegale"])
+        .sink_parquet(processed_parquet_path)
     )
 
 
