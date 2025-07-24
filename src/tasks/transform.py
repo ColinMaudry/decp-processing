@@ -286,17 +286,6 @@ def setup_tableschema_columns(df: pl.DataFrame):
     return df
 
 
-def make_decp_sans_titulaires(df: pl.DataFrame):
-    df_decp_sans_titulaires = df.drop(
-        [
-            "titulaire_id",
-            "titulaire_typeIdentifiant",
-        ]
-    )
-    df_decp_sans_titulaires = df_decp_sans_titulaires.unique()
-    return df_decp_sans_titulaires
-
-
 def extract_unique_acheteurs_siret(df: pl.LazyFrame):
     # Extraction des SIRET des DECP dans une copie du df de base
     df = df.select("acheteur_id")

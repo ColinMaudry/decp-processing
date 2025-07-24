@@ -38,7 +38,7 @@ env = [
     "DATASETS_REFERENCE_FILEPATH=tests/data/datasets_reference_test.json",
     "PREFECT_API_URL=",
     "DECP_PROCESSING_PUBLISH=",
-    "PREFECT_TASKS_REFRESH_CACHE=false"
+    "PREFECT_TASKS_REFRESH_CACHE=true"
 ]
 addopts = "-p no:warnings"
 
