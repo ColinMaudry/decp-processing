@@ -16,7 +16,6 @@ from config import (
     MAX_PREFECT_WORKERS,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
-    make_dirs_if_not_exist,
 )
 from tasks.analyse import generate_stats
 from tasks.cache_management import remove_unused_cache
@@ -254,7 +253,7 @@ def sirene_preprocess():
     print("🚀  Pré-traitement des données SIRENE")
     # Soit les tâches de ce flow vont au bout (success), soit le dossier SIRENE_DATA_DIR est supprimé (voir remove_sirene_data_dir())
     with transaction():
-        make_dirs_if_not_exist(SIRENE_DATA_DIR)
+        SIRENE_DATA_DIR.mkdir(exist_ok=True, parents=True)
 
         # TODO préparer lest données établissements
 
