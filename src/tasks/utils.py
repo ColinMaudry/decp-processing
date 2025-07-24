@@ -37,6 +37,18 @@ def remove_sirene_data_dir(transaction):
     shutil.rmtree(SIRENE_DATA_DIR)
 
 
+#
+# CACHE
+#
+
+
+def get_clean_cache_key(context, parameters) -> str:
+    resource = parameters["resource"]
+
+    # On utilise le hash sha1 de la ressource, généré par data.gouv.fr, comme clé de cache
+    return resource["checksum"]
+
+
 @task
 def remove_unused_cache(
     cache_dir: Path = PREFECT_LOCAL_STORAGE_PATH,
@@ -50,6 +62,11 @@ def remove_unused_cache(
                 if now - file.stat().st_atime > age_limit:
                     print(f"Deleting cache file: {file}")
                     file.unlink()
+
+
+#
+# STATS
+#
 
 
 def generate_stats(df: pl.DataFrame):

@@ -4,7 +4,6 @@ import shutil
 
 import polars as pl
 from prefect import flow, task
-from prefect.cache_policies import INPUTS
 from prefect.task_runners import ConcurrentTaskRunner
 from prefect.transactions import transaction
 
@@ -33,28 +32,33 @@ from tasks.transform import (
     normalize_tables,
     sort_columns,
 )
-from tasks.utils import create_sirene_data_dir, generate_stats, remove_unused_cache
+from tasks.utils import (
+    create_sirene_data_dir,
+    generate_stats,
+    get_clean_cache_key,
+    remove_unused_cache,
+)
 
 
 @task(
     log_prints=True,
     persist_result=True,
-    cache_policy=INPUTS,
     cache_expiration=datetime.timedelta(hours=CACHE_EXPIRATION_TIME_HOURS),
+    cache_key_fn=get_clean_cache_key,
 )
-def get_clean(resource):
+def get_clean(resource) -> pl.DataFrame or None:
     # Récupération des données source...
     with transaction():
         lf: pl.LazyFrame = get_resource(resource)
+        df = None
 
         # Nettoyage des données source et typage des colonnes...
         # si la ressource est dans un format supporté
         if lf is not None:
             lf = clean_decp(lf)
+            df = lf.collect(engine="streaming")
 
-        # Il ne faut pas que lf == None car ça casse concat_decp_json()
-
-    return lf
+    return df
 
 
 @task(log_prints=True)
@@ -95,10 +99,10 @@ def decp_processing(enable_cache_removal: bool = False):
 
     # Traitement parallèle des ressources
     futures = [get_clean.submit(resource) for resource in resources]
-    lfs: list[pl.LazyFrame] = [f.result() for f in futures if f.result() is not None]
+    dfs: list[pl.DataFrame] = [f.result() for f in futures if f.result() is not None]
 
     print("Fusion des dataframes...")
-    df: pl.DataFrame = concat_decp_json(lfs)
+    df: pl.DataFrame = concat_decp_json(dfs)
 
     print("Ajout des données SIRENE...")
     # Preprocessing des données SIRENE si :
