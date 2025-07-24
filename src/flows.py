@@ -4,7 +4,6 @@ import shutil
 
 import polars as pl
 from prefect import flow, task
-from prefect.cache_policies import INPUTS
 from prefect.task_runners import ConcurrentTaskRunner
 from prefect.transactions import transaction
 
@@ -41,11 +40,19 @@ from tasks.transform import (
 )
 
 
+def get_clean_cache_key(context, parameters) -> str:
+    resource = parameters["resource"]
+    # TOOD déplacer cette fonction vers tasks/utils.py
+
+    # On utilise le hash sha1 de la ressource, généré par data.gouv.fr, comme clé de cache
+    return resource["checksum"]
+
+
 @task(
     log_prints=True,
     persist_result=True,
-    cache_policy=INPUTS,
     cache_expiration=datetime.timedelta(hours=CACHE_EXPIRATION_TIME_HOURS),
+    cache_key_fn=get_clean_cache_key,
 )
 def get_clean(resource) -> pl.DataFrame or None:
     # Récupération des données source...
