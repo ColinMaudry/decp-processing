@@ -90,9 +90,7 @@ SCHEMA_MARCHE_2019 = {
 SCHEMA_MARCHE_2022 = {
     **SCHEMA_MARCHE_BASE,
     "titulaires": pl.List(SCHEMA_TITULAIRE_2022),
-    "considerationsSociales.considerationsSociale": pl.List(pl.String),
-    "considerationsEnvironnementales.considerationsEnvironnementale": pl.List(
-        pl.String
-    ),
+    "considerationsSociales.considerationSociale": pl.List(pl.String),
+    "considerationsEnvironnementales.considerationEnvironnementale": pl.List(pl.String),
     **SCHEMA_MODIFICATION_2022,
 }
