@@ -156,7 +156,7 @@ def json_stream_to_parquet(
 
         for chunk in chunk_iter:
             chunk = chunk.replace(b"NaN,", b"null,")
-            fmt.coroutine_ijson.send(chunk)
+            right_fmt.coroutine_ijson.send(chunk)
             for marche in right_fmt.liste_marches_ijson:
                 write_marche_row(marche, f)
 
