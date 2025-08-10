@@ -15,6 +15,15 @@ def save_to_files(df: pl.DataFrame, path: str | Path, file_format=None):
         df.write_csv(f"{path}.csv")
 
 
+def sink_to_files(lf: pl.LazyFrame, path: str | Path, file_format=None):
+    if file_format is None:
+        file_format = ["csv", "parquet"]
+    if "parquet" in file_format:
+        lf.sink_parquet(f"{path}.parquet")
+    if "csv" in file_format:
+        lf.sink_csv(f"{path}.csv")
+
+
 def save_to_sqlite(df: pl.DataFrame, database: str, table_name: str, primary_key: str):
     # Création de la table, avec les définitions de colonnes et de la ou des clés primaires
     column_definitions = []
