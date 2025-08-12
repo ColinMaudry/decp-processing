@@ -154,6 +154,8 @@ def json_stream_to_parquet(
         if not found_marche:
             raise ValueError("pas de match trouvé parmis les formats passés")
 
+        del right_fmt.liste_marches_ijson[:]
+
         for chunk in chunk_iter:
             chunk = chunk.replace(b"NaN,", b"null,")
             right_fmt.coroutine_ijson.send(chunk)
