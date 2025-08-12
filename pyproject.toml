@@ -17,7 +17,7 @@ dependencies = [
     "prefect==3.3.3",
     "orjson",
     "ijson",
-    "xmltodict"
+    "lxml",
 ]
 
 [project.optional-dependencies]
