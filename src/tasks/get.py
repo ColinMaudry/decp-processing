@@ -8,9 +8,10 @@ import orjson
 import polars as pl
 import xmltodict
 from httpx import get, stream
+from lxml import etree
 from prefect import task
 
-from config import DATE_NOW, DIST_DIR, FORMATS_DECP, FormatDECP
+from config import DATE_NOW, DIST_DIR, FORMAT_DECP_2019, FORMATS_DECP, FormatDECP
 from tasks.output import sink_to_files
 
 
@@ -94,18 +95,25 @@ def stream_get(url: str, chunk_size=1024**2):
 
 
 @task
-def get_resource(r: dict, decp_formats: list[FormatDECP] | None = None) -> pl.LazyFrame:
+def get_resource(
+    r: dict, decp_formats: list[FormatDECP] | None = None
+) -> pl.LazyFrame | None:
     if decp_formats is None:
         decp_formats = FORMATS_DECP
 
     print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
     output_path = DIST_DIR / "get" / r["{filename}"]
     output_path.parent.mkdir(exist_ok=True)
-    if r["format"] == "xml":
-        pass  # TODO
-
     url = r["url"]
-    format_decp = json_stream_to_parquet(url, output_path, decp_formats)
+    file_format = r["format"]
+    if file_format == "json":
+        format_decp = json_stream_to_parquet(url, output_path, decp_formats)
+    elif file_format == "xml":
+        format_decp = xml_stream_to_parquet(url, output_path, decp_formats)
+    else:
+        print(f"▶️ Format de fichier non supporté : {file_format} ({r['dataset_name']})")
+        return
+
     lf = pl.scan_parquet(output_path.with_extension(".parquet"))
 
     # TODO: do something with it
@@ -172,7 +180,25 @@ def json_stream_to_parquet(
     return right_fmt
 
 
-def write_marche_row(marche, file):
+@task
+def xml_stream_to_parquet(url: str, output_path: Path) -> FormatDECP:
+    parser = etree.XMLPullParser(tag="marche")
+    with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson", delete=False) as f:
+        for chunk in stream_get(url):
+            parser.feed(chunk)
+            for _, elem in parser.read_events():
+                _, marche = xml_to_dict(elem)
+                write_marche_row(marche, f)
+        lf = pl.scan_ndjson(f.name, schema=FORMAT_DECP_2019.schema)
+        sink_to_files(lf, output_path, file_format="parquet")
+    return FORMAT_DECP_2019
+
+
+def xml_to_dict(element: etree.Element):
+    return element.tag, dict(map(xml_to_dict, element)) or element.text
+
+
+def write_marche_row(marche: dict, file):
     for mod in yield_modifications(marche):
         file.write(orjson.dumps(mod))
         file.write(b"\n")
