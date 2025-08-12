@@ -1,4 +1,3 @@
-import re
 import tempfile
 from functools import partial
 from pathlib import Path
@@ -6,81 +5,12 @@ from pathlib import Path
 import ijson
 import orjson
 import polars as pl
-import xmltodict
-from httpx import get, stream
+from httpx import stream
 from lxml import etree
 from prefect import task
 
 from config import DATE_NOW, DIST_DIR, FORMAT_DECP_2019, FORMATS_DECP, FormatDECP
 from tasks.output import sink_to_files
-
-
-def clean_xml(xml_str):
-    # Suppresion des caractères invalides XML 1.0
-    return re.sub(r"[^\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD]", "", xml_str)
-
-
-def parse_xml(url: str) -> dict:
-    """
-    Récupère et parse un fichier XML à partir d'une URL, puis le convertit en JSON.
-
-    Cette fonction est conçue pour traiter les fichiers XML issus des DECP. Elle applique
-    un post-traitement sur les nœuds "modifications" et "titulaires" pour uniformiser leur structure.
-
-    Paramètre :
-        url (str) : L'URL du fichier XML à récupérer et à parser.
-
-    Retour :
-        dict : Une représentation sous forme de dictionnaire du contenu XML, avec une structure adaptée pour un usage en JSON.
-    """
-
-    request = get(url, follow_redirects=True)
-    data = xmltodict.parse(
-        clean_xml(request.text),
-        force_list={
-            "considerationSociale",
-            "considerationEnvironnementale",
-            "modaliteExecution",
-            "technique",
-            "typePrix",
-            "modification",
-            "titulaire",
-            "marche",
-        },
-    )
-
-    if "marches" in data:
-        if "marche" in data["marches"]:
-            # modifications des titulaires et des modifications
-            for row in data["marches"]["marche"]:
-                mods = row.get("modifications", [])
-                if mods is None:
-                    row["modifications"] = []
-                elif "modification" in mods:
-                    mods_list = mods["modification"]
-                    row["modifications"] = [{"modification": m} for m in mods_list]
-
-                titulaires = row.get("titulaires", [])
-                if titulaires is None:
-                    row["titulaires"] = []
-                elif "titulaire" in titulaires:
-                    titulaires_list = titulaires["titulaire"]
-                    row["titulaires"] = [{"titulaire": t} for t in titulaires_list]
-
-            for row in data["marches"]["marche"]:
-                mods = row.get("modifications", [])
-                _mods = []
-                for mod in mods:
-                    if "titulaires" in mod["modification"]:
-                        mod["modification"].update(
-                            {"titulaires": [mod["modification"]["titulaires"]]}
-                        )
-                    _mods.append(mod)
-
-                if _mods:
-                    row["modifications"] = _mods
-
-    return data
 
 
 @task(retries=3, retry_delay_seconds=3)
