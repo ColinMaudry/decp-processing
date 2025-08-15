@@ -164,10 +164,12 @@ def get_resource(r: dict) -> pl.LazyFrame or None:
         resource_web_url = (
             f"https://www.data.gouv.fr/datasets/{r['dataset_id']}/#/resources/{r['id']}"
         )
-        lf = lf.with_columns(
-            pl.lit(resource_web_url).alias("sourceOpenData"),
-            pl.lit(r["dataset_code"]).alias("source"),
-        )
+        lf = lf.with_columns(pl.lit(resource_web_url).alias("sourceOpenData"))
+
+        # Si c'est le dataset des fichiers consolidés du MINEF (decp_minef), on n'ajoute pas de code car ils en ajoutent déjà un
+        if r["dataset_id"] != "5cd57bf68b4c4179299eb0e9":
+            lf = lf.with_columns(pl.lit(r["dataset_code"]).alias("source"))
+
         return lf
 
     else:
