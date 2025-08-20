@@ -58,7 +58,7 @@ def get_resource(
     return lf
 
 
-def find_format(chunk, decp_formats):
+def find_json_format(chunk, decp_formats):
     found_marche = False
     for fmt in decp_formats:
         fmt.coroutine_ijson.send(chunk)
@@ -94,7 +94,7 @@ def json_stream_to_parquet(
         # In first iteration, will find the right format
         chunk = next(chunk_iter)
         chunk = chunk.replace(b"NaN,", b"null,")
-        right_fmt = find_format(chunk, decp_formats)
+        right_fmt = find_json_format(chunk, decp_formats)
 
         for marche in right_fmt.liste_marches_ijson:
             write_marche_rows(marche, tmp_file)
