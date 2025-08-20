@@ -63,8 +63,8 @@ def find_format(chunk, decp_formats):
     for fmt in decp_formats:
         fmt.coroutine_ijson.send(chunk)
         if len(fmt.liste_marches_ijson) > 0:
-            # We found at least one corresponding event in the chunk, so we're
-            # using the right format!
+            # Le parser a trouvé au moins un marché correspondant à ce format, donc on a
+            # trouvé le bon format.
             found_marche = True
             right_fmt = fmt
             break
