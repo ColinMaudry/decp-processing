@@ -141,14 +141,14 @@ def yield_modifications(row: dict, separator="."):
     raw_mods = [] if raw_mods is None else raw_mods
 
     mods = [{}] + raw_mods
-    for i, m in enumerate(mods):
-        m["id"] = i
-        if "modification" in m:
-            m = m["modification"]
-        titulaires = norm_titulaires(m)
+    for i, mod in enumerate(mods):
+        mod["id"] = i
+        if "modification" in mod:
+            mod = mod["modification"]
+        titulaires = norm_titulaires(mod)
         if titulaires is not None:
-            m["titulaires"] = titulaires
-        row["modification"] = m
+            mod["titulaires"] = titulaires
+        row["modification"] = mod
         yield pl.convert.normalize._simple_json_normalize(
             row, separator, 10, lambda x: x
         )
