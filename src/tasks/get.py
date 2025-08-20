@@ -19,6 +19,7 @@ def stream_get(url: str, chunk_size=1024**2):
         with stream("GET", url, follow_redirects=True) as response:
             yield from response.iter_bytes(chunk_size)
     else:
+        # Données de test.
         with open(url, "rb") as f:
             for chunk in iter(partial(f.read, chunk_size), b""):
                 yield chunk
@@ -57,6 +58,21 @@ def get_resource(
     return lf
 
 
+def find_format(chunk, decp_formats):
+    found_marche = False
+    for fmt in decp_formats:
+        fmt.coroutine_ijson.send(chunk)
+        if len(fmt.liste_marches_ijson) > 0:
+            # We found at least one corresponding event in the chunk, so we're
+            # using the right format!
+            found_marche = True
+            right_fmt = fmt
+            break
+    if not found_marche:
+        raise ValueError("Pas de match trouvé parmis les formats passés")
+    return right_fmt
+
+
 @task
 def json_stream_to_parquet(
     url: str, output_path: Path, decp_formats: list[FormatDECP] | None = None
@@ -70,27 +86,18 @@ def json_stream_to_parquet(
             fmt.liste_marches_ijson, f"{fmt.prefixe_json_marches}.item", use_float=True
         )
 
-    with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson", delete=False) as f:
-        print(f.name)
+    with tempfile.NamedTemporaryFile(
+        mode="wb", suffix=".ndjson", delete=False
+    ) as tmp_file:
         chunk_iter = stream_get(url)
 
         # In first iteration, will find the right format
         chunk = next(chunk_iter)
-        found_marche = False
-        for fmt in decp_formats:
-            chunk = chunk.replace(b"NaN,", b"null,")
-            fmt.coroutine_ijson.send(chunk)
-            for marche in fmt.liste_marches_ijson:
-                # We found at least one corresponding event in the chunk, so we're
-                # using the right format!
-                found_marche = True
-                write_marche_row(marche, f)
-            if found_marche:
-                right_fmt = fmt
-                break
+        chunk = chunk.replace(b"NaN,", b"null,")
+        right_fmt = find_format(chunk, decp_formats)
 
-        if not found_marche:
-            raise ValueError("pas de match trouvé parmis les formats passés")
+        for marche in right_fmt.liste_marches_ijson:
+            write_marche_rows(marche, tmp_file)
 
         del right_fmt.liste_marches_ijson[:]
 
@@ -98,13 +105,13 @@ def json_stream_to_parquet(
             chunk = chunk.replace(b"NaN,", b"null,")
             right_fmt.coroutine_ijson.send(chunk)
             for marche in right_fmt.liste_marches_ijson:
-                write_marche_row(marche, f)
+                write_marche_rows(marche, tmp_file)
 
             del right_fmt.liste_marches_ijson[:]
 
         right_fmt.coroutine_ijson.close()
 
-        lf = pl.scan_ndjson(f.name, schema=right_fmt.schema)
+        lf = pl.scan_ndjson(tmp_file.name, schema=right_fmt.schema)
         sink_to_files(lf, output_path, file_format="parquet")
 
     return right_fmt
@@ -118,7 +125,7 @@ def xml_stream_to_parquet(url: str, output_path: Path) -> FormatDECP:
             parser.feed(chunk)
             for _, elem in parser.read_events():
                 _, marche = xml_to_dict(elem)
-                write_marche_row(marche, f)
+                write_marche_rows(marche, f)
         lf = pl.scan_ndjson(f.name, schema=FORMAT_DECP_2019.schema)
         sink_to_files(lf, output_path, file_format="parquet")
     return FORMAT_DECP_2019
@@ -128,7 +135,7 @@ def xml_to_dict(element: etree.Element):
     return element.tag, dict(map(xml_to_dict, element)) or element.text
 
 
-def write_marche_row(marche: dict, file):
+def write_marche_rows(marche: dict, file):
     for mod in yield_modifications(marche):
         file.write(orjson.dumps(mod))
         file.write(b"\n")
