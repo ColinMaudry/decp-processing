@@ -1,6 +1,11 @@
 import polars as pl
+from prefect import task
 
 from config import SIRENE_DATA_DIR
+from tasks.transform import (
+    extract_unique_acheteurs_siret,
+    extract_unique_titulaires_siret,
+)
 
 
 def add_etablissement_data(
@@ -58,4 +63,64 @@ def add_unite_legale_data(
         df = df.join(
             df_sirets, how="left", on=["titulaire_id", "titulaire_typeIdentifiant"]
         )
+    return df
+
+
+@task(log_prints=True)
+def enrich_from_sirene(df: pl.LazyFrame):
+    # DONNÉES SIRENE ACHETEURS
+
+    print("Extraction des SIRET des acheteurs...")
+    df_sirets_acheteurs = extract_unique_acheteurs_siret(df.clone())
+
+    # print("Ajout des données établissements (acheteurs)...")
+    # df_sirets_acheteurs = add_etablissement_data(
+    #     df_sirets_acheteurs, ["enseigne1Etablissement"], "acheteur_id"
+    # )
+
+    print("Ajout des données unités légales (acheteurs)...")
+    df = add_unite_legale_data(
+        df, df_sirets_acheteurs, siret_column="acheteur_id", type_siret="acheteur"
+    )
+
+    # print("Construction du champ acheteur_nom à partir des données SIRENE...")
+    # df_sirets_acheteurs = make_acheteur_nom(df_sirets_acheteurs)
+
+    # print("Enregistrement des DECP aux formats CSV et Parquet...")
+    # save_to_files(df, f"{DIST_DIR}/decp")
+
+    # print("Suppression de colonnes et déduplication pour les DECP Sans Titulaires...")
+    # df_decp_sans_titulaires = make_decp_sans_titulaires(df)
+    # save_to_files(df_decp_sans_titulaires, f"{DIST_DIR}/decp-sans-titulaires")
+    # del df_decp_sans_titulaires
+
+    # DONNÉES SIRENE TITULAIRES
+
+    # Enrichissement des données pas prioritaire
+    # cf https://github.com/ColinMaudry/decp-processing/issues/17
+
+    print("Extraction des SIRET des titulaires...")
+    df_sirets_titulaires = extract_unique_titulaires_siret(df)
+
+    # print("Ajout des données établissements (titulaires)...")
+    # df_sirets_titulaires = add_etablissement_data_to_titulaires(df_sirets_titulaires)
+
+    print("Ajout des données unités légales (titulaires)...")
+    df = add_unite_legale_data(
+        df, df_sirets_titulaires, siret_column="titulaire_id", type_siret="titulaire"
+    )
+    # print("Amélioration des données unités légales des titulaires...")
+    # df_sirets_titulaires = improve_titulaire_unite_legale_data(df_sirets_titulaires)
+
+    # print("Renommage de certaines colonnes unités légales (titulaires)...")
+    # df_sirets_titulaires = rename_titulaire_sirene_columns(df_sirets_titulaires)
+
+    # print("Jointure pour créer les données DECP Titulaires...")
+    # df_decp_titulaires = merge_sirets_titulaires(df, df_sirets_titulaires)
+    # del df_sirets_titulaires
+
+    # print("Enregistrement des DECP Titulaires aux formats CSV et Parquet...")
+    # save_to_files(df_decp_titulaires, f"{DIST_DIR}/decp-titulaires")
+    # del df_decp_titulaires
+
     return df

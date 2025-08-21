@@ -103,8 +103,5 @@ def detect_format(data, quorum: float) -> str:
         elif isinstance(data["marches"], dict):
             if "marche" in data["marches"]:
                 _data = data["marches"]["marche"]
-    # Pour Mégalis Bretagne (ex : https://www.data.gouv.fr/datasets/donnees-essentielles-du-profil-acheteur-megalis-bretagne-schema-arretes-2022/#/resources/f84e2359-4759-4c76-b594-d2ee6095ca53)
-    elif "marche" in data and isinstance(data["marche"], list):
-        _data = data["marche"]
 
     return detect_format_multiple_titulaires(_data, quorum=quorum)

@@ -8,10 +8,10 @@
     "code": "test_dataset",
     "resources": [
       {
-        "id": "resource_id1234",
-        "title": "decp_123.json",
+        "id": "decp_2022",
+        "title": "decp_2022.json",
         "checksum": { "value": "8888888888888888888888888888888888" },
-        "latest": "./data/decp_test.json",
+        "latest": ".tests/data/decp_test_2022.json",
         "format": "json",
         "created_at": "2025-07-08T18:00:00Z",
         "last_modified": "2025-07-08T19:00:00Z",
