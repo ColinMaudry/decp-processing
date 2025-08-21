@@ -31,6 +31,7 @@ Vous pouvez...
 - Python 3.8 ou plus récent
 - cargo ([installation rapide](https://rustup.rs))
 - fichier .env avec l'adresse des fichiers source
+- sur Debian/Ubuntu : `sudo apt install libpq-dev` (pour builder le module `psycopg2`)
 
 ## Installation
 
