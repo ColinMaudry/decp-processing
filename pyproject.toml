@@ -17,7 +17,8 @@ dependencies = [
     "prefect==3.3.3",
     "orjson",
     "ijson",
-    "xmltodict"
+    "xmltodict",
+    "psycopg2"
 ]
 
 [project.optional-dependencies]
