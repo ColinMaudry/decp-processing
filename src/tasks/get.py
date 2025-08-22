@@ -1,4 +1,5 @@
 import tempfile
+from collections.abc import Iterator
 from functools import partial
 from pathlib import Path
 
@@ -136,12 +137,14 @@ def xml_to_dict(element: etree.Element):
 
 
 def write_marche_rows(marche: dict, file):
+    """Ajout d'une ligne ndjson pour chaque modification/version du marché."""
     for mod in yield_modifications(marche):
         file.write(orjson.dumps(mod))
         file.write(b"\n")
 
 
-def yield_modifications(row: dict, separator="."):
+def yield_modifications(row: dict, separator=".") -> Iterator[dict]:
+    """Pour chaque modification, génère un objet/dict marché aplati."""
     raw_mods = row.pop("modifications", [])
     if isinstance(raw_mods, dict) and "modification" in raw_mods:
         raw_mods = raw_mods["modification"]
