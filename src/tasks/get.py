@@ -39,9 +39,9 @@ def get_resource(
     url = r["url"]
     file_format = r["format"]
     if file_format == "json":
-        format_decp = json_stream_to_parquet(url, output_path, decp_formats)
+        format_decp, fields = json_stream_to_parquet(url, output_path, decp_formats)
     elif file_format == "xml":
-        format_decp = xml_stream_to_parquet(url, output_path, decp_formats)
+        format_decp, fields = xml_stream_to_parquet(url, output_path, decp_formats)
     else:
         print(f"▶️ Format de fichier non supporté : {file_format} ({r['dataset_name']})")
         return
@@ -49,7 +49,7 @@ def get_resource(
     lf = pl.scan_parquet(output_path.with_extension(".parquet"))
 
     # TODO: do something with it
-    artifact_row = gen_artifact_row(r, format_decp, lf, url)  # noqa
+    artifact_row = gen_artifact_row(r, format_decp, lf, url, fields)  # noqa
 
     # Exemple https://www.data.gouv.fr/datasets/5cd57bf68b4c4179299eb0e9/#/resources/bb90091c-f0cb-4a59-ad41-b0ab929aad93
     resource_web_url = (
@@ -77,10 +77,11 @@ def find_json_format(chunk, decp_formats):
 @task
 def json_stream_to_parquet(
     url: str, output_path: Path, decp_formats: list[FormatDECP] | None = None
-) -> FormatDECP:
+) -> tuple[FormatDECP, set[str]]:
     if decp_formats is None:
         decp_formats = FORMATS_DECP
 
+    fields = set()
     for fmt in decp_formats:
         fmt.liste_marches_ijson = ijson.sendable_list()
         fmt.coroutine_ijson = ijson.items_coro(
@@ -98,7 +99,8 @@ def json_stream_to_parquet(
         right_fmt = find_json_format(chunk, decp_formats)
 
         for marche in right_fmt.liste_marches_ijson:
-            write_marche_rows(marche, tmp_file)
+            new_fields = write_marche_rows(marche, tmp_file)
+            fields = fields.union(new_fields)
 
         del right_fmt.liste_marches_ijson[:]
 
@@ -106,7 +108,8 @@ def json_stream_to_parquet(
             chunk = chunk.replace(b"NaN,", b"null,")
             right_fmt.coroutine_ijson.send(chunk)
             for marche in right_fmt.liste_marches_ijson:
-                write_marche_rows(marche, tmp_file)
+                new_fields = write_marche_rows(marche, tmp_file)
+                fields = fields.union(new_fields)
 
             del right_fmt.liste_marches_ijson[:]
 
@@ -115,32 +118,39 @@ def json_stream_to_parquet(
         lf = pl.scan_ndjson(tmp_file.name, schema=right_fmt.schema)
         sink_to_files(lf, output_path, file_format="parquet")
 
-    return right_fmt
+    return right_fmt, fields
 
 
 @task
-def xml_stream_to_parquet(url: str, output_path: Path) -> FormatDECP:
+def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[FormatDECP, set[str]]:
+    fields = set()
     parser = etree.XMLPullParser(tag="marche")
-    with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson", delete=False) as f:
+    with tempfile.NamedTemporaryFile(
+        mode="wb", suffix=".ndjson", delete=False
+    ) as tmp_file:
         for chunk in stream_get(url):
             parser.feed(chunk)
             for _, elem in parser.read_events():
                 _, marche = xml_to_dict(elem)
-                write_marche_rows(marche, f)
-        lf = pl.scan_ndjson(f.name, schema=FORMAT_DECP_2019.schema)
+                new_fields = write_marche_rows(marche, tmp_file)
+                fields = fields.union(new_fields)
+        lf = pl.scan_ndjson(tmp_file.name, schema=FORMAT_DECP_2019.schema)
         sink_to_files(lf, output_path, file_format="parquet")
-    return FORMAT_DECP_2019
+    return FORMAT_DECP_2019, fields
 
 
 def xml_to_dict(element: etree.Element):
     return element.tag, dict(map(xml_to_dict, element)) or element.text
 
 
-def write_marche_rows(marche: dict, file):
+def write_marche_rows(marche: dict, file) -> set[str]:
     """Ajout d'une ligne ndjson pour chaque modification/version du marché."""
+    fields = set()
     for mod in yield_modifications(marche):
         file.write(orjson.dumps(mod))
         file.write(b"\n")
+        fields = fields.union(mod.keys())
+    return fields
 
 
 def yield_modifications(row: dict, separator=".") -> Iterator[dict]:
@@ -185,11 +195,15 @@ def norm_titulaire(titulaire: dict):
     return titulaire
 
 
-def gen_artifact_row(file_info: dict, format: FormatDECP, lf: pl.LazyFrame, url: str):
+def gen_artifact_row(
+    file_info: dict, format: FormatDECP, lf: pl.LazyFrame, url: str, fields: set[str]
+):
     artifact_row = {
         "open_data_dataset_id": file_info["dataset_id"],
         "open_data_dataset_name": file_info["dataset_name"],
         "download_date": DATE_NOW,
+        "data_fields": list(fields),
+        "data_fields_number": len(fields),
         "columns": sorted(format.schema.keys()),
         "column_number": len(format.schema),
         "row_number": lf.select(pl.len()).collect().item(),
