@@ -155,8 +155,14 @@ def write_marche_rows(marche: dict, file) -> set[str]:
 def yield_modifications(row: dict, separator=".") -> Iterator[dict]:
     """Pour chaque modification, génère un objet/dict marché aplati."""
     raw_mods = row.pop("modifications", [])
+    # Couvre le format 2022:
     if isinstance(raw_mods, dict) and "modification" in raw_mods:
         raw_mods = raw_mods["modification"]
+    # Couvre le (non-)format dans lequel "modifications" ou "modification" mène
+    # directement à un dict contenant les métadonnées liées à une modification.
+    if isinstance(raw_mods, dict):
+        raw_mods = [raw_mods]
+
     raw_mods = [] if raw_mods is None else raw_mods
 
     mods = [{}] + raw_mods
