@@ -27,73 +27,21 @@ def stream_get(url: str, chunk_size=1024**2):
 
 
 @task
-def get_resource(r: dict) -> pl.LazyFrame or None:
-    """Téléchargement de la ressource."""
+def get_resource(
+    r: dict, decp_formats: list[FormatDECP] | None = None
+) -> pl.LazyFrame | None:
+    if decp_formats is None:
+        decp_formats = FORMATS_DECP
 
-    date_now = DATE_NOW
-
-    artefact = []
-    artifact_row = {}
-
-    # Téléchargement du fichier JSON
-    decp_json = get_json(r)
-
-    # Déterminer le format du fichier
-    format_decp = detect_format(
-        decp_json, FORMAT_DETECTION_QUORUM
-    )  # 'empty', '2019' ou '2022'
-
-    if format_decp == "2022":
-        print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
-        if r["url"].startswith("https"):
-            artifact_row = {
-                "open_data_dataset_id": r["dataset_id"],
-                "open_data_dataset_name": r["dataset_name"],
-                "open_data_filename": r["ori_filename"],
-                "open_data_id": r["id"],
-                "sha1": r["checksum"],
-                "created_at": r["created_at"],
-                "last_modified": r["last_modified"],
-                "filesize": r["filesize"],
-                "views": r["views"],
-            }
-
-        # JSON -> DF
-        df: pl.DataFrame = json_to_df(decp_json)
-
-        artifact_row["open_data_dataset_id"] = r["dataset_id"]
-        artifact_row["open_data_dataset_name"] = r["dataset_name"]
-        artifact_row["download_date"] = date_now
-        artifact_row["columns"] = sorted(df.columns)
-        artifact_row["column_number"] = len(df.columns)
-        artifact_row["row_number"] = df.height
-
-        artefact.append(artifact_row)
-
-        absent_columns = []
-        for col in COLUMNS_TO_DROP:
-            try:
-                df = df.drop(col)
-            except ColumnNotFoundError:
-                absent_columns.append(col)
-
-        lf = df.lazy()
-
-        # Exemple https://www.data.gouv.fr/datasets/5cd57bf68b4c4179299eb0e9/#/resources/bb90091c-f0cb-4a59-ad41-b0ab929aad93
-        resource_web_url = (
-            f"https://www.data.gouv.fr/datasets/{r['dataset_id']}/#/resources/{r['id']}"
-        )
-        lf = lf.with_columns(
-            pl.lit(resource_web_url).alias("sourceOpenData"),
-            pl.lit(r["dataset_code"]).alias("source"),
-        )
-
-        # Si c'est le dataset des fichiers consolidés du MINEF (decp_minef), on n'ajoute pas de code car ils en ajoutent déjà un
-        if r["dataset_id"] != "5cd57bf68b4c4179299eb0e9":
-            lf = lf.with_columns(pl.lit(r["dataset_code"]).alias("source"))
-
-        return lf
-
+    print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
+    output_path = DIST_DIR / "get" / r["{filename}"]
+    output_path.parent.mkdir(exist_ok=True)
+    url = r["url"]
+    file_format = r["format"]
+    if file_format == "json":
+        format_decp, fields = json_stream_to_parquet(url, output_path, decp_formats)
+    elif file_format == "xml":
+        format_decp, fields = xml_stream_to_parquet(url, output_path, decp_formats)
     else:
         print(f"▶️ Format de fichier non supporté : {file_format} ({r['dataset_name']})")
         return
@@ -107,7 +55,10 @@ def get_resource(r: dict) -> pl.LazyFrame or None:
     resource_web_url = (
         f"https://www.data.gouv.fr/datasets/{r['dataset_id']}/#/resources/{r['id']}"
     )
-    lf = lf.with_columns(pl.lit(resource_web_url).alias("sourceOpenData"))
+    lf = lf.with_columns(
+        pl.lit(resource_web_url).alias("sourceOpenData"),
+        pl.lit(r["dataset_code"]).alias("source"),
+    )
     return lf
 
 
