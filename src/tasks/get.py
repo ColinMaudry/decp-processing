@@ -88,9 +88,7 @@ def json_stream_to_parquet(
             fmt.liste_marches_ijson, f"{fmt.prefixe_json_marches}.item", use_float=True
         )
 
-    with tempfile.NamedTemporaryFile(
-        mode="wb", suffix=".ndjson", delete=False
-    ) as tmp_file:
+    with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson") as tmp_file:
         chunk_iter = stream_get(url)
 
         # In first iteration, will find the right format
@@ -125,9 +123,7 @@ def json_stream_to_parquet(
 def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[FormatDECP, set[str]]:
     fields = set()
     parser = etree.XMLPullParser(tag="marche")
-    with tempfile.NamedTemporaryFile(
-        mode="wb", suffix=".ndjson", delete=False
-    ) as tmp_file:
+    with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson") as tmp_file:
         for chunk in stream_get(url):
             parser.feed(chunk)
             for _, elem in parser.read_events():
