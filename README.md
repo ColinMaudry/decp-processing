@@ -31,6 +31,9 @@ Vous pouvez...
 - Python 3.8 ou plus récent
 - cargo ([installation rapide](https://rustup.rs))
 - fichier .env avec l'adresse des fichiers source
+- si sauvegarde dans Postgre
+  - sur Debian/Ubuntu : `sudo apt install libpq-dev` (pour builder le module `psycopg2`)
+  - créer la base de données cible
 
 ## Installation
 

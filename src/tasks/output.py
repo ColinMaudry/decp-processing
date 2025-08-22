@@ -3,7 +3,7 @@ from pathlib import Path
 
 import polars as pl
 
-from config import DIST_DIR
+from config import DIST_DIR, POSTGRESQL_DB_URI
 
 
 def save_to_files(df: pl.DataFrame, path: str | Path, file_format=None):
@@ -22,6 +22,16 @@ def sink_to_files(lf: pl.LazyFrame, path: str | Path, file_format=None):
         lf.sink_parquet(f"{path}.parquet")
     if "csv" in file_format:
         lf.sink_csv(f"{path}.csv")
+
+
+def save_to_postgres(df: pl.DataFrame, table_name: str):
+    df.write_database(
+        table_name=table_name,
+        connection=POSTGRESQL_DB_URI,
+        engine="sqlalchemy",
+        engine_options={},
+        if_table_exists="replace",
+    )
 
 
 def save_to_sqlite(df: pl.DataFrame, database: str, table_name: str, primary_key: str):
@@ -59,6 +69,17 @@ def save_to_sqlite(df: pl.DataFrame, database: str, table_name: str, primary_key
         f"sqlite:///{DIST_DIR}/{database}.sqlite",
         if_table_exists="append",
     )
+
+
+def save_to_databases(
+    df: pl.DataFrame, database: str, table_name: str, primary_key: str
+):
+    save_to_sqlite(df, database, table_name, primary_key)
+    if (
+        POSTGRESQL_DB_URI != "postgresql://user:pass@server:port/database"
+        and POSTGRESQL_DB_URI is not None
+    ):
+        save_to_postgres(df, table_name)
 
 
 def make_data_package():

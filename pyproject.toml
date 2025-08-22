@@ -18,6 +18,7 @@ dependencies = [
     "orjson",
     "ijson",
     "lxml",
+    "psycopg2"
 ]
 
 [project.optional-dependencies]

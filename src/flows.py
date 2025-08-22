@@ -70,7 +70,7 @@ def make_datalab_data():
 
     df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
 
-    print("Enregistrement des DECP (base DataFrame) au format SQLite...")
+    print("Enregistrement des DECP (base DataFrame) dans les bases de données...")
     save_to_sqlite(
         df,
         "datalab",

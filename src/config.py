@@ -51,6 +51,9 @@ SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
 PREFECT_LOCAL_STORAGE_PATH = Path(os.getenv("PREFECT_LOCAL_STORAGE_PATH"))
 PREFECT_LOCAL_STORAGE_PATH.mkdir(exist_ok=True, parents=True)
 
+# POSTGRESQL
+POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI")
+
 
 with open(
     os.getenv("DATASETS_REFERENCE_FILEPATH", DATA_DIR / "datasets_reference.json"), "r"

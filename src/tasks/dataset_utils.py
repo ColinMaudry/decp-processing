@@ -128,27 +128,24 @@ def list_resources(datasets: list[dict]) -> list[dict]:
     if not isinstance(datasets, list) or not all(isinstance(d, dict) for d in datasets):
         raise ValueError("dataset_ids must be a list of dictionaries")
 
-    if not all("dataset_id" in d.keys() for d in datasets):
+    if not all("id" in d.keys() for d in datasets):
         raise ValueError("Each dataset must contain a 'dataset_id' key")
-
-    if not all("incremental" in d.keys() for d in datasets):
-        raise ValueError("Each dataset must contain an 'incremental' key")
 
     resources = []
     all_resources = []
 
     for dataset in datasets:
         # Données de test ./data/datasets_reference_test.json
-        if dataset["dataset_id"].startswith("test_"):
+        if dataset["id"].startswith("test_"):
             all_resources += dataset["resources"]
 
         # Données de production ./data/datasets_reference.json
         else:
             try:
-                all_resources = list_resources_by_dataset(dataset["dataset_id"])
+                all_resources = list_resources_by_dataset(dataset["id"])
             except Exception as e:
                 raise RuntimeError(
-                    f"Erreur lors de la récupération des ressources du dataset '{dataset['dataset_id']}': {e}"
+                    f"Erreur lors de la récupération des ressources du dataset '{dataset['id']}': {e}"
                 )
         for resource in all_resources:
             # On ne garde que les ressources au format JSON ou XML et celles qui ne sont pas
@@ -160,15 +157,16 @@ def list_resources(datasets: list[dict]) -> list[dict]:
             ):
                 resources.append(
                     {
-                        "dataset_id": dataset["dataset_id"],
-                        "dataset_name": dataset["dataset_name"],
+                        "dataset_id": dataset["id"],
+                        "dataset_name": dataset["name"],
+                        "dataset_code": dataset["code"],
                         "id": resource["id"],
                         "ori_filename": resource["title"],
                         "checksum": resource["checksum"]["value"],
                         # Dataset id en premier pour grouper les ressources d'un même dataset ensemble
                         # Nom du fichier pour le distinguer des autres fichiers du dataset
                         # Un bout d'id de ressource pour les cas où plusieurs fichiers ont le même nom dans le même dataset (ex : Occitanie)
-                        "file_name": f"{dataset['dataset_id']}_{resource['title'].lower().replace('.json', '').replace('.xml', '').replace('.', '_')}_{resource['id'][:3]}",
+                        "file_name": f"{dataset['id']}_{resource['title'].lower().replace('.json', '').replace('.xml', '').replace('.', '_')}_{resource['id'][:3]}",
                         "url": resource["latest"],
                         "format": resource["format"],
                         "created_at": resource["created_at"],
@@ -177,6 +175,6 @@ def list_resources(datasets: list[dict]) -> list[dict]:
                         "views": resource["metrics"].get("views", None),
                     }
                 )
-        print(f"- {dataset['dataset_name']}")
+        print(f"- {dataset['name']}")
 
     return resources
