@@ -107,27 +107,31 @@ def replace_with_modification_data(lf: pl.LazyFrame):
         "modification_montant",
         "modification_titulaires",
         "modification_datePublicationDonneesModification",
-        "modification_dateNotification",
-        "modification_id",
+        "modification_dateNotificationModification",
+        # Format 2019
+        # "modification_dateSignatureModification",
+        # "modification_objetModification"
     ]
 
     # Étape 1 : On s'assure que toutes colonnes de modification possibles sont présentes dans le lf
-    for column in modification_columns:
+    for column in modification_columns + ["modification_id"]:
         if column not in lf.collect_schema().names():
             lf.with_columns(pl.lit(None).alias(column))
 
     # Étape 2: Extraire les données des modifications en renommant les colonnes
     # on ne conserve pas modification_id car on le recrée nous-mêmes, par sécurité
-    modification_columns.remove("modification_id")
     lf_mods = lf.select(
         "uid",
-        pl.col("modification_dateNotification").alias("dateNotification"),
+        pl.col("modification_dateNotificationModification").alias("dateNotification"),
         pl.col("modification_datePublicationDonneesModification").alias(
             "datePublicationDonnees"
         ),
         pl.col("modification_montant").alias("montant"),
         pl.col("modification_dureeMois").alias("dureeMois"),
         pl.col("modification_titulaires").alias("titulaires"),
+        # Format 2019
+        # pl.col("modification_objetModification").alias("objetModification"),
+        # pl.col("modification_dateSignatureModification").alias("dateSignatureModification"),
     )
 
     # Étape 3: Dédupliquer et créer une copie du DataFrame initial sans les colonnes "modifications"
@@ -194,6 +198,7 @@ def replace_with_modification_data(lf: pl.LazyFrame):
                 "montant",
                 "dureeMois",
                 "titulaires",
+                "modification_id",
             ]
             + modification_columns
         ),
