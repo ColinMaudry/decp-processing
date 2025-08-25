@@ -96,37 +96,54 @@ def remove_suffixes_from_uid_column(df):
 def replace_with_modification_data(lf: pl.LazyFrame):
     """
     Gère les modifications dans le DataFrame des DECP.
-    Cette fonction extrait les informations des modifications et les fusionne avec le DataFrame de base en ajoutant une ligne par modification
+    À ce stade les modifications ont été exploded.
+    Cette fonction récupère les informations des modifications (ex : modification_montant) et les insère dans les champs de base (ex : montant).
     (chaque ligne contient les informations complètes à jour à la date de notification)
-    Elle ajoute également la colonne "donneesActuelles" pour indiquer si la notification est la plus récente.
+    Elle ajoute également la colonne "donneesActuelles" pour indiquer si la modification est la plus récente.
     """
 
-    # Étape 1: Créer une copie du DataFrame initial sans la colonne "modifications"
-    lf_base = lf.select(pl.all().exclude("modifications"))
+    modification_columns = [
+        "modification_dureeMois",
+        "modification_montant",
+        "modification_titulaires",
+        "modification_datePublicationDonneesModification",
+        "modification_dateNotification",
+        "modification_id",
+    ]
 
-    # Étape 2: Explode le DataFrame pour avoir une ligne par modification
-    lf_exploded = (
-        lf.select("uid", "modifications")
-        .explode("modifications")
-        .drop_nulls()
-        .with_columns(pl.col("modifications").struct.field("modification"))
-    )
+    # Étape 1 : On s'assure que toutes colonnes de modification possibles sont présentes dans le lf
+    for column in modification_columns:
+        if column not in lf.collect_schema().names():
+            lf.with_columns(pl.lit(None).alias(column))
 
-    # Étape 3: Extraire les données des modifications
-    lf_mods = lf_exploded.select(
+    # Étape 2: Extraire les données des modifications en renommant les colonnes
+    # on ne conserve pas modification_id car on le recrée nous-mêmes, par sécurité
+    modification_columns.remove("modification_id")
+    lf_mods = lf.select(
         "uid",
-        pl.col("modification")
-        .struct.field("dateNotificationModification")
-        .alias("dateNotification"),
-        pl.col("modification")
-        .struct.field("datePublicationDonneesModification")
-        .alias("datePublicationDonnees"),
-        pl.col("modification").struct.field("montant").alias("montant"),
-        pl.col("modification").struct.field("dureeMois").alias("dureeMois"),
-        pl.col("modification").struct.field("titulaires").alias("titulaires"),
+        pl.col("modification_dateNotification").alias("dateNotification"),
+        pl.col("modification_datePublicationDonneesModification").alias(
+            "datePublicationDonnees"
+        ),
+        pl.col("modification_montant").alias("montant"),
+        pl.col("modification_dureeMois").alias("dureeMois"),
+        pl.col("modification_titulaires").alias("titulaires"),
     )
 
-    # Étape 4: Joindre les données de base pour chaque ligne de modification
+    # Étape 3: Dédupliquer et créer une copie du DataFrame initial sans les colonnes "modifications"
+    # On peut dédupliquer aveuglément car la seule chose qui varient dans les lignes d'un même
+    # uid, c'est les données de modifs
+    lf = lf.unique("uid")
+    lf_base = lf.select(
+        "uid",
+        "dateNotification",
+        "datePublicationDonnees",
+        "montant",
+        "dureeMois",
+        "titulaires",
+    )
+
+    # Étape 4: Ajouter le modification_id et la colonne données actuelles pour chaque modif
     lf_concat = (
         pl.concat(
             [
@@ -177,8 +194,8 @@ def replace_with_modification_data(lf: pl.LazyFrame):
                 "montant",
                 "dureeMois",
                 "titulaires",
-                "modifications",
             ]
+            + modification_columns
         ),
         on="uid",
         how="left",
