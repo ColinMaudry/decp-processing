@@ -1,204 +1,228 @@
-import io
-import json
-import re
+import tempfile
+from collections.abc import Iterator
+from functools import partial
+from pathlib import Path
 
+import ijson
 import orjson
 import polars as pl
-import xmltodict
-from httpx import get
-from polars.polars import ColumnNotFoundError
+from httpx import stream
+from lxml import etree
 from prefect import task
 
-from config import (
-    COLUMNS_TO_DROP,
-    DATE_NOW,
-    FORMAT_DETECTION_QUORUM,
-)
-from schemas import MARCHE_SCHEMA_2022
-from tasks.clean import load_and_fix_json
-from tasks.detect_format import detect_format
-
-
-def clean_xml(xml_str):
-    # Suppresion des caractères invalides XML 1.0
-    return re.sub(r"[^\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD]", "", xml_str)
-
-
-def parse_xml(url: str) -> dict:
-    """
-    Récupère et parse un fichier XML à partir d'une URL, puis le convertit en JSON.
-
-    Cette fonction est conçue pour traiter les fichiers XML issus des DECP. Elle applique
-    un post-traitement sur les nœuds "modifications" et "titulaires" pour uniformiser leur structure.
-
-    Paramètre :
-        url (str) : L'URL du fichier XML à récupérer et à parser.
-
-    Retour :
-        dict : Une représentation sous forme de dictionnaire du contenu XML, avec une structure adaptée pour un usage en JSON.
-    """
-
-    request = get(url, follow_redirects=True)
-    data = xmltodict.parse(
-        clean_xml(request.text),
-        force_list={
-            "considerationSociale",
-            "considerationEnvironnementale",
-            "modaliteExecution",
-            "technique",
-            "typePrix",
-            "modification",
-            "titulaire",
-            "marche",
-        },
-    )
-
-    if "marches" in data:
-        if "marche" in data["marches"]:
-            # modifications des titulaires et des modifications
-            for row in data["marches"]["marche"]:
-                mods = row.get("modifications", [])
-                if mods is None:
-                    row["modifications"] = []
-                elif "modification" in mods:
-                    mods_list = mods["modification"]
-                    row["modifications"] = [{"modification": m} for m in mods_list]
-
-                titulaires = row.get("titulaires", [])
-                if titulaires is None:
-                    row["titulaires"] = []
-                elif "titulaire" in titulaires:
-                    titulaires_list = titulaires["titulaire"]
-                    row["titulaires"] = [{"titulaire": t} for t in titulaires_list]
-
-            for row in data["marches"]["marche"]:
-                mods = row.get("modifications", [])
-                _mods = []
-                for mod in mods:
-                    if "titulaires" in mod["modification"]:
-                        mod["modification"].update(
-                            {"titulaires": [mod["modification"]["titulaires"]]}
-                        )
-                    _mods.append(mod)
-
-                if _mods:
-                    row["modifications"] = _mods
-
-    return data
+from config import DATE_NOW, DIST_DIR, FORMAT_DECP_2019, FORMATS_DECP, FormatDECP
+from tasks.output import sink_to_files
 
 
 @task(retries=3, retry_delay_seconds=3)
-def get_json(file_info: dict) -> dict:
-    url = file_info["url"]
-    json_content = {}
-
-    if url.startswith("https"):
-        # Prod file
-        if file_info["format"] == "json":
-            request = get(url, follow_redirects=True)
-            json_content = json.loads(request.text)
-        elif file_info["format"] == "xml":
-            # Conversion du XML en JSON
-            json_content = parse_xml(url)
-        return json_content
+def stream_get(url: str, chunk_size=1024**2):
+    if url.startswith("http"):
+        with stream("GET", url, follow_redirects=True) as response:
+            yield from response.iter_bytes(chunk_size)
     else:
-        # Test file, pas de téléchargement
-        f = open(url, "rb")
-        return json.load(f)
+        # Données de test.
+        with open(url, "rb") as f:
+            for chunk in iter(partial(f.read, chunk_size), b""):
+                yield chunk
 
 
 @task
-def get_resource(r: dict) -> pl.LazyFrame or None:
-    """Téléchargement de la ressource."""
+def get_resource(
+    r: dict, decp_formats: list[FormatDECP] | None = None
+) -> pl.LazyFrame | None:
+    if decp_formats is None:
+        decp_formats = FORMATS_DECP
 
-    date_now = DATE_NOW
-
-    artefact = []
-    artifact_row = {}
-
-    # Téléchargement du fichier JSON
-    decp_json = get_json(r)
-
-    # Déterminer le format du fichier
-    format_decp = detect_format(
-        decp_json, FORMAT_DETECTION_QUORUM
-    )  # 'empty', '2019' ou '2022'
-
-    if format_decp == "2022":
-        print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
-        if r["url"].startswith("https"):
-            artifact_row = {
-                "open_data_dataset_id": r["dataset_id"],
-                "open_data_dataset_name": r["dataset_name"],
-                "open_data_filename": r["ori_filename"],
-                "open_data_id": r["id"],
-                "sha1": r["checksum"],
-                "created_at": r["created_at"],
-                "last_modified": r["last_modified"],
-                "filesize": r["filesize"],
-                "views": r["views"],
-            }
-
-        # JSON -> DF
-        df: pl.DataFrame = json_to_df(decp_json)
-
-        artifact_row["open_data_dataset_id"] = r["dataset_id"]
-        artifact_row["open_data_dataset_name"] = r["dataset_name"]
-        artifact_row["download_date"] = date_now
-        artifact_row["columns"] = sorted(df.columns)
-        artifact_row["column_number"] = len(df.columns)
-        artifact_row["row_number"] = df.height
-
-        artefact.append(artifact_row)
-
-        absent_columns = []
-        for col in COLUMNS_TO_DROP:
-            try:
-                df = df.drop(col)
-            except ColumnNotFoundError:
-                absent_columns.append(col)
-
-        lf = df.lazy()
-
-        # Exemple https://www.data.gouv.fr/datasets/5cd57bf68b4c4179299eb0e9/#/resources/bb90091c-f0cb-4a59-ad41-b0ab929aad93
-        resource_web_url = (
-            f"https://www.data.gouv.fr/datasets/{r['dataset_id']}/#/resources/{r['id']}"
-        )
-        lf = lf.with_columns(pl.lit(resource_web_url).alias("sourceOpenData"))
-
-        # Si c'est le dataset des fichiers consolidés du MINEF (decp_minef), on n'ajoute pas de code car ils en ajoutent déjà un
-        if r["dataset_id"] != "5cd57bf68b4c4179299eb0e9":
-            lf = lf.with_columns(pl.lit(r["dataset_code"]).alias("source"))
-
-        return lf
-
+    print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
+    output_path = DIST_DIR / "get" / r["{filename}"]
+    output_path.parent.mkdir(exist_ok=True)
+    url = r["url"]
+    file_format = r["format"]
+    if file_format == "json":
+        format_decp, fields = json_stream_to_parquet(url, output_path, decp_formats)
+    elif file_format == "xml":
+        format_decp, fields = xml_stream_to_parquet(url, output_path, decp_formats)
     else:
-        print(
-            f"▶️  Format non supporté : {format_decp} {r['ori_filename']} ({r['dataset_name']})"
+        print(f"▶️ Format de fichier non supporté : {file_format} ({r['dataset_name']})")
+        return
+
+    lf = pl.scan_parquet(output_path.with_extension(".parquet"))
+
+    # TODO: do something with it
+    artifact_row = gen_artifact_row(r, format_decp, lf, url, fields)  # noqa
+
+    # Exemple https://www.data.gouv.fr/datasets/5cd57bf68b4c4179299eb0e9/#/resources/bb90091c-f0cb-4a59-ad41-b0ab929aad93
+    resource_web_url = (
+        f"https://www.data.gouv.fr/datasets/{r['dataset_id']}/#/resources/{r['id']}"
+    )
+    lf = lf.with_columns(
+        pl.lit(resource_web_url).alias("sourceOpenData"),
+        pl.lit(r["dataset_code"]).alias("source"),
+    )
+    return lf
+
+
+def find_json_format(chunk, decp_formats):
+    found_marche = False
+    for fmt in decp_formats:
+        fmt.coroutine_ijson.send(chunk)
+        if len(fmt.liste_marches_ijson) > 0:
+            # Le parser a trouvé au moins un marché correspondant à ce format, donc on a
+            # trouvé le bon format.
+            found_marche = True
+            right_fmt = fmt
+            break
+    if not found_marche:
+        raise ValueError("Pas de match trouvé parmis les formats passés")
+    return right_fmt
+
+
+@task
+def json_stream_to_parquet(
+    url: str, output_path: Path, decp_formats: list[FormatDECP] | None = None
+) -> tuple[FormatDECP, set[str]]:
+    if decp_formats is None:
+        decp_formats = FORMATS_DECP
+
+    fields = set()
+    for fmt in decp_formats:
+        fmt.liste_marches_ijson = ijson.sendable_list()
+        fmt.coroutine_ijson = ijson.items_coro(
+            fmt.liste_marches_ijson, f"{fmt.prefixe_json_marches}.item", use_float=True
         )
-        return None
+
+    with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson") as tmp_file:
+        chunk_iter = stream_get(url)
+
+        # In first iteration, will find the right format
+        chunk = next(chunk_iter)
+        chunk = chunk.replace(b"NaN,", b"null,")
+        right_fmt = find_json_format(chunk, decp_formats)
+
+        for marche in right_fmt.liste_marches_ijson:
+            new_fields = write_marche_rows(marche, tmp_file)
+            fields = fields.union(new_fields)
+
+        del right_fmt.liste_marches_ijson[:]
+
+        for chunk in chunk_iter:
+            chunk = chunk.replace(b"NaN,", b"null,")
+            right_fmt.coroutine_ijson.send(chunk)
+            for marche in right_fmt.liste_marches_ijson:
+                new_fields = write_marche_rows(marche, tmp_file)
+                fields = fields.union(new_fields)
+
+            del right_fmt.liste_marches_ijson[:]
+
+        right_fmt.coroutine_ijson.close()
+
+        lf = pl.scan_ndjson(tmp_file.name, schema=right_fmt.schema)
+        sink_to_files(lf, output_path, file_format="parquet")
+
+    return right_fmt, fields
 
 
-def json_to_df(decp_json) -> pl.DataFrame:
-    ndjson_filelike = json_to_ndjson(decp_json)
-    schema = MARCHE_SCHEMA_2022
-    dff = pl.read_ndjson(ndjson_filelike, schema=schema)
-    return dff
+@task
+def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[FormatDECP, set[str]]:
+    fields = set()
+    parser = etree.XMLPullParser(tag="marche")
+    with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson") as tmp_file:
+        for chunk in stream_get(url):
+            parser.feed(chunk)
+            for _, elem in parser.read_events():
+                _, marche = xml_to_dict(elem)
+                new_fields = write_marche_rows(marche, tmp_file)
+                fields = fields.union(new_fields)
+        lf = pl.scan_ndjson(tmp_file.name, schema=FORMAT_DECP_2019.schema)
+        sink_to_files(lf, output_path, file_format="parquet")
+    return FORMAT_DECP_2019, fields
 
 
-def json_to_ndjson(decp_json: dict) -> io.BytesIO:
-    _data = load_and_fix_json(decp_json)
+def xml_to_dict(element: etree.Element):
+    return element.tag, dict(map(xml_to_dict, element)) or element.text
 
-    # Pour l'instant plus de streaming en attendant decp-2019
-    # marches = ijson.items(_data, "item", use_float=True)
-    marches: list = _data
 
-    buffer = io.BytesIO()
-    for marche in marches:
-        # Aplatissement de acheteur et lieuExecution (acheteur_id, etc.)
-        marche = pl.convert.normalize._simple_json_normalize(
-            marche, "_", 10, lambda x: x
+def write_marche_rows(marche: dict, file) -> set[str]:
+    """Ajout d'une ligne ndjson pour chaque modification/version du marché."""
+    fields = set()
+    for mod in yield_modifications(marche):
+        file.write(orjson.dumps(mod))
+        file.write(b"\n")
+        fields = fields.union(mod.keys())
+    return fields
+
+
+def yield_modifications(row: dict, separator=".") -> Iterator[dict]:
+    """Pour chaque modification, génère un objet/dict marché aplati."""
+    raw_mods = row.pop("modifications", [])
+    # Couvre le format 2022:
+    if isinstance(raw_mods, dict) and "modification" in raw_mods:
+        raw_mods = raw_mods["modification"]
+    # Couvre le (non-)format dans lequel "modifications" ou "modification" mène
+    # directement à un dict contenant les métadonnées liées à une modification.
+    if isinstance(raw_mods, dict):
+        raw_mods = [raw_mods]
+
+    raw_mods = [] if raw_mods is None else raw_mods
+
+    mods = [{}] + raw_mods
+    for i, mod in enumerate(mods):
+        mod["id"] = i
+        if "modification" in mod:
+            mod = mod["modification"]
+        titulaires = norm_titulaires(mod)
+        if titulaires is not None:
+            mod["titulaires"] = titulaires
+        row["modification"] = mod
+        yield pl.convert.normalize._simple_json_normalize(
+            row, separator, 10, lambda x: x
         )
-        buffer.write(orjson.dumps(marche))
-        buffer.write(b"\n")
-    return buffer
+
+
+def norm_titulaires(titulaires):
+    if isinstance(titulaires, list):
+        titulaires_clean = []
+        for t in titulaires:
+            if isinstance(t, dict):
+                titulaires_clean.append(norm_titulaire(t))
+            elif isinstance(t, list):
+                # Traite les listes de titulaires écrites en listes de listes.
+                for inner_t in t:
+                    if isinstance(inner_t, dict):
+                        titulaires_clean.append(norm_titulaire(inner_t))
+        return titulaires_clean
+    return None
+
+
+def norm_titulaire(titulaire: dict):
+    if "titulaire" in titulaire:
+        titulaire = titulaire["titulaire"]
+    return titulaire
+
+
+def gen_artifact_row(
+    file_info: dict, format: FormatDECP, lf: pl.LazyFrame, url: str, fields: set[str]
+):
+    artifact_row = {
+        "open_data_dataset_id": file_info["dataset_id"],
+        "open_data_dataset_name": file_info["dataset_name"],
+        "download_date": DATE_NOW,
+        "data_fields": list(fields),
+        "data_fields_number": len(fields),
+        "columns": sorted(format.schema.keys()),
+        "column_number": len(format.schema),
+        "row_number": lf.select(pl.len()).collect().item(),
+    }
+
+    online_artifact_row = {
+        "open_data_filename": file_info["ori_filename"],
+        "open_data_id": file_info["id"],
+        "sha1": file_info["checksum"],
+        "created_at": file_info["created_at"],
+        "last_modified": file_info["last_modified"],
+        "filesize": file_info["filesize"],
+        "views": file_info["views"],
+    }
+    if url.startswith("http"):
+        artifact_row |= online_artifact_row
+    return artifact_row

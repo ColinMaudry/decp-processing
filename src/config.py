@@ -1,10 +1,15 @@
 import json
 import os
 import shutil
+from collections.abc import Coroutine
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
+from ijson import sendable_list
+
+from schemas import SCHEMA_MARCHE_2019, SCHEMA_MARCHE_2022
 
 dotenv_path = find_dotenv()
 if dotenv_path == "":
@@ -14,9 +19,6 @@ if dotenv_path == "":
     shutil.copyfile(template_dotenv_path, dotenv_path)
 
 load_dotenv(dotenv_path, override=False)
-
-# Seuil de confiance pour la détection du format des données - en pratique c'est inutile car il n'y a qu'un format par fichier
-FORMAT_DETECTION_QUORUM = 0.7
 
 # Nombre maximal de workers utilisables par Prefect. Défaut : 16
 MAX_PREFECT_WORKERS = int(os.getenv("MAX_PREFECT_WORKERS", 16))
@@ -136,3 +138,17 @@ EXCLUDED_RESOURCES = [
     "59ba0edb-cf94-4bf1-a546-61f561553917",  # decp-2022.json : format bizarre, entre 2019 et 2022 ~8000 marchés
     "16962018-5c31-4296-9454-5998585496d2",  # decp-2019.json : format DECP 2019, pas encore supporté
 ]
+
+
+@dataclass
+class FormatDECP:
+    label: str
+    schema: dict
+    prefixe_json_marches: str
+    liste_marches_ijson: sendable_list | None = None
+    coroutine_ijson: Coroutine | None = None
+
+
+FORMAT_DECP_2019 = FormatDECP("2019", SCHEMA_MARCHE_2019, "marches")
+FORMAT_DECP_2022 = FormatDECP("2022", SCHEMA_MARCHE_2022, "marches.marche")
+FORMATS_DECP = [FORMAT_DECP_2019, FORMAT_DECP_2022]

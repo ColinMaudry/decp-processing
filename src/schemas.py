@@ -1,6 +1,6 @@
 import polars as pl
 
-TITULAIRE_SCHEMA_2022 = pl.Struct(
+SCHEMA_TITULAIRE_2022 = pl.Struct(
     {
         "titulaire": pl.Struct(
             {
@@ -11,63 +11,86 @@ TITULAIRE_SCHEMA_2022 = pl.Struct(
     }
 )
 
-MODIFICATION_SCHEMA_2022 = pl.Struct(
+
+SCHEMA_TITULAIRE_2019 = pl.Struct(
     {
-        "modification": pl.Struct(
-            {
-                "id": pl.String,
-                # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
-                "dateNotificationModification": pl.String,
-                "datePublicationDonneesModification": pl.String,
-                "montant": pl.String,
-                "dureeMois": pl.String,
-                "titulaires": pl.List(TITULAIRE_SCHEMA_2022),
-            }
-        )
+        "typeIdentifiant": pl.String,
+        "id": pl.String,
     }
 )
 
-MODIFICATION_SCHEMA_PLAT_2022 = {
-    "modification.id": pl.String,  # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
+SCHEMA_MODIFICATION_BASE = {
+    "modification.id": pl.Int32,  # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
+    "modification.objetModification": pl.String,
     "modification.dateNotificationModification": pl.String,
     "modification.datePublicationDonneesModification": pl.String,
+    "modification.typeIdentifiant": pl.String,
     "modification.montant": pl.String,
+    "modification.dateSignatureModification": pl.String,
     "modification.dureeMois": pl.String,
-    "modification.titulaires.typeIdentifiant": pl.String,
-    "modification.titulaires.id": pl.String,
+}
+
+SCHEMA_MODIFICATION_2022 = {
+    **SCHEMA_MODIFICATION_BASE,
+    "modification.titulaires": pl.List(SCHEMA_TITULAIRE_2022),
+}
+
+SCHEMA_MODIFICATION_2019 = {
+    **SCHEMA_MODIFICATION_BASE,
+    "modification.titulaires": pl.List(SCHEMA_TITULAIRE_2019),
 }
 
 
-MARCHE_SCHEMA_2022 = {
+SCHEMA_MARCHE_BASE = {
     "procedure": pl.String,
     "nature": pl.String,
     "codeCPV": pl.String,
     "dureeMois": pl.String,
     "datePublicationDonnees": pl.String,
-    "titulaires": pl.List(TITULAIRE_SCHEMA_2022),
-    "modifications": pl.List(MODIFICATION_SCHEMA_2022),
     "id": pl.String,
     "formePrix": pl.String,
     "dateNotification": pl.String,
     "objet": pl.String,
     "montant": pl.String,
-    "acheteur_id": pl.String,
+    "acheteur.id": pl.String,
     "source": pl.String,
-    "lieuExecution_code": pl.String,
-    "lieuExecution_typeCode": pl.String,
+    "lieuExecution.code": pl.String,
+    "lieuExecution.typeCode": pl.String,
+    "_type": pl.String,
     "uid": pl.String,
-    "considerationsSociales": pl.Struct({"considerationSociale": pl.List(pl.String)}),
-    "considerationsEnvironnementales": pl.Struct(
-        {"considerationEnvironnementale": pl.List(pl.String)}
-    ),
-    "marcheInnovant": pl.String,
-    "attributionAvance": pl.String,
-    "sousTraitanceDeclaree": pl.String,
+    "uuid": pl.String,
+    # "modaliteExecution": pl.List(pl.String),
+    "marcheInnovant": pl.Boolean,
+    "attributionAvance": pl.Boolean,
+    "sousTraitanceDeclaree": pl.Boolean,
     "ccag": pl.String,
     "offresRecues": pl.String,
     "typeGroupementOperateurs": pl.String,
     "idAccordCadre": pl.String,
+    # "technique": pl.List(pl.String),
+    "TypePrix": pl.String,
     "tauxAvance": pl.String,
     "origineUE": pl.String,
     "origineFrance": pl.String,
+    "created_at": pl.String,
+    "typesPrix": pl.List(pl.String),
+    "typePrix": pl.String,
+    "term.acheteur.id": pl.String,
+    "updated_at": pl.String,
+}
+
+SCHEMA_MARCHE_2019 = {
+    **SCHEMA_MARCHE_BASE,
+    "titulaires": pl.List(SCHEMA_TITULAIRE_2019),
+    "considerationsSociales": pl.List(pl.String),
+    "considerationsEnvironnementales": pl.List(pl.String),
+    **SCHEMA_MODIFICATION_2019,
+}
+
+SCHEMA_MARCHE_2022 = {
+    **SCHEMA_MARCHE_BASE,
+    "titulaires": pl.List(SCHEMA_TITULAIRE_2022),
+    "considerationsSociales.considerationSociale": pl.List(pl.String),
+    "considerationsEnvironnementales.considerationEnvironnementale": pl.List(pl.String),
+    **SCHEMA_MODIFICATION_2022,
 }
