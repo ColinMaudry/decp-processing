@@ -34,7 +34,7 @@ def get_resource(
         decp_formats = FORMATS_DECP
 
     print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
-    output_path = DIST_DIR / "get" / r["{filename}"]
+    output_path = DIST_DIR / "get" / r["filename"]
     output_path.parent.mkdir(exist_ok=True)
     url = r["url"]
     file_format = r["format"]
@@ -46,7 +46,7 @@ def get_resource(
         print(f"▶️ Format de fichier non supporté : {file_format} ({r['dataset_name']})")
         return
 
-    lf = pl.scan_parquet(output_path.with_extension(".parquet"))
+    lf = pl.scan_parquet(output_path.with_suffix(".parquet"))
 
     # TODO: do something with it
     artifact_row = gen_artifact_row(r, format_decp, lf, url, fields)  # noqa
@@ -64,6 +64,7 @@ def get_resource(
 
 def find_json_format(chunk, decp_formats):
     found_marche = False
+    right_fmt = None
     for fmt in decp_formats:
         fmt.coroutine_ijson.send(chunk)
         if len(fmt.liste_marches_ijson) > 0:
@@ -97,6 +98,8 @@ def json_stream_to_parquet(
         # In first iteration, will find the right format
         chunk = next(chunk_iter)
         chunk = chunk.replace(b"NaN,", b"null,")
+        chunk = chunk.replace(b'"NC",', b"null,")
+
         right_fmt = find_json_format(chunk, decp_formats)
 
         for marche in right_fmt.liste_marches_ijson:
@@ -107,6 +110,8 @@ def json_stream_to_parquet(
 
         for chunk in chunk_iter:
             chunk = chunk.replace(b"NaN,", b"null,")
+            chunk = chunk.replace(b'"NC",', b"null,")
+
             right_fmt.coroutine_ijson.send(chunk)
             for marche in right_fmt.liste_marches_ijson:
                 new_fields = write_marche_rows(marche, tmp_file)

@@ -135,7 +135,7 @@ def list_resources(datasets: list[dict]) -> list[dict]:
     all_resources = []
 
     for dataset in datasets:
-        # Données de test ./data/datasets_reference_test.json
+        # Données de test .tests/data/datasets_reference_test.json
         if dataset["id"].startswith("test_"):
             all_resources += dataset["resources"]
 
@@ -166,7 +166,7 @@ def list_resources(datasets: list[dict]) -> list[dict]:
                         # Dataset id en premier pour grouper les ressources d'un même dataset ensemble
                         # Nom du fichier pour le distinguer des autres fichiers du dataset
                         # Un bout d'id de ressource pour les cas où plusieurs fichiers ont le même nom dans le même dataset (ex : Occitanie)
-                        "file_name": f"{dataset['id']}_{resource['title'].lower().replace('.json', '').replace('.xml', '').replace('.', '_')}_{resource['id'][:3]}",
+                        "filename": f"{dataset['id']}_{resource['title'].lower().replace('.json', '').replace('.xml', '').replace('.', '_')}_{resource['id'][:3]}",
                         "url": resource["latest"],
                         "format": resource["format"],
                         "created_at": resource["created_at"],

@@ -72,11 +72,13 @@ SCHEMA_MARCHE_BASE = {
     "tauxAvance": pl.String,
     "origineUE": pl.String,
     "origineFrance": pl.String,
-    "created_at": pl.String,
-    "typesPrix": pl.List(pl.String),
-    "typePrix": pl.String,
-    "term.acheteur.id": pl.String,
-    "updated_at": pl.String,
+    # Les champs listes de strings ne sont pas encore gérés
+    # Présents parfois dans les données mais non pertinents :
+    # "created_at": pl.String,
+    # "typesPrix": pl.List(pl.String),
+    # "typePrix": pl.String,
+    # "term.acheteur.id": pl.String,
+    # "updated_at": pl.String,
 }
 
 SCHEMA_MARCHE_2019 = {
