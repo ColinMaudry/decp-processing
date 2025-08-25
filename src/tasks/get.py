@@ -124,7 +124,7 @@ def json_stream_to_parquet(
         lf = pl.scan_ndjson(tmp_file.name, schema=right_fmt.schema)
         sink_to_files(lf, output_path, file_format="parquet")
 
-    return right_fmt, fields
+    return fields
 
 
 @task
@@ -140,7 +140,7 @@ def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[FormatDECP, set[
                 fields = fields.union(new_fields)
         lf = pl.scan_ndjson(tmp_file.name, schema=FORMAT_DECP_2019.schema)
         sink_to_files(lf, output_path, file_format="parquet")
-    return FORMAT_DECP_2019, fields
+    return fields
 
 
 def xml_to_dict(element: etree.Element):
@@ -205,17 +205,13 @@ def norm_titulaire(titulaire: dict):
     return titulaire
 
 
-def gen_artifact_row(
-    file_info: dict, format: FormatDECP, lf: pl.LazyFrame, url: str, fields: set[str]
-):
+def gen_artifact_row(file_info: dict, lf: pl.LazyFrame, url: str, fields: set[str]):
     artifact_row = {
         "open_data_dataset_id": file_info["dataset_id"],
         "open_data_dataset_name": file_info["dataset_name"],
         "download_date": DATE_NOW,
         "data_fields": list(fields),
         "data_fields_number": len(fields),
-        "columns": sorted(format.schema.keys()),
-        "column_number": len(format.schema),
         "row_number": lf.select(pl.len()).collect().item(),
     }
 
