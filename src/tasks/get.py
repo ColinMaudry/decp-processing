@@ -44,7 +44,7 @@ def get_resource(
         format_decp, fields = xml_stream_to_parquet(url, output_path, decp_formats)
     else:
         print(f"▶️ Format de fichier non supporté : {file_format} ({r['dataset_name']})")
-        return
+        return None
 
     lf = pl.scan_parquet(output_path.with_suffix(".parquet"))
 
