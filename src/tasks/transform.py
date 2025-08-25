@@ -114,9 +114,9 @@ def replace_with_modification_data(lf: pl.LazyFrame):
     ]
 
     # Étape 1 : On s'assure que toutes colonnes de modification possibles sont présentes dans le lf
-    for column in modification_columns + ["modification_id"]:
+    for column in modification_columns + ["modification_modification_id"]:
         if column not in lf.collect_schema().names():
-            lf.with_columns(pl.lit(None).alias(column))
+            lf = lf.with_columns(pl.lit(None).alias(column))
 
     # Étape 2: Extraire les données des modifications en renommant les colonnes
     # on ne conserve pas modification_id car on le recrée nous-mêmes, par sécurité
@@ -198,7 +198,7 @@ def replace_with_modification_data(lf: pl.LazyFrame):
                 "montant",
                 "dureeMois",
                 "titulaires",
-                "modification_id",
+                "modification_modification_id",
             ]
             + modification_columns
         ),
