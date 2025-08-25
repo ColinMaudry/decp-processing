@@ -20,24 +20,24 @@ SCHEMA_TITULAIRE_2019 = pl.Struct(
 )
 
 SCHEMA_MODIFICATION_BASE = {
-    "modification.id": pl.Int32,  # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
-    "modification.objetModification": pl.String,
-    "modification.dateNotificationModification": pl.String,
-    "modification.datePublicationDonneesModification": pl.String,
-    "modification.typeIdentifiant": pl.String,
-    "modification.montant": pl.String,
-    "modification.dateSignatureModification": pl.String,
-    "modification.dureeMois": pl.String,
+    "modification_id": pl.Int32,  # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
+    "modification_objetModification": pl.String,
+    "modification_dateNotificationModification": pl.String,
+    "modification_datePublicationDonneesModification": pl.String,
+    "modification_typeIdentifiant": pl.String,
+    "modification_montant": pl.String,
+    "modification_dateSignatureModification": pl.String,
+    "modification_dureeMois": pl.String,
 }
 
 SCHEMA_MODIFICATION_2022 = {
     **SCHEMA_MODIFICATION_BASE,
-    "modification.titulaires": pl.List(SCHEMA_TITULAIRE_2022),
+    "modification_titulaires": pl.List(SCHEMA_TITULAIRE_2022),
 }
 
 SCHEMA_MODIFICATION_2019 = {
     **SCHEMA_MODIFICATION_BASE,
-    "modification.titulaires": pl.List(SCHEMA_TITULAIRE_2019),
+    "modification_titulaires": pl.List(SCHEMA_TITULAIRE_2019),
 }
 
 
@@ -52,10 +52,10 @@ SCHEMA_MARCHE_BASE = {
     "dateNotification": pl.String,
     "objet": pl.String,
     "montant": pl.String,
-    "acheteur.id": pl.String,
+    "acheteur_id": pl.String,
     "source": pl.String,
-    "lieuExecution.code": pl.String,
-    "lieuExecution.typeCode": pl.String,
+    "lieuExecution_code": pl.String,
+    "lieuExecution_typeCode": pl.String,
     "_type": pl.String,
     "uid": pl.String,
     "uuid": pl.String,

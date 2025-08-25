@@ -152,7 +152,7 @@ def write_marche_rows(marche: dict, file) -> set[str]:
     return fields
 
 
-def yield_modifications(row: dict, separator=".") -> Iterator[dict]:
+def yield_modifications(row: dict, separator="_") -> Iterator[dict]:
     """Pour chaque modification, génère un objet/dict marché aplati."""
     raw_mods = row.pop("modifications", [])
     # Couvre le format 2022:
