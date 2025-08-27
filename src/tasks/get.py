@@ -63,19 +63,13 @@ def get_resource(
 
 
 def find_json_format(chunk, decp_formats):
-    found_marche = False
-    right_fmt = None
     for fmt in decp_formats:
         fmt.coroutine_ijson.send(chunk)
         if len(fmt.liste_marches_ijson) > 0:
             # Le parser a trouvé au moins un marché correspondant à ce format, donc on a
             # trouvé le bon format.
-            found_marche = True
-            right_fmt = fmt
-            break
-    if not found_marche:
-        raise ValueError("Pas de match trouvé parmis les formats passés")
-    return right_fmt
+            return fmt
+    raise ValueError("Pas de match trouvé parmis les formats passés")
 
 
 @task
