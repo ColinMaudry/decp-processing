@@ -92,7 +92,6 @@ def json_stream_to_parquet(
         # In first iteration, will find the right format
         chunk = next(chunk_iter)
         chunk = chunk.replace(b"NaN,", b"null,")
-        chunk = chunk.replace(b'"NC",', b"null,")
 
         right_fmt = find_json_format(chunk, decp_formats)
 
@@ -104,7 +103,6 @@ def json_stream_to_parquet(
 
         for chunk in chunk_iter:
             chunk = chunk.replace(b"NaN,", b"null,")
-            chunk = chunk.replace(b'"NC",', b"null,")
 
             right_fmt.coroutine_ijson.send(chunk)
             for marche in right_fmt.liste_marches_ijson:
@@ -116,6 +114,9 @@ def json_stream_to_parquet(
         right_fmt.coroutine_ijson.close()
 
         lf = pl.scan_ndjson(tmp_file.name, schema=right_fmt.schema)
+
+        # Cette ligne ne remplace pas les "NC". Même chose avec replace_strict()
+        lf = lf.with_columns(pl.all().replace("NC", None))
         sink_to_files(lf, output_path, file_format="parquet")
 
     return fields
