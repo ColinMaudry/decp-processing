@@ -49,7 +49,7 @@ def get_resource(
     lf = pl.scan_parquet(output_path.with_suffix(".parquet"))
 
     # TODO: do something with it
-    artifact_row = gen_artifact_row(r, format_decp, lf, url, fields)  # noqa
+    artifact_row = gen_artifact_row(r, lf, url, fields)  # noqa
 
     # Exemple https://www.data.gouv.fr/datasets/5cd57bf68b4c4179299eb0e9/#/resources/bb90091c-f0cb-4a59-ad41-b0ab929aad93
     resource_web_url = (
