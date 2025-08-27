@@ -26,9 +26,6 @@ SCHEMA_MODIFICATION_BASE = {
     "modification_typeIdentifiant": pl.String,
     "modification_montant": pl.String,
     "modification_dureeMois": pl.String,
-    # Format 2019
-    # "modification_objetModification": pl.String,
-    # "modification_dateSignatureModification": pl.String,
 }
 
 SCHEMA_MODIFICATION_2022 = {
@@ -39,6 +36,9 @@ SCHEMA_MODIFICATION_2022 = {
 SCHEMA_MODIFICATION_2019 = {
     **SCHEMA_MODIFICATION_BASE,
     "modification_titulaires": pl.List(SCHEMA_TITULAIRE_2019),
+    # TODO ajouter la gestion de ces champs
+    # "modification_objetModification": pl.String,
+    # "modification_dateSignatureModification": pl.String,
 }
 
 
