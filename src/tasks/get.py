@@ -115,8 +115,6 @@ def json_stream_to_parquet(
 
         lf = pl.scan_ndjson(tmp_file.name, schema=right_fmt.schema)
 
-        # Cette ligne ne remplace pas les "NC". Même chose avec replace_strict()
-        lf = lf.with_columns(pl.all().replace("NC", None))
         sink_to_files(lf, output_path, file_format="parquet")
 
     return fields

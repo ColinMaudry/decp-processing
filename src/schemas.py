@@ -1,5 +1,10 @@
 import polars as pl
 
+# Rappel : avec pl.scan_ndjson() (pl.DataFrame([some data]) fonctionne différemment) :
+# - si le champ en entrée est dans le schéma, il est ingéré (erreur au moment du collect() si mismatch de dtype)
+# - si le champ en entrée n'est pas dans le schéma, il est ignoré
+# - si un champ est présent dans le schéma mais absent en entrée, il est ajouté mais null
+
 SCHEMA_TITULAIRE_2022 = pl.Struct(
     {
         "titulaire": pl.Struct(
