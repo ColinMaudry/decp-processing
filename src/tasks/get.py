@@ -39,9 +39,9 @@ def get_resource(
     url = r["url"]
     file_format = r["format"]
     if file_format == "json":
-        format_decp, fields = json_stream_to_parquet(url, output_path, decp_formats)
+        fields = json_stream_to_parquet(url, output_path, decp_formats)
     elif file_format == "xml":
-        format_decp, fields = xml_stream_to_parquet(url, output_path, decp_formats)
+        fields = xml_stream_to_parquet(url, output_path, decp_formats)
     else:
         print(f"▶️ Format de fichier non supporté : {file_format} ({r['dataset_name']})")
         return None
