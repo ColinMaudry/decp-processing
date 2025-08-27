@@ -14,23 +14,12 @@ def clean_decp(lf: pl.LazyFrame) -> pl.LazyFrame:
     # Suppression des marchés qui n'ont pas d'id ou d'acheteur_id
     lf = lf.filter(pl.col("id").is_not_null() & pl.col("acheteur_id").is_not_null())
 
-    print(lf.collect().select("dureeMois").unique())
-
     # Nettoyage des identifiants de marchés
     lf = lf.with_columns(pl.col("id").str.replace_all(r"[ ,\\./]", "_"))
-    print(lf.collect().select("dureeMois").unique())
+
     # Ajout du champ uid
     # TODO: à déplacer autre part, dans transform
     lf = lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
-    print(lf.collect().select("dureeMois").unique())
-    # NC
-    schema: pl.Schema = lf.collect_schema()
-    booleans_numbers_col = []
-    for col in schema:
-        if schema[col] in [pl.Int16, pl.Int32, pl.Int64, pl.Boolean]:
-            booleans_numbers_col.append(col)
-
-    lf = lf.with_columns(pl.col(pl.Utf8).replace("NC", None))
 
     # Dates
     date_replacements = {
@@ -61,21 +50,18 @@ def clean_decp(lf: pl.LazyFrame) -> pl.LazyFrame:
             {"Marche": "Marché", "subsequent": "subséquent"}
         )
     )
-    print(lf.collect().select("dureeMois").unique())
 
     # Explosion et traitement des modifications
     lf = process_modifications(lf)
-    print(lf.collect().select("dureeMois").unique())
 
     # Explosion des titulaires
     lf = explode_titulaires(lf)
 
-    print(lf.collect().select("dureeMois").unique())
+    # NC
+    lf = lf.with_columns(pl.col(pl.Utf8).replace("NC", None))
 
     # Correction des datatypes
     lf = fix_data_types(lf)
-
-    print(lf.collect().select("dureeMois").unique())
 
     return lf
 
