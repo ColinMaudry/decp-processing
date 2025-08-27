@@ -1,5 +1,4 @@
 import datetime
-import math
 
 import polars as pl
 import polars.selectors as cs
@@ -15,12 +14,23 @@ def clean_decp(lf: pl.LazyFrame) -> pl.LazyFrame:
     # Suppression des marchés qui n'ont pas d'id ou d'acheteur_id
     lf = lf.filter(pl.col("id").is_not_null() & pl.col("acheteur_id").is_not_null())
 
+    print(lf.collect().select("dureeMois").unique())
+
     # Nettoyage des identifiants de marchés
     lf = lf.with_columns(pl.col("id").str.replace_all(r"[ ,\\./]", "_"))
-
+    print(lf.collect().select("dureeMois").unique())
     # Ajout du champ uid
     # TODO: à déplacer autre part, dans transform
     lf = lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
+    print(lf.collect().select("dureeMois").unique())
+    # NC
+    schema: pl.Schema = lf.collect_schema()
+    booleans_numbers_col = []
+    for col in schema:
+        if schema[col] in [pl.Int16, pl.Int32, pl.Int64, pl.Boolean]:
+            booleans_numbers_col.append(col)
+
+    lf = lf.with_columns(pl.col(pl.Utf8).replace("NC", None))
 
     # Dates
     date_replacements = {
@@ -51,15 +61,21 @@ def clean_decp(lf: pl.LazyFrame) -> pl.LazyFrame:
             {"Marche": "Marché", "subsequent": "subséquent"}
         )
     )
+    print(lf.collect().select("dureeMois").unique())
 
     # Explosion et traitement des modifications
     lf = process_modifications(lf)
+    print(lf.collect().select("dureeMois").unique())
 
     # Explosion des titulaires
     lf = explode_titulaires(lf)
 
+    print(lf.collect().select("dureeMois").unique())
+
     # Correction des datatypes
     lf = fix_data_types(lf)
+
+    print(lf.collect().select("dureeMois").unique())
 
     return lf
 
@@ -126,87 +142,3 @@ def fix_data_types(lf: pl.LazyFrame):
         .name.keep()
     ).with_columns(float_cols.fill_nan(None).cast(pl.Boolean).name.keep())
     return lf
-
-
-def clean_decp_json_modifications(input_json_: dict):
-    """
-    Nettoyage des données JSON des DECP pour les modifications des titulaires.
-    Suppression des données qui ne correspondent pas au format attendu (ex: {"typeIdentifiant": "SIRET", "id": "12345678901234"}).
-    """
-    clean_json = []
-    titulaires_cleaned_cpt = 0
-    for entry in input_json_:
-        # entry = {} représentant un marché
-        modifications_entries = entry.get("modifications", []) or []
-        # modifications_entries = [] représentant les modifications du marché
-        clean_modifications_entries = []
-        for modification_entry in modifications_entries:
-            # modification_entry = {} représentant une modification du marché
-            modification_entry_clean = modification_entry["modification"]
-            if "titulaires" in modification_entry_clean.keys():
-                modification_titulaires_clean = []
-                for modification_titulaire in (
-                    modification_entry_clean.get("titulaires", []) or []
-                ):
-                    # mofification_titulaire = {} représentant un titulaire de la modification
-                    if modification_titulaire is not None and isinstance(
-                        modification_titulaire["titulaire"], dict
-                    ):
-                        # Si le titulaire est un dictionnaire, on récupère l'id et le typeIdentifiant
-                        modification_titulaires_clean.append(
-                            {
-                                "titulaire": {
-                                    "typeIdentifiant": modification_titulaire[
-                                        "titulaire"
-                                    ].get("typeIdentifiant"),
-                                    "id": modification_titulaire["titulaire"].get("id"),
-                                }
-                            }
-                        )
-                if modification_titulaires_clean:
-                    modification_entry_clean["titulaires"] = (
-                        modification_titulaires_clean
-                    )
-                else:
-                    modification_entry_clean.pop("titulaires", None)
-                    titulaires_cleaned_cpt += 1
-            clean_modifications_entries.append(
-                {"modification": modification_entry_clean}
-            )
-        entry["modifications"] = clean_modifications_entries
-        clean_json.append(entry)
-    # print(f"Nombre de titulaires nettoyés : {titulaires_cleaned_cpt}")
-    return clean_json
-
-
-def fix_nan_nc(obj):
-    """Paroure tout le JSON pour remplacer NaN et NC par null."""
-    if (isinstance(obj, float) and math.isnan(obj)) or obj == "NC":
-        return None
-    elif isinstance(obj, dict):
-        return {k: fix_nan_nc(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [fix_nan_nc(item) for item in obj]
-    return obj
-
-
-def load_and_fix_json(decp_json: dict):
-    json_data = decp_json["marches"]["marche"]
-
-    # if type(json_data["marches"]):
-    #     json_data = fix_nan_nc(json_data["marches"])
-    # elif type(json_data["marches"]["marche"]) == list:
-    #     json_data = fix_nan_nc(json_data["marches"]["marche"])
-    # else:
-    #     print("Structure de fichier JSON non reconnue")
-    #     print(json_data)
-    #     raise ValueError
-
-    json_data = fix_nan_nc(json_data)
-
-    json_data = clean_decp_json_modifications(json_data)
-
-    # fixed_buffer = io.StringIO()
-    # json.dump(json_data, fixed_buffer)
-    # fixed_buffer.seek(0)  # rewind to beginning so it can be read
-    return json_data
