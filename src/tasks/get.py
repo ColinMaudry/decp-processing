@@ -208,6 +208,7 @@ def gen_artifact_row(file_info: dict, lf: pl.LazyFrame, url: str, fields: set[st
         "row_number": lf.select(pl.len()).collect().item(),
     }
 
+    # TODO trouver un meilleur nom : c'est les métadonnées de ressource data.gouv.fr
     online_artifact_row = {
         "open_data_filename": file_info["ori_filename"],
         "open_data_id": file_info["id"],

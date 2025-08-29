@@ -69,18 +69,17 @@ def clean_decp(lf: pl.LazyFrame) -> pl.LazyFrame:
 def fix_data_types(lf: pl.LazyFrame):
     numeric_dtypes = {
         "dureeMois": pl.Int16,
-        # "dureeMoisModification": pl.Int16,
         # "dureeMoisActeSousTraitance": pl.Int16,
         # "dureeMoisModificationActeSousTraitance": pl.Int16,
         "offresRecues": pl.Int16,
         "montant": pl.Float64,
-        # "montantModification": pl.Float64,
         # "montantActeSousTraitance": pl.Float64,
         # "montantModificationActeSousTraitance": pl.Float64,
         "tauxAvance": pl.Float64,
         # "variationPrixActeSousTraitance": pl.Float64,
         "origineFrance": pl.Float64,
         "origineUE": pl.Float64,
+        "modification_id": pl.Int16,
     }
 
     # Champs numériques
@@ -106,7 +105,7 @@ def fix_data_types(lf: pl.LazyFrame):
         pl.col(dates_col).str.strptime(pl.Date, format="%Y-%m-%d", strict=False)
     )
 
-    # Suppression dans dates dans le futur
+    # Suppression des dates dans le futur
     for col in dates_col:
         lf = lf.with_columns(
             pl.when(pl.col(col) > datetime.datetime.now())
@@ -127,4 +126,5 @@ def fix_data_types(lf: pl.LazyFrame):
         .otherwise(None)
         .name.keep()
     ).with_columns(float_cols.fill_nan(None).cast(pl.Boolean).name.keep())
+
     return lf
