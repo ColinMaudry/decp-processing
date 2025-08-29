@@ -14,7 +14,7 @@ from config import (
     DATE_NOW,
     FORMAT_DETECTION_QUORUM,
 )
-from schemas import MARCHE_SCHEMA_2022
+from schemas import SCHEMA_MARCHE_2022
 from tasks.clean import load_and_fix_json
 from tasks.detect_format import detect_format
 
@@ -181,7 +181,7 @@ def get_resource(r: dict) -> pl.LazyFrame or None:
 
 def json_to_df(decp_json) -> pl.DataFrame:
     ndjson_filelike = json_to_ndjson(decp_json)
-    schema = MARCHE_SCHEMA_2022
+    schema = SCHEMA_MARCHE_2022
     dff = pl.read_ndjson(ndjson_filelike, schema=schema)
     return dff
 
