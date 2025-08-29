@@ -4,7 +4,11 @@ import math
 import polars as pl
 import polars.selectors as cs
 
-from tasks.transform import explode_titulaires, process_modifications
+from tasks.transform import (
+    explode_titulaires,
+    process_modifications,
+    process_string_lists,
+)
 
 
 def clean_decp(lf: pl.LazyFrame) -> pl.LazyFrame:
@@ -51,6 +55,9 @@ def clean_decp(lf: pl.LazyFrame) -> pl.LazyFrame:
             {"Marche": "Marché", "subsequent": "subséquent"}
         )
     )
+
+    # Champs liste
+    lf = process_string_lists(lf)
 
     # Explosion et traitement des modifications
     lf = process_modifications(lf)
