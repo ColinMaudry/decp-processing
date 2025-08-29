@@ -79,6 +79,7 @@ BASE_DF_COLUMNS = [
     "montant",
     "codeCPV",
     "procedure",
+    "techniques",
     "dureeMois",
     "dateNotification",
     "datePublicationDonnees",
@@ -86,6 +87,9 @@ BASE_DF_COLUMNS = [
     "attributionAvance",
     "offresRecues",
     "marcheInnovant",
+    "modaliteExecution",
+    "considerationsSociales",
+    "considerationsEnvironnementales",
     "ccag",
     "sousTraitanceDeclaree",
     "typeGroupementOperateurs",
@@ -103,15 +107,10 @@ BASE_DF_COLUMNS = [
 
 COLUMNS_TO_DROP = [
     # Pas encore incluses
-    "typesPrix",
-    "considerationsEnvironnementales",
-    "considerationsSociales",
-    "techniques",
-    "modalitesExecution",
     "actesSousTraitance",
     "modificationsActesSousTraitance",
     # Inutilisée (on se base sur la date de la modification pour trier les modifications)
-    "modification.id"
+    "modification_id"
     # Champs de concessions
     "_type",  # Marché ou Contrat de concession
     "autoriteConcedante",
