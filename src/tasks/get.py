@@ -77,7 +77,7 @@ def find_json_format(chunk, decp_formats):
     raise ValueError("Pas de match trouvé parmis les formats passés")
 
 
-@task
+@task(persist_result=False)
 def json_stream_to_parquet(
     url: str, output_path: Path, decp_formats: list[FormatDECP] | None = None
 ) -> tuple[FormatDECP, set[str]]:
@@ -125,7 +125,7 @@ def json_stream_to_parquet(
     return fields
 
 
-@task
+@task(persist_result=False)
 def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[FormatDECP, set[str]]:
     fields = set()
     parser = etree.XMLPullParser(tag="marche")
