@@ -28,7 +28,6 @@ SCHEMA_MODIFICATION_BASE = {
     "modification_id": pl.Int32,  # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
     "modification_dateNotificationModification": pl.String,
     "modification_datePublicationDonneesModification": pl.String,
-    "modification_typeIdentifiant": pl.String,
     "modification_montant": pl.String,
     "modification_dureeMois": pl.String,
 }
