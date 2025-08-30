@@ -102,39 +102,21 @@ def replace_with_modification_data(lf: pl.LazyFrame):
     Elle ajoute également la colonne "donneesActuelles" pour indiquer si la modification est la plus récente.
     """
 
-    modification_columns = [
-        "modification_dureeMois",
-        "modification_montant",
-        "modification_titulaires",
-        "modification_datePublicationDonneesModification",
-        "modification_dateNotificationModification",
-        # Format 2019
-        # "modification_dateSignatureModification",
-        # "modification_objetModification"
-    ]
-
-    # Étape 1 : On s'assure que toutes colonnes de modification possibles sont présentes dans le lf
-    for column in modification_columns + ["modification_modification_id"]:
-        if column not in lf.collect_schema().names():
-            lf = lf.with_columns(pl.lit(None).alias(column))
-
-    # Étape 2: Extraire les données des modifications en renommant les colonnes
+    # Étape 1: Extraire les données des modifications en renommant les colonnes
     # on ne conserve pas modification_id car on le recrée nous-mêmes, par sécurité
+    schema = lf.collect_schema().names()
     lf_mods = lf.select(
-        "uid",
-        pl.col("modification_dateNotificationModification").alias("dateNotification"),
-        pl.col("modification_datePublicationDonneesModification").alias(
-            "datePublicationDonnees"
-        ),
-        pl.col("modification_montant").alias("montant"),
-        pl.col("modification_dureeMois").alias("dureeMois"),
-        pl.col("modification_titulaires").alias("titulaires"),
-        # Format 2019
-        # pl.col("modification_objetModification").alias("objetModification"),
-        # pl.col("modification_dateSignatureModification").alias("dateSignatureModification"),
+        cs.by_name("uid")
+        | cs.starts_with("modification_") - cs.by_name("modification_id")
+    ).rename(
+        {
+            column: column.removeprefix("modification_").removesuffix("Modification")
+            for column in schema
+            if column.startswith("modification_") and column != "modification_id"
+        }
     )
 
-    # Étape 3: Dédupliquer et créer une copie du DataFrame initial sans les colonnes "modifications"
+    # Étape 2: Dédupliquer et créer une copie du DataFrame initial sans les colonnes "modifications"
     # On peut dédupliquer aveuglément car la seule chose qui varient dans les lignes d'un même
     # uid, c'est les données de modifs
     lf = lf.unique("uid")
@@ -147,7 +129,7 @@ def replace_with_modification_data(lf: pl.LazyFrame):
         "titulaires",
     )
 
-    # Étape 4: Ajouter le modification_id et la colonne données actuelles pour chaque modif
+    # Étape 3: Ajouter le modification_id et la colonne données actuelles pour chaque modif
     lf_concat = (
         pl.concat(
             [
@@ -182,7 +164,7 @@ def replace_with_modification_data(lf: pl.LazyFrame):
         )
     )
 
-    # Étape 5: Remplir les valeurs nulles en utilisant les dernières valeurs non-nulles pour chaque id
+    # Étape 4: Remplir les valeurs nulles en utilisant les dernières valeurs non-nulles pour chaque id
     lf_concat = lf_concat.with_columns(
         pl.col("montant", "dureeMois", "titulaires")
         .fill_null(strategy="backward")
@@ -198,10 +180,8 @@ def replace_with_modification_data(lf: pl.LazyFrame):
                 "montant",
                 "dureeMois",
                 "titulaires",
-                "modification_modification_id",
             ]
-            + modification_columns
-        ),
+        ).drop(cs.starts_with("modification_")),
         on="uid",
         how="left",
     )
