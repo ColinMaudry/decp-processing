@@ -34,6 +34,11 @@ def get_resource(
         decp_formats = FORMATS_DECP
 
     print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
+
+    if r["filesize"] < 100:
+        print(f"🗑️  {r['ori_filename']} - Ressource ignorée : inférieure à 100 octets.")
+        return None
+
     output_path = DIST_DIR / "get" / r["filename"]
     output_path.parent.mkdir(exist_ok=True)
     url = r["url"]
