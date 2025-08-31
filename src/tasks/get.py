@@ -10,7 +10,7 @@ from httpx import stream
 from lxml import etree
 from prefect import task
 
-from config import DATE_NOW, DIST_DIR, FORMAT_DECP_2019, FORMATS_DECP, FormatDECP
+from config import DATE_NOW, DIST_DIR, SCHEMA_DECP_2019, SCHEMAS_DECP, SchemaDECP
 from tasks.output import sink_to_files
 
 
@@ -28,10 +28,10 @@ def stream_get(url: str, chunk_size=1024**2):
 
 @task
 def get_resource(
-    r: dict, decp_formats: list[FormatDECP] | None = None
+    r: dict, decp_schemas: list[SchemaDECP] | None = None
 ) -> pl.LazyFrame | None:
-    if decp_formats is None:
-        decp_formats = FORMATS_DECP
+    if decp_schemas is None:
+        decp_schemas = SCHEMAS_DECP
 
     print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
 
@@ -44,9 +44,9 @@ def get_resource(
     url = r["url"]
     file_format = r["format"]
     if file_format == "json":
-        fields = json_stream_to_parquet(url, output_path, decp_formats)
+        fields, decp_schema = json_stream_to_parquet(url, output_path, decp_schemas)
     elif file_format == "xml":
-        fields = xml_stream_to_parquet(url, output_path, decp_formats)
+        fields, decp_schema = xml_stream_to_parquet(url, output_path, decp_schemas)
     else:
         print(f"▶️ Format de fichier non supporté : {file_format} ({r['dataset_name']})")
         return None
@@ -79,13 +79,13 @@ def find_json_format(chunk, decp_formats):
 
 @task(persist_result=False)
 def json_stream_to_parquet(
-    url: str, output_path: Path, decp_formats: list[FormatDECP] | None = None
-) -> tuple[FormatDECP, set[str]]:
-    if decp_formats is None:
-        decp_formats = FORMATS_DECP
+    url: str, output_path: Path, decp_schemas: list[SchemaDECP] | None = None
+) -> tuple[SchemaDECP, set[str]]:
+    if decp_schemas is None:
+        decp_schemas = SCHEMAS_DECP
 
     fields = set()
-    for fmt in decp_formats:
+    for fmt in decp_schemas:
         fmt.liste_marches_ijson = ijson.sendable_list()
         fmt.coroutine_ijson = ijson.items_coro(
             fmt.liste_marches_ijson, f"{fmt.prefixe_json_marches}.item", use_float=True
@@ -98,35 +98,35 @@ def json_stream_to_parquet(
         chunk = next(chunk_iter)
         chunk = chunk.replace(b"NaN,", b"null,")
 
-        right_fmt = find_json_format(chunk, decp_formats)
+        decp_schema = find_json_format(chunk, decp_schemas)
 
-        for marche in right_fmt.liste_marches_ijson:
+        for marche in decp_schema.liste_marches_ijson:
             new_fields = write_marche_rows(marche, tmp_file)
             fields = fields.union(new_fields)
 
-        del right_fmt.liste_marches_ijson[:]
+        del decp_schema.liste_marches_ijson[:]
 
         for chunk in chunk_iter:
             chunk = chunk.replace(b"NaN,", b"null,")
 
-            right_fmt.coroutine_ijson.send(chunk)
-            for marche in right_fmt.liste_marches_ijson:
+            decp_schema.coroutine_ijson.send(chunk)
+            for marche in decp_schema.liste_marches_ijson:
                 new_fields = write_marche_rows(marche, tmp_file)
                 fields = fields.union(new_fields)
 
-            del right_fmt.liste_marches_ijson[:]
+            del decp_schema.liste_marches_ijson[:]
 
-        right_fmt.coroutine_ijson.close()
+        decp_schema.coroutine_ijson.close()
 
-        lf = pl.scan_ndjson(tmp_file.name, schema=right_fmt.schema)
+        lf = pl.scan_ndjson(tmp_file.name, schema=decp_schema.schema)
 
         sink_to_files(lf, output_path, file_format="parquet")
 
-    return fields
+    return fields, decp_schema
 
 
 @task(persist_result=False)
-def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[FormatDECP, set[str]]:
+def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[SchemaDECP, set[str]]:
     fields = set()
     parser = etree.XMLPullParser(tag="marche")
     with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson") as tmp_file:
@@ -136,9 +136,9 @@ def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[FormatDECP, set[
                 _, marche = xml_to_dict(elem)
                 new_fields = write_marche_rows(marche, tmp_file)
                 fields = fields.union(new_fields)
-        lf = pl.scan_ndjson(tmp_file.name, schema=FORMAT_DECP_2019.schema)
+        lf = pl.scan_ndjson(tmp_file.name, schema=SCHEMA_DECP_2019.schema)
         sink_to_files(lf, output_path, file_format="parquet")
-    return fields
+    return fields, SCHEMA_DECP_2019
 
 
 def xml_to_dict(element: etree.Element):
