@@ -78,19 +78,16 @@ def gen_artifact_row(
     decp_schema: SchemaDECP,
 ):
     artifact_row = {
+        # file and schema metadata
         "open_data_dataset_id": file_info["dataset_id"],
         "open_data_dataset_name": file_info["dataset_name"],
         "download_date": DATE_NOW,
         "data_fields": sorted(list(fields)),
         "data_fields_number": len(fields),
-        "schema": decp_schema.schema,
         "schema_label": decp_schema.label,
-        "schema_columns": sorted(decp_schema.schema.keys()),
+        "schema": dict(sorted(decp_schema.schema)),
         "row_number": lf.select(pl.len()).collect().item(),
-    }
-
-    # TODO trouver un meilleur nom : c'est les métadonnées de ressource data.gouv.fr
-    online_artifact_row = {
+        # data.gouv.fr metadata
         "open_data_filename": file_info["ori_filename"],
         "open_data_id": file_info["id"],
         "sha1": file_info["checksum"],
@@ -100,8 +97,6 @@ def gen_artifact_row(
         "views": file_info["views"],
         "url": url,
     }
-    if url.startswith("http"):
-        artifact_row |= online_artifact_row
 
     return artifact_row
 
