@@ -12,7 +12,7 @@ from config import (
     DATE_NOW,
     PREFECT_LOCAL_STORAGE_PATH,
     SIRENE_DATA_DIR,
-    SchemaDECP,
+    DecpFormat,
 )
 
 
@@ -75,7 +75,7 @@ def gen_artifact_row(
     lf: pl.LazyFrame,
     url: str,
     fields: set[str],
-    decp_schema: SchemaDECP,
+    decp_format: DecpFormat,
 ):
     artifact_row = {
         # file and schema metadata
@@ -84,8 +84,8 @@ def gen_artifact_row(
         "download_date": DATE_NOW,
         "data_fields": sorted(list(fields)),
         "data_fields_number": len(fields),
-        "schema_label": decp_schema.label,
-        "schema": dict(sorted(decp_schema.schema)),
+        "schema_label": decp_format.label,
+        "schema": decp_format.schema,
         "row_number": lf.select(pl.len()).collect().item(),
         # data.gouv.fr metadata
         "open_data_filename": file_info["ori_filename"],

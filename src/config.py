@@ -140,7 +140,7 @@ EXCLUDED_RESOURCES = [
 
 
 @dataclass
-class SchemaDECP:
+class DecpFormat:
     label: str
     schema: dict
     prefixe_json_marches: str
@@ -148,6 +148,6 @@ class SchemaDECP:
     coroutine_ijson: Coroutine | None = None
 
 
-SCHEMA_DECP_2019 = SchemaDECP("DECP 2019", SCHEMA_MARCHE_2019, "marches")
-SCHEMA_DECP_2022 = SchemaDECP("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
-SCHEMAS_DECP = [SCHEMA_DECP_2019, SCHEMA_DECP_2022]
+DECP_FORMAT_2019 = DecpFormat("DECP 2019", SCHEMA_MARCHE_2019, "marches")
+DECP_FORMAT_2022 = DecpFormat("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
+DECP_FORMATS = [DECP_FORMAT_2019, DECP_FORMAT_2022]
