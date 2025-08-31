@@ -1,5 +1,4 @@
 import datetime
-import math
 
 import polars as pl
 import polars.selectors as cs
@@ -58,6 +57,9 @@ def clean_decp(lf: pl.LazyFrame) -> pl.LazyFrame:
     # Explosion des titulaires
     lf = explode_titulaires(lf)
 
+    # NC
+    lf = lf.with_columns(pl.col(pl.Utf8).replace("NC", None))
+
     # Correction des datatypes
     lf = fix_data_types(lf)
 
@@ -67,18 +69,17 @@ def clean_decp(lf: pl.LazyFrame) -> pl.LazyFrame:
 def fix_data_types(lf: pl.LazyFrame):
     numeric_dtypes = {
         "dureeMois": pl.Int16,
-        # "dureeMoisModification": pl.Int16,
         # "dureeMoisActeSousTraitance": pl.Int16,
         # "dureeMoisModificationActeSousTraitance": pl.Int16,
         "offresRecues": pl.Int16,
         "montant": pl.Float64,
-        # "montantModification": pl.Float64,
         # "montantActeSousTraitance": pl.Float64,
         # "montantModificationActeSousTraitance": pl.Float64,
         "tauxAvance": pl.Float64,
         # "variationPrixActeSousTraitance": pl.Float64,
         "origineFrance": pl.Float64,
         "origineUE": pl.Float64,
+        "modification_id": pl.Int16,
     }
 
     # Champs numériques
@@ -104,7 +105,7 @@ def fix_data_types(lf: pl.LazyFrame):
         pl.col(dates_col).str.strptime(pl.Date, format="%Y-%m-%d", strict=False)
     )
 
-    # Suppression dans dates dans le futur
+    # Suppression des dates dans le futur
     for col in dates_col:
         lf = lf.with_columns(
             pl.when(pl.col(col) > datetime.datetime.now())
@@ -125,88 +126,5 @@ def fix_data_types(lf: pl.LazyFrame):
         .otherwise(None)
         .name.keep()
     ).with_columns(float_cols.fill_nan(None).cast(pl.Boolean).name.keep())
+
     return lf
-
-
-def clean_decp_json_modifications(input_json_: dict):
-    """
-    Nettoyage des données JSON des DECP pour les modifications des titulaires.
-    Suppression des données qui ne correspondent pas au format attendu (ex: {"typeIdentifiant": "SIRET", "id": "12345678901234"}).
-    """
-    clean_json = []
-    titulaires_cleaned_cpt = 0
-    for entry in input_json_:
-        # entry = {} représentant un marché
-        modifications_entries = entry.get("modifications", []) or []
-        # modifications_entries = [] représentant les modifications du marché
-        clean_modifications_entries = []
-        for modification_entry in modifications_entries:
-            # modification_entry = {} représentant une modification du marché
-            modification_entry_clean = modification_entry["modification"]
-            if "titulaires" in modification_entry_clean.keys():
-                modification_titulaires_clean = []
-                for modification_titulaire in (
-                    modification_entry_clean.get("titulaires", []) or []
-                ):
-                    # mofification_titulaire = {} représentant un titulaire de la modification
-                    if modification_titulaire is not None and isinstance(
-                        modification_titulaire["titulaire"], dict
-                    ):
-                        # Si le titulaire est un dictionnaire, on récupère l'id et le typeIdentifiant
-                        modification_titulaires_clean.append(
-                            {
-                                "titulaire": {
-                                    "typeIdentifiant": modification_titulaire[
-                                        "titulaire"
-                                    ].get("typeIdentifiant"),
-                                    "id": modification_titulaire["titulaire"].get("id"),
-                                }
-                            }
-                        )
-                if modification_titulaires_clean:
-                    modification_entry_clean["titulaires"] = (
-                        modification_titulaires_clean
-                    )
-                else:
-                    modification_entry_clean.pop("titulaires", None)
-                    titulaires_cleaned_cpt += 1
-            clean_modifications_entries.append(
-                {"modification": modification_entry_clean}
-            )
-        entry["modifications"] = clean_modifications_entries
-        clean_json.append(entry)
-    # print(f"Nombre de titulaires nettoyés : {titulaires_cleaned_cpt}")
-    return clean_json
-
-
-def fix_nan_nc(obj):
-    """Paroure tout le JSON pour remplacer NaN et NC par null."""
-    if (isinstance(obj, float) and math.isnan(obj)) or obj == "NC":
-        return None
-    elif isinstance(obj, dict):
-        return {k: fix_nan_nc(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [fix_nan_nc(item) for item in obj]
-    return obj
-
-
-def load_and_fix_json(decp_json: dict):
-    json_data = decp_json["marches"]["marche"]
-
-    # if type(json_data["marches"]):
-    #     json_data = fix_nan_nc(json_data["marches"])
-    # elif type(json_data["marches"]["marche"]) == list:
-    #     json_data = fix_nan_nc(json_data["marches"]["marche"])
-    # else:
-    #     print("Structure de fichier JSON non reconnue")
-    #     print(json_data)
-    #     raise ValueError
-
-    json_data = fix_nan_nc(json_data)
-
-    json_data = clean_decp_json_modifications(json_data)
-
-    # fixed_buffer = io.StringIO()
-    # json.dump(json_data, fixed_buffer)
-    # fixed_buffer.seek(0)  # rewind to beginning so it can be read
-    return json_data

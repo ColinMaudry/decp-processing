@@ -10,8 +10,9 @@ from httpx import stream
 from lxml import etree
 from prefect import task
 
-from config import DATE_NOW, DIST_DIR, FORMAT_DECP_2019, FORMATS_DECP, FormatDECP
+from config import DECP_FORMAT_2019, DECP_FORMATS, DIST_DIR, DecpFormat
 from tasks.output import sink_to_files
+from tasks.utils import gen_artifact_row
 
 
 @task(retries=3, retry_delay_seconds=3)
@@ -28,28 +29,33 @@ def stream_get(url: str, chunk_size=1024**2):
 
 @task
 def get_resource(
-    r: dict, decp_formats: list[FormatDECP] | None = None
+    r: dict, decp_formats: list[DecpFormat] | None = None
 ) -> pl.LazyFrame | None:
     if decp_formats is None:
-        decp_formats = FORMATS_DECP
+        decp_formats = DECP_FORMATS
 
     print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
-    output_path = DIST_DIR / "get" / r["{filename}"]
+
+    if r["filesize"] < 100:
+        print(f"🗑️  {r['ori_filename']} - Ressource ignorée : inférieure à 100 octets.")
+        return None
+
+    output_path = DIST_DIR / "get" / r["filename"]
     output_path.parent.mkdir(exist_ok=True)
     url = r["url"]
     file_format = r["format"]
     if file_format == "json":
-        format_decp, fields = json_stream_to_parquet(url, output_path, decp_formats)
+        fields, decp_format = json_stream_to_parquet(url, output_path, decp_formats)
     elif file_format == "xml":
-        format_decp, fields = xml_stream_to_parquet(url, output_path, decp_formats)
+        fields, decp_format = xml_stream_to_parquet(url, output_path, decp_formats)
     else:
         print(f"▶️ Format de fichier non supporté : {file_format} ({r['dataset_name']})")
-        return
+        return None
 
-    lf = pl.scan_parquet(output_path.with_extension(".parquet"))
+    lf = pl.scan_parquet(output_path.with_suffix(".parquet"))
 
     # TODO: do something with it
-    artifact_row = gen_artifact_row(r, format_decp, lf, url, fields)  # noqa
+    artifact_row = gen_artifact_row(r, lf, url, fields, decp_format)  # noqa
 
     # Exemple https://www.data.gouv.fr/datasets/5cd57bf68b4c4179299eb0e9/#/resources/bb90091c-f0cb-4a59-ad41-b0ab929aad93
     resource_web_url = (
@@ -62,33 +68,30 @@ def get_resource(
     return lf
 
 
-def find_json_format(chunk, decp_formats):
-    found_marche = False
-    for fmt in decp_formats:
-        fmt.coroutine_ijson.send(chunk)
-        if len(fmt.liste_marches_ijson) > 0:
+def find_json_decp_format(chunk, decp_formats):
+    for decp_format in decp_formats:
+        decp_format.coroutine_ijson.send(chunk)
+        if len(decp_format.liste_marches_ijson) > 0:
             # Le parser a trouvé au moins un marché correspondant à ce format, donc on a
             # trouvé le bon format.
-            found_marche = True
-            right_fmt = fmt
-            break
-    if not found_marche:
-        raise ValueError("Pas de match trouvé parmis les formats passés")
-    return right_fmt
+            return decp_format
+    raise ValueError("Pas de match trouvé parmis les schémas passés")
 
 
-@task
+@task(persist_result=False)
 def json_stream_to_parquet(
-    url: str, output_path: Path, decp_formats: list[FormatDECP] | None = None
-) -> tuple[FormatDECP, set[str]]:
+    url: str, output_path: Path, decp_formats: list[DecpFormat] | None = None
+) -> tuple[DecpFormat, set[str]]:
     if decp_formats is None:
-        decp_formats = FORMATS_DECP
+        decp_formats = DECP_FORMATS
 
     fields = set()
-    for fmt in decp_formats:
-        fmt.liste_marches_ijson = ijson.sendable_list()
-        fmt.coroutine_ijson = ijson.items_coro(
-            fmt.liste_marches_ijson, f"{fmt.prefixe_json_marches}.item", use_float=True
+    for decp_format in decp_formats:
+        decp_format.liste_marches_ijson = ijson.sendable_list()
+        decp_format.coroutine_ijson = ijson.items_coro(
+            decp_format.liste_marches_ijson,
+            f"{decp_format.prefixe_json_marches}.item",
+            use_float=True,
         )
 
     with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson") as tmp_file:
@@ -97,33 +100,36 @@ def json_stream_to_parquet(
         # In first iteration, will find the right format
         chunk = next(chunk_iter)
         chunk = chunk.replace(b"NaN,", b"null,")
-        right_fmt = find_json_format(chunk, decp_formats)
 
-        for marche in right_fmt.liste_marches_ijson:
+        decp_format = find_json_decp_format(chunk, decp_formats)
+
+        for marche in decp_format.liste_marches_ijson:
             new_fields = write_marche_rows(marche, tmp_file)
             fields = fields.union(new_fields)
 
-        del right_fmt.liste_marches_ijson[:]
+        del decp_format.liste_marches_ijson[:]
 
         for chunk in chunk_iter:
             chunk = chunk.replace(b"NaN,", b"null,")
-            right_fmt.coroutine_ijson.send(chunk)
-            for marche in right_fmt.liste_marches_ijson:
+
+            decp_format.coroutine_ijson.send(chunk)
+            for marche in decp_format.liste_marches_ijson:
                 new_fields = write_marche_rows(marche, tmp_file)
                 fields = fields.union(new_fields)
 
-            del right_fmt.liste_marches_ijson[:]
+            del decp_format.liste_marches_ijson[:]
 
-        right_fmt.coroutine_ijson.close()
+        decp_format.coroutine_ijson.close()
 
-        lf = pl.scan_ndjson(tmp_file.name, schema=right_fmt.schema)
+        lf = pl.scan_ndjson(tmp_file.name, schema=decp_format.schema)
+
         sink_to_files(lf, output_path, file_format="parquet")
 
-    return right_fmt, fields
+    return fields, decp_format
 
 
-@task
-def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[FormatDECP, set[str]]:
+@task(persist_result=False)
+def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[DecpFormat, set[str]]:
     fields = set()
     parser = etree.XMLPullParser(tag="marche")
     with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson") as tmp_file:
@@ -133,9 +139,9 @@ def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[FormatDECP, set[
                 _, marche = xml_to_dict(elem)
                 new_fields = write_marche_rows(marche, tmp_file)
                 fields = fields.union(new_fields)
-        lf = pl.scan_ndjson(tmp_file.name, schema=FORMAT_DECP_2019.schema)
+        lf = pl.scan_ndjson(tmp_file.name, schema=DECP_FORMAT_2019.schema)
         sink_to_files(lf, output_path, file_format="parquet")
-    return FORMAT_DECP_2019, fields
+    return fields, DECP_FORMAT_2019
 
 
 def xml_to_dict(element: etree.Element):
@@ -152,7 +158,7 @@ def write_marche_rows(marche: dict, file) -> set[str]:
     return fields
 
 
-def yield_modifications(row: dict, separator=".") -> Iterator[dict]:
+def yield_modifications(row: dict, separator="_") -> Iterator[dict]:
     """Pour chaque modification, génère un objet/dict marché aplati."""
     raw_mods = row.pop("modifications", [])
     # Couvre le format 2022:
@@ -198,31 +204,3 @@ def norm_titulaire(titulaire: dict):
     if "titulaire" in titulaire:
         titulaire = titulaire["titulaire"]
     return titulaire
-
-
-def gen_artifact_row(
-    file_info: dict, format: FormatDECP, lf: pl.LazyFrame, url: str, fields: set[str]
-):
-    artifact_row = {
-        "open_data_dataset_id": file_info["dataset_id"],
-        "open_data_dataset_name": file_info["dataset_name"],
-        "download_date": DATE_NOW,
-        "data_fields": list(fields),
-        "data_fields_number": len(fields),
-        "columns": sorted(format.schema.keys()),
-        "column_number": len(format.schema),
-        "row_number": lf.select(pl.len()).collect().item(),
-    }
-
-    online_artifact_row = {
-        "open_data_filename": file_info["ori_filename"],
-        "open_data_id": file_info["id"],
-        "sha1": file_info["checksum"],
-        "created_at": file_info["created_at"],
-        "last_modified": file_info["last_modified"],
-        "filesize": file_info["filesize"],
-        "views": file_info["views"],
-    }
-    if url.startswith("http"):
-        artifact_row |= online_artifact_row
-    return artifact_row

@@ -12,6 +12,7 @@ from config import (
     DATE_NOW,
     PREFECT_LOCAL_STORAGE_PATH,
     SIRENE_DATA_DIR,
+    DecpFormat,
 )
 
 
@@ -67,6 +68,37 @@ def remove_unused_cache(
 #
 # STATS
 #
+
+
+def gen_artifact_row(
+    file_info: dict,
+    lf: pl.LazyFrame,
+    url: str,
+    fields: set[str],
+    decp_format: DecpFormat,
+):
+    artifact_row = {
+        # file and schema metadata
+        "open_data_dataset_id": file_info["dataset_id"],
+        "open_data_dataset_name": file_info["dataset_name"],
+        "download_date": DATE_NOW,
+        "data_fields": sorted(list(fields)),
+        "data_fields_number": len(fields),
+        "schema_label": decp_format.label,
+        "schema": decp_format.schema,
+        "row_number": lf.select(pl.len()).collect().item(),
+        # data.gouv.fr metadata
+        "open_data_filename": file_info["ori_filename"],
+        "open_data_id": file_info["id"],
+        "sha1": file_info["checksum"],
+        "created_at": file_info["created_at"],
+        "last_modified": file_info["last_modified"],
+        "filesize": file_info["filesize"],
+        "views": file_info["views"],
+        "url": url,
+    }
+
+    return artifact_row
 
 
 def generate_stats(df: pl.DataFrame):
