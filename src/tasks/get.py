@@ -69,14 +69,14 @@ def get_resource(
     return lf
 
 
-def find_json_format(chunk, decp_formats):
-    for fmt in decp_formats:
-        fmt.coroutine_ijson.send(chunk)
-        if len(fmt.liste_marches_ijson) > 0:
+def find_json_schema(chunk, decp_schemas):
+    for schema in decp_schemas:
+        schema.coroutine_ijson.send(chunk)
+        if len(schema.liste_marches_ijson) > 0:
             # Le parser a trouvé au moins un marché correspondant à ce format, donc on a
             # trouvé le bon format.
-            return fmt
-    raise ValueError("Pas de match trouvé parmis les formats passés")
+            return schema
+    raise ValueError("Pas de match trouvé parmis les schémas passés")
 
 
 @task(persist_result=False)
@@ -87,10 +87,12 @@ def json_stream_to_parquet(
         decp_schemas = SCHEMAS_DECP
 
     fields = set()
-    for fmt in decp_schemas:
-        fmt.liste_marches_ijson = ijson.sendable_list()
-        fmt.coroutine_ijson = ijson.items_coro(
-            fmt.liste_marches_ijson, f"{fmt.prefixe_json_marches}.item", use_float=True
+    for schema in decp_schemas:
+        schema.liste_marches_ijson = ijson.sendable_list()
+        schema.coroutine_ijson = ijson.items_coro(
+            schema.liste_marches_ijson,
+            f"{schema.prefixe_json_marches}.item",
+            use_float=True,
         )
 
     with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson") as tmp_file:
@@ -100,7 +102,7 @@ def json_stream_to_parquet(
         chunk = next(chunk_iter)
         chunk = chunk.replace(b"NaN,", b"null,")
 
-        decp_schema = find_json_format(chunk, decp_schemas)
+        decp_schema = find_json_schema(chunk, decp_schemas)
 
         for marche in decp_schema.liste_marches_ijson:
             new_fields = write_marche_rows(marche, tmp_file)
