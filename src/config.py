@@ -148,6 +148,6 @@ class SchemaDECP:
     coroutine_ijson: Coroutine | None = None
 
 
-SCHEMA_DECP_2019 = SchemaDECP("2019", SCHEMA_MARCHE_2019, "marches")
-SCHEMA_DECP_2022 = SchemaDECP("2022", SCHEMA_MARCHE_2022, "marches.marche")
+SCHEMA_DECP_2019 = SchemaDECP("DECP 2019", SCHEMA_MARCHE_2019, "marches")
+SCHEMA_DECP_2022 = SchemaDECP("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
 SCHEMAS_DECP = [SCHEMA_DECP_2019, SCHEMA_DECP_2022]

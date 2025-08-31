@@ -10,8 +10,9 @@ from httpx import stream
 from lxml import etree
 from prefect import task
 
-from config import DATE_NOW, DIST_DIR, SCHEMA_DECP_2019, SCHEMAS_DECP, SchemaDECP
+from config import DIST_DIR, SCHEMA_DECP_2019, SCHEMAS_DECP, SchemaDECP
 from tasks.output import sink_to_files
+from tasks.utils import gen_artifact_row
 
 
 @task(retries=3, retry_delay_seconds=3)
@@ -54,7 +55,8 @@ def get_resource(
     lf = pl.scan_parquet(output_path.with_suffix(".parquet"))
 
     # TODO: do something with it
-    artifact_row = gen_artifact_row(r, lf, url, fields)  # noqa
+    artifact_row = gen_artifact_row(r, lf, url, fields, decp_schema)  # noqa
+    print(artifact_row)
 
     # Exemple https://www.data.gouv.fr/datasets/5cd57bf68b4c4179299eb0e9/#/resources/bb90091c-f0cb-4a59-ad41-b0ab929aad93
     resource_web_url = (
@@ -201,28 +203,3 @@ def norm_titulaire(titulaire: dict):
     if "titulaire" in titulaire:
         titulaire = titulaire["titulaire"]
     return titulaire
-
-
-def gen_artifact_row(file_info: dict, lf: pl.LazyFrame, url: str, fields: set[str]):
-    artifact_row = {
-        "open_data_dataset_id": file_info["dataset_id"],
-        "open_data_dataset_name": file_info["dataset_name"],
-        "download_date": DATE_NOW,
-        "data_fields": list(fields),
-        "data_fields_number": len(fields),
-        "row_number": lf.select(pl.len()).collect().item(),
-    }
-
-    # TODO trouver un meilleur nom : c'est les métadonnées de ressource data.gouv.fr
-    online_artifact_row = {
-        "open_data_filename": file_info["ori_filename"],
-        "open_data_id": file_info["id"],
-        "sha1": file_info["checksum"],
-        "created_at": file_info["created_at"],
-        "last_modified": file_info["last_modified"],
-        "filesize": file_info["filesize"],
-        "views": file_info["views"],
-    }
-    if url.startswith("http"):
-        artifact_row |= online_artifact_row
-    return artifact_row
