@@ -116,12 +116,14 @@ def fix_data_types(lf: pl.LazyFrame):
     # Champs booléens
     cols = ("sousTraitanceDeclaree", "attributionAvance", "marcheInnovant")
     lf = lf.with_columns(
-        pl.when(cols.str.to_lowercase().is_in(["true", "1", "oui"]))
-        .then(True)
-        .when(cols.str.to_lowercase().is_in(["false", "0", "non"]))
-        .then(False)
-        .otherwise(None)
-        .name.keep()
+        [
+            pl.when(pl.col(col).str.to_lowercase().is_in(["true", "1", "oui"]))
+            .then(True)
+            .when(pl.col(col).str.to_lowercase().is_in(["false", "0", "non"]))
+            .then(False)
+            .otherwise(None)
+            .name.keep()
+            for col in cols
+        ]
     )
-
     return lf
