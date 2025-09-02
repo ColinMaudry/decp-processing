@@ -1,7 +1,6 @@
 import datetime
 
 import polars as pl
-import polars.selectors as cs
 
 from tasks.transform import explode_titulaires, process_modifications
 
@@ -116,15 +115,13 @@ def fix_data_types(lf: pl.LazyFrame):
 
     # Champs booléens
     cols = ("sousTraitanceDeclaree", "attributionAvance", "marcheInnovant")
-    str_cols = cs.by_name(cols) & cs.string()
-    float_cols = cs.by_name(cols) & cs.float()
     lf = lf.with_columns(
-        pl.when(str_cols.str.to_lowercase() == "true")
+        pl.when(cols.str.to_lowercase().is_in(["true", "1", "oui"]))
         .then(True)
-        .when(str_cols.str.to_lowercase() == "false")
+        .when(cols.str.to_lowercase().is_in(["false", "0", "non"]))
         .then(False)
         .otherwise(None)
         .name.keep()
-    ).with_columns(float_cols.fill_nan(None).cast(pl.Boolean).name.keep())
+    )
 
     return lf
