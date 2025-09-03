@@ -12,7 +12,7 @@ from prefect import task
 
 from config import DECP_FORMAT_2019, DECP_FORMATS, DIST_DIR, DecpFormat
 from tasks.output import sink_to_files
-from tasks.utils import gen_artifact_row
+from tasks.utils import gen_artifact_row, stream_replace_bytestring
 
 
 @task(retries=3, retry_delay_seconds=3)
@@ -95,11 +95,13 @@ def json_stream_to_parquet(
         )
 
     with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson") as tmp_file:
-        chunk_iter = stream_get(url)
+        http_stream_iter = stream_get(url)
+        stream_replace_iter = stream_replace_bytestring(
+            http_stream_iter, b"NaN,", b"null,"
+        )
 
         # In first iteration, will find the right format
-        chunk = next(chunk_iter)
-        chunk = chunk.replace(b"NaN,", b"null,")
+        chunk = next(stream_replace_iter)
 
         decp_format = find_json_decp_format(chunk, decp_formats)
 
@@ -109,9 +111,7 @@ def json_stream_to_parquet(
 
         del decp_format.liste_marches_ijson[:]
 
-        for chunk in chunk_iter:
-            chunk = chunk.replace(b"NaN,", b"null,")
-
+        for chunk in stream_replace_iter:
             decp_format.coroutine_ijson.send(chunk)
             for marche in decp_format.liste_marches_ijson:
                 new_fields = write_marche_rows(marche, tmp_file)

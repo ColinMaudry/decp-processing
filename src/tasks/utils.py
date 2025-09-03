@@ -16,6 +16,26 @@ from config import (
 )
 
 
+def stream_replace_bytestring(iterator, old_bytestring: bytes, new_bytestring: bytes):
+    buffer = b""
+    length_to_replace = len(old_bytestring)
+
+    for chunk in iterator:
+        buffer += chunk
+        buffer = buffer.replace(old_bytestring, new_bytestring)
+        # On garde un bout de quelques caractères au cas où le pattern est coupé entre les deux chunks
+        safe_end = len(buffer) - length_to_replace + 1
+
+        if safe_end > 0:
+            to_process, buffer = buffer[:safe_end], buffer[safe_end:]
+            chunk = to_process.replace(old_bytestring, new_bytestring)
+            yield chunk
+
+    if buffer:
+        buffer = buffer.replace(old_bytestring, new_bytestring)
+        yield buffer
+
+
 def create_artifact(
     data,
     key: str,
