@@ -2,7 +2,6 @@
 
 Projet de traitement et de publication de meilleures données sur les marchés publics attribués en France. Ce projet prend sa source dans la complexité de la publication des données faite par le Ministère des Finances :
 
-- code source de l'agrégation des données [fermé](https://github.com/139bercy/decp-rama-v2/blob/main/README.md)
 - documentation incomplète et éparpillée
   - https://github.com/139bercy/decp-rama-v2/blob/main/README.md
   - https://www.data.gouv.fr/fr/datasets/5cd57bf68b4c4179299eb0e9
@@ -17,7 +16,7 @@ Pour me contacter vous pouvez ouvrir un "issue" sur Github ou me contacter par e
 
 ## Données
 
-Les données produites sont les mêmes données que celles publiées par le Ministère des Finances sur data.economie.gouv.fr. J'ai choisi de prendre ces données comme source et non les DECP au format réglementaire JSON car les premières ont été nettoyées et améliorées ([code](https://github.com/139bercy/decp-augmente)) par le Ministère, ce qui me fait moins de travail.
+Les données produites sont les mêmes données que celles publiées par le Ministère des Finances sur data.gouv.fr.
 
 Elles sont mises à dispositions aux formats CSV, Parquet et SQLite.
 
