@@ -98,7 +98,11 @@ def decp_processing(enable_cache_removal: bool = False):
     resources: list[dict] = list_resources(TRACKED_DATASETS)
 
     # Traitement parallèle des ressources
-    futures = [get_clean.submit(resource) for resource in resources]
+    futures = [
+        get_clean.submit(resource)
+        for resource in resources
+        if resource["filesize"] > 100
+    ]
     dfs: list[pl.DataFrame] = [f.result() for f in futures if f.result() is not None]
 
     print("Fusion des dataframes...")
