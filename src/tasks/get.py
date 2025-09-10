@@ -64,10 +64,10 @@ def get_resource(
     return lf
 
 
-def find_json_decp_format(chunk, decp_formats):
+def find_json_decp_format(chunk, decp_formats, r_url):
     for decp_format in decp_formats:
-        decp_format.coroutine_ijson.send(chunk)
-        if len(decp_format.liste_marches_ijson) > 0:
+        decp_format.resources_list_coroutine[r_url]["coroutine"].send(chunk)
+        if len(decp_format.resources_list_coroutine[r_url]["sendable_list"]) > 0:
             # Le parser a trouvé au moins un marché correspondant à ce format, donc on a
             # trouvé le bon format.
             return decp_format
@@ -83,39 +83,51 @@ def json_stream_to_parquet(
 
     fields = set()
     for decp_format in decp_formats:
-        decp_format.liste_marches_ijson = ijson.sendable_list()
-        decp_format.coroutine_ijson = ijson.items_coro(
-            decp_format.liste_marches_ijson,
+        print("boucle decp_format")
+        format_resource_list = decp_format.resources_list_coroutine
+
+        if format_resource_list.get(url) is None:
+            format_resource = format_resource_list[url] = {}
+        else:
+            format_resource = format_resource_list.get(url)
+
+        format_resource["sendable_list"] = ijson.sendable_list()
+        format_resource["coroutine"] = ijson.items_coro(
+            format_resource["sendable_list"],
             f"{decp_format.prefixe_json_marches}.item",
             use_float=True,
         )
 
     with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson") as tmp_file:
+        print("début tempfile")
         http_stream_iter = stream_get(url)
         stream_replace_iter = stream_replace_bytestring(
             http_stream_iter, b"NaN,", b"null,"
         )
+        print("fin stream_replace_bytesttring")
 
         # In first iteration, will find the right format
         chunk = next(stream_replace_iter)
+        decp_format = find_json_decp_format(chunk, decp_formats, url)
+        format_resource = decp_format.resources_list_coroutine[url]
 
-        decp_format = find_json_decp_format(chunk, decp_formats)
+        print("format", decp_format.label)
 
-        for marche in decp_format.liste_marches_ijson:
+        for marche in format_resource["sendable_list"]:
             new_fields = write_marche_rows(marche, tmp_file)
             fields = fields.union(new_fields)
 
-        del decp_format.liste_marches_ijson[:]
+        del format_resource["sendable_list"][:]
 
         for chunk in stream_replace_iter:
-            decp_format.coroutine_ijson.send(chunk)
-            for marche in decp_format.liste_marches_ijson:
+            format_resource["coroutine"].send(chunk)
+            for marche in format_resource["sendable_list"]:
                 new_fields = write_marche_rows(marche, tmp_file)
                 fields = fields.union(new_fields)
 
-            del decp_format.liste_marches_ijson[:]
+            del format_resource["sendable_list"][:]
 
-        decp_format.coroutine_ijson.close()
+        format_resource["coroutine"].close()
 
         lf = pl.scan_ndjson(tmp_file.name, schema=decp_format.schema)
 

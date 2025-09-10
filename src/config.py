@@ -1,13 +1,11 @@
 import json
 import os
 import shutil
-from collections.abc import Coroutine
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
-from ijson import sendable_list
 
 from schemas import SCHEMA_MARCHE_2019, SCHEMA_MARCHE_2022
 
@@ -136,6 +134,7 @@ EXCLUDED_RESOURCES = [
     "17046b18-8921-486a-bc31-c9196d5c3e9c",  # decp.xml : fichier XML consolidé par le MINEF mais abandonné
     "68bd2001-3420-4d94-bc49-c90878df322c",  # decp.ocds.json : fichier au format JSON mais OCDS, pas DECP
     "59ba0edb-cf94-4bf1-a546-61f561553917",  # decp-2022.json : format bizarre, entre 2019 et 2022 ~8000 marchés
+    "16962018-5c31-4296-9454-5998585496d2",  # decp-2019.json : encore trop de bizarreries non-supportées
 ]
 
 
@@ -144,10 +143,19 @@ class DecpFormat:
     label: str
     schema: dict
     prefixe_json_marches: str
-    liste_marches_ijson: sendable_list | None = None
-    coroutine_ijson: Coroutine | None = None
+    resources_list_coroutine: dict
 
 
-DECP_FORMAT_2019 = DecpFormat("DECP 2019", SCHEMA_MARCHE_2019, "marches")
-DECP_FORMAT_2022 = DecpFormat("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
+DECP_FORMAT_2019 = DecpFormat(
+    label="DECP 2019",
+    schema=SCHEMA_MARCHE_2019,
+    prefixe_json_marches="marches",
+    resources_list_coroutine={},
+)
+DECP_FORMAT_2022 = DecpFormat(
+    label="DECP 2022",
+    schema=SCHEMA_MARCHE_2022,
+    prefixe_json_marches="marches.marche",
+    resources_list_coroutine={},
+)
 DECP_FORMATS = [DECP_FORMAT_2019, DECP_FORMAT_2022]
