@@ -14,7 +14,7 @@ dependencies = [
     "tableschema",
     "frictionless==4.40.11",
     "ipykernel",
-    "prefect==3.3.3",
+    "prefect==3.4.17",
     "orjson",
     "ijson",
     "lxml",
