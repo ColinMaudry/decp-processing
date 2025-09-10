@@ -211,7 +211,7 @@ def normalize_tables(df: pl.DataFrame):
     df_marches = df_marches.unique(subset=["uid", "modification_id"]).sort(
         by="datePublicationDonnees", descending=True
     )
-    save_to_databases(df_marches, "datalab", "marches", "uid, modification_id")
+    save_to_databases(df_marches, "decp", "marches", "uid, modification_id")
     del df_marches
 
     # ACHETEURS
@@ -219,7 +219,7 @@ def normalize_tables(df: pl.DataFrame):
     df_acheteurs: pl.DataFrame = df.select(cs.starts_with("acheteur"))
     df_acheteurs = df_acheteurs.rename(lambda name: name.removeprefix("acheteur_"))
     df_acheteurs = df_acheteurs.unique().sort(by="id")
-    save_to_databases(df_acheteurs, "datalab", "acheteurs", "id")
+    save_to_databases(df_acheteurs, "decp", "acheteurs", "id")
     del df_acheteurs
 
     # TITULAIRES
@@ -230,7 +230,7 @@ def normalize_tables(df: pl.DataFrame):
     ### On garde les champs id et typeIdentifiant en clé primaire composite
     df_titulaires = df_titulaires.rename(lambda name: name.removeprefix("titulaire_"))
     df_titulaires = df_titulaires.unique().sort(by=["id"])
-    save_to_databases(df_titulaires, "datalab", "entreprises", "id, typeIdentifiant")
+    save_to_databases(df_titulaires, "decp", "entreprises", "id, typeIdentifiant")
     del df_titulaires
 
     ## Table marches_titulaires
@@ -242,7 +242,7 @@ def normalize_tables(df: pl.DataFrame):
     )
     save_to_databases(
         df_marches_titulaires,
-        "datalab",
+        "decp",
         "marches_titulaires",
         '"marche_uid", "titulaire_id", "titulaire_typeIdentifiant", "marche_modification_id"',
     )
