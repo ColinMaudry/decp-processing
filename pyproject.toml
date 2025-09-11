@@ -16,7 +16,7 @@ dependencies = [
     "ipykernel",
     "prefect==3.4.17",
     "orjson",
-    "ijson",
+    "ijson==3.4.0",
     "lxml",
     "psycopg2"
 ]
