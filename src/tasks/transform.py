@@ -5,35 +5,36 @@ import polars.selectors as cs
 from httpx import get
 from prefect import task
 
-from config import DATA_DIR
+from config import DATA_DIR, DecpFormat
 from tasks.output import save_to_databases
 
 
-def explode_titulaires(df: pl.LazyFrame):
+def explode_titulaires(df: pl.LazyFrame, decp_format: DecpFormat):
     # Explosion des champs titulaires sur plusieurs lignes (un titulaire de marché par ligne)
     # et une colonne par champ
 
-    # Structure originale
+    # Structure originale 2022
     # [{{"id": "abc", "typeIdentifiant": "SIRET"}}]
 
     # Explosion de la liste de titulaires en autant de nouvelles lignes
     df = df.explode("titulaires")
 
-    # Renommage du premier objet englobant
-    df = df.select(
-        pl.col("*"),
-        pl.col("titulaires")
-        .struct.rename_fields(["titulaires.object"])
-        .alias("titulaires_renamed"),
-    )
+    if decp_format.label == "DECP 2022":
+        # Renommage du premier objet englobant
+        df = df.with_columns(
+            pl.col("titulaires")
+            .struct.rename_fields(["titulaires.object"])
+            .alias("titulaires"),
+        )
 
-    # Extraction du premier objet dans une nouvelle colonne
-    df = df.unnest("titulaires_renamed")
+        # Extraction du premier objet dans une nouvelle colonne
+        df = df.unnest("titulaires")
+        df = df.rename({"titulaires.object": "titulaires"})
 
     # Renommage des champs de l'objet titulaire
     df = df.select(
         pl.col("*"),
-        pl.col("titulaires.object")
+        pl.col("titulaires")
         .struct.rename_fields(["titulaire_typeIdentifiant", "titulaire_id"])
         .alias("titulaire"),
     )
@@ -42,7 +43,7 @@ def explode_titulaires(df: pl.LazyFrame):
     df = df.unnest("titulaire")
 
     # Suppression des anciennes colonnes
-    df = df.drop(["titulaires", "titulaires.object"])
+    df = df.drop(["titulaires"])
 
     # Cast l'identifiant en string
     df = df.with_columns(pl.col("titulaire_id").cast(pl.String))

@@ -2,10 +2,11 @@ import datetime
 
 import polars as pl
 
+from config import DecpFormat
 from tasks.transform import explode_titulaires, process_modifications
 
 
-def clean_decp(lf: pl.LazyFrame) -> pl.LazyFrame:
+def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     #
     # CLEAN DATA
     #
@@ -54,7 +55,7 @@ def clean_decp(lf: pl.LazyFrame) -> pl.LazyFrame:
     lf = process_modifications(lf)
 
     # Explosion des titulaires
-    lf = explode_titulaires(lf)
+    lf = explode_titulaires(lf, decp_format)
 
     # NC
     lf = lf.with_columns(pl.col(pl.Utf8).replace("NC", None))
