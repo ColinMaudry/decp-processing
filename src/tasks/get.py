@@ -52,8 +52,11 @@ def get_resource(
             fields, decp_format = xml_stream_to_parquet(
                 url, output_path, fix_control_chars=True
             )
+            print(f"♻️  {r['ori_filename']} nettoyé et traité")
     else:
-        print(f"▶️ Format de fichier non supporté : {file_format} ({r['dataset_name']})")
+        print(
+            f"▶️  Format de fichier non supporté : {file_format} ({r['dataset_name']})"
+        )
         return None, None
 
     lf: pl.LazyFrame = pl.scan_parquet(output_path.with_suffix(".parquet"))
