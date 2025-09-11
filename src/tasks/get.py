@@ -11,7 +11,7 @@ from lxml import etree
 from prefect import task
 
 from config import DECP_FORMAT_2019, DECP_FORMATS, DIST_DIR, DecpFormat
-from tasks.clean import extract_innermost_struct
+from tasks.clean import clean_control_characters, extract_innermost_struct
 from tasks.output import sink_to_files
 from tasks.utils import gen_artifact_row, stream_replace_bytestring
 
@@ -44,7 +44,14 @@ def get_resource(
     if file_format == "json":
         fields, decp_format = json_stream_to_parquet(url, output_path, decp_formats)
     elif file_format == "xml":
-        fields, decp_format = xml_stream_to_parquet(url, output_path, decp_formats)
+        try:
+            fields, decp_format = xml_stream_to_parquet(
+                url, output_path, fix_control_chars=False
+            )
+        except etree.XMLSyntaxError:
+            fields, decp_format = xml_stream_to_parquet(
+                url, output_path, fix_control_chars=True
+            )
     else:
         print(f"▶️ Format de fichier non supporté : {file_format} ({r['dataset_name']})")
         return None, None
@@ -126,12 +133,16 @@ def json_stream_to_parquet(
 
 
 @task(persist_result=False)
-def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[set, DecpFormat]:
+def xml_stream_to_parquet(
+    url: str, output_path: Path, fix_control_chars=False
+) -> tuple[set, DecpFormat]:
     # Pour l'instant tous les fichiers XML (AIFE), sont au format 2019, donc pas de détection.
     fields = set()
     parser = etree.XMLPullParser(tag="marche")
     with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson") as tmp_file:
         for chunk in stream_get(url):
+            if fix_control_chars:
+                chunk = clean_control_characters(chunk)
             parser.feed(chunk)
             for _, elem in parser.read_events():
                 _, marche = xml_to_dict(elem)
