@@ -190,7 +190,7 @@ def replace_with_modification_data(lf: pl.LazyFrame):
     return lf_final
 
 
-def process_modifications(lf: pl.LazyFrame):
+def process_modifications(lf: pl.LazyFrame) -> pl.LazyFrame:
     # Pas encore au point, risque de trop gros effets de bord
     # lf = remove_modifications_duplicates(lf)
 
