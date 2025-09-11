@@ -124,7 +124,7 @@ Le pré-traitement des données SIRENE doit être fait une fois pour que le trai
 pytest tests/test_sirene_preprocess.py
 ```
 
-Lancement du traitement principal (datalab + decp.info)
+Lancement du traitement principal (data_tables + decp.info)
 
 ```bash
 python src/flows.py
@@ -162,7 +162,7 @@ Ce traitement doit être fait une fois pour que le test du traitement principal 
 pytest tests/test_sirene_preprocess.py
 ```
 
-### Du traitement principal (datalab + decp.info)
+### Du traitement principal (data tables + decp.info)
 
 ```bash
 pytest tests/test_main.py

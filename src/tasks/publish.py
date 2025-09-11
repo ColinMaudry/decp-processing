@@ -45,15 +45,10 @@ def publish_to_datagouv(context: str):
             "context": "decp",
         },
         {
-            "file": str(DIST_DIR / "datalab.sqlite"),
+            "file": str(DIST_DIR / "decp.sqlite"),
             "resource_id": "43f54982-da60-4eb7-aaaf-ba935396209b",
-            "context": "datalab",
+            "context": "data_tables",
         },
-        # {
-        #     "file": str(DIST_DIR/"decp.sqlite"),
-        #     "resource_id": "c6b08d03-7aa4-4132-b5b2-fd76633feecc",
-        #     "context": "decp",
-        # },
         # {
         #     "file": str(DIST_DIR/"datapackage.json"),
         #     "resource_id": "65194f6f-e273-4067-8075-56f072d56baf",

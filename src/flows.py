@@ -49,31 +49,29 @@ from tasks.utils import (
 def get_clean(resource) -> pl.DataFrame or None:
     # Récupération des données source...
     with transaction():
-        lf: pl.LazyFrame = get_resource(resource)
-        df = None
+        lf, decp_format = get_resource(resource)
 
         # Nettoyage des données source et typage des colonnes...
         # si la ressource est dans un format supporté
         if lf is not None:
-            lf = clean_decp(lf)
+            lf = clean_decp(lf, decp_format)
             df = lf.collect(engine="streaming")
 
     return df
 
 
 @task(log_prints=True)
-def make_datalab_data():
-    """Tâches consacrées à la transformation des données dans un format
-    adapté aux activités du Datalab d'Anticor."""
+def make_data_tables():
+    """Tâches consacrées à la transformation des données dans un format relationnel (SQL)."""
 
-    print("Création de la base données pour le Datalab d'Anticor...")
+    print("Création de la base données au format relationnel...")
 
     df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
 
     print("Enregistrement des DECP (base DataFrame) dans les bases de données...")
     save_to_sqlite(
         df,
-        "datalab",
+        "decp",
         "data.gouv.fr.2022.clean",
         "uid, titulaire_id, titulaire_typeIdentifiant, modification_id",
     )
@@ -83,7 +81,7 @@ def make_datalab_data():
 
     if DECP_PROCESSING_PUBLISH.lower() == "true":
         print("Publication sur data.gouv.fr...")
-        publish_to_datagouv(context="datalab")
+        publish_to_datagouv(context="data_tables")
     else:
         print("Publication sur data.gouv.fr désactivée.")
 
@@ -98,7 +96,11 @@ def decp_processing(enable_cache_removal: bool = False):
     resources: list[dict] = list_resources(TRACKED_DATASETS)
 
     # Traitement parallèle des ressources
-    futures = [get_clean.submit(resource) for resource in resources]
+    futures = [
+        get_clean.submit(resource)
+        for resource in resources
+        if resource["filesize"] > 100
+    ]
     dfs: list[pl.DataFrame] = [f.result() for f in futures if f.result() is not None]
 
     print("Fusion des dataframes...")
@@ -126,7 +128,7 @@ def decp_processing(enable_cache_removal: bool = False):
     save_to_files(df, DIST_DIR / "decp")
 
     # Base de données SQLite dédiée aux activités du Datalab d'Anticor
-    make_datalab_data()
+    make_data_tables()
 
     # Suppression des fichiers de cache inutilisés
     if enable_cache_removal:

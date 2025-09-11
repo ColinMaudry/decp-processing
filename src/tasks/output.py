@@ -15,6 +15,15 @@ def save_to_files(df: pl.DataFrame, path: str | Path, file_format=None):
         df.write_csv(f"{path}.csv")
 
 
+def sink_to_files(lf: pl.LazyFrame, path: str | Path, file_format=None):
+    if file_format is None:
+        file_format = ["csv", "parquet"]
+    if "parquet" in file_format:
+        lf.sink_parquet(f"{path}.parquet")
+    if "csv" in file_format:
+        lf.sink_csv(f"{path}.csv")
+
+
 def save_to_postgres(df: pl.DataFrame, table_name: str):
     df.write_database(
         table_name=table_name,

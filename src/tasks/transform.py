@@ -5,7 +5,7 @@ import polars.selectors as cs
 from httpx import get
 from prefect import task
 
-from config import DATA_DIR
+from config import DATA_DIR, DecpFormat
 from tasks.output import save_to_databases
 
 
@@ -37,31 +37,32 @@ def process_string_lists(lf: pl.LazyFrame):
     return lf
 
 
-def explode_titulaires(df: pl.LazyFrame):
+def explode_titulaires(df: pl.LazyFrame, decp_format: DecpFormat):
     # Explosion des champs titulaires sur plusieurs lignes (un titulaire de marché par ligne)
     # et une colonne par champ
 
-    # Structure originale
+    # Structure originale 2022
     # [{{"id": "abc", "typeIdentifiant": "SIRET"}}]
 
     # Explosion de la liste de titulaires en autant de nouvelles lignes
     df = df.explode("titulaires")
 
-    # Renommage du premier objet englobant
-    df = df.select(
-        pl.col("*"),
-        pl.col("titulaires")
-        .struct.rename_fields(["titulaires.object"])
-        .alias("titulaires_renamed"),
-    )
+    if decp_format.label == "DECP 2022":
+        # Renommage du premier objet englobant
+        df = df.with_columns(
+            pl.col("titulaires")
+            .struct.rename_fields(["titulaires.object"])
+            .alias("titulaires"),
+        )
 
-    # Extraction du premier objet dans une nouvelle colonne
-    df = df.unnest("titulaires_renamed")
+        # Extraction du premier objet dans une nouvelle colonne
+        df = df.unnest("titulaires")
+        df = df.rename({"titulaires.object": "titulaires"})
 
     # Renommage des champs de l'objet titulaire
     df = df.select(
         pl.col("*"),
-        pl.col("titulaires.object")
+        pl.col("titulaires")
         .struct.rename_fields(["titulaire_typeIdentifiant", "titulaire_id"])
         .alias("titulaire"),
     )
@@ -70,7 +71,7 @@ def explode_titulaires(df: pl.LazyFrame):
     df = df.unnest("titulaire")
 
     # Suppression des anciennes colonnes
-    df = df.drop(["titulaires", "titulaires.object"])
+    df = df.drop(["titulaires"])
 
     # Cast l'identifiant en string
     df = df.with_columns(pl.col("titulaire_id").cast(pl.String))
@@ -124,37 +125,40 @@ def remove_suffixes_from_uid_column(df):
 def replace_with_modification_data(lf: pl.LazyFrame):
     """
     Gère les modifications dans le DataFrame des DECP.
-    Cette fonction extrait les informations des modifications et les fusionne avec le DataFrame de base en ajoutant une ligne par modification
+    À ce stade les modifications ont été exploded dans write_marche_rows().
+    Cette fonction récupère les informations des modifications (ex : modification_montant) et les insère dans les champs de base (ex : montant).
     (chaque ligne contient les informations complètes à jour à la date de notification)
-    Elle ajoute également la colonne "donneesActuelles" pour indiquer si la notification est la plus récente.
+    Elle ajoute également la colonne "donneesActuelles" pour indiquer si la modification est la plus récente.
     """
 
-    # Étape 1: Créer une copie du DataFrame initial sans la colonne "modifications"
-    lf_base = lf.select(pl.all().exclude("modifications"))
-
-    # Étape 2: Explode le DataFrame pour avoir une ligne par modification
-    lf_exploded = (
-        lf.select("uid", "modifications")
-        .explode("modifications")
-        .drop_nulls()
-        .with_columns(pl.col("modifications").struct.field("modification"))
+    # Étape 1: Extraire les données des modifications en renommant les colonnes
+    # on ne conserve pas modification_id car on le recrée nous-mêmes, par sécurité
+    schema = lf.collect_schema().names()
+    lf_mods = lf.select(
+        cs.by_name("uid")
+        | cs.starts_with("modification_") - cs.by_name("modification_id")
+    ).rename(
+        {
+            column: column.removeprefix("modification_").removesuffix("Modification")
+            for column in schema
+            if column.startswith("modification_") and column != "modification_id"
+        }
     )
 
-    # Étape 3: Extraire les données des modifications
-    lf_mods = lf_exploded.select(
+    # Étape 2: Dédupliquer et créer une copie du DataFrame initial sans les colonnes "modifications"
+    # On peut dédupliquer aveuglément car la seule chose qui varient dans les lignes d'un même
+    # uid, c'est les données de modifs
+    lf = lf.unique("uid")
+    lf_base = lf.select(
         "uid",
-        pl.col("modification")
-        .struct.field("dateNotificationModification")
-        .alias("dateNotification"),
-        pl.col("modification")
-        .struct.field("datePublicationDonneesModification")
-        .alias("datePublicationDonnees"),
-        pl.col("modification").struct.field("montant").alias("montant"),
-        pl.col("modification").struct.field("dureeMois").alias("dureeMois"),
-        pl.col("modification").struct.field("titulaires").alias("titulaires"),
+        "dateNotification",
+        "datePublicationDonnees",
+        "montant",
+        "dureeMois",
+        "titulaires",
     )
 
-    # Étape 4: Joindre les données de base pour chaque ligne de modification
+    # Étape 3: Ajouter le modification_id et la colonne données actuelles pour chaque modif
     lf_concat = (
         pl.concat(
             [
@@ -189,7 +193,7 @@ def replace_with_modification_data(lf: pl.LazyFrame):
         )
     )
 
-    # Étape 5: Remplir les valeurs nulles en utilisant les dernières valeurs non-nulles pour chaque id
+    # Étape 4: Remplir les valeurs nulles en utilisant les dernières valeurs non-nulles pour chaque id
     lf_concat = lf_concat.with_columns(
         pl.col("montant", "dureeMois", "titulaires")
         .fill_null(strategy="backward")
@@ -205,9 +209,8 @@ def replace_with_modification_data(lf: pl.LazyFrame):
                 "montant",
                 "dureeMois",
                 "titulaires",
-                "modifications",
             ]
-        ),
+        ).drop(cs.starts_with("modification_")),
         on="uid",
         how="left",
     )
@@ -215,7 +218,7 @@ def replace_with_modification_data(lf: pl.LazyFrame):
     return lf_final
 
 
-def process_modifications(lf: pl.LazyFrame):
+def process_modifications(lf: pl.LazyFrame) -> pl.LazyFrame:
     # Pas encore au point, risque de trop gros effets de bord
     # lf = remove_modifications_duplicates(lf)
 
@@ -237,7 +240,7 @@ def normalize_tables(df: pl.DataFrame):
     df_marches = df_marches.unique(subset=["uid", "modification_id"]).sort(
         by="datePublicationDonnees", descending=True
     )
-    save_to_databases(df_marches, "datalab", "marches", "uid, modification_id")
+    save_to_databases(df_marches, "decp", "marches", "uid, modification_id")
     del df_marches
 
     # ACHETEURS
@@ -245,7 +248,7 @@ def normalize_tables(df: pl.DataFrame):
     df_acheteurs: pl.DataFrame = df.select(cs.starts_with("acheteur"))
     df_acheteurs = df_acheteurs.rename(lambda name: name.removeprefix("acheteur_"))
     df_acheteurs = df_acheteurs.unique().sort(by="id")
-    save_to_databases(df_acheteurs, "datalab", "acheteurs", "id")
+    save_to_databases(df_acheteurs, "decp", "acheteurs", "id")
     del df_acheteurs
 
     # TITULAIRES
@@ -256,7 +259,7 @@ def normalize_tables(df: pl.DataFrame):
     ### On garde les champs id et typeIdentifiant en clé primaire composite
     df_titulaires = df_titulaires.rename(lambda name: name.removeprefix("titulaire_"))
     df_titulaires = df_titulaires.unique().sort(by=["id"])
-    save_to_databases(df_titulaires, "datalab", "entreprises", "id, typeIdentifiant")
+    save_to_databases(df_titulaires, "decp", "entreprises", "id, typeIdentifiant")
     del df_titulaires
 
     ## Table marches_titulaires
@@ -268,7 +271,7 @@ def normalize_tables(df: pl.DataFrame):
     )
     save_to_databases(
         df_marches_titulaires,
-        "datalab",
+        "decp",
         "marches_titulaires",
         '"marche_uid", "titulaire_id", "titulaire_typeIdentifiant", "marche_modification_id"',
     )

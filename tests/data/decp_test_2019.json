@@ -1,0 +1,112 @@
+{
+  "marches": [
+    {
+      "procedure": "Procédure adaptée",
+      "modifications": [
+        {
+          "dateNotificationModification": "2022-11-23",
+          "dureeMois": 1,
+          "objetModification": "Avenant 1",
+          "montant": 79237,
+          "datePublicationDonneesModification": "2023-01-04",
+          "titulaires": [
+            [
+              {
+                "typeIdentifiant": "SIRET",
+                "denominationSociale": "AMC FOLLIOT",
+                "id": "65265021900023"
+              }
+            ]
+          ]
+        }
+      ],
+      "nature": "Marché",
+      "codeCPV": "45261210",
+      "dureeMois": 11,
+      "datePublicationDonnees": "2022-01-24",
+      "titulaires": [
+        {
+          "typeIdentifiant": "SIRET",
+          "denominationSociale": "AMC FOLLIOT",
+          "id": "65265021900023"
+        }
+      ],
+      "id": "202183935401",
+      "_type": "Marché",
+      "formePrix": "Ferme et actualisable",
+      "dateNotification": "2021-12-01",
+      "objet": "Extension du groupe scolaire: Lot 3 : Charpente bois et#8211,Bardage",
+      "montant": 77899.0,
+      "acheteur.id": "21500222100012",
+      "uid": "21500222100012202183935401",
+      "source": "e-marchespublics",
+      "lieuExecution": {
+        "code": "50340",
+        "typeCode": "Code postal",
+        "nom": "Code postal"
+      }
+    },
+    {
+      "id": "2022VI2022.242",
+      "acheteur": {
+        "id": "21974022200019"
+      },
+      "nature": "Marché",
+      "objet": "Eléctricité courant fort/courant faible lot no4",
+      "codeCPV": "45316110-9",
+      "procedure": "Appel d'offres ouvert",
+      "lieuExecution": {
+        "code": "97430",
+        "typeCode": "Code postal"
+      },
+      "dureeMois": "NC",
+      "dateNotification": "2022-11-23",
+      "datePublicationDonnees": "2022-12-05",
+      "montant": 137614.0,
+      "formePrix": "Mixte",
+      "titulaires": [
+        {
+          "typeIdentifiant": "SIRET",
+          "id": "34027049500021",
+          "denominationSociale": "FFF"
+        },
+        {
+          "typeIdentifiant": "TVA",
+          "id": "99999999999",
+          "denominationSociale": "DEF"
+        }
+      ],
+      "modifications": [
+        {
+          "modification": {
+            "id": 1,
+            "dateNotificationModification": "2023-04-24",
+            "datePublicationDonneesModification": "2023-04-24",
+            "titulaires": [
+              [
+                [
+                  [
+                    {
+                      "typeIdentifiant": "SIRET",
+                      "id": "34027049500021",
+                      "denominationSociale": "FFF"
+                    },
+                    {
+                      "typeIdentifiant": "TVA",
+                      "id": "1111111111",
+                      "denominationSociale": "ABC"
+                    }
+                  ]
+                ]
+              ]
+            ]
+          }
+        }
+      ],
+      "origineUE": 0.3,
+      "origineFrance": 0.7,
+      "_type": "Marché",
+      "marcheInnovant": true
+    }
+  ]
+}

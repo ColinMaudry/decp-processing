@@ -1,5 +1,10 @@
 import polars as pl
 
+# Rappel : avec pl.scan_ndjson() (pl.DataFrame([some data]) fonctionne différemment) :
+# - si le champ en entrée est dans le schéma, il est ingéré (erreur au moment du collect() si mismatch de dtype)
+# - si le champ en entrée n'est pas dans le schéma, il est ignoré
+# - si un champ est présent dans le schéma mais absent en entrée, il est ajouté mais null
+
 SCHEMA_TITULAIRE_2022 = pl.Struct(
     {
         "titulaire": pl.Struct(
@@ -11,30 +16,33 @@ SCHEMA_TITULAIRE_2022 = pl.Struct(
     }
 )
 
-SCHEMA_MODIFICATION_2022 = pl.Struct(
+
+SCHEMA_TITULAIRE_2019 = pl.Struct(
     {
-        "modification": pl.Struct(
-            {
-                "id": pl.String,
-                # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
-                "dateNotificationModification": pl.String,
-                "datePublicationDonneesModification": pl.String,
-                "montant": pl.String,
-                "dureeMois": pl.String,
-                "titulaires": pl.List(SCHEMA_TITULAIRE_2022),
-            }
-        )
+        "typeIdentifiant": pl.String,
+        "id": pl.String,
     }
 )
 
-MODIFICATION_SCHEMA_PLAT_2022 = {
-    "modification.id": pl.String,  # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
-    "modification.dateNotificationModification": pl.String,
-    "modification.datePublicationDonneesModification": pl.String,
-    "modification.montant": pl.String,
-    "modification.dureeMois": pl.String,
-    "modification.titulaires.typeIdentifiant": pl.String,
-    "modification.titulaires.id": pl.String,
+SCHEMA_MODIFICATION_BASE = {
+    "modification_id": pl.Int32,  # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
+    "modification_dateNotificationModification": pl.String,
+    "modification_datePublicationDonneesModification": pl.String,
+    "modification_montant": pl.String,
+    "modification_dureeMois": pl.String,
+}
+
+SCHEMA_MODIFICATION_2022 = {
+    **SCHEMA_MODIFICATION_BASE,
+    "modification_titulaires": pl.List(SCHEMA_TITULAIRE_2022),
+}
+
+SCHEMA_MODIFICATION_2019 = {
+    **SCHEMA_MODIFICATION_BASE,
+    "modification_titulaires": pl.List(SCHEMA_TITULAIRE_2019),
+    # TODO ajouter la gestion de ces champs
+    # "modification_objetModification": pl.String,
+    # "modification_dateSignatureModification": pl.String,
 }
 
 
@@ -44,8 +52,6 @@ SCHEMA_MARCHE_BASE = {
     "codeCPV": pl.String,
     "dureeMois": pl.String,
     "datePublicationDonnees": pl.String,
-    "titulaires": pl.List(SCHEMA_TITULAIRE_2022),
-    "modifications": pl.List(SCHEMA_MODIFICATION_2022),
     "id": pl.String,
     "formePrix": pl.String,
     "dateNotification": pl.String,
@@ -55,16 +61,16 @@ SCHEMA_MARCHE_BASE = {
     "source": pl.String,
     "lieuExecution_code": pl.String,
     "lieuExecution_typeCode": pl.String,
+    # "_type": pl.String,
     "uid": pl.String,
+    # "uuid": pl.String,
     "marcheInnovant": pl.String,
     "attributionAvance": pl.String,
     "sousTraitanceDeclaree": pl.String,
     "ccag": pl.String,
-    "typePrix": pl.String,
     "offresRecues": pl.String,
     "typeGroupementOperateurs": pl.String,
     "idAccordCadre": pl.String,
-    "TypePrix": pl.String,
     "tauxAvance": pl.String,
     "origineUE": pl.String,
     "origineFrance": pl.String,
