@@ -97,7 +97,7 @@ def remove_suffixes_from_uid_column(df):
 def replace_with_modification_data(lf: pl.LazyFrame):
     """
     Gère les modifications dans le DataFrame des DECP.
-    À ce stade les modifications ont été exploded.
+    À ce stade les modifications ont été exploded dans write_marche_rows().
     Cette fonction récupère les informations des modifications (ex : modification_montant) et les insère dans les champs de base (ex : montant).
     (chaque ligne contient les informations complètes à jour à la date de notification)
     Elle ajoute également la colonne "donneesActuelles" pour indiquer si la modification est la plus récente.

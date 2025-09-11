@@ -49,7 +49,7 @@ def get_resource(
         print(f"▶️ Format de fichier non supporté : {file_format} ({r['dataset_name']})")
         return None, None
 
-    lf = pl.scan_parquet(output_path.with_suffix(".parquet"))
+    lf: pl.LazyFrame = pl.scan_parquet(output_path.with_suffix(".parquet"))
 
     # TODO: do something with it
     artifact_row = gen_artifact_row(r, lf, url, fields, decp_format)  # noqa
