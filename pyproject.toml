@@ -9,7 +9,7 @@ authors = [
 dependencies = [
     "python-dotenv",
     "pandas",
-    "polars==1.27.0",
+    "polars==1.33.1",
     "pyarrow",
     "tableschema",
     "frictionless==4.40.11",
