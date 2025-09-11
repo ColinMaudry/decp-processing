@@ -66,6 +66,17 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     return lf
 
 
+def extract_innermost_struct(x):
+    """Récupération des structs présents dans un nombre inconnu de listes imbriquées.
+    Uniquement utilisé pour decp-2019.json du MINEF."""
+    while isinstance(x, list):
+        if len(x) == 0 or isinstance(x[0], dict):
+            return x
+        else:
+            x = x[0]  # On ouvre la liste suivante
+    return None  # fallback
+
+
 def fix_data_types(lf: pl.LazyFrame):
     numeric_dtypes = {
         "dureeMois": pl.Int16,

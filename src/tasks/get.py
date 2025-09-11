@@ -11,6 +11,7 @@ from lxml import etree
 from prefect import task
 
 from config import DECP_FORMAT_2019, DECP_FORMATS, DIST_DIR, DecpFormat
+from tasks.clean import extract_innermost_struct
 from tasks.output import sink_to_files
 from tasks.utils import gen_artifact_row, stream_replace_bytestring
 
@@ -27,12 +28,12 @@ def stream_get(url: str, chunk_size=1024**2):
                 yield chunk
 
 
-@task
+@task(persist_result=False)
 def get_resource(
     r: dict, decp_formats: list[DecpFormat] | None = None
-) -> pl.LazyFrame | None:
+) -> tuple[pl.LazyFrame | None, DecpFormat | None]:
     if decp_formats is None:
-        decp_formats = DECP_FORMATS
+        decp_formats: list[DecpFormat] = DECP_FORMATS
 
     print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
 
@@ -46,7 +47,7 @@ def get_resource(
         fields, decp_format = xml_stream_to_parquet(url, output_path, decp_formats)
     else:
         print(f"▶️ Format de fichier non supporté : {file_format} ({r['dataset_name']})")
-        return None
+        return None, None
 
     lf = pl.scan_parquet(output_path.with_suffix(".parquet"))
 
@@ -61,7 +62,7 @@ def get_resource(
         pl.lit(resource_web_url).alias("sourceOpenData"),
         pl.lit(r["dataset_code"]).alias("source"),
     )
-    return lf
+    return lf, decp_format
 
 
 def find_json_decp_format(chunk, decp_formats):
@@ -77,9 +78,9 @@ def find_json_decp_format(chunk, decp_formats):
 @task(persist_result=False)
 def json_stream_to_parquet(
     url: str, output_path: Path, decp_formats: list[DecpFormat] | None = None
-) -> tuple[DecpFormat, set[str]]:
+) -> tuple[set, DecpFormat]:
     if decp_formats is None:
-        decp_formats = DECP_FORMATS
+        decp_formats: list[DecpFormat] = DECP_FORMATS
 
     fields = set()
     for decp_format in decp_formats:
@@ -102,7 +103,7 @@ def json_stream_to_parquet(
         decp_format = find_json_decp_format(chunk, decp_formats)
 
         for marche in decp_format.liste_marches_ijson:
-            new_fields = write_marche_rows(marche, tmp_file)
+            new_fields = write_marche_rows(marche, tmp_file, decp_format)
             fields = fields.union(new_fields)
 
         del decp_format.liste_marches_ijson[:]
@@ -110,7 +111,7 @@ def json_stream_to_parquet(
         for chunk in stream_replace_iter:
             decp_format.coroutine_ijson.send(chunk)
             for marche in decp_format.liste_marches_ijson:
-                new_fields = write_marche_rows(marche, tmp_file)
+                new_fields = write_marche_rows(marche, tmp_file, decp_format)
                 fields = fields.union(new_fields)
 
             del decp_format.liste_marches_ijson[:]
@@ -125,7 +126,8 @@ def json_stream_to_parquet(
 
 
 @task(persist_result=False)
-def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[DecpFormat, set[str]]:
+def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[set, DecpFormat]:
+    # Pour l'instant tous les fichiers XML (AIFE), sont au format 2019, donc pas de détection.
     fields = set()
     parser = etree.XMLPullParser(tag="marche")
     with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson") as tmp_file:
@@ -133,7 +135,7 @@ def xml_stream_to_parquet(url: str, output_path: Path) -> tuple[DecpFormat, set[
             parser.feed(chunk)
             for _, elem in parser.read_events():
                 _, marche = xml_to_dict(elem)
-                new_fields = write_marche_rows(marche, tmp_file)
+                new_fields = write_marche_rows(marche, tmp_file, DECP_FORMAT_2019)
                 fields = fields.union(new_fields)
         lf = pl.scan_ndjson(tmp_file.name, schema=DECP_FORMAT_2019.schema)
         sink_to_files(lf, output_path, file_format="parquet")
@@ -144,10 +146,18 @@ def xml_to_dict(element: etree.Element):
     return element.tag, dict(map(xml_to_dict, element)) or element.text
 
 
-def write_marche_rows(marche: dict, file) -> set[str]:
+def write_marche_rows(marche: dict, file, decp_format: DecpFormat) -> set[str]:
     """Ajout d'une ligne ndjson pour chaque modification/version du marché."""
     fields = set()
     for mod in yield_modifications(marche):
+        # Pour decp-2019.json : désimbrication des données des titulaires
+        # voir https://github.com/ColinMaudry/decp-processing/issues/114
+        if decp_format.label == "DECP 2019":
+            for f in ["titulaires", "modification_titulaires"]:
+                liste_titulaires = mod.get(f)
+                if liste_titulaires and isinstance(liste_titulaires[0], list):
+                    mod[f] = extract_innermost_struct(liste_titulaires)
+
         file.write(orjson.dumps(mod))
         file.write(b"\n")
         fields = fields.union(mod.keys())

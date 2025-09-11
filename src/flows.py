@@ -49,12 +49,12 @@ from tasks.utils import (
 def get_clean(resource) -> pl.DataFrame or None:
     # Récupération des données source...
     with transaction():
-        lf: pl.LazyFrame = get_resource(resource)
+        lf, decp_format = get_resource(resource)
 
         # Nettoyage des données source et typage des colonnes...
         # si la ressource est dans un format supporté
         if lf is not None:
-            lf = clean_decp(lf)
+            lf = clean_decp(lf, decp_format)
             df = lf.collect(engine="streaming")
 
     return df
