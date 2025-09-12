@@ -612,7 +612,7 @@
           }
         ],
         "considerationsSociales": {
-          "considerationSociale": ["Pas de considération sociale"]
+          "considerationSociale": ["Critère social", "Clause sociale"]
         },
         "considerationsEnvironnementales": {
           "considerationEnvironnementale": [
