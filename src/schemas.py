@@ -1,6 +1,6 @@
 import polars as pl
 
-# Rappel : avec pl.scan_ndjson() (pl.DataFrame([some data]) fonctionne différemment) :
+# Rappel : pl.scan_ndjson() fonctionne différemment de pl.DataFrame([some data]) :
 # - si le champ en entrée est dans le schéma, il est ingéré (erreur au moment du collect() si mismatch de dtype)
 # - si le champ en entrée n'est pas dans le schéma, il est ignoré
 # - si un champ est présent dans le schéma mais absent en entrée, il est ajouté mais null
@@ -15,7 +15,6 @@ SCHEMA_TITULAIRE_2022 = pl.Struct(
         )
     }
 )
-
 
 SCHEMA_TITULAIRE_2019 = pl.Struct(
     {
@@ -45,7 +44,6 @@ SCHEMA_MODIFICATION_2019 = {
     # "modification_dateSignatureModification": pl.String,
 }
 
-
 SCHEMA_MARCHE_BASE = {
     "procedure": pl.String,
     "nature": pl.String,
@@ -74,8 +72,6 @@ SCHEMA_MARCHE_BASE = {
     "tauxAvance": pl.String,
     "origineUE": pl.String,
     "origineFrance": pl.String,
-    "typesPrix": pl.List(pl.String),
-    "typesPrix_typePrix": pl.List(pl.String),
     # Présents dans peu de marchés et peu pertinents :
     # "created_at": pl.String,
     # "term.acheteur.id": pl.String,
@@ -92,6 +88,7 @@ SCHEMA_MARCHE_2019 = {
     "considerationsEnvironnementales": pl.List(pl.String),
     "modalitesExecution": pl.List(pl.String),
     "techniques": pl.List(pl.String),
+    "typesPrix": pl.List(pl.String),
     **SCHEMA_MODIFICATION_2019,
 }
 
@@ -102,5 +99,6 @@ SCHEMA_MARCHE_2022 = {
     "considerationsEnvironnementales_considerationEnvironnementale": pl.List(pl.String),
     "modalitesExecution_modaliteExecution": pl.List(pl.String),
     "techniques_technique": pl.List(pl.String),
+    "typesPrix_typePrix": pl.List(pl.String),
     **SCHEMA_MODIFICATION_2022,
 }
