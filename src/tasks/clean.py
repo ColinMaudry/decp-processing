@@ -59,6 +59,9 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     # Champs liste
     lf = process_string_lists(lf)
 
+    # Valeurs équivalentes à null transformées en null
+    lf = clean_null_equivalent(lf)
+
     # Explosion et traitement des modifications
     lf = process_modifications(lf)
 
@@ -92,7 +95,33 @@ def clean_control_characters(chunk: bytes):
     return bytes(chunk, "utf-8")
 
 
-def fix_data_types(lf: pl.LazyFrame):
+def clean_null_equivalent(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """Supprime les strings équivalente à null"""
+    mapping_null = {
+        "considerationsSociales": "Pas de considération sociale",
+        "considerationsEnvironnementales": "Pas de considération environnementale",
+        # "modalitesExecution": "Sans objet",
+        "ccag": "Pas de CCAG",
+        "typeGroupement": "Pas de groupement",
+    }
+
+    columns = lf.collect_schema().names()
+
+    lf = lf.with_columns(
+        [
+            pl.when(pl.col(col_name) == pl.lit(mapping_null[col_name]))
+            .then(pl.lit("Sans objet"))
+            .otherwise(pl.col(col_name))
+            .name.keep()
+            for col_name in mapping_null
+            if col_name in columns
+        ]
+    )
+
+    return lf
+
+
+def fix_data_types(lf: pl.LazyFrame) -> pl.LazyFrame:
     numeric_dtypes = {
         "dureeMois": pl.Int16,
         # "dureeMoisActeSousTraitance": pl.Int16,
