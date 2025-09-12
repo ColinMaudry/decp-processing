@@ -166,6 +166,7 @@ def write_marche_rows(marche: dict, file, decp_format: DecpFormat) -> set[str]:
     for mod in yield_modifications(marche):
         # Pour decp-2019.json : désimbrication des données des titulaires
         # voir https://github.com/ColinMaudry/decp-processing/issues/114
+        # complète probablement norm_titulaires(), qui ne faisait pas complètement le taff, donc à fusionner
         if decp_format.label == "DECP 2019":
             for f in ["titulaires", "modification_titulaires"]:
                 liste_titulaires = mod.get(f)
