@@ -76,8 +76,6 @@ SCHEMA_MARCHE_BASE = {
     "origineFrance": pl.String,
     "typesPrix": pl.List(pl.String),
     "typesPrix_typePrix": pl.List(pl.String),
-    "modaliteExecution": pl.List(pl.String),
-    "techniques_technique": pl.List(pl.String),
     # Présents dans peu de marchés et peu pertinents :
     # "created_at": pl.String,
     # "term.acheteur.id": pl.String,
@@ -87,18 +85,22 @@ SCHEMA_MARCHE_BASE = {
     # "_type": pl.String,
 }
 
-# SCHEMA_MARCHE_2019 = {
-#     **SCHEMA_MARCHE_BASE,
-#     "titulaires": pl.List(SCHEMA_TITULAIRE_2019),
-#     "considerationsSociales": pl.List(pl.String),
-#     "considerationsEnvironnementales": pl.List(pl.String),
-#     **SCHEMA_MODIFICATION_2019,
-# }
+SCHEMA_MARCHE_2019 = {
+    **SCHEMA_MARCHE_BASE,
+    "titulaires": pl.List(SCHEMA_TITULAIRE_2019),
+    "considerationsSociales": pl.List(pl.String),
+    "considerationsEnvironnementales": pl.List(pl.String),
+    "modalitesExecution": pl.List(pl.String),
+    "techniques": pl.List(pl.String),
+    **SCHEMA_MODIFICATION_2019,
+}
 
 SCHEMA_MARCHE_2022 = {
     **SCHEMA_MARCHE_BASE,
     "titulaires": pl.List(SCHEMA_TITULAIRE_2022),
     "considerationsSociales_considerationSociale": pl.List(pl.String),
     "considerationsEnvironnementales_considerationEnvironnementale": pl.List(pl.String),
+    "modalitesExecution_modaliteExecution": pl.List(pl.String),
+    "techniques_technique": pl.List(pl.String),
     **SCHEMA_MODIFICATION_2022,
 }

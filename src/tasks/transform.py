@@ -15,6 +15,7 @@ def process_string_lists(lf: pl.LazyFrame):
         "considerationsEnvironnementales_considerationEnvironnementale",
         "techniques_technique",
         "typesPrix_typePrix",
+        "modalitesExecution_modaliteExecution",
     ]
     columns = lf.collect_schema().names()
 
