@@ -52,7 +52,7 @@
           "modaliteExecution": ["Sans objet"]
         },
         "techniques": {
-          "technique": ["Sans objet"]
+          "technique": ["Accord-cadre", "Concours"]
         },
         "typesPrix": {
           "typePrix": ["Définitif révisable"]
@@ -612,7 +612,7 @@
           }
         ],
         "considerationsSociales": {
-          "considerationSociale": ["Pas de considération sociale"]
+          "considerationSociale": ["Critère social", "Clause sociale"]
         },
         "considerationsEnvironnementales": {
           "considerationEnvironnementale": [

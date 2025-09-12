@@ -72,6 +72,7 @@ def get_resource(
         pl.lit(resource_web_url).alias("sourceOpenData"),
         pl.lit(r["dataset_code"]).alias("source"),
     )
+
     return lf, decp_format
 
 
@@ -101,36 +102,39 @@ def json_stream_to_parquet(
             use_float=True,
         )
 
-    with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson") as tmp_file:
-        http_stream_iter = stream_get(url)
-        stream_replace_iter = stream_replace_bytestring(
-            http_stream_iter, b"NaN,", b"null,"
-        )
+    tmp_file = tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson", delete=True)
 
-        # In first iteration, will find the right format
-        chunk = next(stream_replace_iter)
+    http_stream_iter = stream_get(url)
+    stream_replace_iter = stream_replace_bytestring(http_stream_iter, b"NaN,", b"null,")
 
-        decp_format = find_json_decp_format(chunk, decp_formats)
+    # In first iteration, will find the right format
+    chunk = next(stream_replace_iter)
 
+    decp_format = find_json_decp_format(chunk, decp_formats)
+
+    for marche in decp_format.liste_marches_ijson:
+        new_fields = write_marche_rows(marche, tmp_file, decp_format)
+        fields = fields.union(new_fields)
+
+    del decp_format.liste_marches_ijson[:]
+
+    for chunk in stream_replace_iter:
+        decp_format.coroutine_ijson.send(chunk)
         for marche in decp_format.liste_marches_ijson:
             new_fields = write_marche_rows(marche, tmp_file, decp_format)
             fields = fields.union(new_fields)
 
         del decp_format.liste_marches_ijson[:]
 
-        for chunk in stream_replace_iter:
-            decp_format.coroutine_ijson.send(chunk)
-            for marche in decp_format.liste_marches_ijson:
-                new_fields = write_marche_rows(marche, tmp_file, decp_format)
-                fields = fields.union(new_fields)
+    decp_format.coroutine_ijson.close()
 
-            del decp_format.liste_marches_ijson[:]
+    tmp_file.seek(0)
 
-        decp_format.coroutine_ijson.close()
+    lf = pl.scan_ndjson(tmp_file.name, schema=decp_format.schema)
 
-        lf = pl.scan_ndjson(tmp_file.name, schema=decp_format.schema)
+    sink_to_files(lf, output_path, file_format="parquet")
 
-        sink_to_files(lf, output_path, file_format="parquet")
+    tmp_file.close()
 
     return fields, decp_format
 
@@ -166,6 +170,7 @@ def write_marche_rows(marche: dict, file, decp_format: DecpFormat) -> set[str]:
     for mod in yield_modifications(marche):
         # Pour decp-2019.json : désimbrication des données des titulaires
         # voir https://github.com/ColinMaudry/decp-processing/issues/114
+        # complète probablement norm_titulaires(), qui ne faisait pas complètement le taff, donc à fusionner
         if decp_format.label == "DECP 2019":
             for f in ["titulaires", "modification_titulaires"]:
                 liste_titulaires = mod.get(f)
