@@ -81,6 +81,7 @@ def remove_unused_cache(
 #
 
 
+# Statistiques pour une ressource
 def gen_artifact_row(
     file_info: dict,
     lf: pl.LazyFrame,
@@ -96,7 +97,6 @@ def gen_artifact_row(
         "data_fields": sorted(list(fields)),
         "data_fields_number": len(fields),
         "schema_label": decp_format.label,
-        "schema": decp_format.schema,
         "row_number": lf.select(pl.len()).collect().item(),
         # data.gouv.fr metadata
         "open_data_filename": file_info["ori_filename"],
@@ -112,6 +112,7 @@ def gen_artifact_row(
     return artifact_row
 
 
+# Statistiques pour toutes les données collectées ce jour
 def generate_stats(df: pl.DataFrame):
     now = datetime.now()
     df_uid: pl.DataFrame = (
