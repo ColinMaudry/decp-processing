@@ -135,16 +135,22 @@ def replace_with_modification_data(lf: pl.LazyFrame):
     # Étape 1: Extraire les données des modifications en renommant les colonnes
     # on ne conserve pas modification_id car on le recrée nous-mêmes, par sécurité
     schema = lf.collect_schema().names()
-    lf_mods = lf.select(
-        cs.by_name("uid")
-        | cs.starts_with("modification_") - cs.by_name("modification_id")
-    ).rename(
-        {
-            column: column.removeprefix("modification_").removesuffix("Modification")
-            for column in schema
-            if column.startswith("modification_") and column != "modification_id"
-        }
-    )
+    lf_mods = (
+        lf.select(
+            cs.by_name("uid")
+            | cs.starts_with("modification_") - cs.by_name("modification_id")
+        )
+        .rename(
+            {
+                column: column.removeprefix("modification_").removesuffix(
+                    "Modification"
+                )
+                for column in schema
+                if column.startswith("modification_") and column != "modification_id"
+            }
+        )
+        .filter(~pl.all_horizontal(pl.all().exclude("uid").is_null()))
+    )  # sans les lignes de données initiales
 
     # Étape 2: Dédupliquer et créer une copie du DataFrame initial sans les colonnes "modifications"
     # On peut dédupliquer aveuglément car la seule chose qui varient dans les lignes d'un même
