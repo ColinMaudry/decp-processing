@@ -243,9 +243,9 @@ def process_modifications(lf: pl.LazyFrame) -> pl.LazyFrame:
 def normalize_tables(df: pl.DataFrame):
     # MARCHES
 
-    df_marches: pl.DataFrame = df.drop("titulaire_id", "titulaire_typeIdentifiant")
+    df_marches: pl.DataFrame = df.drop(cs.starts_with("titulaire", "acheteur"))
     df_marches = df_marches.unique(subset=["uid", "modification_id"]).sort(
-        by="datePublicationDonnees", descending=True
+        by="dateNotification", descending=True
     )
     save_to_databases(df_marches, "decp", "marches", "uid, modification_id")
     del df_marches
@@ -271,18 +271,29 @@ def normalize_tables(df: pl.DataFrame):
 
     ## Table marches_titulaires
     df_marches_titulaires: pl.DataFrame = df.select(
-        "uid", "titulaire_id", "titulaire_typeIdentifiant", "modification_id"
+        "uid", "modification_id", "titulaire_id", "titulaire_typeIdentifiant"
     )
-    df_marches_titulaires = df_marches_titulaires.rename(
-        {"uid": "marche_uid", "modification_id": "marche_modification_id"}
-    )
+
     save_to_databases(
         df_marches_titulaires,
         "decp",
         "marches_titulaires",
-        '"marche_uid", "titulaire_id", "titulaire_typeIdentifiant", "marche_modification_id"',
+        '"uid", "modification_id", "titulaire_id", "titulaire_typeIdentifiant"',
     )
     del df_marches_titulaires
+
+    ## Table marches_acheteurs
+    df_marches_acheteurs: pl.DataFrame = df.select(
+        "uid", "modification_id", "acheteur_id"
+    ).unique()
+
+    save_to_databases(
+        df_marches_acheteurs,
+        "decp",
+        "marches_acheteurs",
+        '"uid", "modification_id", "acheteur_id"',
+    )
+    del df_marches_acheteurs
 
     # TODO ajouter les sous-traitants quand ils seront ajoutés aux données
 
