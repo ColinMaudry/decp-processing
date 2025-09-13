@@ -30,10 +30,9 @@ def stream_get(url: str, chunk_size=1024**2):
 
 @task(persist_result=False)
 def get_resource(
-    r: dict, decp_formats: list[DecpFormat] | None = None
+    r: dict, resources_artifact: list[dict] | list
 ) -> tuple[pl.LazyFrame | None, DecpFormat | None]:
-    if decp_formats is None:
-        decp_formats: list[DecpFormat] = DECP_FORMATS
+    decp_formats: list[DecpFormat] = DECP_FORMATS
 
     print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
 
@@ -61,8 +60,10 @@ def get_resource(
 
     lf: pl.LazyFrame = pl.scan_parquet(output_path.with_suffix(".parquet"))
 
-    # TODO: do something with it
+    # Ajout des stats de la ressource à l'artifact
+    # https://github.com/ColinMaudry/decp-processing/issues/89
     artifact_row = gen_artifact_row(r, lf, url, fields, decp_format)  # noqa
+    resources_artifact.append(artifact_row)
 
     # Exemple https://www.data.gouv.fr/datasets/5cd57bf68b4c4179299eb0e9/#/resources/bb90091c-f0cb-4a59-ad41-b0ab929aad93
     resource_web_url = (

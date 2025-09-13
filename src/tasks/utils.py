@@ -36,15 +36,6 @@ def stream_replace_bytestring(iterator, old_bytestring: bytes, new_bytestring: b
         yield buffer
 
 
-def create_artifact(
-    data,
-    key: str,
-    description: str = None,
-):
-    if data is list:
-        create_table_artifact(key=key, table=data, description=description)
-
-
 @task
 def create_sirene_data_dir():
     SIRENE_DATA_DIR.mkdir(exist_ok=True, parents=True)
@@ -123,19 +114,29 @@ def gen_artifact_row(
 
 def generate_stats(df: pl.DataFrame):
     now = datetime.now()
-    df_uid: pl.DataFrame = df.select(
-        "uid",
-        "acheteur_id",
-        "datePublicationDonnees",
-        "dateNotification",
-        "montant",
-        "sourceOpenData",
-    ).unique(subset=["uid"])
+    df_uid: pl.DataFrame = (
+        df.select(
+            "uid",
+            "acheteur_id",
+            "dateNotification",
+            "datePublicationDonnees",
+            "montant",
+            "donneesActuelles",
+            "source",
+            "sourceOpenData",
+        )
+        .filter(pl.col("donneesActuelles"))
+        .unique(subset=["uid"])
+    )
+
+    resources = df_uid["sourceOpenData"].unique().to_list()
 
     stats = {
         "datetime": now.isoformat()[:-7],  # jusqu'aux secondes
         "date": DATE_NOW,
-        "resources": df_uid["sourceOpenData"].unique().to_list(),
+        "resources": resources,
+        "nb_resources": len(resources),
+        "sources": df_uid["source"].unique().to_list(),
         "nb_lignes": df.height,
         "colonnes_triées": sorted(df.columns),
         "nb_colonnes": len(df.columns),

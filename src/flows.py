@@ -4,6 +4,7 @@ import shutil
 
 import polars as pl
 from prefect import flow, task
+from prefect.artifacts import create_table_artifact
 from prefect.task_runners import ConcurrentTaskRunner
 from prefect.transactions import transaction
 
@@ -46,10 +47,10 @@ from tasks.utils import (
     cache_expiration=datetime.timedelta(hours=CACHE_EXPIRATION_TIME_HOURS),
     cache_key_fn=get_clean_cache_key,
 )
-def get_clean(resource) -> pl.DataFrame or None:
+def get_clean(resource, resources_artifact: list) -> pl.DataFrame or None:
     # Récupération des données source...
     with transaction():
-        lf, decp_format = get_resource(resource)
+        lf, decp_format = get_resource(resource, resources_artifact)
 
         # Nettoyage des données source et typage des colonnes...
         # si la ressource est dans un format supporté
@@ -95,13 +96,23 @@ def decp_processing(enable_cache_removal: bool = False):
     print("Liste de toutes les ressources des datasets...")
     resources: list[dict] = list_resources(TRACKED_DATASETS)
 
+    # Initialisation du tableau des artifacts de ressources
+    resources_artifact = []
+
     # Traitement parallèle des ressources
     futures = [
-        get_clean.submit(resource)
+        get_clean.submit(resource, resources_artifact)
         for resource in resources
         if resource["filesize"] > 100
     ]
     dfs: list[pl.DataFrame] = [f.result() for f in futures if f.result() is not None]
+
+    create_table_artifact(
+        table=resources_artifact,
+        key="datagouvfr-json-resources",
+        description=f"Les ressources utilisées comme source ({DATE_NOW})",
+    )
+    del resources_artifact
 
     print("Fusion des dataframes...")
     df: pl.DataFrame = concat_decp_json(dfs)
