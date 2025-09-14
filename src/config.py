@@ -56,7 +56,7 @@ POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI")
 
 
 with open(
-    os.getenv("DATASETS_REFERENCE_FILEPATH", DATA_DIR / "datasets_reference.json"), "r"
+    os.getenv("DATASETS_REFERENCE_FILEPATH", DATA_DIR / "source_datasets.json"), "r"
 ) as f:
     TRACKED_DATASETS = json.load(f)
 
