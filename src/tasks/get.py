@@ -69,10 +69,17 @@ def get_resource(
     resource_web_url = (
         f"https://www.data.gouv.fr/datasets/{r['dataset_id']}/#/resources/{r['id']}"
     )
-    lf = lf.with_columns(
-        pl.lit(resource_web_url).alias("sourceFile"),
-        pl.lit(r["dataset_code"]).alias("sourceDataset"),
-    )
+
+    lf = lf.with_columns(pl.lit(resource_web_url).alias("sourceFile"))
+
+    if r["dataset_code"] == "decp_minef":
+        lf = lf.with_columns(
+            (pl.lit("decp_minef_") + pl.col("source")).alias("sourceDataset")
+        )
+        lf = lf.drop("source")
+    else:
+        lf = lf.rename({"source": "sourceDataset"})
+        lf = lf.with_columns(pl.lit(r["dataset_code"]).alias("sourceDataset"))
 
     return lf, decp_format
 
