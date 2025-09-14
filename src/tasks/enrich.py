@@ -1,4 +1,5 @@
 import polars as pl
+import polars.selectors as cs
 from prefect import task
 
 from config import SIRENE_DATA_DIR
@@ -82,6 +83,7 @@ def enrich_from_sirene(df: pl.LazyFrame):
     df = add_unite_legale_data(
         df, df_sirets_acheteurs, siret_column="acheteur_id", type_siret="acheteur"
     )
+    del df_sirets_acheteurs
 
     # print("Construction du champ acheteur_nom à partir des données SIRENE...")
     # df_sirets_acheteurs = make_acheteur_nom(df_sirets_acheteurs)
@@ -109,6 +111,7 @@ def enrich_from_sirene(df: pl.LazyFrame):
     df = add_unite_legale_data(
         df, df_sirets_titulaires, siret_column="titulaire_id", type_siret="titulaire"
     )
+    del df_sirets_titulaires
     # print("Amélioration des données unités légales des titulaires...")
     # df_sirets_titulaires = improve_titulaire_unite_legale_data(df_sirets_titulaires)
 
@@ -122,5 +125,7 @@ def enrich_from_sirene(df: pl.LazyFrame):
     # print("Enregistrement des DECP Titulaires aux formats CSV et Parquet...")
     # save_to_files(df_decp_titulaires, f"{DIST_DIR}/decp-titulaires")
     # del df_decp_titulaires
+
+    df = df.drop(cs.ends_with("_siren"))
 
     return df

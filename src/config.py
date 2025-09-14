@@ -65,30 +65,29 @@ BOOKMARK_FILEPATH = Path(
 )
 
 # Liste et ordre des colonnes pour le mono dataframe de base (avant normalisation et spécialisation)
-# Sert aussi à vérifier qu'au moins ces colonnes sont présentes (d'autres peuvent être présentes en plus)
+# Sert aussi à vérifier qu'au moins ces colonnes sont présentes (d'autres peuvent être présentes en plus, les colonnes "innatendues")
 BASE_DF_COLUMNS = [
     "uid",
     "id",
     "nature",
     "acheteur_id",
     "acheteur_nom",
-    "acheteur_siren",
     "titulaire_id",
     "titulaire_typeIdentifiant",
     "titulaire_nom",
-    "titulaire_siren",
     "objet",
     "montant",
     "codeCPV",
     "procedure",
     "techniques",
     "dureeMois",
+    "offresRecues",
     "dateNotification",
     "datePublicationDonnees",
     "formePrix",
     "typesPrix",
     "attributionAvance",
-    "offresRecues",
+    "tauxAvance",
     "marcheInnovant",
     "modalitesExecution",
     "considerationsSociales",
@@ -96,7 +95,6 @@ BASE_DF_COLUMNS = [
     "ccag",
     "sousTraitanceDeclaree",
     "typeGroupementOperateurs",
-    "tauxAvance",
     "origineUE",
     "origineFrance",
     "lieuExecution_code",
@@ -104,8 +102,8 @@ BASE_DF_COLUMNS = [
     "idAccordCadre",
     "modification_id",
     "donneesActuelles",
-    "source",
-    "sourceOpenData",
+    "sourceDataset",
+    "sourceFile",
 ]
 
 COLUMNS_TO_DROP = [

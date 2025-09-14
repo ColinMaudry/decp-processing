@@ -70,8 +70,8 @@ def get_resource(
         f"https://www.data.gouv.fr/datasets/{r['dataset_id']}/#/resources/{r['id']}"
     )
     lf = lf.with_columns(
-        pl.lit(resource_web_url).alias("sourceOpenData"),
-        pl.lit(r["dataset_code"]).alias("source"),
+        pl.lit(resource_web_url).alias("sourceFile"),
+        pl.lit(r["dataset_code"]).alias("sourceDataset"),
     )
 
     return lf, decp_format
