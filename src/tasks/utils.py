@@ -10,8 +10,10 @@ from prefect.artifacts import create_table_artifact
 from config import (
     CACHE_EXPIRATION_TIME_HOURS,
     DATE_NOW,
+    DIST_DIR,
     PREFECT_LOCAL_STORAGE_PATH,
     SIRENE_DATA_DIR,
+    TRACKED_DATASETS,
     DecpFormat,
 )
 
@@ -130,6 +132,8 @@ def generate_stats(df: pl.DataFrame):
         .unique(subset=["uid"])
     )
 
+    generate_public_source_stats(df_uid)
+
     resources = df_uid["sourceOpenData"].unique().to_list()
 
     stats = {
@@ -177,3 +181,43 @@ def generate_stats(df: pl.DataFrame):
         key="stats-marches-publics",
         description=f"Statistiques sur les marchés publics agrégés ({DATE_NOW})",
     )
+
+
+def generate_public_source_stats(df_uid: pl.DataFrame) -> None:
+    df_uid = df_uid.select("uid", "acheteur_id", "source")
+
+    df_acheteurs = (
+        df_uid.select("acheteur_id", "source").unique().group_by("source").len()
+    )
+    df_acheteurs = df_acheteurs.rename({"len": "nb_acheteurs"})
+
+    # group + count
+    df_uid = df_uid.select("uid", "source").unique().group_by("source").len()
+    df_uid = df_uid.rename({"len": "nb_marchés"}).sort(by="nb_marchés", descending=True)
+
+    # lecture des sources en df
+    df_sources: pl.DataFrame = pl.DataFrame(TRACKED_DATASETS)
+    # si c'est les données de test
+    if "resources" in df_sources.columns:
+        df_sources = df_sources.drop("resources")
+
+    # petites modifications
+    df_sources = df_sources.with_columns(
+        (pl.lit("https://www.data.gouv.fr/datasets/") + pl.col("id")).alias("url")
+    )
+    df_sources = df_sources.rename(
+        {"name": "nom", "owner_org_name": "organisation"}
+    ).drop("id")
+
+    # ajout données count
+    df_sources = df_sources.join(
+        df_acheteurs, left_on="code", right_on="source", how="left"
+    )
+    df_sources = df_sources.join(df_uid, left_on="code", right_on="source", how="left")
+
+    df_sources = df_sources.select(
+        "nom", "organisation", "url", "nb_marchés", "nb_acheteurs", "code"
+    )
+
+    # dump CSV dans dist
+    df_sources.write_csv(DIST_DIR / "statistiques.csv")

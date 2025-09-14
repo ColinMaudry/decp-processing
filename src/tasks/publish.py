@@ -54,7 +54,11 @@ def publish_to_datagouv(context: str):
         #     "resource_id": "65194f6f-e273-4067-8075-56f072d56baf",
         #     "context": "decp",
         # },
-        # {"file": str(DIST_DIR/"statistiques.csv"), "resource_id": "8ded94de-3b80-4840-a5bb-7faad1c9c234"},
+        {
+            "file": str(DIST_DIR / "statistiques.csv"),
+            "resource_id": "8ded94de-3b80-4840-a5bb-7faad1c9c234",
+            "context": "decp",
+        },
     ]
 
     for upload in uploads:
