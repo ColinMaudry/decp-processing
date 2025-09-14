@@ -1,5 +1,7 @@
 import polars as pl
 
+# Ces schémas sont destinés à l'ingestion des données source, pas à leur validation en fin de traitement.
+
 # Rappel : pl.scan_ndjson() fonctionne différemment de pl.DataFrame([some data]) :
 # - si le champ en entrée est dans le schéma, il est ingéré (erreur au moment du collect() si mismatch de dtype)
 # - si le champ en entrée n'est pas dans le schéma, il est ignoré
