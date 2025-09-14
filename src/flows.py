@@ -80,12 +80,6 @@ def make_data_tables():
     print("Normalisation des tables...")
     normalize_tables(df)
 
-    if DECP_PROCESSING_PUBLISH.lower() == "true":
-        print("Publication sur data.gouv.fr...")
-        publish_to_datagouv(context="data_tables")
-    else:
-        print("Publication sur data.gouv.fr désactivée.")
-
 
 @flow(
     log_prints=True, task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS)
@@ -137,9 +131,16 @@ def decp_processing(enable_cache_removal: bool = False):
     print("Enregistrement des DECP aux formats CSV, Parquet...")
     df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
     save_to_files(df, DIST_DIR / "decp")
+    del df
 
     # Base de données SQLite dédiée aux activités du Datalab d'Anticor
     make_data_tables()
+
+    if DECP_PROCESSING_PUBLISH.lower() == "true":
+        print("Publication sur data.gouv.fr...")
+        publish_to_datagouv()
+    else:
+        print("Publication sur data.gouv.fr désactivée.")
 
     # Suppression des fichiers de cache inutilisés
     if enable_cache_removal:

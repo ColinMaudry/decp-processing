@@ -24,7 +24,10 @@ def publish_to_datagouv(context: str):
         {
             "file": str(DIST_DIR / "decp.parquet"),
             "resource_id": "11cea8e8-df3e-4ed1-932b-781e2635e432",
-            "context": context,
+        },
+        {
+            "file": str(DIST_DIR / "decp.csv"),
+            "resource_id": "22847056-61df-452d-837d-8b8ceadbfc52",
         },
         # {
         #     "file": str(DIST_DIR/"decp-titulaires.csv"),
@@ -37,17 +40,14 @@ def publish_to_datagouv(context: str):
         {
             "file": str(DIST_DIR / "decp-sans-titulaires.csv"),
             "resource_id": "834c14dd-037c-4825-958d-0a841c4777ae",
-            "context": "decp",
         },
         {
             "file": str(DIST_DIR / "decp-sans-titulaires.parquet"),
             "resource_id": "df28fa7d-2d36-439b-943a-351bde02f01d",
-            "context": "decp",
         },
         {
             "file": str(DIST_DIR / "decp.sqlite"),
             "resource_id": "43f54982-da60-4eb7-aaaf-ba935396209b",
-            "context": "data_tables",
         },
         # {
         #     "file": str(DIST_DIR/"datapackage.json"),
@@ -57,15 +57,13 @@ def publish_to_datagouv(context: str):
         {
             "file": str(DIST_DIR / "statistiques.csv"),
             "resource_id": "8ded94de-3b80-4840-a5bb-7faad1c9c234",
-            "context": "decp",
         },
     ]
 
     for upload in uploads:
-        if context == upload["context"]:
-            print(f"Mise à jour de {upload['file']}...")
-            result = update_resource(
-                api, dataset_id, upload["resource_id"], upload["file"], api_key
-            )
-            if result["success"] is True:
-                print("OK")
+        print(f"Mise à jour de {upload['file']}...")
+        result = update_resource(
+            api, dataset_id, upload["resource_id"], upload["file"], api_key
+        )
+        if result["success"] is True:
+            print("OK")
