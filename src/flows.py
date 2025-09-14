@@ -22,10 +22,7 @@ from tasks.clean import clean_decp
 from tasks.dataset_utils import list_resources
 from tasks.enrich import enrich_from_sirene
 from tasks.get import get_resource
-from tasks.output import (
-    save_to_files,
-    save_to_sqlite,
-)
+from tasks.output import generate_final_schema, save_to_files, save_to_sqlite
 from tasks.publish import publish_to_datagouv
 from tasks.transform import (
     concat_decp_json,
@@ -124,12 +121,14 @@ def decp_processing(enable_cache_removal: bool = False):
 
     generate_stats(df)
 
+    # Réinitialisation de DIST_DIR
     if os.path.exists(DIST_DIR):
         shutil.rmtree(DIST_DIR)
     os.makedirs(DIST_DIR)
 
-    print("Enregistrement des DECP aux formats CSV, Parquet...")
+    print("Génération du schéma et enregistrement des DECP aux formats CSV, Parquet...")
     df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
+    generate_final_schema(df)
     save_to_files(df, DIST_DIR / "decp")
     del df
 
