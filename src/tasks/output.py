@@ -1,9 +1,11 @@
+import json
 import sqlite3
+from collections import OrderedDict
 from pathlib import Path
 
 import polars as pl
 
-from config import DIST_DIR, POSTGRESQL_DB_URI
+from config import DATA_DIR, DIST_DIR, POSTGRESQL_DB_URI
 
 
 def save_to_files(df: pl.DataFrame, path: str | Path, file_format=None):
@@ -82,49 +84,26 @@ def save_to_databases(
         save_to_postgres(df, table_name)
 
 
-def make_data_package():
-    from frictionless import Package, Resource, steps
+def generate_final_schema(df):
+    final_schema = OrderedDict()
 
-    common_steps = [
-        steps.field_update(name="id", descriptor={"type": "string"}),
-        steps.field_update(name="uid", descriptor={"type": "string"}),
-        steps.field_update(name="acheteur_id", descriptor={"type": "string"}),
-    ]
+    # conversion en dict sérialisable en JSON
+    for col in df.columns:
+        final_schema[col] = {"datatype": df.schema[col].__str__()}
 
-    outputs = [
-        {
-            "csv": str(DIST_DIR / "decp.csv"),
-            "steps": common_steps
-            + [
-                steps.field_update(name="titulaire_id", descriptor={"type": "string"}),
-            ],
-        },
-        {
-            "csv": str(DIST_DIR / "decp-sans-titulaires.csv"),
-            "steps": common_steps,
-        },
-        # {
-        #     "csv": f"{DIST_DIR}/decp-titulaires.csv",
-        #     "steps": common_steps
-        #     + [
-        #         steps.field_update(name="departement", descriptor={"type": "string"}),
-        #         steps.field_update(name="titulaire_id", descriptor={"type": "string"}),
-        #     ],
-        # },
-    ]
+    # récupération de data/data_fields.json
+    with open(DATA_DIR / "schema_base.json", "r", encoding="utf-8") as file:
+        base_json = json.load(file, object_pairs_hook=OrderedDict)
 
-    resources = []
+    # fusion des deux
+    for field in final_schema:
+        if field not in base_json:
+            print(field + " absent de schema_base.json !")
+        else:
+            merged = OrderedDict(base_json[field])  # Copy to preserve order
+            merged.update(final_schema[field])  # Add/override with datatype
+            final_schema[field] = merged
 
-    for output in outputs:
-        resource: Resource = Resource(path=output["csv"])
-
-        # Cette méthode détecte les caractéristiques du CSV et tente de deviner les datatypes
-        resources.append(Resource.transform(steps=output["steps"], resource=resource))
-
-    Package(
-        name="decp",
-        title="DECP tabulaire",
-        description="Données essentielles de la commande publique (FR) au format tabulaire v2.",
-        resources=resources,
-        # it's possible to provide all the official properties like homepage, version, etc
-    ).to_json(DIST_DIR / "datapackage.json")
+    # création de dist/schema.json
+    with open(DIST_DIR / "schema.json", "w", encoding="utf-8") as file:
+        json.dump(final_schema, file, indent=4, ensure_ascii=False, sort_keys=False)
