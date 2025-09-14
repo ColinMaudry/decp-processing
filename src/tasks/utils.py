@@ -125,8 +125,8 @@ def generate_stats(df: pl.DataFrame):
             "datePublicationDonnees",
             "montant",
             "donneesActuelles",
-            "source",
-            "sourceOpenData",
+            "sourceDataset",
+            "sourceFile",
         )
         .filter(pl.col("donneesActuelles"))
         .unique(subset=["uid"])
@@ -134,14 +134,14 @@ def generate_stats(df: pl.DataFrame):
 
     generate_public_source_stats(df_uid)
 
-    resources = df_uid["sourceOpenData"].unique().to_list()
+    resources = df_uid["sourceFile"].unique().to_list()
 
     stats = {
         "datetime": now.isoformat()[:-7],  # jusqu'aux secondes
         "date": DATE_NOW,
         "resources": resources,
         "nb_resources": len(resources),
-        "sources": df_uid["source"].unique().to_list(),
+        "sources": df_uid["sourceDataset"].unique().to_list(),
         "nb_lignes": df.height,
         "colonnes_triées": sorted(df.columns),
         "nb_colonnes": len(df.columns),
@@ -184,15 +184,20 @@ def generate_stats(df: pl.DataFrame):
 
 
 def generate_public_source_stats(df_uid: pl.DataFrame) -> None:
-    df_uid = df_uid.select("uid", "acheteur_id", "source")
+    df_uid = df_uid.select("uid", "acheteur_id", "sourceDataset")
 
     df_acheteurs = (
-        df_uid.select("acheteur_id", "source").unique().group_by("source").len()
+        df_uid.select("acheteur_id", "sourceDataset")
+        .unique()
+        .group_by("sourceDataset")
+        .len()
     )
     df_acheteurs = df_acheteurs.rename({"len": "nb_acheteurs"})
 
     # group + count
-    df_uid = df_uid.select("uid", "source").unique().group_by("source").len()
+    df_uid = (
+        df_uid.select("uid", "sourceDataset").unique().group_by("sourceDataset").len()
+    )
     df_uid = df_uid.rename({"len": "nb_marchés"}).sort(by="nb_marchés", descending=True)
 
     # lecture des sources en df
@@ -211,10 +216,13 @@ def generate_public_source_stats(df_uid: pl.DataFrame) -> None:
 
     # ajout données count
     df_sources = df_sources.join(
-        df_acheteurs, left_on="code", right_on="source", how="left"
+        df_acheteurs, left_on="code", right_on="sourceDataset", how="left"
     )
-    df_sources = df_sources.join(df_uid, left_on="code", right_on="source", how="left")
+    df_sources = df_sources.join(
+        df_uid, left_on="code", right_on="sourceDataset", how="left"
+    )
 
+    # ordre des colonnes
     df_sources = df_sources.select(
         "nom", "organisation", "url", "nb_marchés", "nb_acheteurs", "code"
     )
