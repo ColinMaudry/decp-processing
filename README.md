@@ -1,10 +1,16 @@
 # DECP processing
 
-Projet de traitement et de publication de meilleures données sur les marchés publics attribués en France. Ce projet prend sa source dans la complexité de la publication des données faite par le Ministère des Finances :
+> version 2.0
 
-- code source de l'agrégation des données [fermé](https://github.com/139bercy/decp-rama-v2/blob/main/README.md)
+Projet de traitement et de publication de meilleures données sur les marchés publics attribués en France.
+
+Les données sont rassemblées tous les matins, du lundi au vendredi, et publiées sur data.gouv.fr.
+
+Ce projet prend sa source dans la complexité de la publication des données faite par le Ministère des Finances :
+
+- code source de l'agrégation [ouvert mais très peu lisible](https://github.com/139bercy/decp-arr2022)
 - documentation incomplète et éparpillée
-  - https://github.com/139bercy/decp-rama-v2/blob/main/README.md
+  - https://github.com/139bercy/decp-arr2022/blob/main/README.md
   - https://www.data.gouv.fr/fr/datasets/5cd57bf68b4c4179299eb0e9
   - https://data.economie.gouv.fr/pages/donnees-essentielles-de-la-commande-publique/
 - schéma de données DECP 2 [complexe à utiliser](https://github.com/ColinMaudry/decp-processing/issues/4)
