@@ -87,7 +87,7 @@ def list_resources_by_dataset(dataset_id: str) -> list[dict]:
     retry_delay_seconds=3,
     persist_result=True,
     cache_policy=INPUTS,
-    cache_expiration=datetime.timedelta(hours=20),
+    cache_expiration=datetime.timedelta(hours=23),
 )
 def list_resources(datasets: list[dict]) -> list[dict]:
     """
@@ -162,7 +162,9 @@ def list_resources(datasets: list[dict]) -> list[dict]:
                         "dataset_code": dataset["code"],
                         "id": resource["id"],
                         "ori_filename": resource["title"],
-                        "checksum": resource["checksum"]["value"],
+                        "checksum": resource["checksum"]["value"]
+                        if resource["checksum"]
+                        else resource["extras"]["analysis:checksum"],
                         # Dataset id en premier pour grouper les ressources d'un même dataset ensemble
                         # Nom du fichier pour le distinguer des autres fichiers du dataset
                         # Un bout d'id de ressource pour les cas où plusieurs fichiers ont le même nom dans le même dataset (ex : Occitanie)
@@ -171,7 +173,9 @@ def list_resources(datasets: list[dict]) -> list[dict]:
                         "format": resource["format"],
                         "created_at": resource["created_at"],
                         "last_modified": resource["last_modified"],
-                        "filesize": resource["filesize"],
+                        "filesize": resource.get("filesize", None)
+                        or resource["extras"].get("analysis:content-length", None)
+                        or 1000,
                         "views": resource["metrics"].get("views", None),
                     }
                 )
