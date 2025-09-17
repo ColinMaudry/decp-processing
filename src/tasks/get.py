@@ -11,13 +11,13 @@ from lxml import etree
 from prefect import task
 
 from config import DECP_FORMAT_2019, DECP_FORMATS, DIST_DIR, DecpFormat
-from tasks.clean import clean_control_characters, extract_innermost_struct
+from tasks.clean import clean_invalid_characters, extract_innermost_struct
 from tasks.output import sink_to_files
 from tasks.utils import gen_artifact_row, stream_replace_bytestring
 
 
 @task(retries=3, retry_delay_seconds=3)
-def stream_get(url: str, chunk_size=1024**2):
+def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par défaut)
     if url.startswith("http"):
         with stream("GET", url, follow_redirects=True) as response:
             yield from response.iter_bytes(chunk_size)
@@ -45,11 +45,11 @@ def get_resource(
     elif file_format == "xml":
         try:
             fields, decp_format = xml_stream_to_parquet(
-                url, output_path, fix_control_chars=False
+                url, output_path, fix_chars=False
             )
         except etree.XMLSyntaxError:
             fields, decp_format = xml_stream_to_parquet(
-                url, output_path, fix_control_chars=True
+                url, output_path, fix_chars=True
             )
             print(f"♻️  {r['ori_filename']} nettoyé et traité")
     else:
@@ -139,7 +139,6 @@ def json_stream_to_parquet(
     tmp_file.seek(0)
 
     lf = pl.scan_ndjson(tmp_file.name, schema=decp_format.schema)
-
     sink_to_files(lf, output_path, file_format="parquet")
 
     tmp_file.close()
@@ -149,15 +148,17 @@ def json_stream_to_parquet(
 
 @task(persist_result=False)
 def xml_stream_to_parquet(
-    url: str, output_path: Path, fix_control_chars=False
+    url: str, output_path: Path, fix_chars=False
 ) -> tuple[set, DecpFormat]:
     # Pour l'instant tous les fichiers XML (AIFE), sont au format 2019, donc pas de détection.
     fields = set()
-    parser = etree.XMLPullParser(tag="marche")
-    with tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson") as tmp_file:
+    parser = etree.XMLPullParser(tag="marche", recover=True)
+    with tempfile.NamedTemporaryFile(
+        mode="wb", suffix=".ndjson", delete=True
+    ) as tmp_file:
         for chunk in stream_get(url):
-            if fix_control_chars:
-                chunk = clean_control_characters(chunk)
+            if fix_chars:
+                chunk = clean_invalid_characters(chunk)
             parser.feed(chunk)
             for _, elem in parser.read_events():
                 _, marche = xml_to_dict(elem)
