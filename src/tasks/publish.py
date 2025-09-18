@@ -1,8 +1,6 @@
-from os import getenv
-
 from httpx import post
 
-from config import DIST_DIR
+from config import API_KEY, DIST_DIR
 
 
 def update_resource(api, dataset_id, resource_id, file_path, api_key):
@@ -15,7 +13,6 @@ def update_resource(api, dataset_id, resource_id, file_path, api_key):
 
 
 def publish_to_datagouv(context: str):
-    api_key = getenv("DATAGOUVFR_API_KEY")
     api = "https://www.data.gouv.fr/api/1"
     dataset_id = "608c055b35eb4e6ee20eb325"
 
@@ -62,7 +59,7 @@ def publish_to_datagouv(context: str):
     for upload in uploads:
         print(f"Mise à jour de {upload['file']}...")
         result = update_resource(
-            api, dataset_id, upload["resource_id"], upload["file"], api_key
+            api, dataset_id, upload["resource_id"], upload["file"], API_KEY
         )
         if result["success"] is True:
             print("OK")

@@ -26,7 +26,7 @@ SCHEMA_TITULAIRE_2019 = pl.Struct(
 )
 
 SCHEMA_MODIFICATION_BASE = {
-    "modification_id": pl.Int32,  # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
+    # "modification_id": pl.Int32,  # can switch down to UInt8 when https://github.com/pola-rs/polars/pull/16105 is merged
     "modification_dateNotificationModification": pl.String,
     "modification_datePublicationDonneesModification": pl.String,
     "modification_montant": pl.String,
@@ -57,7 +57,6 @@ SCHEMA_MARCHE_BASE = {
     "dateNotification": pl.String,
     "objet": pl.String,
     "montant": pl.String,
-    "acheteur_id": pl.String,
     "source": pl.String,
     "lieuExecution_code": pl.String,
     "lieuExecution_typeCode": pl.String,
@@ -85,6 +84,8 @@ SCHEMA_MARCHE_BASE = {
 
 SCHEMA_MARCHE_2019 = {
     **SCHEMA_MARCHE_BASE,
+    "acheteur.id": pl.String,
+    "acheteur_id": pl.String,
     "titulaires": pl.List(SCHEMA_TITULAIRE_2019),
     "considerationsSociales": pl.List(pl.String),
     "considerationsEnvironnementales": pl.List(pl.String),
@@ -96,6 +97,7 @@ SCHEMA_MARCHE_2019 = {
 
 SCHEMA_MARCHE_2022 = {
     **SCHEMA_MARCHE_BASE,
+    "acheteur_id": pl.String,
     "titulaires": pl.List(SCHEMA_TITULAIRE_2022),
     "considerationsSociales_considerationSociale": pl.List(pl.String),
     "considerationsEnvironnementales_considerationEnvironnementale": pl.List(pl.String),

@@ -32,6 +32,9 @@ MONTH_NOW = DATE_NOW[:7]  # YYYY-MM
 # Publication ou non des fichiers produits sur data.gouv.fr
 DECP_PROCESSING_PUBLISH = os.environ.get("DECP_PROCESSING_PUBLISH", "")
 
+# Clé d'API data.gouv.fr
+API_KEY = os.environ.get("DATAGOUVFR_API_KEY", "")
+
 # Dossier racine
 BASE_DIR = Path(__file__).parent.parent
 
@@ -129,11 +132,16 @@ COLUMNS_TO_DROP = [
     "dureeMois_source",
 ]
 
-# Liste des ID de ressources présentes dans un dataset à traiter, mais exclues du traitement
+# Liste des ID de ressources présentes dans un dataset à traiter, au format JSON ou XML, mais exclues du traitement
 EXCLUDED_RESOURCES = [
     "17046b18-8921-486a-bc31-c9196d5c3e9c",  # decp.xml : fichier XML consolidé par le MINEF mais abandonné
     "68bd2001-3420-4d94-bc49-c90878df322c",  # decp.ocds.json : fichier au format JSON mais OCDS, pas DECP
     "59ba0edb-cf94-4bf1-a546-61f561553917",  # decp-2022.json : format bizarre, entre 2019 et 2022 ~8000 marchés
+    "9c4f84d6-6fc9-4c82-a7f8-fb60d54fa188",  # données Région Bretagne inexistante (404)
+    "8133b5b6-d097-4a5f-91cc-e94b11db3e2a",  # données Région Bretagne inexistante (404)
+    "e10ea7c4-4992-45d8-a191-07dac6991f89",  # données Région Bretagne inexistante (404)
+    "2d6dd1a6-8471-48c0-a207-6715cff06a99",  # données Région Bretagne JSON non-réglementaire
+    "7629a6a1-3b8a-4570-8562-3a7cf82be88e",  # données Région Bretagne XML non-réglementaire
 ]
 
 

@@ -133,20 +133,16 @@ def replace_with_modification_data(lf: pl.LazyFrame):
     """
 
     # Étape 1: Extraire les données des modifications en renommant les colonnes
-    # on ne conserve pas modification_id car on le recrée nous-mêmes, par sécurité
     schema = lf.collect_schema().names()
     lf_mods = (
-        lf.select(
-            cs.by_name("uid")
-            | cs.starts_with("modification_") - cs.by_name("modification_id")
-        )
+        lf.select(cs.by_name("uid") | cs.starts_with("modification_"))
         .rename(
             {
                 column: column.removeprefix("modification_").removesuffix(
                     "Modification"
                 )
                 for column in schema
-                if column.startswith("modification_") and column != "modification_id"
+                if column.startswith("modification_")
             }
         )
         .filter(~pl.all_horizontal(pl.all().exclude("uid").is_null()))
