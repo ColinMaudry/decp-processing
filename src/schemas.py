@@ -85,6 +85,7 @@ SCHEMA_MARCHE_BASE = {
 SCHEMA_MARCHE_2019 = {
     **SCHEMA_MARCHE_BASE,
     "acheteur.id": pl.String,
+    "acheteur_id": pl.String,
     "titulaires": pl.List(SCHEMA_TITULAIRE_2019),
     "considerationsSociales": pl.List(pl.String),
     "considerationsEnvironnementales": pl.List(pl.String),
