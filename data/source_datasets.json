@@ -262,17 +262,5 @@
     "name": "AIFE_DE_13001977100018",
     "owner_org_name": "Agence pour l'Informatique Financière de l'Etat",
     "code": "aife_dume"
-  },
-  {
-    "id": "65cf11893fda573b53b19f52",
-    "name": "Déclaration des données essentielles Avenue Web Systèmes",
-    "owner_org_name": "AVENUE WEB SYSTEMES",
-    "code": "datagouv_aws"
-  },
-  {
-    "id": "68caf6b135f19236a4f37a32",
-    "name": "Mes AWS",
-    "owner_org_name": "Ministère de l'économie, des Finances et de l'Industrie",
-    "code": "colin_aws"
   }
 ]
