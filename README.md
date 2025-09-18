@@ -1,12 +1,15 @@
 # DECP processing
 
-> version 2.0
+> version 2.0 ([notes de version](https://github.com/ColinMaudry/decp-processing/blob/main/CHANGELOG.md))
 
-Projet de traitement et de publication de meilleures données sur les marchés publics attribués en France.
+Projet de traitement et de publication de meilleures données sur les marchés publics attribués en France. Vous pouvez consulter, filtrer et télécharger
+ces données sur le site [decp.info](https://decp.info). Enfin la section [À propos](https://decp.info/a-propos) décrit les objectifs du projet et regroupe toutes les informations clés.
 
-Les données sont rassemblées tous les matins, du lundi au vendredi, et publiées sur data.gouv.fr.
+Les données sont rassemblées et traitées tous les matins, du lundi au vendredi,
+et [publiées sur data.gouv.fr](https://www.data.gouv.fr/fr/datasets/donnees-essentielles-de-la-commande-publique-consolidees-format-tabulaire/)
+aux formats parquet, CSV et SQLite.
 
-Ce projet prend sa source dans la complexité de la publication des données faite par le Ministère des Finances :
+Ce projet prend sa source dans la complexité de la publication des données par le Ministère des Finances :
 
 - code source de l'agrégation [ouvert mais très peu lisible](https://github.com/139bercy/decp-arr2022)
 - documentation incomplète et éparpillée
@@ -23,23 +26,24 @@ Pour me contacter vous pouvez ouvrir un "issue" sur Github ou me contacter par e
 
 ## Données
 
-Les données produites sont les mêmes données que celles publiées par le Ministère des Finances sur data.economie.gouv.fr. J'ai choisi de prendre ces données comme source et non les DECP au format réglementaire JSON car les premières ont été nettoyées et améliorées ([code](https://github.com/139bercy/decp-augmente)) par le Ministère, ce qui me fait moins de travail.
-
-Elles sont mises à dispositions aux formats CSV, Parquet et SQLite.
-
-Vous pouvez...
-
-- les télécharger sur [data.gouv.fr](https://www.data.gouv.fr/fr/datasets/donnees-essentielles-de-la-commande-publique-consolidees-format-tabulaire/) (vous trouverez aussi plus d'informations sur ces données)
-- les visualiséer, les filtrer et télécharger sur [decp.info](https://decp.info)
+Les données consolidées proviennent intégralement de sources ouvertes. Les détails des sources de données utilisées peuvent
+être consultés sur [decp.info](https://decp.info/a-propos).
 
 ## Pré-requis
 
-- Python 3.8 ou plus récent
+- Python 3.9 ou plus récent
 - cargo ([installation rapide](https://rustup.rs))
-- fichier .env avec l'adresse des fichiers source
-- si sauvegarde dans Postgre
+- si sauvegarde dans PostgreSQL :
   - sur Debian/Ubuntu : `sudo apt install libpq-dev` (pour builder le module `psycopg2`)
   - créer la base de données cible
+
+## Bases techniques
+
+Cet outil repose grandement sur trois logiciels libres :
+
+- [prefect](https://docs.prefect.io/v3/get-started) pour l'orchestration, le monitoring, la gestion du cache
+- [polars](https://docs.pola.rs) pour la manipulation de données tabulaires en flux
+- [ijson](https://pypi.org/project/ijson/) pour la manipulation de données JSON en flux
 
 ## Installation
 
@@ -49,11 +53,6 @@ Je vous recommande d'utiliser un environnement virtuel Python pour isoler l'inst
 
 ```bash
 python -m venv .venv
-```
-
-Activez l'environnement virtuel :
-
-```bash
 source .venv/bin/activate
 ```
 
@@ -63,7 +62,7 @@ Installez les dépendances :
 pip install .
 ```
 
-Installez les dépendances de développement et l'auto-formatage :
+Pour les contributeurices, installez les dépendances de développement et l'auto-formatage au moment des commits :
 
 ```bash
 pip install .[dev]
@@ -75,7 +74,7 @@ pre-commit install
 pip install .'[dev]'
 ```
 
-Faites une copie de template.env, renommez-la en .env et adaptez les valeurs :
+Faites une copie du fichier template.env, renommez-le en .env et adaptez les valeurs :
 
 ```shell
 cp template.env .env
@@ -84,7 +83,7 @@ nano .env
 
 ### Installation sur le serveur pour les déploiements (Linux)
 
-Ces instructions supposent que le serveur prefect est installé, configuré et démarré.
+Ces instructions supposent que le serveur [prefect](https://docs.prefect.io/v3/get-started) est installé, configuré et démarré.
 
 Il suppose également que le work pool "local" a été créé.
 
@@ -92,21 +91,16 @@ Il suppose également que le work pool "local" a été créé.
 2. Démarrer le serveur prefect
 3. Adapter les chemins dans `systemd/prefect-worker.service`
 4. Copier `systemd/prefect-worker.service` dans le répertoire `/etc/systemd/system`
-5. Activer le service (pour qu'il soit démarré au démarrage du serveur)
+5. Activer et démarrer le service
 
 ```bash
 systemctl enable prefect-worker.service
-```
-
-5. Démarrer le service
-
-```bash
 systemctl start prefect-worker.service
 ```
 
 Un nouveau worker doit apparaître dans l'interface de gestion de prefect.
 
-### Avec Docker (sous Windows)
+### Avec Docker sous Windows, peu testé
 
 Construire et lancer le container
 
@@ -130,7 +124,7 @@ Le pré-traitement des données SIRENE doit être fait une fois pour que le trai
 pytest tests/test_sirene_preprocess.py
 ```
 
-Lancement du traitement principal (data_tables + decp.info)
+Lancement du traitement principal (data_tables + decp.info) via un serveur prefect à usage unique
 
 ```bash
 python src/flows.py
@@ -168,7 +162,7 @@ Ce traitement doit être fait une fois pour que le test du traitement principal 
 pytest tests/test_sirene_preprocess.py
 ```
 
-### Du traitement principal (data tables + decp.info)
+### Du traitement principal (data tables + decp.info) (les autres tests de /tests sont moins maintenus)
 
 ```bash
 pytest tests/test_main.py
@@ -176,5 +170,6 @@ pytest tests/test_main.py
 
 # Contributeurs ❤️
 
-- Colin Maudry
+- Colin Maudry (développeur principal)
 - [FranckMaseo](https://github.com/frankmaseo)
+- [Thomas Louf](https://github.com/tlouf)
