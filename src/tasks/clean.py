@@ -16,9 +16,10 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     # CLEAN DATA
     #
 
-    # Si format 2019
+    # Si format 2019 : parfois c'est "acheteur.id": ..., parfois c'est "acheteur": {id : ...}
     if decp_format.label == "DECP 2019":
-        lf = lf.rename({"acheteur.id": "acheteur_id"})
+        lf = lf.with_columns(pl.coalesce("acheteur_id", "acheteur.id"))
+        lf = lf.drop("acheteur.id")
 
     # Suppression des marchés qui n'ont pas d'id ou d'acheteur_id
     lf = lf.filter(pl.col("id").is_not_null() & pl.col("acheteur_id").is_not_null())

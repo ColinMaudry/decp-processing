@@ -4,7 +4,7 @@ from httpx import get
 from prefect import task
 from prefect.cache_policies import INPUTS
 
-from config import EXCLUDED_RESOURCES
+from config import API_KEY, EXCLUDED_RESOURCES
 
 
 def list_datasets_by_org(org_id: str) -> list[dict]:
@@ -50,7 +50,9 @@ def handle_paginated_calls(url: str) -> list[dict]:
     """
     data = []
     while url:
-        response = get(url, follow_redirects=True).json()
+        response = get(
+            url, follow_redirects=True, headers={"X-API-KEY": API_KEY}
+        ).json()
         data.extend(response["data"])
         url = response.get("next_page")
     return data
@@ -164,7 +166,8 @@ def list_resources(datasets: list[dict]) -> list[dict]:
                         "ori_filename": resource["title"],
                         "checksum": resource["checksum"]["value"]
                         if resource["checksum"]
-                        else resource["extras"]["analysis:checksum"],
+                        else resource["extras"].get("analysis:checksum")
+                        or resource["id"],
                         # Dataset id en premier pour grouper les ressources d'un même dataset ensemble
                         # Nom du fichier pour le distinguer des autres fichiers du dataset
                         # Un bout d'id de ressource pour les cas où plusieurs fichiers ont le même nom dans le même dataset (ex : Occitanie)

@@ -135,7 +135,6 @@ def json_stream_to_parquet(
         del decp_format.liste_marches_ijson[:]
 
     decp_format.coroutine_ijson.close()
-
     tmp_file.seek(0)
 
     lf = pl.scan_ndjson(tmp_file.name, schema=decp_format.schema)
