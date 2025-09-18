@@ -1,78 +1,75 @@
+import datetime
 import os
 import shutil
 
 import polars as pl
 from prefect import flow, task
+from prefect.artifacts import create_table_artifact
+from prefect.task_runners import ConcurrentTaskRunner
 from prefect.transactions import transaction
 
 from config import (
     BASE_DF_COLUMNS,
+    CACHE_EXPIRATION_TIME_HOURS,
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
+    MAX_PREFECT_WORKERS,
     SIRENE_DATA_DIR,
+    TRACKED_DATASETS,
 )
-from tasks.analyse import generate_stats
 from tasks.clean import clean_decp
-from tasks.enrich import add_unite_legale_data
-from tasks.get import get_decp_json
-from tasks.output import (
-    save_to_files,
-    save_to_sqlite,
-)
+from tasks.dataset_utils import list_resources
+from tasks.enrich import enrich_from_sirene
+from tasks.get import get_resource
+from tasks.output import generate_final_schema, save_to_files, save_to_sqlite
 from tasks.publish import publish_to_datagouv
-from tasks.setup import create_sirene_data_dir
 from tasks.transform import (
     concat_decp_json,
-    extract_unique_acheteurs_siret,
-    extract_unique_titulaires_siret,
     get_prepare_unites_legales,
-    make_decp_sans_titulaires,
     normalize_tables,
     sort_columns,
 )
+from tasks.utils import (
+    create_sirene_data_dir,
+    generate_stats,
+    get_clean_cache_key,
+    remove_unused_cache,
+)
+
+
+@task(
+    log_prints=True,
+    persist_result=True,
+    cache_expiration=datetime.timedelta(hours=CACHE_EXPIRATION_TIME_HOURS),
+    cache_key_fn=get_clean_cache_key,
+)
+def get_clean(resource, resources_artifact: list) -> pl.DataFrame or None:
+    # Récupération des données source...
+    with transaction():
+        lf, decp_format = get_resource(resource, resources_artifact)
+
+        # Nettoyage des données source et typage des colonnes...
+        # si la ressource est dans un format supporté
+        if lf is not None:
+            lf = clean_decp(lf, decp_format)
+            df = lf.collect(engine="streaming")
+
+    return df
 
 
 @task(log_prints=True)
-def get_clean_concat():
-    print("Récupération des données source...")
-    files = get_decp_json()
+def make_data_tables():
+    """Tâches consacrées à la transformation des données dans un format relationnel (SQL)."""
 
-    print("Nettoyage des données source et typage des colonnes...")
-    files = clean_decp(files)
-
-    print("Fusion des dataframes...")
-    df = concat_decp_json(files)
-
-    print("Ajout des données SIRENE...")
-    lf: pl.LazyFrame = enrich_from_sirene(df.lazy())
-
-    print("Génération de l'artefact (statistiques) sur le base df...")
-    df: pl.DataFrame = lf.collect(engine="streaming")
-    generate_stats(df)
-
-    if os.path.exists(DIST_DIR):
-        shutil.rmtree(DIST_DIR)
-    os.makedirs(DIST_DIR)
-
-    print("Enregistrement des DECP aux formats CSV, Parquet...")
-    df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
-    save_to_files(df, DIST_DIR / "decp")
-
-
-@flow(log_prints=True)
-def make_datalab_data():
-    """Tâches consacrées à la transformation des données dans un format
-    adapté aux activités du Datalab d'Anticor."""
-
-    print("🚀  Création des données pour le Datalab d'Anticor...")
+    print("Création de la base données au format relationnel...")
 
     df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
 
-    print("Enregistrement des DECP aux formats SQLite...")
+    print("Enregistrement des DECP (base DataFrame) dans les bases de données...")
     save_to_sqlite(
         df,
-        "datalab",
+        "decp",
         "data.gouv.fr.2022.clean",
         "uid, titulaire_id, titulaire_typeIdentifiant, modification_id",
     )
@@ -80,131 +77,75 @@ def make_datalab_data():
     print("Normalisation des tables...")
     normalize_tables(df)
 
-    if DECP_PROCESSING_PUBLISH.lower() == "true":
-        print("Publication sur data.gouv.fr...")
-        publish_to_datagouv(context="datalab")
-    else:
-        print("Publication sur data.gouv.fr désactivée.")
 
-    print("☑️  Fin du flow make_datalab_data.")
+@flow(
+    log_prints=True, task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS)
+)
+def decp_processing(enable_cache_removal: bool = False):
+    print("🚀  Début du flow decp-processing")
 
+    print("Liste de toutes les ressources des datasets...")
+    resources: list[dict] = list_resources(TRACKED_DATASETS)
 
-@flow(log_prints=True)
-def make_decpinfo_data():
-    """Tâches consacrées à la transformation des données dans un format
-    # adapté à decp.info"""
+    # Initialisation du tableau des artifacts de ressources
+    resources_artifact = []
 
-    print("🚀  Création des données pour decp.info...")
+    # Traitement parallèle des ressources
+    futures = [
+        get_clean.submit(resource, resources_artifact)
+        for resource in resources
+        if resource["filesize"] > 100
+    ]
+    dfs: list[pl.DataFrame] = [f.result() for f in futures if f.result() is not None]
 
-    df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
+    create_table_artifact(
+        table=resources_artifact,
+        key="datagouvfr-json-resources",
+        description=f"Les ressources utilisées comme source ({DATE_NOW})",
+    )
+    del resources_artifact
 
-    # DECP sans titulaires
-    save_to_files(make_decp_sans_titulaires(df), DIST_DIR / "decp-sans-titulaires")
+    print("Fusion des dataframes...")
+    df: pl.DataFrame = concat_decp_json(dfs)
 
-    # print("Ajout des colonnes manquantes...")
-    # df = setup_tableschema_columns(df)
-
-    # CREATION D'UN DATA PACKAGE (FRICTIONLESS DATA)
-
-    # Pas la priorité pour le moment, prend du temps
-    # print("Validation des données DECP avec le TableSchema...")
-    # validate_decp_against_tableschema()
-
-    # print("Création du data package (JSON)....")
-    # make_data_package()
-
-    # PUBLICATION DES FICHIERS SUR DATA.GOUV.FR
-    if DECP_PROCESSING_PUBLISH.lower() == "true":
-        print("Publication sur data.gouv.fr...")
-        publish_to_datagouv(context="decp")
-    else:
-        print("Publication sur data.gouv.fr désactivée.")
-
-    print("☑️  Fin du flow make_decpinfo_data.")
-
-    return df
-
-
-@flow(log_prints=True)
-def decp_processing():
-    print("🚀  Début du flow principal")
-
-    # Données nettoyées et fusionnées
-    get_clean_concat()
-
-    # Fichiers dédiés à l'Open Data et decp.info
-    make_decpinfo_data()
-
-    # Base de données SQLite dédiée aux activités du Datalab d'Anticor
-    make_datalab_data()
-
-    print("☑️  Fin du flow principal decp_processing.")
-
-
-@task(log_prints=True)
-def enrich_from_sirene(df: pl.LazyFrame):
-    # Préprocessing des données SIRENE si :
+    print("Ajout des données SIRENE...")
+    # Preprocessing des données SIRENE si :
     # - le dossier n'existe pas encore (= les données n'ont pas déjà été preprocessed ce mois-ci)
     # - on est au moins le 5 du mois (pour être sûr que les données SIRENE ont été mises à jour sur data.gouv.fr)
     if not SIRENE_DATA_DIR.exists() and int(DATE_NOW[-2:]) >= 5:
         sirene_preprocess()
+    lf: pl.LazyFrame = enrich_from_sirene(df.lazy())
 
-    # DONNÉES SIRENE ACHETEURS
+    print("Génération de l'artefact (statistiques) sur le base df...")
+    df: pl.DataFrame = lf.collect(engine="streaming")
 
-    print("Extraction des SIRET des acheteurs...")
-    df_sirets_acheteurs = extract_unique_acheteurs_siret(df.clone())
+    generate_stats(df)
 
-    # print("Ajout des données établissements (acheteurs)...")
-    # df_sirets_acheteurs = add_etablissement_data(
-    #     df_sirets_acheteurs, ["enseigne1Etablissement"], "acheteur_id"
-    # )
+    # Réinitialisation de DIST_DIR
+    if os.path.exists(DIST_DIR):
+        shutil.rmtree(DIST_DIR)
+    os.makedirs(DIST_DIR)
 
-    print("Ajout des données unités légales (acheteurs)...")
-    df = add_unite_legale_data(
-        df, df_sirets_acheteurs, siret_column="acheteur_id", type_siret="acheteur"
-    )
+    print("Génération du schéma et enregistrement des DECP aux formats CSV, Parquet...")
+    df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
+    generate_final_schema(df)
+    save_to_files(df, DIST_DIR / "decp")
+    del df
 
-    # print("Construction du champ acheteur_nom à partir des données SIRENE...")
-    # df_sirets_acheteurs = make_acheteur_nom(df_sirets_acheteurs)
+    # Base de données SQLite dédiée aux activités du Datalab d'Anticor
+    make_data_tables()
 
-    # print("Enregistrement des DECP aux formats CSV et Parquet...")
-    # save_to_files(df, f"{DIST_DIR}/decp")
+    if DECP_PROCESSING_PUBLISH.lower() == "true":
+        print("Publication sur data.gouv.fr...")
+        publish_to_datagouv()
+    else:
+        print("Publication sur data.gouv.fr désactivée.")
 
-    # print("Suppression de colonnes et déduplication pour les DECP Sans Titulaires...")
-    # df_decp_sans_titulaires = make_decp_sans_titulaires(df)
-    # save_to_files(df_decp_sans_titulaires, f"{DIST_DIR}/decp-sans-titulaires")
-    # del df_decp_sans_titulaires
+    # Suppression des fichiers de cache inutilisés
+    if enable_cache_removal:
+        remove_unused_cache()
 
-    # DONNÉES SIRENE TITULAIRES
-
-    # Enrichissement des données pas prioritaire
-    # cf https://github.com/ColinMaudry/decp-processing/issues/17
-
-    print("Extraction des SIRET des titulaires...")
-    df_sirets_titulaires = extract_unique_titulaires_siret(df)
-
-    # print("Ajout des données établissements (titulaires)...")
-    # df_sirets_titulaires = add_etablissement_data_to_titulaires(df_sirets_titulaires)
-
-    print("Ajout des données unités légales (titulaires)...")
-    df = add_unite_legale_data(
-        df, df_sirets_titulaires, siret_column="titulaire_id", type_siret="titulaire"
-    )
-    # print("Amélioration des données unités légales des titulaires...")
-    # df_sirets_titulaires = improve_titulaire_unite_legale_data(df_sirets_titulaires)
-
-    # print("Renommage de certaines colonnes unités légales (titulaires)...")
-    # df_sirets_titulaires = rename_titulaire_sirene_columns(df_sirets_titulaires)
-
-    # print("Jointure pour créer les données DECP Titulaires...")
-    # df_decp_titulaires = merge_sirets_titulaires(df, df_sirets_titulaires)
-    # del df_sirets_titulaires
-
-    # print("Enregistrement des DECP Titulaires aux formats CSV et Parquet...")
-    # save_to_files(df_decp_titulaires, f"{DIST_DIR}/decp-titulaires")
-    # del df_decp_titulaires
-
-    return df
+    print("☑️  Fin du flow principal decp_processing.")
 
 
 @flow(log_prints=True)

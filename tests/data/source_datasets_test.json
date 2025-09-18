@@ -1,0 +1,32 @@
+[
+  {
+    "id": "test_dataset",
+    "name": "Dataset de test",
+    "owner_org_name": "decp-processing",
+    "code": "test_dataset",
+    "resources": [
+      {
+        "id": "decp_2022",
+        "title": "decp_2022.json",
+        "checksum": { "value": "8888888888888888888888888888888888" },
+        "latest": "./tests/data/decp_test_2022.json",
+        "format": "json",
+        "created_at": "2025-07-08T18:00:00Z",
+        "last_modified": "2025-07-08T19:00:00Z",
+        "filesize": 766654,
+        "metrics": { "views": 10 }
+      },
+      {
+        "id": "decp_2019",
+        "title": "decp_2019.json",
+        "checksum": { "value": "9999999999999999999999999999" },
+        "latest": "./tests/data/decp_test_2019.json",
+        "format": "json",
+        "created_at": "2025-07-08T18:00:00Z",
+        "last_modified": "2025-07-08T19:00:00Z",
+        "filesize": 766654,
+        "metrics": { "views": 10 }
+      }
+    ]
+  }
+]

@@ -1,115 +1,145 @@
 import datetime
-import io
-import json
-import math
-from pathlib import Path
+import re
 
 import polars as pl
-import polars.selectors as cs
-from prefect import task
 
-from config import DATA_DIR
-from tasks.output import save_to_files
-from tasks.transform import explode_titulaires, process_modifications
+from config import DecpFormat
+from tasks.transform import (
+    explode_titulaires,
+    process_modifications,
+    process_string_lists,
+)
 
 
-@task
-def clean_decp(files: list[Path]):
-    return_files = []
-    for file in files:
-        #
-        # CLEAN DATA
-        #
+def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
+    #
+    # CLEAN DATA
+    #
 
-        lf: pl.LazyFrame = pl.scan_parquet(f"{file}.parquet")
+    # Si format 2019 : parfois c'est "acheteur.id": ..., parfois c'est "acheteur": {id : ...}
+    if decp_format.label == "DECP 2019":
+        lf = lf.with_columns(pl.coalesce("acheteur_id", "acheteur.id"))
+        lf = lf.drop("acheteur.id")
 
-        # Colonnes exclues pour l'instant
-        # lf = df.rename({
-        #     "typesPrix_typePrix": "typesPrix",
-        #     "considerationsEnvironnementales_considerationEnvironnementale": "considerationsEnvironnementales",
-        #     "considerationsSociales_considerationSociale": "considerationsSociales",
-        #     "techniques_technique": "techniques",
-        #     "modalitesExecution_modaliteExecution": "modalitesExecution"
-        # })
+    # Suppression des marchés qui n'ont pas d'id ou d'acheteur_id
+    lf = lf.filter(pl.col("id").is_not_null() & pl.col("acheteur_id").is_not_null())
 
-        # Nettoyage des identifiants de marchés
-        lf = lf.with_columns(pl.col("id").str.replace_all(r"[ ,\\./]", "_"))
+    # Nettoyage des identifiants de marchés
+    lf = lf.with_columns(pl.col("id").str.replace_all(r"[ ,\\./]", "_"))
 
-        # Ajout du champ uid
-        # TODO: à déplacer autre part, dans transform
-        lf = lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
+    # Ajout du champ uid
+    # TODO: à déplacer autre part, dans transform
+    lf = lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
 
-        # Suppression des lignes en doublon par UID (acheteur id + id)
-        # Exemple : 20005584600014157140791205100
-        # index_size_before = df.height
-        # df = df.unique(subset=["uid"], maintain_order=False)
-        # print("-- ", index_size_before - df.height, " doublons supprimés (uid)")
+    # Dates
+    date_replacements = {
+        # ID marché invalide et SIRET de l'acheteur
+        "0002-11-30": "",
+        "September, 16 2021 00:00:00": "2021-09-16",  # 2000769
+        # 5800012 19830766200017 (plein !)
+        "16 2021 00:00:00": "",
+        "0222-04-29": "2022-04-29",  # 202201L0100
+        "0021-12-05": "2022-12-05",  # 20222022/1400
+        "0001-06-21": "",  # 0000000000000000 21850109600018
+        "0019-10-18": "",  # 0000000000000000 34857909500012
+        "5021-02-18": "2021-02-18",  # 20213051200 21590015000016
+        "2921-11-19": "",  # 20220057201 20005226400013
+        "0022-04-29": "2022-04-29",  # 2022AOO-GASL0100 25640454200035
+    }
 
-        # Dates
-        date_replacements = {
-            # ID marché invalide et SIRET de l'acheteur
-            "0002-11-30": "",
-            "September, 16 2021 00:00:00": "2021-09-16",  # 2000769
-            # 5800012 19830766200017 (plein !)
-            "16 2021 00:00:00": "",
-            "0222-04-29": "2022-04-29",  # 202201L0100
-            "0021-12-05": "2022-12-05",  # 20222022/1400
-            "0001-06-21": "",  # 0000000000000000 21850109600018
-            "0019-10-18": "",  # 0000000000000000 34857909500012
-            "5021-02-18": "2021-02-18",  # 20213051200 21590015000016
-            "2921-11-19": "",  # 20220057201 20005226400013
-            "0022-04-29": "2022-04-29",  # 2022AOO-GASL0100 25640454200035
-        }
+    # Using replace_many for efficient replacement of multiple date values
+    lf = lf.with_columns(
+        pl.col(["datePublicationDonnees", "dateNotification"])
+        .str.replace_many(date_replacements)
+        .cast(pl.Utf8)
+    )
 
-        # Using replace_many for efficient replacement of multiple date values
-        lf = lf.with_columns(
-            pl.col(["datePublicationDonnees", "dateNotification"])
-            .str.replace_many(date_replacements)
-            .cast(pl.Utf8)
+    # Nature
+    lf = lf.with_columns(
+        pl.col("nature").str.replace_many(
+            {"Marche": "Marché", "subsequent": "subséquent"}
         )
+    )
 
-        # Nature
-        lf = lf.with_columns(
-            pl.col("nature").str.replace_many(
-                {"Marche": "Marché", "subsequent": "subséquent"}
-            )
-        )
+    # Champs liste
+    lf = process_string_lists(lf)
 
-        # Explosion et traitement des modifications
-        lf = process_modifications(lf)
+    # Valeurs équivalentes à null transformées en null
+    lf = clean_null_equivalent(lf)
 
-        # Explosion des titulaires
-        lf = explode_titulaires(lf)
+    # Explosion et traitement des modifications
+    lf = process_modifications(lf)
 
-        # Fix datatypes
-        lf = fix_data_types(lf)
+    # Explosion des titulaires
+    lf = explode_titulaires(lf, decp_format)
 
-        output_file = DATA_DIR / "clean" / file.name
-        return_files.append(output_file)
-        output_file.parent.mkdir(exist_ok=True)
+    # NC
+    lf = lf.with_columns(pl.col(pl.Utf8).replace("NC", None))
 
-        df: pl.DataFrame = lf.collect()
-        save_to_files(df, output_file, ["parquet"])
+    # Correction des datatypes
+    lf = fix_data_types(lf)
 
-    return return_files
+    return lf
 
 
-def fix_data_types(lf: pl.LazyFrame):
-    print("Correction des datatypes...")
+def extract_innermost_struct(x):
+    """Récupération des structs présents dans un nombre inconnu de listes imbriquées.
+    Uniquement utilisé pour decp-2019.json du MINEF."""
+    while isinstance(x, list):
+        if len(x) == 0 or isinstance(x[0], dict):
+            return x
+        else:
+            x = x[0]  # On ouvre la liste suivante
+    return None  # fallback
+
+
+def clean_invalid_characters(chunk: bytes):
+    """Supprime les "ASCII control characters", caractères invalides en XML."""
+    chunk = chunk.decode("utf-8")
+    chunk = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]", "", chunk)
+    return bytes(chunk, "utf-8")
+
+
+def clean_null_equivalent(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """Supprime les strings équivalente à null"""
+    mapping_null = {
+        "considerationsSociales": "Pas de considération sociale",
+        "considerationsEnvironnementales": "Pas de considération environnementale",
+        # "modalitesExecution": "Sans objet",
+        "ccag": "Pas de CCAG",
+        "typeGroupement": "Pas de groupement",
+    }
+
+    columns = lf.collect_schema().names()
+
+    lf = lf.with_columns(
+        [
+            pl.when(pl.col(col_name) == pl.lit(mapping_null[col_name]))
+            .then(pl.lit("Sans objet"))
+            .otherwise(pl.col(col_name))
+            .name.keep()
+            for col_name in mapping_null
+            if col_name in columns
+        ]
+    )
+
+    return lf
+
+
+def fix_data_types(lf: pl.LazyFrame) -> pl.LazyFrame:
     numeric_dtypes = {
         "dureeMois": pl.Int16,
-        # "dureeMoisModification": pl.Int16,
         # "dureeMoisActeSousTraitance": pl.Int16,
         # "dureeMoisModificationActeSousTraitance": pl.Int16,
         "offresRecues": pl.Int16,
         "montant": pl.Float64,
-        # "montantModification": pl.Float64,
         # "montantActeSousTraitance": pl.Float64,
         # "montantModificationActeSousTraitance": pl.Float64,
         "tauxAvance": pl.Float64,
         # "variationPrixActeSousTraitance": pl.Float64,
         "origineFrance": pl.Float64,
         "origineUE": pl.Float64,
+        "modification_id": pl.Int16,
     }
 
     # Champs numériques
@@ -135,7 +165,7 @@ def fix_data_types(lf: pl.LazyFrame):
         pl.col(dates_col).str.strptime(pl.Date, format="%Y-%m-%d", strict=False)
     )
 
-    # Suppression dans dates dans le futur
+    # Suppression des dates dans le futur
     for col in dates_col:
         lf = lf.with_columns(
             pl.when(pl.col(col) > datetime.datetime.now())
@@ -146,88 +176,15 @@ def fix_data_types(lf: pl.LazyFrame):
 
     # Champs booléens
     cols = ("sousTraitanceDeclaree", "attributionAvance", "marcheInnovant")
-    str_cols = cs.by_name(cols) & cs.string()
-    float_cols = cs.by_name(cols) & cs.float()
     lf = lf.with_columns(
-        pl.when(str_cols.str.to_lowercase() == "true")
-        .then(True)
-        .when(str_cols.str.to_lowercase() == "false")
-        .then(False)
-        .otherwise(None)
-        .name.keep()
-    ).with_columns(float_cols.fill_nan(None).cast(pl.Boolean).name.keep())
+        [
+            pl.when(pl.col(col).str.to_lowercase().is_in(["true", "1", "oui"]))
+            .then(True)
+            .when(pl.col(col).str.to_lowercase().is_in(["false", "0", "non"]))
+            .then(False)
+            .otherwise(None)
+            .name.keep()
+            for col in cols
+        ]
+    )
     return lf
-
-
-def clean_decp_json_modifications(input_json_: dict):
-    """
-    Nettoyage des données JSON des DECP pour les modifications des titulaires.
-    Suppression des données qui ne correspondent pas au format attendu (ex: {"typeIdentifiant": "SIRET", "id": "12345678901234"}).
-    """
-    clean_json = []
-    titulaires_cleaned_cpt = 0
-    for entry in input_json_:
-        # entry = {} représentant un marché
-        modifications_entries = entry.get("modifications", [])
-        # modifications_entries = [] représentant les modifications du marché
-        clean_modifications_entries = []
-        for modification_entry in modifications_entries:
-            # modification_entry = {} représentant une modification du marché
-            modification_entry_clean = modification_entry["modification"]
-            if "titulaires" in modification_entry_clean.keys():
-                modification_titulaires_clean = []
-                for modification_titulaire in modification_entry_clean.get(
-                    "titulaires", []
-                ):
-                    # mofification_titulaire = {} représentant un titulaire de la modification
-                    if isinstance(modification_titulaire["titulaire"], dict):
-                        # Si le titulaire est un dictionnaire, on récupère l'id et le typeIdentifiant
-                        modification_titulaires_clean.append(
-                            {
-                                "titulaire": {
-                                    "typeIdentifiant": modification_titulaire[
-                                        "titulaire"
-                                    ].get("typeIdentifiant"),
-                                    "id": modification_titulaire["titulaire"].get("id"),
-                                }
-                            }
-                        )
-                if modification_titulaires_clean:
-                    modification_entry_clean["titulaires"] = (
-                        modification_titulaires_clean
-                    )
-                else:
-                    modification_entry_clean.pop("titulaires", None)
-                    titulaires_cleaned_cpt += 1
-            clean_modifications_entries.append(
-                {"modification": modification_entry_clean}
-            )
-        entry["modifications"] = clean_modifications_entries
-        clean_json.append(entry)
-    print(f"Nombre de titulaires nettoyés : {titulaires_cleaned_cpt}")
-    return clean_json
-
-
-def fix_nan_nc(obj):
-    """Paroure tout le JSON pour remplacer NaN et NC par null."""
-    if (isinstance(obj, float) and math.isnan(obj)) or obj == "NC":
-        return None
-    elif isinstance(obj, dict):
-        return {k: fix_nan_nc(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [fix_nan_nc(item) for item in obj]
-    return obj
-
-
-def load_and_fix_json(input_buffer):
-    json_data = json.load(input_buffer)["marches"]["marche"]
-
-    print("Remplacement des NaN et NC par null...")
-    json_data = fix_nan_nc(json_data)
-    print("Correction de la structure des modifications...")
-    json_data = clean_decp_json_modifications(json_data)
-
-    fixed_buffer = io.StringIO()
-    json.dump(json_data, fixed_buffer)
-    fixed_buffer.seek(0)  # rewind to beginning so it can be read
-    return fixed_buffer

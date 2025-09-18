@@ -1,7 +1,7 @@
 [project]
 name = "decp-processing"
 description = "Traitement des données des marchés publics français."
-version = "2.0.1"
+version = "2.0.0"
 requires-python = ">= 3.9"
 authors = [
     { name = "Colin Maudry", email = "colin+decp@maudry.com" }
@@ -9,14 +9,16 @@ authors = [
 dependencies = [
     "python-dotenv",
     "pandas",
-    "polars==1.27.0",
+    "polars==1.33.1",
     "pyarrow",
     "tableschema",
     "frictionless==4.40.11",
     "ipykernel",
-    "prefect==3.3.3",
+    "prefect==3.4.17",
     "orjson",
-    "ijson"
+    "ijson==3.4.0",
+    "lxml",
+    "psycopg2"
 ]
 
 [project.optional-dependencies]
@@ -34,9 +36,10 @@ testpaths = [
     "tests",
 ]
 env = [
-    "DECP_JSON_FILES_PATH=data/decp_json_files_test.json",
+    "DATASETS_REFERENCE_FILEPATH=tests/data/source_datasets_test.json",
     "PREFECT_API_URL=",
-    "DECP_PROCESSING_PUBLISH="
+    "DECP_PROCESSING_PUBLISH=",
+    "PREFECT_TASKS_REFRESH_CACHE=true"
 ]
 addopts = "-p no:warnings"
 

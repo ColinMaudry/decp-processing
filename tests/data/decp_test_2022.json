@@ -16,7 +16,7 @@
           "code": "97430",
           "typeCode": "Code postal"
         },
-        "dureeMois": 3,
+        "dureeMois": "NC",
         "dateNotification": "2022-11-23",
         "datePublicationDonnees": "2022-12-05",
         "montant": 137614.0,
@@ -52,7 +52,7 @@
           "modaliteExecution": ["Sans objet"]
         },
         "techniques": {
-          "technique": ["Sans objet"]
+          "technique": ["Accord-cadre", "Concours"]
         },
         "typesPrix": {
           "typePrix": ["Définitif révisable"]
@@ -243,8 +243,8 @@
         "montant": 127835.12,
         "formePrix": "Unitaire",
         "attributionAvance": false,
-        "offresRecues": 2,
-        "marcheInnovant": false,
+        "offresRecues": 55,
+        "marcheInnovant": "non",
         "ccag": "Travaux",
         "sousTraitanceDeclaree": true,
         "typeGroupementOperateurs": "Pas de groupement",
@@ -315,7 +315,7 @@
               "dureeMois": 17,
               "dateNotification": "2024-02-08",
               "montant": 32646.0,
-              "variationPrix": "NC",
+              "variationPrix": "ferme",
               "datePublicationDonnees": "2025-04-14"
             }
           }
@@ -368,9 +368,9 @@
         "datePublicationDonnees": "2019-09-23",
         "montant": 1105000.0,
         "formePrix": "Mixte",
-        "attributionAvance": "NC",
-        "offresRecues": "NC",
-        "marcheInnovant": "NC",
+        "attributionAvance": false,
+        "offresRecues": 2,
+        "marcheInnovant": true,
         "ccag": "Pas de CCAG",
         "sousTraitanceDeclaree": true,
         "typeGroupementOperateurs": "Pas de groupement",
@@ -530,7 +530,7 @@
                 "id": "75217344300041",
                 "typeIdentifiant": "SIRET"
               },
-              "dureeMois": "NC",
+              "dureeMois": 3,
               "dateNotification": "2019-12-11",
               "montant": 219149.69,
               "variationPrix": "Révisable",
@@ -544,7 +544,7 @@
                 "id": "48092474500049",
                 "typeIdentifiant": "SIRET"
               },
-              "dureeMois": "NC",
+              "dureeMois": 2,
               "dateNotification": "2019-12-11",
               "montant": 27900.0,
               "variationPrix": "Révisable",
@@ -612,7 +612,7 @@
           }
         ],
         "considerationsSociales": {
-          "considerationSociale": ["Pas de considération sociale"]
+          "considerationSociale": ["Critère social", "Clause sociale"]
         },
         "considerationsEnvironnementales": {
           "considerationEnvironnementale": [
@@ -642,57 +642,6 @@
         "origineUE": null,
         "origineFrance": null,
         "_type": "Marché"
-      },
-      {
-        "id": "2024CULT05",
-        "acheteur": {
-          "id": "21060029200010"
-        },
-        "nature": "Marché",
-        "objet": "RESIDENCE COMPAGNIE SIMONNE RIZZO AU THEATRE DE LA LICORNE 2024 A 2026",
-        "codeCPV": "92300000-4",
-        "procedure": "Procédure adaptée",
-        "lieuExecution": {
-          "code": "06029",
-          "typeCode": "Code commune"
-        },
-        "dureeMois": 23,
-        "dateNotification": "2024-08-07",
-        "datePublicationDonnees": "2024-09-04",
-        "montant": 40000.0,
-        "formePrix": "Forfaitaire",
-        "offresRecues": "NC",
-        "ccag": "Pas de CCAG",
-        "typeGroupementOperateurs": "Pas de groupement",
-        "titulaires": [
-          {
-            "titulaire": {
-              "typeIdentifiant": "SIRET",
-              "id": "75255609200043"
-            }
-          }
-        ],
-        "considerationsSociales": {
-          "considerationSociale": ["Pas de considération sociale"]
-        },
-        "considerationsEnvironnementales": {
-          "considerationEnvironnementale": [
-            "Pas de considération environnementale"
-          ]
-        },
-        "modalitesExecution": {
-          "modaliteExecution": ["Sans objet"]
-        },
-        "techniques": {
-          "technique": ["Sans objet"]
-        },
-        "typesPrix": {
-          "typePrix": ["Définitif ferme"]
-        },
-        "_type": "Marché",
-        "marcheInnovant": "NC",
-        "attributionAvance": "NC",
-        "sousTraitanceDeclaree": "NC"
       }
     ]
   }

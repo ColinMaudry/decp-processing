@@ -1,0 +1,150 @@
+{
+  "uid": {
+    "description": "Concaténation du SIRET de l'acheteur (acheteur_id) et de l'identifiant de marché (id). Utilisé comme identifiant unique de marché.",
+    "friendly_name": "Identifiant unique"
+  },
+  "id": {
+    "description": "Identifiant attribué par l'acheteur",
+    "friendly_name": "Identifiant interne"
+  },
+  "nature": {
+    "description": "Marché, marché de partenariat ou marché de sécurité.",
+    "friendly_name": "Nature"
+  },
+  "acheteur_id": {
+    "description": "Identifiant de l'établissement de l'acheteur (SIRET), référencé dans la base SIRENE de l'INSEE.",
+    "friendly_name": "SIRET acheteur"
+  },
+  "acheteur_nom": {
+    "description": "Nom de l'acheteur tel que renseigné dans la base SIRENE de l'INSEE.",
+    "friendly_name": "Nom acheteur"
+  },
+  "titulaire_id": {
+    "description": "Identifiant du titulaire du marché (SIRET). Voir 'Type identifiant' pour le référentiel utilisé",
+    "friendly_name": "Identifiant titulaire"
+  },
+  "titulaire_typeIdentifiant": {
+    "description": "Référentiel utilisé pour l'identifiant du titulaire : SIRET (établissement INSEE), TVA, TAHITI, RIDET, FRWF, IREP, HORS-UE",
+    "friendly_name": "Type identifiant"
+  },
+  "titulaire_nom": {
+    "description": "Nom du titulaire. Nom tel que renseigné dans la base SIRENE de l'INSEE si c'est un SIRET.",
+    "friendly_name": "Nom titulaire"
+  },
+  "objet": {
+    "description": "Objet du marché public.",
+    "friendly_name": "Objet"
+  },
+  "montant": {
+    "description": "Montant forfaire ou montant maximum estimé hors-taxes, en euros.",
+    "friendly_name": "Montant"
+  },
+  "codeCPV": {
+    "description": "Catégorie de bien, service ou travaux achetés, selon le Vocabulaire commun pour les marchés publics (CPV).",
+    "friendly_name": "Code CPV"
+  },
+  "procedure": {
+    "description": "Le type de procédure utilisé pour le marché public. Prodcédure négociée ouverte, Procédure non négociée ouverte, Procédure négociée restreinte, Procédure non négociée restreinte.",
+    "friendly_name": "Procédure"
+  },
+  "techniques": {
+    "description": "Les techniques d'achat utilisée pour le marché marché public. ccord-cadre, Concours, Système de qualification, Système d'acquisition dynamique, Catalogue électronique, Enchère électronique, Sans objet.",
+    "friendly_name": "Techniques"
+  },
+  "dureeMois": {
+    "description": "Durée en mois du marché attribué.",
+    "friendly_name": "Durée (mois)"
+  },
+  "offresRecues": {
+    "description": "Le nombre d'offres reçues pendant la phase d'appel d'offres. Comprend aussi les offres irrégulières, inacceptables, inappropriées et anormalement basses.",
+    "friendly_name": "Offres reçues"
+  },
+  "dateNotification": {
+    "description": "Date à laquelle le marché public ou une sa modification a été notifiée aux titulaires du marché public.",
+    "friendly_name": "Date notification"
+  },
+  "datePublicationDonnees": {
+    "description": "Date à laquelle les données du marché public ou de la modification ont été publiées sur data.gouv.fr.",
+    "friendly_name": "Date publication données"
+  },
+  "formePrix": {
+    "description": "La forme du prix du marché publci. Unitaire, forfaitaire ou mixte.",
+    "friendly_name": "Forme prix"
+  },
+  "typesPrix": {
+    "description": "Les types de prix du marché public. Définitif ferme, Définitif actualisable, Définitif révisable, Provisoire",
+    "friendly_name": "Types prix"
+  },
+  "attributionAvance": {
+    "description": "Si une avance sur le montant du marché public a été attribuée aux titulaires.",
+    "friendly_name": "Attribution avance"
+  },
+  "tauxAvance": {
+    "description": "Taux de l'avance attribuée au titulaire principal du marché public par rapport au montant du marché (O.1 = 10 % du montant du marché). En fonction de la valeur de attributionAvance, une valeur égale à 0 signifie qu'il y a une avance  mais que le taux n'est pas connu (attributionAvance=true).",
+    "friendly_name": "Taux avance"
+  },
+  "marcheInnovant": {
+    "description": "Si le marché comporte des travaux, services ou fournitures innovantes.",
+    "friendly_name": ""
+  },
+  "modalitesExecution": {
+    "description": "Les modalités d'exécution du marché public. Tranches, Bons de commande, Marchés subséquents, Sans objet.",
+    "friendly_name": "Modalités exécution"
+  },
+  "considerationsSociales": {
+    "description": "Les considérations sociales prévues dans le marché public. Clause sociale, Critère social, Marché réservé, Sans objet.",
+    "friendly_name": "Considérations sociales"
+  },
+  "considerationsEnvironnementales": {
+    "description": "Les considérations environnementales prévues dans le marché public. Clause environnementale, Critère environnemental, Sans objet.",
+    "friendly_name": "Considérations environnementales"
+  },
+  "ccag": {
+    "description": "Cahiers des clauses administratives générales et techniques (CCAG) utilisés pour le marchés publics.",
+    "friendly_name": "CCAG"
+  },
+  "sousTraitanceDeclaree": {
+    "description": "Au moment de la notification du marché, les titulaires du marché ont déclaré s'appuyer sur un ou plusieurs sous-traitants pour ce marché public.",
+    "friendly_name": "Sous-traitance déclarée"
+  },
+  "typeGroupementOperateurs": {
+    "description": "Le type de groupement d'entreprises ou d'opérateurs économiques.",
+    "friendly_name": "Type groupement"
+  },
+  "origineUE": {
+    "description": "Pour les marchés de fournitures de denrées alimentaires, de véhicules, de produits de santé et d'habillement, selon la liste annexée à l'arrêté du 22 décembre 2022, la part des produits issus de l'Union européenne avec laquelle le marché sera exécuté. 0.2 = 20 % de la part des produits provient de l'Union européenne. Cette valeur ne peut pas être inférieure à la valeur de Origine France.",
+    "friendly_name": "Origine UE"
+  },
+  "origineFrance": {
+    "description": "Pour les marchés de fournitures de denrées alimentaires, de véhicules, de produits de santé et d'habillement, selon la liste annexée à l'arrêté du 22 décembre 2022, la part des produits français avec laquelle le marché sera exécuté. 0.2 = 20 % de la part des produits sont français. Cette valeur ne peut pas être supérieure à la valeur de Origine UE.",
+    "friendly_name": "Origine France"
+  },
+  "lieuExecution_code": {
+    "description": "Code du lieu d'éxecution du marché public. Le type de code est renseigné par 'Type code lieu exécution'.",
+    "friendly_name": "Code lieu exécution"
+  },
+  "lieuExecution_typeCode": {
+    "description": "Type du code du lieu d'exécution. Code postal, Code commune, Code arrondissement, Code canton, Code département, Code région, Code pays\"",
+    "friendly_name": "Type code lieu exécution"
+  },
+  "idAccordCadre": {
+    "description": "Pour un marché subséquent, l'identifiant interne du marché public relevant de la technique d'achat accord-cadre auquel il est lié.",
+    "friendly_name": "Identifiant accord-cadre"
+  },
+  "modification_id": {
+    "description": "Identifiant de la modification. 0 = données initiales du marché public. 1 = première modification.",
+    "friendly_name": "Identifiant modification"
+  },
+  "donneesActuelles": {
+    "description": "Si les données de cette ligne sont les données actuelles du marché public, une fois les éventuelles modifications prises en compte.",
+    "friendly_name": "Données actuelles"
+  },
+  "sourceDataset": {
+    "description": "Code du jeu de données dont proviennent les données de ce marché public.",
+    "friendly_name": "Source dataset"
+  },
+  "sourceFile": {
+    "description": "Lien vers le fichier Open Data dont proviennent les données de ce marché public.",
+    "friendly_name": "Source fichier"
+  }
+}

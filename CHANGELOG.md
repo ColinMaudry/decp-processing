@@ -1,8 +1,11 @@
-# [2.0.1] - 2025-05-04
-- Gestion des modifications de marchés (montants et durée)
+# [2.0.0] - 2025-09-19
 
-
-# [0.1.1] - 2025-04-06
-- Fixer l'encoding à utf8 pour la lecture des json
-- Ajouter la création automatique du fichier .env si il n'existe pas
-- Ajouter un fichier CHANGELOG.md
+- Refonte totale reposant sur prefect, polars et ijson, au lieu de dataflow et pandas
+- Ajout de sources de données en plus de celles consolidées par le MINEF
+  - plateformes Atexo
+  - données publiées par l'AIFE (PLACE, achatpublic.com)
+  - ARNIA (ex Ternum BFC)
+  - Mégalis Bretagne
+- Support des formats JSON DECP 2019 et DECP 2022 en entrée
+- Intégration des modifications de marché
+- Traitement effectué en bonne partie en flux pour économiser la mémoire et gérer les gros fichiers en entrée

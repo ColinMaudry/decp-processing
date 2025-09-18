@@ -1,18 +1,39 @@
+import json
 import sqlite3
+from collections import OrderedDict
 from pathlib import Path
 
 import polars as pl
 
-from config import DIST_DIR
+from config import DATA_DIR, DIST_DIR, POSTGRESQL_DB_URI
 
 
 def save_to_files(df: pl.DataFrame, path: str | Path, file_format=None):
     if file_format is None:
         file_format = ["csv", "parquet"]
-    if "csv" in file_format:
-        df.write_csv(f"{path}.csv")
     if "parquet" in file_format:
         df.write_parquet(f"{path}.parquet")
+    if "csv" in file_format:
+        df.write_csv(f"{path}.csv")
+
+
+def sink_to_files(lf: pl.LazyFrame, path: str | Path, file_format=None):
+    if file_format is None:
+        file_format = ["csv", "parquet"]
+    if "parquet" in file_format:
+        lf.sink_parquet(f"{path}.parquet")
+    if "csv" in file_format:
+        lf.sink_csv(f"{path}.csv")
+
+
+def save_to_postgres(df: pl.DataFrame, table_name: str):
+    df.write_database(
+        table_name=table_name,
+        connection=POSTGRESQL_DB_URI,
+        engine="sqlalchemy",
+        engine_options={},
+        if_table_exists="replace",
+    )
 
 
 def save_to_sqlite(df: pl.DataFrame, database: str, table_name: str, primary_key: str):
@@ -52,49 +73,37 @@ def save_to_sqlite(df: pl.DataFrame, database: str, table_name: str, primary_key
     )
 
 
-def make_data_package():
-    from frictionless import Package, Resource, steps
+def save_to_databases(
+    df: pl.DataFrame, database: str, table_name: str, primary_key: str
+):
+    save_to_sqlite(df, database, table_name, primary_key)
+    if (
+        POSTGRESQL_DB_URI != "postgresql://user:pass@server:port/database"
+        and POSTGRESQL_DB_URI is not None
+    ):
+        save_to_postgres(df, table_name)
 
-    common_steps = [
-        steps.field_update(name="id", descriptor={"type": "string"}),
-        steps.field_update(name="uid", descriptor={"type": "string"}),
-        steps.field_update(name="acheteur_id", descriptor={"type": "string"}),
-    ]
 
-    outputs = [
-        {
-            "csv": str(DIST_DIR / "decp.csv"),
-            "steps": common_steps
-            + [
-                steps.field_update(name="titulaire_id", descriptor={"type": "string"}),
-            ],
-        },
-        {
-            "csv": str(DIST_DIR / "decp-sans-titulaires.csv"),
-            "steps": common_steps,
-        },
-        # {
-        #     "csv": f"{DIST_DIR}/decp-titulaires.csv",
-        #     "steps": common_steps
-        #     + [
-        #         steps.field_update(name="departement", descriptor={"type": "string"}),
-        #         steps.field_update(name="titulaire_id", descriptor={"type": "string"}),
-        #     ],
-        # },
-    ]
+def generate_final_schema(df):
+    final_schema = OrderedDict()
 
-    resources = []
+    # conversion en dict sérialisable en JSON
+    for col in df.columns:
+        final_schema[col] = {"datatype": df.schema[col].__str__()}
 
-    for output in outputs:
-        resource: Resource = Resource(path=output["csv"])
+    # récupération de data/data_fields.json
+    with open(DATA_DIR / "schema_base.json", "r", encoding="utf-8") as file:
+        base_json = json.load(file, object_pairs_hook=OrderedDict)
 
-        # Cette méthode détecte les caractéristiques du CSV et tente de deviner les datatypes
-        resources.append(Resource.transform(steps=output["steps"], resource=resource))
+    # fusion des deux
+    for field in final_schema:
+        if field not in base_json:
+            print(field + " absent de schema_base.json !")
+        else:
+            merged = OrderedDict(base_json[field])  # Copy to preserve order
+            merged.update(final_schema[field])  # Add/override with datatype
+            final_schema[field] = merged
 
-    Package(
-        name="decp",
-        title="DECP tabulaire",
-        description="Données essentielles de la commande publique (FR) au format tabulaire v2.",
-        resources=resources,
-        # it's possible to provide all the official properties like homepage, version, etc
-    ).to_json(DIST_DIR / "datapackage.json")
+    # création de dist/schema.json
+    with open(DIST_DIR / "schema.json", "w", encoding="utf-8") as file:
+        json.dump(final_schema, file, indent=4, ensure_ascii=False, sort_keys=False)

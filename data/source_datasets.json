@@ -1,0 +1,266 @@
+[
+  {
+    "id": "67271f8e43aad6253355b457",
+    "name": "Données essentielles du profil acheteur Conseil du Départemental du Rhône",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_rhone"
+  },
+  {
+    "id": "67271f982276221b3ffd463d",
+    "name": "Données essentielles du profil acheteur EPIDE",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_epide"
+  },
+  {
+    "id": "67271f9e05321453957baec7",
+    "name": "Données essentielles du profil acheteur Plateforme Mutualisée d'ATEXO",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_mutualise"
+  },
+  {
+    "id": "67271fa3f265db6119a6b6b0",
+    "name": "Données essentielles du profil acheteur de la Compagnie du Logement",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_cie_logement"
+  },
+  {
+    "id": "67271fa6290200f00fce1fcc",
+    "name": "Données essentielles du profil acheteur de Vendée Habitat",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_vendee_habitat"
+  },
+  {
+    "id": "67271fda43aad6253355b458",
+    "name": "Données essentielles du profil acheteur du Groupe France Télévisions",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_france_tv"
+  },
+  {
+    "id": "67271fe149625899ea32c0d2",
+    "name": "Données essentielles du profil acheteur Alsace Marchés Publics",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_alsace_mp"
+  },
+  {
+    "id": "6727201449625899ea32c0d4",
+    "name": "Données essentielles du profil acheteur de l' Association Marchés Publics d'Aquitaine",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_mp_aquitaine"
+  },
+  {
+    "id": "672720321f1de4860c84baff",
+    "name": "Données essentielles de la plateforme dématérialisée des marchés publics des acheteurs de l’Ain",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_mp_ain"
+  },
+  {
+    "id": "67272093922b37b9b2f1b653",
+    "name": "Données essentielles du profil acheteur GIP Maximilien",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_maximilien"
+  },
+  {
+    "id": "672720b0b8b33f91e6032bfe",
+    "name": "Données essentielles du profil acheteur Eure Normandie Numérique",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_eure_nm"
+  },
+  {
+    "id": "672720b2acd2250747936742",
+    "name": "Données essentielles du profil acheteur Aéroport Marseille Provence",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_aeroport_mars_prov"
+  },
+  {
+    "id": "672720b5cc0f6e1e1dba8f00",
+    "name": "Données essentielles du profil acheteur CAS Marseille",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_cas_marseille"
+  },
+  {
+    "id": "672720b71f1de4860c84bb00",
+    "name": "Données essentielles du profil acheteur Territoire de la Côte Ouest",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_terr_cote_ouest"
+  },
+  {
+    "id": "672720bb3b056f39537f239f",
+    "name": "Données essentielles du profil acheteur Département Vienne",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_vienne"
+  },
+  {
+    "id": "672720cb97702d39796f4edc",
+    "name": "Données essentielles du profil acheteur Ville et Communauté Urbaine du Grand Reims",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_vcu_grand_reims"
+  },
+  {
+    "id": "672720d97c0997c624f8e336",
+    "name": "Données essentielles du profil acheteur Montpellier Méditerranée Métropole",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_montpellier_metro"
+  },
+  {
+    "id": "672720dbd3c5ca95c62e7c62",
+    "name": "Données essentielles du profil acheteur ANFH",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_anfh"
+  },
+  {
+    "id": "672720e0cdbaec7aa4f43f4f",
+    "name": "Données essentielles du profil acheteur CINOR",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_cinor"
+  },
+  {
+    "id": "672720e2753525dfd8368ac8",
+    "name": "Données essentielles du profil acheteur Creos",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_creos"
+  },
+  {
+    "id": "672720e451bcff5f90f6f9e4",
+    "name": "Données essentielles du profil acheteur Région Réunion",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_reunion"
+  },
+  {
+    "id": "672720e71f1de4860c84bb01",
+    "name": "Données essentielles du profil acheteur Achat Hôpital",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_achat_hopital"
+  },
+  {
+    "id": "672720eb3d9ba78898cbb6aa",
+    "name": "Données essentielles du profil acheteur Département des Bouches-du-Rhône",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_bouches_rhone"
+  },
+  {
+    "id": "672720ee720fd33a184a47a3",
+    "name": "Données essentielles du profil acheteur ADM76",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_amd76"
+  },
+  {
+    "id": "672720f0f12888a874bc2861",
+    "name": "Données essentielles du profil acheteur La Porte du Hainaut",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_porte_hainaut"
+  },
+  {
+    "id": "672720f51f1de4860c84bb02",
+    "name": "Données essentielles du profil acheteur Le département de la Meuse",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_meuse"
+  },
+  {
+    "id": "672720f8753525dfd8368ac9",
+    "name": "Données essentielles du profil acheteur Conseil Régional des Pays de la Loire",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_pays_loire"
+  },
+  {
+    "id": "672720fa753525dfd8368aca",
+    "name": "Données essentielles du profil acheteur Syndicat Intercommunal de Traitement des Déchets du Nord et de l'Est",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_si_dechets_nord_est"
+  },
+  {
+    "id": "6727210202eee145031c05da",
+    "name": "Données essentielles du profil acheteur GIP Recia",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_recia"
+  },
+  {
+    "id": "6727210a3b056f39537f23a0",
+    "name": "Données essentielles du profil acheteur Adullact",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_adullact"
+  },
+  {
+    "id": "6727210c720fd33a184a47a4",
+    "name": "Données essentielles du profil acheteur Gouvernement de Nouvelle-Calédonie",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_nouvelle_caledonie"
+  },
+  {
+    "id": "6727211e60854f01267aaf19",
+    "name": "Données essentielles du profil acheteur CDC Habitat",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_cdc_habitat"
+  },
+  {
+    "id": "67272125cc0f6e1e1dba8f01",
+    "name": "Données essentielles du profil acheteur Loire-Atlantique",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_loire_atlantique"
+  },
+  {
+    "id": "6727217e51bcff5f90f6f9e5",
+    "name": "Données essentielles du profil acheteur Ville de Marseille",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_marseille"
+  },
+  {
+    "id": "672721842b370d8b3227704d",
+    "name": "Données essentielles du profil acheteur Région Guadeloupe",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_guadeloupe"
+  },
+  {
+    "id": "67272196d3c5ca95c62e7c63",
+    "name": "Données essentielles du profil acheteur CNRS",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_cnrs"
+  },
+  {
+    "id": "67272199922b37b9b2f1b654",
+    "name": "Données essentielles du profil acheteur CNES",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_cnes"
+  },
+  {
+    "id": "672721aaec64ca6d86444166",
+    "name": "Données essentielles du profil acheteur Métropole Aix Marseille Provence",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_aix_marseille"
+  },
+  {
+    "id": "672721d097702d39796f4edd",
+    "name": "Données essentielles du profil acheteur Nantes Métropole",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_nantes_metro"
+  },
+  {
+    "id": "67305b223bb03813db8efe33",
+    "name": "Données essentielles du profil acheteur Marchés Publics 596280",
+    "owner_org_name": "ATEXO - DECP",
+    "code": "atexo_mp_596280"
+  },
+  {
+    "id": "5cd57bf68b4c4179299eb0e9",
+    "name": "Données essentielles de la commande publique - fichiers consolidés",
+    "owner_org_name": "Ministère de l'économie, des Finances et de l'Industrie",
+    "code": "decp_minef"
+  },
+  {
+    "id": "65f18014e9923e9e71f5f258",
+    "name": "Données essentielles du profil acheteur Mégalis Bretagne - schéma arrêtés 2022",
+    "owner_org_name": "Mégalis Bretagne",
+    "code": "megalis_bretagne"
+  },
+  {
+    "id": "673f078f5c4cba55842cbe57",
+    "name": "Données essentielles du profil acheteur ARNIA",
+    "owner_org_name": "Agence Régionale du Numérique et de l’intelligence artificielle",
+    "code": "arnia"
+  },
+  {
+    "id": "5df410e86f44413a91d34be3",
+    "name": "AIFE_DE_13001977100018",
+    "owner_org_name": "Agence pour l'Informatique Financière de l'Etat",
+    "code": "aife_dume"
+  }
+]
