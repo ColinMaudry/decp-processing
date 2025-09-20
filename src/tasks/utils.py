@@ -132,6 +132,7 @@ def generate_stats(df: pl.DataFrame):
         .unique(subset=["uid"])
     )
 
+    # Statistiques sur les sources de données (statistiques.csv)
     generate_public_source_stats(df_uid)
 
     resources = df_uid["sourceFile"].unique().to_list()
@@ -184,10 +185,10 @@ def generate_stats(df: pl.DataFrame):
 
 
 def generate_public_source_stats(df_uid: pl.DataFrame) -> None:
-    df_uid = df_uid.select("uid", "acheteur_id", "sourceDataset")
+    df_marches = df_uid.select("uid", "acheteur_id", "sourceDataset")
 
     df_acheteurs = (
-        df_uid.select("acheteur_id", "sourceDataset")
+        df_marches.select("acheteur_id", "sourceDataset")
         .unique()
         .group_by("sourceDataset")
         .len()
@@ -195,10 +196,15 @@ def generate_public_source_stats(df_uid: pl.DataFrame) -> None:
     df_acheteurs = df_acheteurs.rename({"len": "nb_acheteurs"})
 
     # group + count
-    df_uid = (
-        df_uid.select("uid", "sourceDataset").unique().group_by("sourceDataset").len()
+    df_marches = (
+        df_marches.select("uid", "sourceDataset")
+        .unique()
+        .group_by("sourceDataset")
+        .len()
     )
-    df_uid = df_uid.rename({"len": "nb_marchés"}).sort(by="nb_marchés", descending=True)
+    df_marches = df_marches.rename({"len": "nb_marchés"}).sort(
+        by="nb_marchés", descending=True
+    )
 
     # lecture des sources en df
     df_sources: pl.DataFrame = pl.DataFrame(TRACKED_DATASETS)
@@ -216,16 +222,33 @@ def generate_public_source_stats(df_uid: pl.DataFrame) -> None:
 
     # ajout données count
     df_sources = df_sources.join(
-        df_acheteurs, left_on="code", right_on="sourceDataset", how="left"
+        df_acheteurs,
+        left_on="code",
+        right_on="sourceDataset",
+        how="full",
+        coalesce=True,
     )
     df_sources = df_sources.join(
-        df_uid, left_on="code", right_on="sourceDataset", how="left"
+        df_marches, left_on="code", right_on="sourceDataset", how="full", coalesce=True
     )
 
     # ordre des colonnes
     df_sources = df_sources.select(
         "nom", "organisation", "url", "nb_marchés", "nb_acheteurs", "code"
     )
+
+    # application des métadonnées decp_minef aux codes decp_minef_*
+    df_sources = (
+        df_sources.sort(by="code").with_columns(
+            pl.col("nom", "organisation", "url").fill_null(strategy="forward")
+        )
+    ).filter(pl.col("code") != "decp_minef")
+
+    # remplacement des null par zéros
+    df_sources = df_sources.fill_null(0)
+
+    # tri par nombre de marchés
+    df_sources = df_sources.sort(by="nb_marchés", descending=True, nulls_last=True)
 
     # dump CSV dans dist
     df_sources.write_csv(DIST_DIR / "statistiques.csv")
