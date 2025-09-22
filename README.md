@@ -173,3 +173,4 @@ pytest tests/test_main.py
 - Colin Maudry (développeur principal)
 - [FranckMaseo](https://github.com/frankmaseo)
 - [Thomas Louf](https://github.com/tlouf)
+- [vico4445](https://github.com/vico4445)
