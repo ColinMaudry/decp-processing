@@ -170,5 +170,10 @@ def sirene_preprocess():
     print("☑️  Fin du flow sirene_preprocess.")
 
 
+@flow
+def scrap_marches_securises():
+    pass
+
+
 if __name__ == "__main__":
     decp_processing()
