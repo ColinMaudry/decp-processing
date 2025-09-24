@@ -52,7 +52,7 @@ SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
 # Dossier de stockage des résultats de tâches et du cache
 # https://docs.prefect.io/v3/advanced/results#default-persistence-configuration
 PREFECT_LOCAL_STORAGE_PATH = Path(
-    os.getenv("PREFECT_LOCAL_STORAGE_PATH"), BASE_DIR / ".prefect/storage"
+    os.getenv("PREFECT_LOCAL_STORAGE_PATH", DATA_DIR / "prefect_storage")
 )
 PREFECT_LOCAL_STORAGE_PATH.mkdir(exist_ok=True, parents=True)
 
