@@ -100,6 +100,11 @@ systemctl start prefect-worker.service
 
 Un nouveau worker doit apparaître dans l'interface de gestion de prefect.
 
+Déploiement des flows (exécution programmée de main ou ponctuelle de dev) :
+
+1. Configurer .env pour que `PREFECT_API_URL` pointe vers le serveur où on souhaite déployer
+2. Éxécuter `python src/deploy.py`
+
 ### Avec Docker sous Windows, peu testé
 
 Construire et lancer le container
