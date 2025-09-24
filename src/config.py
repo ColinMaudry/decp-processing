@@ -39,7 +39,7 @@ API_KEY = os.environ.get("DATAGOUVFR_API_KEY", "")
 BASE_DIR = Path(__file__).parent.parent
 
 # Les variables configurées sur le serveur doivent avoir la priorité
-DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
+DATA_DIR = os.getenv("DATA_DIR") or BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True, parents=True)
 
 DIST_DIR = Path(os.getenv("DECP_DIST_DIR", BASE_DIR / "dist"))
