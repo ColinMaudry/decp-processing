@@ -35,10 +35,11 @@ def publish_to_datagouv():
             "file": str(DIST_DIR / "decp-sans-titulaires.parquet"),
             "resource_id": "df28fa7d-2d36-439b-943a-351bde02f01d",
         },
-        {
-            "file": str(DIST_DIR / "decp.sqlite"),
-            "resource_id": "43f54982-da60-4eb7-aaaf-ba935396209b",
-        },
+        # https://github.com/ColinMaudry/decp-processing/issues/124
+        # {
+        #     "file": str(DIST_DIR / "decp.sqlite"),
+        #     "resource_id": "43f54982-da60-4eb7-aaaf-ba935396209b",
+        # },
         {
             "file": str(DIST_DIR / "schema.json"),
             "resource_id": "9a4144c0-ee44-4dec-bee5-bbef38191d9a",

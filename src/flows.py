@@ -134,7 +134,8 @@ def decp_processing(enable_cache_removal: bool = False):
     del df
 
     # Base de données SQLite dédiée aux activités du Datalab d'Anticor
-    make_data_tables()
+    # Désactivé pour l'instant https://github.com/ColinMaudry/decp-processing/issues/124
+    # make_data_tables()
 
     if DECP_PROCESSING_PUBLISH.lower() == "true":
         print("Publication sur data.gouv.fr...")
