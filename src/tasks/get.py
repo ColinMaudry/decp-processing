@@ -10,7 +10,13 @@ from httpx import stream
 from lxml import etree
 from prefect import task
 
-from config import DECP_FORMAT_2019, DECP_FORMATS, DIST_DIR, DecpFormat
+from config import (
+    DECP_FORMAT_2019,
+    DECP_FORMATS,
+    DECP_PROCESSING_PUBLISH,
+    DIST_DIR,
+    DecpFormat,
+)
 from tasks.clean import clean_invalid_characters, extract_innermost_struct
 from tasks.output import sink_to_files
 from tasks.utils import gen_artifact_row, stream_replace_bytestring
@@ -62,8 +68,9 @@ def get_resource(
 
     # Ajout des stats de la ressource à l'artifact
     # https://github.com/ColinMaudry/decp-processing/issues/89
-    artifact_row = gen_artifact_row(r, lf, url, fields, decp_format)  # noqa
-    resources_artifact.append(artifact_row)
+    if DECP_PROCESSING_PUBLISH:
+        artifact_row = gen_artifact_row(r, lf, url, fields, decp_format)  # noqa
+        resources_artifact.append(artifact_row)
 
     # Exemple https://www.data.gouv.fr/datasets/5cd57bf68b4c4179299eb0e9/#/resources/bb90091c-f0cb-4a59-ad41-b0ab929aad93
     resource_web_url = (

@@ -98,12 +98,13 @@ def decp_processing(enable_cache_removal: bool = False):
     ]
     dfs: list[pl.DataFrame] = [f.result() for f in futures if f.result() is not None]
 
-    create_table_artifact(
-        table=resources_artifact,
-        key="datagouvfr-json-resources",
-        description=f"Les ressources utilisées comme source ({DATE_NOW})",
-    )
-    del resources_artifact
+    if DECP_PROCESSING_PUBLISH:
+        create_table_artifact(
+            table=resources_artifact,
+            key="datagouvfr-json-resources",
+            description=f"Les ressources utilisées comme source ({DATE_NOW})",
+        )
+        del resources_artifact
 
     print("Fusion des dataframes...")
     df: pl.DataFrame = concat_decp_json(dfs)
@@ -119,7 +120,8 @@ def decp_processing(enable_cache_removal: bool = False):
     print("Génération de l'artefact (statistiques) sur le base df...")
     df: pl.DataFrame = lf.collect(engine="streaming")
 
-    generate_stats(df)
+    if DECP_PROCESSING_PUBLISH:
+        generate_stats(df)
 
     # Réinitialisation de DIST_DIR
     if os.path.exists(DIST_DIR):
@@ -135,7 +137,7 @@ def decp_processing(enable_cache_removal: bool = False):
     # Base de données SQLite dédiée aux activités du Datalab d'Anticor
     make_data_tables()
 
-    if DECP_PROCESSING_PUBLISH.lower() == "true":
+    if DECP_PROCESSING_PUBLISH:
         print("Publication sur data.gouv.fr...")
         publish_to_datagouv()
     else:
