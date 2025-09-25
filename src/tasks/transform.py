@@ -247,11 +247,10 @@ def normalize_tables(lf: pl.LazyFrame):
 
     # ACHETEURS
 
-    df_acheteurs: pl.LazyFrame = lf.select(cs.starts_with("acheteur"))
-    df_acheteurs = df_acheteurs.rename(lambda name: name.removeprefix("acheteur_"))
-    df_acheteurs = df_acheteurs.unique().sort(by="id")
-    save_to_databases(df_acheteurs, "decp", "acheteurs", "id")
-    del df_acheteurs
+    lf_acheteurs: pl.LazyFrame = lf.select(cs.starts_with("acheteur"))
+    lf_acheteurs = lf_acheteurs.rename(lambda name: name.removeprefix("acheteur_"))
+    lf_acheteurs = lf_acheteurs.unique().sort(by="id")
+    save_to_databases(lf_acheteurs, "decp", "acheteurs", "id")
 
     # TITULAIRES
 
