@@ -20,6 +20,12 @@ if dotenv_path == "":
 
 load_dotenv(dotenv_path, override=False)
 
+
+def make_path_from_env(env: str, alternative_path: Path) -> Path:
+    # J'ai eu des comportements erratiques avec os.getenv("env", alternative_path), donc j'utilise "or"
+    return Path(os.getenv(env) or alternative_path)
+
+
 # Nombre maximal de workers utilisables par Prefect. Défaut : 16
 MAX_PREFECT_WORKERS = int(os.getenv("MAX_PREFECT_WORKERS", 16))
 
@@ -39,21 +45,22 @@ API_KEY = os.environ.get("DATAGOUVFR_API_KEY", "")
 BASE_DIR = Path(__file__).parent.parent
 
 # Les variables configurées sur le serveur doivent avoir la priorité
-DATA_DIR = Path(os.getenv("DATA_DIR")) or BASE_DIR / "data"
+DATA_DIR = make_path_from_env("DATA_DIR", BASE_DIR / "data")
 DATA_DIR.mkdir(exist_ok=True, parents=True)
 
-DIST_DIR = Path(os.getenv("DECP_DIST_DIR") or BASE_DIR / "dist")
+DIST_DIR = make_path_from_env("DECP_DIST_DIR", BASE_DIR)
 DIST_DIR.mkdir(exist_ok=True, parents=True)
 
-sirene_data_parent_dir = Path(os.getenv("SIRENE_DATA_PARENT_DIR")) or DATA_DIR
+sirene_data_parent_dir = make_path_from_env("SIRENE_DATA_PARENT_DIR", DATA_DIR)
 SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
 # SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
 
 # Dossier de stockage des résultats de tâches et du cache
 # https://docs.prefect.io/v3/advanced/results#default-persistence-configuration
-PREFECT_LOCAL_STORAGE_PATH = (
-    Path(os.getenv("PREFECT_LOCAL_STORAGE_PATH")) or DATA_DIR / "prefect_storage"
+PREFECT_LOCAL_STORAGE_PATH = make_path_from_env(
+    "PREFECT_LOCAL_STORAGE_PATH", DATA_DIR / "prefect_storage"
 )
+
 PREFECT_LOCAL_STORAGE_PATH.mkdir(exist_ok=True, parents=True)
 
 # POSTGRESQL
@@ -61,7 +68,10 @@ POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI")
 
 
 with open(
-    os.getenv("DATASETS_REFERENCE_FILEPATH", DATA_DIR / "source_datasets.json"), "r"
+    make_path_from_env(
+        "DATASETS_REFERENCE_FILEPATH", DATA_DIR / "source_datasets.json"
+    ),
+    "r",
 ) as f:
     TRACKED_DATASETS = json.load(f)
 
