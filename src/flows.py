@@ -172,7 +172,11 @@ def sirene_preprocess():
 
 @flow
 def scrap_marches_securises():
-    pass
+    # Préparation de la liste d'URL de recherche
+    urls = [
+        "https://www.marches-securises.fr/entreprise/?module=liste_donnees_essentielles&page=1&siret_pa=&siret_pa1=&date_deb=2024-01-01&date_fin=2024-02-31&date_deb_ms=2024-01-01&date_fin_ms=2024-03-31&ref_ume=&cpv_et=&type_procedure=&type_marche=&objet=&rs_oe=&dep_liste=13&ctrl_key=aWwwS1pLUlFzejBOYitCWEZzZTEzZz09&text=&donnees_essentielles=1&search=table_ms&"
+    ]
+    print(urls)
 
 
 if __name__ == "__main__":
