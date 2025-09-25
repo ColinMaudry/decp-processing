@@ -45,13 +45,13 @@ DECP_PROCESSING_PUBLISH_TIMEOUT = int(os.getenv("DECP_PROCESSING_PUBLISH_TIMEOUT
 API_KEY = os.getenv("DATAGOUVFR_API_KEY", "")
 
 # Dossier racine
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).absolute().parent.parent
 
 # Les variables configurées sur le serveur doivent avoir la priorité
 DATA_DIR = make_path_from_env("DATA_DIR", BASE_DIR / "data")
 DATA_DIR.mkdir(exist_ok=True, parents=True)
 
-DIST_DIR = make_path_from_env("DECP_DIST_DIR", BASE_DIR)
+DIST_DIR = make_path_from_env("DECP_DIST_DIR", BASE_DIR / "dist")
 DIST_DIR.mkdir(exist_ok=True, parents=True)
 
 sirene_data_parent_dir = make_path_from_env("SIRENE_DATA_PARENT_DIR", DATA_DIR)

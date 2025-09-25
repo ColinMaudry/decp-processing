@@ -10,6 +10,7 @@ from prefect.transactions import transaction
 
 from config import (
     BASE_DF_COLUMNS,
+    BASE_DIR,
     CACHE_EXPIRATION_TIME_HOURS,
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
@@ -83,7 +84,7 @@ def make_data_tables():
     log_prints=True, task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS)
 )
 def decp_processing(enable_cache_removal: bool = False):
-    print("🚀  Début du flow decp-processing")
+    print(f"🚀  Début du flow decp-processing dans base dir {BASE_DIR} ")
 
     print("Liste de toutes les ressources des datasets...")
     resources: list[dict] = list_resources(TRACKED_DATASETS)
