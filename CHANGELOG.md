@@ -1,3 +1,7 @@
+### [2.0.1] 2025-09-25
+
+- amélioration de la création des chemins de fichiers configurés ([#123](https://github.com/ColinMaudry/decp-processing/issues/123))
+
 # [2.0.0] - 2025-09-19
 
 - Refonte totale reposant sur prefect, polars et ijson, au lieu de dataflow et pandas
