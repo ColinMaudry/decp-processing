@@ -36,15 +36,13 @@ DATE_NOW = datetime.now().isoformat()[0:10]  # YYYY-MM-DD
 MONTH_NOW = DATE_NOW[:7]  # YYYY-MM
 
 # Publication ou non des fichiers produits sur data.gouv.fr
-DECP_PROCESSING_PUBLISH = os.environ.get("DECP_PROCESSING_PUBLISH", "")
+DECP_PROCESSING_PUBLISH = os.getenv("DECP_PROCESSING_PUBLISH", "")
 
 # Timeout pour la publication de chaque ressource sur data.gouv.fr
-DECP_PROCESSING_PUBLISH_TIMEOUT = int(
-    os.environ.get("DECP_PROCESSING_PUBLISH_TIMEOUT", 300)
-)
+DECP_PROCESSING_PUBLISH_TIMEOUT = int(os.getenv("DECP_PROCESSING_PUBLISH_TIMEOUT", 300))
 
 # Clé d'API data.gouv.fr
-API_KEY = os.environ.get("DATAGOUVFR_API_KEY", "")
+API_KEY = os.getenv("DATAGOUVFR_API_KEY", "")
 
 # Dossier racine
 BASE_DIR = Path(__file__).parent.parent
