@@ -10,6 +10,7 @@ from prefect.transactions import transaction
 
 from config import (
     BASE_DF_COLUMNS,
+    BASE_DIR,
     CACHE_EXPIRATION_TIME_HOURS,
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
@@ -22,7 +23,7 @@ from tasks.clean import clean_decp
 from tasks.dataset_utils import list_resources
 from tasks.enrich import enrich_from_sirene
 from tasks.get import get_resource
-from tasks.output import generate_final_schema, save_to_files, save_to_sqlite
+from tasks.output import generate_final_schema, save_to_databases, save_to_files
 from tasks.publish import publish_to_datagouv
 from tasks.transform import (
     concat_decp_json,
@@ -64,25 +65,27 @@ def make_data_tables():
 
     print("Création de la base données au format relationnel...")
 
-    df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
+    lf: pl.LazyFrame = pl.scan_parquet(DIST_DIR / "decp.parquet")
 
     print("Enregistrement des DECP (base DataFrame) dans les bases de données...")
-    save_to_sqlite(
-        df,
+    print(DIST_DIR / "decp.parquet")
+    save_to_databases(
+        lf,
         "decp",
         "data.gouv.fr.2022.clean",
         "uid, titulaire_id, titulaire_typeIdentifiant, modification_id",
     )
 
     print("Normalisation des tables...")
-    normalize_tables(df)
+    normalize_tables(lf)
 
 
 @flow(
-    log_prints=True, task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS)
+    log_prints=True,
+    task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS),
 )
 def decp_processing(enable_cache_removal: bool = False):
-    print("🚀  Début du flow decp-processing")
+    print(f"🚀  Début du flow decp-processing dans base dir {BASE_DIR} ")
 
     print("Liste de toutes les ressources des datasets...")
     resources: list[dict] = list_resources(TRACKED_DATASETS)
@@ -117,16 +120,16 @@ def decp_processing(enable_cache_removal: bool = False):
         sirene_preprocess()
     lf: pl.LazyFrame = enrich_from_sirene(df.lazy())
 
-    print("Génération de l'artefact (statistiques) sur le base df...")
     df: pl.DataFrame = lf.collect(engine="streaming")
-
-    if DECP_PROCESSING_PUBLISH:
-        generate_stats(df)
 
     # Réinitialisation de DIST_DIR
     if os.path.exists(DIST_DIR):
         shutil.rmtree(DIST_DIR)
     os.makedirs(DIST_DIR)
+
+    if DECP_PROCESSING_PUBLISH:
+        print("Génération de l'artefact (statistiques) sur le base df...")
+        generate_stats(df)
 
     print("Génération du schéma et enregistrement des DECP aux formats CSV, Parquet...")
     df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
@@ -135,7 +138,8 @@ def decp_processing(enable_cache_removal: bool = False):
     del df
 
     # Base de données SQLite dédiée aux activités du Datalab d'Anticor
-    make_data_tables()
+    # Désactivé pour l'instant https://github.com/ColinMaudry/decp-processing/issues/124
+    # make_data_tables()
 
     if DECP_PROCESSING_PUBLISH:
         print("Publication sur data.gouv.fr...")

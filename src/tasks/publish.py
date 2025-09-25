@@ -1,6 +1,6 @@
 from httpx import post
 
-from config import API_KEY, DIST_DIR
+from config import API_KEY, DECP_PROCESSING_PUBLISH_TIMEOUT, DIST_DIR
 
 
 def update_resource(api, dataset_id, resource_id, file_path, api_key):
@@ -8,7 +8,9 @@ def update_resource(api, dataset_id, resource_id, file_path, api_key):
     headers = {"X-API-KEY": api_key}
     file = {"file": open(file_path, "rb")}
     # TODO: replace requests.post with httpx.post
-    response = post(url, files=file, headers=headers, timeout=120)
+    response = post(
+        url, files=file, headers=headers, timeout=DECP_PROCESSING_PUBLISH_TIMEOUT
+    )
     return response.json()
 
 
@@ -25,18 +27,11 @@ def publish_to_datagouv():
             "file": str(DIST_DIR / "decp.csv"),
             "resource_id": "22847056-61df-452d-837d-8b8ceadbfc52",
         },
-        {
-            "file": str(DIST_DIR / "decp-sans-titulaires.csv"),
-            "resource_id": "834c14dd-037c-4825-958d-0a841c4777ae",
-        },
-        {
-            "file": str(DIST_DIR / "decp-sans-titulaires.parquet"),
-            "resource_id": "df28fa7d-2d36-439b-943a-351bde02f01d",
-        },
-        {
-            "file": str(DIST_DIR / "decp.sqlite"),
-            "resource_id": "43f54982-da60-4eb7-aaaf-ba935396209b",
-        },
+        # https://github.com/ColinMaudry/decp-processing/issues/124
+        # {
+        #     "file": str(DIST_DIR / "decp.sqlite"),
+        #     "resource_id": "43f54982-da60-4eb7-aaaf-ba935396209b",
+        # },
         {
             "file": str(DIST_DIR / "schema.json"),
             "resource_id": "9a4144c0-ee44-4dec-bee5-bbef38191d9a",

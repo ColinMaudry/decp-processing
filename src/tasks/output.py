@@ -36,16 +36,18 @@ def save_to_postgres(df: pl.DataFrame, table_name: str):
     )
 
 
-def save_to_sqlite(df: pl.DataFrame, database: str, table_name: str, primary_key: str):
+def save_to_sqlite(lf: pl.LazyFrame, database: str, table_name: str, primary_key: str):
     # Création de la table, avec les définitions de colonnes et de la ou des clés primaires
     column_definitions = []
-    for column_name, column_type in zip(df.columns, df.dtypes):
-        sql_type = "TEXT"  # Default
-        if column_type in [pl.Int16, pl.Int64, pl.Boolean]:
+    schema = lf.collect_schema()
+    for column in schema.keys():
+        if schema[column] in [pl.Int16, pl.Int64, pl.Boolean]:
             sql_type = "INTEGER"
-        elif column_type in [pl.Float32, pl.Float64]:
+        elif schema[column] in [pl.Float32, pl.Float64]:
             sql_type = "REAL"
-        column_definitions.append(f'"{column_name}" {sql_type}')
+        else:
+            sql_type = "TEXT"
+        column_definitions.append(f'"{column}" {sql_type}')
 
     if "." in primary_key and '"' not in primary_key:
         raise ValueError(
@@ -66,22 +68,38 @@ def save_to_sqlite(df: pl.DataFrame, database: str, table_name: str, primary_key
     connection.commit()
     connection.close()
 
-    df.write_database(
-        f'"{table_name}"',
-        f"sqlite:///{DIST_DIR}/{database}.sqlite",
-        if_table_exists="append",
-    )
+    # Batch size
+    batch_size = 50000
+    offset = 0
+    while True:
+        # Récupération du batch
+        batch = lf.slice(offset, batch_size).collect(engine="streaming")
+
+        # Fin de la boucle si plus de données
+        if batch.height == 0:
+            break
+
+        # Écriture du batch dans SQLite
+        batch.write_database(
+            f'"{table_name}"',
+            connection=f"sqlite:///{DIST_DIR}/{database}.sqlite",
+            if_table_exists="append",
+        )
+
+        offset += batch_size
 
 
 def save_to_databases(
-    df: pl.DataFrame, database: str, table_name: str, primary_key: str
+    lf: pl.LazyFrame, database: str, table_name: str, primary_key: str
 ):
-    save_to_sqlite(df, database, table_name, primary_key)
-    if (
-        POSTGRESQL_DB_URI != "postgresql://user:pass@server:port/database"
-        and POSTGRESQL_DB_URI is not None
-    ):
-        save_to_postgres(df, table_name)
+    save_to_sqlite(lf, database, table_name, primary_key)
+
+    # Pas utilisé pour l'instant
+    # if (
+    #     POSTGRESQL_DB_URI != "postgresql://user:pass@server:port/database"
+    #     and POSTGRESQL_DB_URI is not None
+    # ):
+    #     save_to_postgres(df, table_name)
 
 
 def generate_final_schema(df):
