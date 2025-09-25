@@ -39,20 +39,20 @@ API_KEY = os.environ.get("DATAGOUVFR_API_KEY", "")
 BASE_DIR = Path(__file__).parent.parent
 
 # Les variables configurées sur le serveur doivent avoir la priorité
-DATA_DIR = os.getenv("DATA_DIR") or BASE_DIR / "data"
+DATA_DIR = Path(os.getenv("DATA_DIR")) or BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True, parents=True)
 
-DIST_DIR = Path(os.getenv("DECP_DIST_DIR", BASE_DIR / "dist"))
+DIST_DIR = Path(os.getenv("DECP_DIST_DIR") or BASE_DIR / "dist")
 DIST_DIR.mkdir(exist_ok=True, parents=True)
 
-sirene_data_parent_dir = Path(os.getenv("SIRENE_DATA_PARENT_DIR", DATA_DIR))
+sirene_data_parent_dir = Path(os.getenv("SIRENE_DATA_PARENT_DIR")) or DATA_DIR
 SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
 # SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
 
 # Dossier de stockage des résultats de tâches et du cache
 # https://docs.prefect.io/v3/advanced/results#default-persistence-configuration
-PREFECT_LOCAL_STORAGE_PATH = Path(
-    os.getenv("PREFECT_LOCAL_STORAGE_PATH", DATA_DIR / "prefect_storage")
+PREFECT_LOCAL_STORAGE_PATH = (
+    Path(os.getenv("PREFECT_LOCAL_STORAGE_PATH")) or DATA_DIR / "prefect_storage"
 )
 PREFECT_LOCAL_STORAGE_PATH.mkdir(exist_ok=True, parents=True)
 
