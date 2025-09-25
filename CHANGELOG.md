@@ -1,6 +1,11 @@
 ### [2.0.1] 2025-09-25
 
+- correction sommes et médianes des montants achetés par an (artefacts)
+- le timeout de l'upload vers data.gouv.fr est configurable
+- réduction de la consommation mémoire du chargement en base de données, puis désactivation ([#124](https://github.com/ColinMaudry/decp-processing/issues/124))
 - amélioration de la création des chemins de fichiers configurés ([#123](https://github.com/ColinMaudry/decp-processing/issues/123))
+- remise à zéro de /dist avant de générer statistiques.csv
+- ajout du contributeur vico4445 <3
 
 # [2.0.0] - 2025-09-19
 

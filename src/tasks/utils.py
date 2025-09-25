@@ -1,4 +1,3 @@
-import os
 import shutil
 import time
 from datetime import datetime
@@ -232,4 +231,3 @@ def generate_public_source_stats(df_uid: pl.DataFrame) -> None:
 
     # dump CSV dans dist
     df_sources.write_csv(DIST_DIR / "statistiques.csv")
-    print(os.listdir(DIST_DIR))
