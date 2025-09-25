@@ -38,6 +38,11 @@ MONTH_NOW = DATE_NOW[:7]  # YYYY-MM
 # Publication ou non des fichiers produits sur data.gouv.fr
 DECP_PROCESSING_PUBLISH = os.environ.get("DECP_PROCESSING_PUBLISH", "")
 
+# Timeout pour la publication de chaque ressource sur data.gouv.fr
+DECP_PROCESSING_PUBLISH_TIMEOUT = int(
+    os.environ.get("DECP_PROCESSING_PUBLISH_TIMEOUT", 300)
+)
+
 # Clé d'API data.gouv.fr
 API_KEY = os.environ.get("DATAGOUVFR_API_KEY", "")
 

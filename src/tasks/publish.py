@@ -1,6 +1,6 @@
 from httpx import post
 
-from config import API_KEY, DIST_DIR
+from config import API_KEY, DECP_PROCESSING_PUBLISH_TIMEOUT, DIST_DIR
 
 
 def update_resource(api, dataset_id, resource_id, file_path, api_key):
@@ -8,7 +8,9 @@ def update_resource(api, dataset_id, resource_id, file_path, api_key):
     headers = {"X-API-KEY": api_key}
     file = {"file": open(file_path, "rb")}
     # TODO: replace requests.post with httpx.post
-    response = post(url, files=file, headers=headers, timeout=120)
+    response = post(
+        url, files=file, headers=headers, timeout=DECP_PROCESSING_PUBLISH_TIMEOUT
+    )
     return response.json()
 
 
