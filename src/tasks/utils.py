@@ -165,12 +165,13 @@ def generate_stats(df: pl.DataFrame):
         stats[f"{str(year)}_nb_notifications_marchés"] = df_date_notification.height
 
         if df_date_notification.height > 0:
-            stats[f"{str(year)}_somme_montant_marchés_notifiés"] = (
-                df_date_notification.group_by("montant").sum()["montant"][0]
+            stats[f"{str(year)}_somme_montant_marchés_notifiés"] = int(
+                df_date_notification.select(pl.sum("montant")).item()
             )
-            stats[f"{str(year)}_médiane_montant_marchés_notifiés"] = (
-                df_date_notification.group_by("montant").median()["montant"][0]
+            stats[f"{str(year)}_médiane_montant_marchés_notifiés"] = int(
+                df_date_notification.select(pl.median("montant")).item()
             )
+
         else:
             stats[f"{str(year)}_somme_montant_marchés_notifiés"] = ""
             stats[f"{str(year)}_médiane_montant_marchés_notifiés"] = ""
