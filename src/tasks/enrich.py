@@ -88,14 +88,6 @@ def enrich_from_sirene(df: pl.LazyFrame):
     # print("Construction du champ acheteur_nom à partir des données SIRENE...")
     # df_sirets_acheteurs = make_acheteur_nom(df_sirets_acheteurs)
 
-    # print("Enregistrement des DECP aux formats CSV et Parquet...")
-    # save_to_files(df, f"{DIST_DIR}/decp")
-
-    # print("Suppression de colonnes et déduplication pour les DECP Sans Titulaires...")
-    # df_decp_sans_titulaires = make_decp_sans_titulaires(df)
-    # save_to_files(df_decp_sans_titulaires, f"{DIST_DIR}/decp-sans-titulaires")
-    # del df_decp_sans_titulaires
-
     # DONNÉES SIRENE TITULAIRES
 
     # Enrichissement des données pas prioritaire

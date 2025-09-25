@@ -27,14 +27,6 @@ def publish_to_datagouv():
             "file": str(DIST_DIR / "decp.csv"),
             "resource_id": "22847056-61df-452d-837d-8b8ceadbfc52",
         },
-        {
-            "file": str(DIST_DIR / "decp-sans-titulaires.csv"),
-            "resource_id": "834c14dd-037c-4825-958d-0a841c4777ae",
-        },
-        {
-            "file": str(DIST_DIR / "decp-sans-titulaires.parquet"),
-            "resource_id": "df28fa7d-2d36-439b-943a-351bde02f01d",
-        },
         # https://github.com/ColinMaudry/decp-processing/issues/124
         # {
         #     "file": str(DIST_DIR / "decp.sqlite"),
