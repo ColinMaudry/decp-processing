@@ -81,7 +81,8 @@ def make_data_tables():
 
 
 @flow(
-    log_prints=True, task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS)
+    log_prints=True,
+    task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS),
 )
 def decp_processing(enable_cache_removal: bool = False):
     print(f"🚀  Début du flow decp-processing dans base dir {BASE_DIR} ")
@@ -118,15 +119,15 @@ def decp_processing(enable_cache_removal: bool = False):
         sirene_preprocess()
     lf: pl.LazyFrame = enrich_from_sirene(df.lazy())
 
-    print("Génération de l'artefact (statistiques) sur le base df...")
     df: pl.DataFrame = lf.collect(engine="streaming")
-
-    generate_stats(df)
 
     # Réinitialisation de DIST_DIR
     if os.path.exists(DIST_DIR):
         shutil.rmtree(DIST_DIR)
     os.makedirs(DIST_DIR)
+
+    print("Génération de l'artefact (statistiques) sur le base df...")
+    generate_stats(df)
 
     print("Génération du schéma et enregistrement des DECP aux formats CSV, Parquet...")
     df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
