@@ -39,19 +39,21 @@ API_KEY = os.environ.get("DATAGOUVFR_API_KEY", "")
 BASE_DIR = Path(__file__).parent.parent
 
 # Les variables configurées sur le serveur doivent avoir la priorité
-DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
+DATA_DIR = Path(os.getenv("DATA_DIR")) or BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True, parents=True)
 
-DIST_DIR = Path(os.getenv("DECP_DIST_DIR", BASE_DIR / "dist"))
+DIST_DIR = Path(os.getenv("DECP_DIST_DIR") or BASE_DIR / "dist")
 DIST_DIR.mkdir(exist_ok=True, parents=True)
 
-sirene_data_parent_dir = Path(os.getenv("SIRENE_DATA_PARENT_DIR", DATA_DIR))
+sirene_data_parent_dir = Path(os.getenv("SIRENE_DATA_PARENT_DIR")) or DATA_DIR
 SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
 # SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
 
 # Dossier de stockage des résultats de tâches et du cache
 # https://docs.prefect.io/v3/advanced/results#default-persistence-configuration
-PREFECT_LOCAL_STORAGE_PATH = Path(os.getenv("PREFECT_LOCAL_STORAGE_PATH"))
+PREFECT_LOCAL_STORAGE_PATH = (
+    Path(os.getenv("PREFECT_LOCAL_STORAGE_PATH")) or DATA_DIR / "prefect_storage"
+)
 PREFECT_LOCAL_STORAGE_PATH.mkdir(exist_ok=True, parents=True)
 
 # POSTGRESQL
@@ -62,10 +64,6 @@ with open(
     os.getenv("DATASETS_REFERENCE_FILEPATH", DATA_DIR / "source_datasets.json"), "r"
 ) as f:
     TRACKED_DATASETS = json.load(f)
-
-BOOKMARK_FILEPATH = Path(
-    os.getenv("BOOKMARK_FILEPATH", DATA_DIR / "system" / "processed_bookmarks.json")
-)
 
 # Liste et ordre des colonnes pour le mono dataframe de base (avant normalisation et spécialisation)
 # Sert aussi à vérifier qu'au moins ces colonnes sont présentes (d'autres peuvent être présentes en plus, les colonnes "innatendues")
