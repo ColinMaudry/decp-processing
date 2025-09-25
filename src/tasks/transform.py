@@ -236,19 +236,18 @@ def process_modifications(lf: pl.LazyFrame) -> pl.LazyFrame:
     return lf
 
 
-def normalize_tables(df: pl.DataFrame):
+def normalize_tables(lf: pl.LazyFrame):
     # MARCHES
 
-    df_marches: pl.DataFrame = df.drop(cs.starts_with("titulaire", "acheteur"))
-    df_marches = df_marches.unique(subset=["uid", "modification_id"]).sort(
+    lf_marches: pl.LazyFrame = lf.drop(cs.starts_with("titulaire", "acheteur"))
+    lf_marches = lf_marches.unique(subset=["uid", "modification_id"]).sort(
         by="dateNotification", descending=True
     )
-    save_to_databases(df_marches, "decp", "marches", "uid, modification_id")
-    del df_marches
+    save_to_databases(lf_marches, "decp", "marches", "uid, modification_id")
 
     # ACHETEURS
 
-    df_acheteurs: pl.DataFrame = df.select(cs.starts_with("acheteur"))
+    df_acheteurs: pl.LazyFrame = lf.select(cs.starts_with("acheteur"))
     df_acheteurs = df_acheteurs.rename(lambda name: name.removeprefix("acheteur_"))
     df_acheteurs = df_acheteurs.unique().sort(by="id")
     save_to_databases(df_acheteurs, "decp", "acheteurs", "id")
@@ -257,39 +256,37 @@ def normalize_tables(df: pl.DataFrame):
     # TITULAIRES
 
     ## Table entreprises
-    df_titulaires: pl.DataFrame = df.select(cs.starts_with("titulaire"))
+    lf_titulaires: pl.LazyFrame = lf.select(cs.starts_with("titulaire"))
 
     ### On garde les champs id et typeIdentifiant en clé primaire composite
-    df_titulaires = df_titulaires.rename(lambda name: name.removeprefix("titulaire_"))
-    df_titulaires = df_titulaires.unique().sort(by=["id"])
-    save_to_databases(df_titulaires, "decp", "entreprises", "id, typeIdentifiant")
-    del df_titulaires
+    lf_titulaires = lf_titulaires.rename(lambda name: name.removeprefix("titulaire_"))
+    lf_titulaires = lf_titulaires.unique().sort(by=["id"])
+    save_to_databases(lf_titulaires, "decp", "entreprises", "id, typeIdentifiant")
+    del lf_titulaires
 
     ## Table marches_titulaires
-    df_marches_titulaires: pl.DataFrame = df.select(
+    lf_marches_titulaires: pl.LazyFrame = lf.select(
         "uid", "modification_id", "titulaire_id", "titulaire_typeIdentifiant"
     )
 
     save_to_databases(
-        df_marches_titulaires,
+        lf_marches_titulaires,
         "decp",
         "marches_titulaires",
         '"uid", "modification_id", "titulaire_id", "titulaire_typeIdentifiant"',
     )
-    del df_marches_titulaires
 
     ## Table marches_acheteurs
-    df_marches_acheteurs: pl.DataFrame = df.select(
+    lf_marches_acheteurs: pl.LazyFrame = lf.select(
         "uid", "modification_id", "acheteur_id"
     ).unique()
 
     save_to_databases(
-        df_marches_acheteurs,
+        lf_marches_acheteurs,
         "decp",
         "marches_acheteurs",
         '"uid", "modification_id", "acheteur_id"',
     )
-    del df_marches_acheteurs
 
     # TODO ajouter les sous-traitants quand ils seront ajoutés aux données
 
@@ -303,15 +300,18 @@ def concat_decp_json(dfs: list) -> pl.DataFrame:
         "Suppression des lignes en doublon par UID + titulaire ID + titulaire type ID + modification_id"
     )
 
-    # Exemple : 20005584600014157140791205100
+    # Exemple de doublon : 20005584600014157140791205100
     index_size_before = df.height
-    df = df.unique(
+    df_clean = df.unique(
         subset=["uid", "titulaire_id", "titulaire_typeIdentifiant", "modification_id"],
         maintain_order=False,
     )
-    print("-- ", index_size_before - df.height, " doublons supprimés")
 
-    return df
+    del df
+
+    print("-- ", index_size_before - df_clean.height, " doublons supprimés")
+
+    return df_clean
 
 
 def setup_tableschema_columns(df: pl.DataFrame):

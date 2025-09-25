@@ -22,7 +22,7 @@ from tasks.clean import clean_decp
 from tasks.dataset_utils import list_resources
 from tasks.enrich import enrich_from_sirene
 from tasks.get import get_resource
-from tasks.output import generate_final_schema, save_to_files, save_to_sqlite
+from tasks.output import generate_final_schema, save_to_databases, save_to_files
 from tasks.publish import publish_to_datagouv
 from tasks.transform import (
     concat_decp_json,
@@ -64,18 +64,19 @@ def make_data_tables():
 
     print("Création de la base données au format relationnel...")
 
-    df: pl.DataFrame = pl.read_parquet(DIST_DIR / "decp.parquet")
+    lf: pl.LazyFrame = pl.scan_parquet(DIST_DIR / "decp.parquet")
 
     print("Enregistrement des DECP (base DataFrame) dans les bases de données...")
-    save_to_sqlite(
-        df,
+    print(DIST_DIR / "decp.parquet")
+    save_to_databases(
+        lf,
         "decp",
         "data.gouv.fr.2022.clean",
         "uid, titulaire_id, titulaire_typeIdentifiant, modification_id",
     )
 
     print("Normalisation des tables...")
-    normalize_tables(df)
+    normalize_tables(lf)
 
 
 @flow(
