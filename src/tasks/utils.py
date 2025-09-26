@@ -218,16 +218,33 @@ def generate_public_source_stats(df_uid: pl.DataFrame) -> None:
 
     # ajout données count
     df_sources = df_sources.join(
-        df_acheteurs, left_on="code", right_on="sourceDataset", how="left"
+        df_acheteurs,
+        left_on="code",
+        right_on="sourceDataset",
+        how="full",
+        coalesce=True,
     )
     df_sources = df_sources.join(
-        df_uid, left_on="code", right_on="sourceDataset", how="left"
+        df_uid, left_on="code", right_on="sourceDataset", how="full", coalesce=True
     )
 
     # ordre des colonnes
     df_sources = df_sources.select(
         "nom", "organisation", "url", "nb_marchés", "nb_acheteurs", "code"
     )
+
+    # application des métadonnées decp_minef aux codes decp_minef_*
+    df_sources = (
+        df_sources.sort(by="code").with_columns(
+            pl.col("nom", "organisation", "url").fill_null(strategy="forward")
+        )
+    ).filter(pl.col("code") != "decp_minef")
+
+    # remplacement des null par zéros
+    df_sources = df_sources.fill_null(0)
+
+    # tri par nombre de marchés
+    df_sources = df_sources.sort(by="nb_marchés", descending=True, nulls_last=True)
 
     # dump CSV dans dist
     df_sources.write_csv(DIST_DIR / "statistiques.csv")
