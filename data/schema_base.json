@@ -36,7 +36,7 @@
     "friendly_name": "Objet"
   },
   "montant": {
-    "description": "Montant forfaire ou montant maximum estimé hors-taxes, en euros.",
+    "description": "Montant forfaitaire ou montant maximum estimé hors-taxes, en euros.",
     "friendly_name": "Montant"
   },
   "codeCPV": {
@@ -48,7 +48,7 @@
     "friendly_name": "Procédure"
   },
   "techniques": {
-    "description": "Les techniques d'achat utilisée pour le marché marché public. ccord-cadre, Concours, Système de qualification, Système d'acquisition dynamique, Catalogue électronique, Enchère électronique, Sans objet.",
+    "description": "Les techniques d'achat utilisées pour le marché public. Accord-cadre, Concours, Système de qualification, Système d'acquisition dynamique, Catalogue électronique, Enchère électronique, Sans objet.",
     "friendly_name": "Techniques"
   },
   "dureeMois": {
@@ -60,7 +60,7 @@
     "friendly_name": "Offres reçues"
   },
   "dateNotification": {
-    "description": "Date à laquelle le marché public ou une sa modification a été notifiée aux titulaires du marché public.",
+    "description": "Date à laquelle le marché public ou de la modification a été notifiée aux titulaires du marché public.",
     "friendly_name": "Date notification"
   },
   "datePublicationDonnees": {
@@ -68,7 +68,7 @@
     "friendly_name": "Date publication données"
   },
   "formePrix": {
-    "description": "La forme du prix du marché publci. Unitaire, forfaitaire ou mixte.",
+    "description": "La forme du prix du marché public. Unitaire, forfaitaire ou mixte.",
     "friendly_name": "Forme prix"
   },
   "typesPrix": {
@@ -100,7 +100,7 @@
     "friendly_name": "Considérations environnementales"
   },
   "ccag": {
-    "description": "Cahiers des clauses administratives générales et techniques (CCAG) utilisés pour le marchés publics.",
+    "description": "Cahier des clauses administratives générales et techniques (CCAG) utilisé pour le marchés publics.",
     "friendly_name": "CCAG"
   },
   "sousTraitanceDeclaree": {
@@ -112,19 +112,19 @@
     "friendly_name": "Type groupement"
   },
   "origineUE": {
-    "description": "Pour les marchés de fournitures de denrées alimentaires, de véhicules, de produits de santé et d'habillement, selon la liste annexée à l'arrêté du 22 décembre 2022, la part des produits issus de l'Union européenne avec laquelle le marché sera exécuté. 0.2 = 20 % de la part des produits provient de l'Union européenne. Cette valeur ne peut pas être inférieure à la valeur de Origine France.",
+    "description": "Pour les marchés de fournitures de denrées alimentaires, de véhicules, de produits de santé et d'habillement, selon la liste annexée à l'arrêté du 22 décembre 2022, la part des produits issus de l'Union européenne avec laquelle le marché sera exécuté. 0.2 = 20 % de la part des produits provient de l'Union européenne. Cette valeur ne peut pas être inférieure à la valeur de origineFrance.",
     "friendly_name": "Origine UE"
   },
   "origineFrance": {
-    "description": "Pour les marchés de fournitures de denrées alimentaires, de véhicules, de produits de santé et d'habillement, selon la liste annexée à l'arrêté du 22 décembre 2022, la part des produits français avec laquelle le marché sera exécuté. 0.2 = 20 % de la part des produits sont français. Cette valeur ne peut pas être supérieure à la valeur de Origine UE.",
+    "description": "Pour les marchés de fournitures de denrées alimentaires, de véhicules, de produits de santé et d'habillement, selon la liste annexée à l'arrêté du 22 décembre 2022, la part des produits français avec laquelle le marché sera exécuté. 0.2 = 20 % de la part des produits sont français. Cette valeur ne peut pas être supérieure à la valeur de origineUE.",
     "friendly_name": "Origine France"
   },
   "lieuExecution_code": {
-    "description": "Code du lieu d'éxecution du marché public. Le type de code est renseigné par 'Type code lieu exécution'.",
+    "description": "Code du lieu d'exécution du marché public. Le type de code est renseigné par 'Type code lieu exécution'.",
     "friendly_name": "Code lieu exécution"
   },
   "lieuExecution_typeCode": {
-    "description": "Type du code du lieu d'exécution. Code postal, Code commune, Code arrondissement, Code canton, Code département, Code région, Code pays\"",
+    "description": "Type du code du lieu d'exécution. Code postal, Code commune, Code arrondissement, Code canton, Code département, Code région, Code pays.",
     "friendly_name": "Type code lieu exécution"
   },
   "idAccordCadre": {
@@ -132,7 +132,7 @@
     "friendly_name": "Identifiant accord-cadre"
   },
   "modification_id": {
-    "description": "Identifiant de la modification. 0 = données initiales du marché public. 1 = première modification.",
+    "description": "Identifiant de la modification. 0 = données initiales du marché public, 1 = première modification, etc.",
     "friendly_name": "Identifiant modification"
   },
   "donneesActuelles": {

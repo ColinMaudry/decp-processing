@@ -1,3 +1,7 @@
+#### 2.0.3 - 2025-09-29
+
+- correction de coquilles dans le schéma
+
 #### 2.0.2 - 2025-09-26
 
 - distinction des différentes sources de données consolidées par le MINEF (`decp_minef_*`)
