@@ -1,11 +1,13 @@
 {
   "uid": {
     "description": "Concaténation du SIRET de l'acheteur (acheteur_id) et de l'identifiant de marché (id). Utilisé comme identifiant unique de marché.",
-    "friendly_name": "Identifiant unique"
+    "friendly_name": "Identifiant unique",
+    "short_name": "Id. unique"
   },
   "id": {
     "description": "Identifiant attribué par l'acheteur",
-    "friendly_name": "Identifiant interne"
+    "friendly_name": "Identifiant interne",
+    "short_name": "Id. interne"
   },
   "nature": {
     "description": "Marché, marché de partenariat ou marché de sécurité.",
@@ -13,23 +15,28 @@
   },
   "acheteur_id": {
     "description": "Identifiant de l'établissement de l'acheteur (SIRET), référencé dans la base SIRENE de l'INSEE.",
-    "friendly_name": "SIRET acheteur"
+    "friendly_name": "SIRET acheteur",
+    "short_name": "Id. acheteur"
   },
   "acheteur_nom": {
     "description": "Nom de l'acheteur tel que renseigné dans la base SIRENE de l'INSEE.",
-    "friendly_name": "Nom acheteur"
+    "friendly_name": "Nom acheteur",
+    "short_name": "Acheteur"
   },
   "titulaire_id": {
     "description": "Identifiant du titulaire du marché (SIRET). Voir 'Type identifiant' pour le référentiel utilisé",
-    "friendly_name": "Identifiant titulaire"
+    "friendly_name": "Identifiant titulaire",
+    "short_name": "Id. titulaire"
   },
   "titulaire_typeIdentifiant": {
     "description": "Référentiel utilisé pour l'identifiant du titulaire : SIRET (établissement INSEE), TVA, TAHITI, RIDET, FRWF, IREP, HORS-UE",
-    "friendly_name": "Type identifiant"
+    "friendly_name": "Type identifiant",
+    "short_name": "Type id."
   },
   "titulaire_nom": {
     "description": "Nom du titulaire. Nom tel que renseigné dans la base SIRENE de l'INSEE si c'est un SIRET.",
-    "friendly_name": "Nom titulaire"
+    "friendly_name": "Nom titulaire",
+    "short_name": "Titulaire"
   },
   "objet": {
     "description": "Objet du marché public.",
@@ -41,7 +48,8 @@
   },
   "codeCPV": {
     "description": "Catégorie de bien, service ou travaux achetés, selon le Vocabulaire commun pour les marchés publics (CPV).",
-    "friendly_name": "Code CPV"
+    "friendly_name": "Code CPV",
+    "short_name": "CPV"
   },
   "procedure": {
     "description": "Le type de procédure utilisé pour le marché public. Prodcédure négociée ouverte, Procédure non négociée ouverte, Procédure négociée restreinte, Procédure non négociée restreinte.",
@@ -65,7 +73,8 @@
   },
   "datePublicationDonnees": {
     "description": "Date à laquelle les données du marché public ou de la modification ont été publiées sur data.gouv.fr.",
-    "friendly_name": "Date publication données"
+    "friendly_name": "Date publication données",
+    "short_name": "Date pub. données"
   },
   "formePrix": {
     "description": "La forme du prix du marché public. Unitaire, forfaitaire ou mixte.",
@@ -85,7 +94,7 @@
   },
   "marcheInnovant": {
     "description": "Si le marché comporte des travaux, services ou fournitures innovantes.",
-    "friendly_name": ""
+    "friendly_name": "Marché innovant"
   },
   "modalitesExecution": {
     "description": "Les modalités d'exécution du marché public. Tranches, Bons de commande, Marchés subséquents, Sans objet.",
@@ -93,11 +102,13 @@
   },
   "considerationsSociales": {
     "description": "Les considérations sociales prévues dans le marché public. Clause sociale, Critère social, Marché réservé, Sans objet.",
-    "friendly_name": "Considérations sociales"
+    "friendly_name": "Considérations sociales",
+    "short_name": "Cons. sociales"
   },
   "considerationsEnvironnementales": {
     "description": "Les considérations environnementales prévues dans le marché public. Clause environnementale, Critère environnemental, Sans objet.",
-    "friendly_name": "Considérations environnementales"
+    "friendly_name": "Considérations environnementales",
+    "short_name": "Cons. environnementales"
   },
   "ccag": {
     "description": "Cahier des clauses administratives générales et techniques (CCAG) utilisé pour le marchés publics.",
@@ -105,11 +116,13 @@
   },
   "sousTraitanceDeclaree": {
     "description": "Au moment de la notification du marché, les titulaires du marché ont déclaré s'appuyer sur un ou plusieurs sous-traitants pour ce marché public.",
-    "friendly_name": "Sous-traitance déclarée"
+    "friendly_name": "Sous-traitance déclarée",
+    "short_name": "Sous-traitance"
   },
   "typeGroupementOperateurs": {
     "description": "Le type de groupement d'entreprises ou d'opérateurs économiques.",
-    "friendly_name": "Type groupement"
+    "friendly_name": "Type groupement",
+    "short_name": "Groupement"
   },
   "origineUE": {
     "description": "Pour les marchés de fournitures de denrées alimentaires, de véhicules, de produits de santé et d'habillement, selon la liste annexée à l'arrêté du 22 décembre 2022, la part des produits issus de l'Union européenne avec laquelle le marché sera exécuté. 0.2 = 20 % de la part des produits provient de l'Union européenne. Cette valeur ne peut pas être inférieure à la valeur de origineFrance.",
@@ -121,19 +134,23 @@
   },
   "lieuExecution_code": {
     "description": "Code du lieu d'exécution du marché public. Le type de code est renseigné par 'Type code lieu exécution'.",
-    "friendly_name": "Code lieu exécution"
+    "friendly_name": "Code lieu exécution",
+    "short_name": "Lieu exécution"
   },
   "lieuExecution_typeCode": {
     "description": "Type du code du lieu d'exécution. Code postal, Code commune, Code arrondissement, Code canton, Code département, Code région, Code pays.",
-    "friendly_name": "Type code lieu exécution"
+    "friendly_name": "Type code lieu exécution",
+    "short_name": "Type lieu exécution"
   },
   "idAccordCadre": {
     "description": "Pour un marché subséquent, l'identifiant interne du marché public relevant de la technique d'achat accord-cadre auquel il est lié.",
-    "friendly_name": "Identifiant accord-cadre"
+    "friendly_name": "Identifiant accord-cadre",
+    "short_name": "Id. accord-cadre"
   },
   "modification_id": {
     "description": "Identifiant de la modification. 0 = données initiales du marché public, 1 = première modification, etc.",
-    "friendly_name": "Identifiant modification"
+    "friendly_name": "Identifiant modification",
+    "short_name": "Id. modification"
   },
   "donneesActuelles": {
     "description": "Si les données de cette ligne sont les données actuelles du marché public, une fois les éventuelles modifications prises en compte.",
