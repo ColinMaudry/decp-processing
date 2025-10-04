@@ -1,3 +1,7 @@
+#### 2.0.4 - 2025-10-04
+
+- nettoyage montant invalide de marché ([#125](https://github.com/ColinMaudry/decp-processing/issues/125))
+
 #### 2.0.3 - 2025-09-29
 
 - correction de coquilles dans le schéma
