@@ -1,3 +1,9 @@
+#### 2.0.4 - 2025-10-04
+
+- nettoyage montant invalide de marché ([#125](https://github.com/ColinMaudry/decp-processing/issues/125))
+- publication du schéma au format [TableSchema](https://specs.frictionlessdata.io/table-schema) ([#126](https://github.com/ColinMaudry/decp-processing/issues/126))
+- amélioration des noms de colonnes dans le schéma pour les GUIs (`title`, `short_name`)
+
 #### 2.0.3 - 2025-09-29
 
 - correction de coquilles dans le schéma

@@ -1,7 +1,7 @@
 [project]
 name = "decp-processing"
 description = "Traitement des données des marchés publics français."
-version = "2.0.2"
+version = "2.0.4"
 requires-python = ">= 3.9"
 authors = [
     { name = "Colin Maudry", email = "colin+decp@maudry.com" }
@@ -11,8 +11,7 @@ dependencies = [
     "pandas", # nécessaire pour l'écriture en base de données
     "polars==1.33.1",
     "pyarrow",
-    "tableschema",
-    "frictionless==4.40.11",
+    "frictionless",
     "ipykernel",
     "prefect==3.4.17",
     "orjson",
