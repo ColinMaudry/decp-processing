@@ -11,8 +11,7 @@ dependencies = [
     "pandas", # nécessaire pour l'écriture en base de données
     "polars==1.33.1",
     "pyarrow",
-    "tableschema",
-    "frictionless==4.40.11",
+    "frictionless",
     "ipykernel",
     "prefect==3.4.17",
     "orjson",
