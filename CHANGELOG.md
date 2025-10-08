@@ -1,3 +1,8 @@
+#### 2.0.5 - 2025-10-08
+
+- correction des NaN dans les données consolidées par le MINEF ([#127](https://github.com/ColinMaudry/decp-processing/issues/127))
+- auto-release à chaque fois que je push un tag
+
 #### 2.0.4 - 2025-10-04
 
 - nettoyage montant invalide de marché ([#125](https://github.com/ColinMaudry/decp-processing/issues/125))
