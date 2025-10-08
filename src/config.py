@@ -155,6 +155,9 @@ EXCLUDED_RESOURCES = [
     "7629a6a1-3b8a-4570-8562-3a7cf82be88e",  # données Région Bretagne XML non-réglementaire
 ]
 
+# Ces marchés ont des montants invalides, donc on les met à 1 euro.
+MARCHES_BAD_MONTANT = ["221300015002472020F00075"]
+
 
 @dataclass
 class DecpFormat:
