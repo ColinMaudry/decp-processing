@@ -110,10 +110,12 @@ def json_stream_to_parquet(
             use_float=True,
         )
 
-    tmp_file = tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson", delete=True)
+    tmp_file = tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson", delete=False)
 
     http_stream_iter = stream_get(url)
-    stream_replace_iter = stream_replace_bytestring(http_stream_iter, b"NaN,", b"null,")
+    stream_replace_iter = stream_replace_bytestring(
+        http_stream_iter, rb"NaN([,\n])", rb"null\1"
+    )
 
     # In first iteration, will find the right format
     chunk = next(stream_replace_iter)
