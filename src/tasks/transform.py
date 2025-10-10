@@ -130,7 +130,6 @@ def replace_with_modification_data(lf: pl.LazyFrame):
     (chaque ligne contient les informations complètes à jour à la date de notification)
     Elle ajoute également la colonne "donneesActuelles" pour indiquer si la modification est la plus récente.
     """
-
     # Étape 1: Extraire les données des modifications en renommant les colonnes
     schema = lf.collect_schema().names()
     lf_mods = (
@@ -148,30 +147,20 @@ def replace_with_modification_data(lf: pl.LazyFrame):
     )  # sans les lignes de données initiales
 
     # Étape 2: Dédupliquer et créer une copie du DataFrame initial sans les colonnes "modifications"
-    # On peut dédupliquer aveuglément car la seule chose qui varient dans les lignes d'un même
-    # uid, c'est les données de modifs
-    lf = lf.unique("uid")
-    lf_base = lf.select(
-        "uid",
-        "dateNotification",
-        "datePublicationDonnees",
-        "montant",
-        "dureeMois",
-        "titulaires",
-    )
+    # Tri par dateNotification DESC pour sélectionner la ligne la plus récente
+    lf = lf.sort(["uid", "dateNotification"], descending=[False, True]).unique("uid", keep="first")
+
+    # Garder TOUTES les colonnes sauf les colonnes modification_*
+    lf_base = lf.drop(cs.starts_with("modification_"))
 
     # Étape 3: Ajouter le modification_id et la colonne données actuelles pour chaque modif
-    lf_concat = (
+    # Colonnes qui peuvent changer avec les modifications
+    modification_columns = ["uid", "dateNotification", "datePublicationDonnees", "montant", "dureeMois", "titulaires"]
+
+    lf = (
         pl.concat(
             [
-                lf_base.select(
-                    "uid",
-                    "dateNotification",
-                    "datePublicationDonnees",
-                    "montant",
-                    "dureeMois",
-                    "titulaires",
-                ),
+                lf_base.select(modification_columns),
                 lf_mods,
             ],
             how="vertical_relaxed",
@@ -195,24 +184,50 @@ def replace_with_modification_data(lf: pl.LazyFrame):
         )
     )
 
-    # Étape 4: Remplir les valeurs nulles en utilisant les dernières valeurs non-nulles pour chaque id
-    lf_concat = lf_concat.with_columns(
+    # Étape 4a: Remplacer les listes de titulaires "vides" (contenant uniquement des structs avec des nulls) par null
+    # Car Polars ne considère pas [{{null,null}}] comme une valeur null lors du fill_null()
+    # Structure: List(Struct({'titulaire': Struct({'typeIdentifiant': String, 'id': String})}))
+    lf = lf.with_columns(
+        pl.when(
+            pl.col("titulaires").list.len() > 0
+        )
+        .then(
+            # Si la liste n'est pas vide, vérifier si tous les éléments sont des structs vides
+            # On accède au champ "titulaire" puis on vérifie si typeIdentifiant ET id sont null
+            pl.when(
+                pl.col("titulaires")
+                .list.eval(
+                    # Pour chaque élément de la liste, accéder au struct "titulaire" puis vérifier ses champs
+                    pl.element().struct.field("titulaire").struct.field("typeIdentifiant").is_null()
+                    & pl.element().struct.field("titulaire").struct.field("id").is_null()
+                )
+                .list.all()  # Vérifier que TOUS les éléments de la liste ont typeIdentifiant=null ET id=null
+            )
+            .then(None)  # Remplacer par null si tous les structs sont vides
+            .otherwise(pl.col("titulaires"))  # Garder la liste sinon
+        )
+        .otherwise(None)  # Si liste vide, mettre null
+        .alias("titulaires")
+    )
+
+    # Étape 4b: Remplir les valeurs nulles en utilisant les dernières valeurs non-nulles pour chaque id
+    lf = lf.with_columns(
         pl.col("montant", "dureeMois", "titulaires")
         .fill_null(strategy="backward")
         .over("uid")
     )
 
-    # Étape 5: Ajouter les données du DataFrame de base
-    lf_final = lf_concat.join(
-        lf.drop(
-            [
-                "dateNotification",
-                "datePublicationDonnees",
-                "montant",
-                "dureeMois",
-                "titulaires",
-            ]
-        ).drop(cs.starts_with("modification_")),
+    # Étape 5: Réintroduire les colonnes fixes (qui ne changent pas avec les modifications)
+    # Sélectionner uniquement les colonnes qui ne sont pas dans modification_columns
+    columns_to_keep = [col for col in lf_base.collect_schema().names()
+                       if col not in modification_columns]
+
+    # Créer un DataFrame avec uniquement les colonnes fixes, dédupliqué par uid
+    lf_fixed_columns = lf_base.select(["uid"] + columns_to_keep).unique("uid")
+
+    # Joindre pour réintroduire les colonnes fixes
+    lf_final = lf.join(
+        lf_fixed_columns,
         on="uid",
         how="left",
     )
