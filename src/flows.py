@@ -178,7 +178,7 @@ def sirene_preprocess():
     print("☑️  Fin du flow sirene_preprocess.")
 
 
-@flow
+@flow(log_prints=True)
 def scrap_marches_securises(mode=None, year=None):
     mode = mode or MARCHES_SECURISES_SCRAPING_MODE
 
