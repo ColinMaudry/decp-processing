@@ -305,13 +305,16 @@ def scrap_marches_securises_month(year: str, month: str) -> list:
             print(json_href)
             json_html_page = get_html(json_href)
             if json_html_page:
-                json_html_page.replace("</head>", "</head><body>") + "</body></html>"
+                json_html_page = (
+                    json_html_page.replace("</head>", "</head><body>")
+                    + "</body></html>"
+                )
             else:
                 "json_html_page is None, skipping..."
                 continue
-            json_soup = BeautifulSoup(json_html_page, "html.parser")
+            json_html_page_soup = BeautifulSoup(json_html_page, "html.parser")
             try:
-                decp_json = json.loads(json_soup.find("body").string)
+                decp_json = json.loads(json_html_page_soup.find("body").string)
             except Exception as e:
                 print(json_html_page)
                 print(e)
