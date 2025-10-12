@@ -10,7 +10,7 @@ import ijson
 import orjson
 import polars as pl
 from bs4 import BeautifulSoup
-from httpx import get, stream
+from httpx import stream
 from lxml import etree
 from prefect import task
 
@@ -253,15 +253,16 @@ def norm_titulaire(titulaire: dict):
     return titulaire
 
 
-def get_html(url: str, root: str = "") -> str or None:
-    def get_response() -> httpx.Response:
-        return get(url, timeout=timeout).raise_for_status()
+def get_html(url: str, client: httpx.Client) -> str or None:
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8",
+        "Connection": "keep-alive",
+    }
 
-    if url.startswith("/"):
-        if root == "":
-            print("Root not specified and URL starts with /")
-            raise ValueError
-        url = root + url
+    def get_response() -> httpx.Response:
+        return client.get(url, timeout=timeout, headers=headers).raise_for_status()
+
     timeout = httpx.Timeout(20.0, connect=60.0, pool=20.0, read=20.0)
     try:
         response = get_response()
@@ -282,8 +283,8 @@ def get_html(url: str, root: str = "") -> str or None:
 #     persist_result=True,
 #     cache_expiration=datetime.timedelta(days=15),
 # )
-def get_json_marches_securises(url: str) -> dict or None:
-    json_html_page = get_html(url)
+def get_json_marches_securises(url: str, client: httpx.Client) -> dict or None:
+    json_html_page = get_html(url, client)
     sleep(0.1)
     if json_html_page:
         json_html_page = (
@@ -303,32 +304,33 @@ def get_json_marches_securises(url: str) -> dict or None:
 
 
 @task(log_prints=True)
-def scrap_marches_securises_month(year: str, month: str) -> list:
+def scrap_marches_securises_month(year: str, month: str):
     marches = []
     page = 1
-    while True:
-        search_url = (
-            f"https://www.marches-securises.fr/entreprise/?module=liste_donnees_essentielles&page={str(page)}&siret_pa=&siret_pa1=&date_deb={year}-{month}-01&date_fin={year}-{month}-31&date_deb_ms={year}-{month}-01&date_fin_ms={year}-{month}-31&ref_ume=&cpv_et=&type_procedure=&type_marche=&objet=&rs_oe=&dep_liste=&ctrl_key=aWwwS1pLUlFzejBOYitCWEZzZTEzZz09&text=&donnees_essentielles=1&search="
-            f"table_ms&"
-        )
-        html_result_page = get_html(search_url)
-        soup = BeautifulSoup(html_result_page, "html.parser")
-        result_div = soup.find("div", attrs={"id": "liste_consultations"})
-        print("Year: ", year, "Month: ", month, "Page: ", str(page))
-        json_links = result_div.find_all(
-            "a", attrs={"title": "Télécharger au format Json"}
-        )
-        if not json_links:
-            break
-        else:
-            page += 1
-        for json_link in json_links:
-            json_href = "https://www.marches-securises.fr" + json_link["href"]
-            decp_json = get_json_marches_securises(json_href)
-            marches.append(decp_json)
-    if len(marches) > 0:
-        dicts = {"marches": marches}
-        json_path = DIST_DIR / f"marches-securises_{year}-{month}.json"
-        with open(json_path, "w") as f:
-            f.write(json.dumps(dicts))
-        publish_scrap_to_datagouv(year, month, json_path)
+    with httpx.Client() as client:
+        while True:
+            search_url = (
+                f"https://www.marches-securises.fr/entreprise/?module=liste_donnees_essentielles&page={str(page)}&siret_pa=&siret_pa1=&date_deb={year}-{month}-01&date_fin={year}-{month}-31&date_deb_ms={year}-{month}-01&date_fin_ms={year}-{month}-31&ref_ume=&cpv_et=&type_procedure=&type_marche=&objet=&rs_oe=&dep_liste=&ctrl_key=aWwwS1pLUlFzejBOYitCWEZzZTEzZz09&text=&donnees_essentielles=1&search="
+                f"table_ms&"
+            )
+            html_result_page = get_html(search_url, client)
+            soup = BeautifulSoup(html_result_page, "html.parser")
+            result_div = soup.find("div", attrs={"id": "liste_consultations"})
+            print("Year: ", year, "Month: ", month, "Page: ", str(page))
+            json_links = result_div.find_all(
+                "a", attrs={"title": "Télécharger au format Json"}
+            )
+            if not json_links:
+                break
+            else:
+                page += 1
+            for json_link in json_links:
+                json_href = "https://www.marches-securises.fr" + json_link["href"]
+                decp_json = get_json_marches_securises(json_href, client)
+                marches.append(decp_json)
+        if len(marches) > 0:
+            dicts = {"marches": marches}
+            json_path = DIST_DIR / f"marches-securises_{year}-{month}.json"
+            with open(json_path, "w") as f:
+                f.write(json.dumps(dicts))
+            publish_scrap_to_datagouv(year, month, json_path)
