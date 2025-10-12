@@ -1,3 +1,4 @@
+import datetime
 import json
 import tempfile
 from collections.abc import Iterator
@@ -13,6 +14,7 @@ from bs4 import BeautifulSoup
 from httpx import get, stream
 from lxml import etree
 from prefect import task
+from prefect.cache_policies import INPUTS
 
 from config import (
     DECP_FORMAT_2019,
@@ -273,10 +275,33 @@ def get_html(url: str, root: str = "") -> str or None:
         except (httpx.ConnectError, httpx.ReadTimeout, httpx.HTTPStatusError):
             print("Skipped")
             return None
-
     html = response.text
-    sleep(0.1)
     return html
+
+
+@task(
+    cache_policy=INPUTS,
+    persist_result=True,
+    cache_expiration=datetime.timedelta(days=15),
+)
+def get_json_marches_securises(url: str) -> dict or None:
+    json_html_page = get_html(url)
+    sleep(0.1)
+    if json_html_page:
+        json_html_page = (
+            json_html_page.replace("</head>", "</head><body>") + "</body></html>"
+        )
+    else:
+        print("json_html_page is None, skipping...")
+        return None
+    json_html_page_soup = BeautifulSoup(json_html_page, "html.parser")
+    try:
+        decp_json = json.loads(json_html_page_soup.find("body").string)
+    except Exception as e:
+        print(json_html_page)
+        print(e)
+        return None
+    return decp_json
 
 
 @task(log_prints=True)
@@ -301,22 +326,7 @@ def scrap_marches_securises_month(year: str, month: str) -> list:
             page += 1
         for json_link in json_links:
             json_href = "https://www.marches-securises.fr" + json_link["href"]
-            json_html_page = get_html(json_href)
-            if json_html_page:
-                json_html_page = (
-                    json_html_page.replace("</head>", "</head><body>")
-                    + "</body></html>"
-                )
-            else:
-                "json_html_page is None, skipping..."
-                continue
-            json_html_page_soup = BeautifulSoup(json_html_page, "html.parser")
-            try:
-                decp_json = json.loads(json_html_page_soup.find("body").string)
-            except Exception as e:
-                print(json_html_page)
-                print(e)
-                continue
+            decp_json = get_json_marches_securises(json_href)
             marches.append(decp_json)
     dicts = {"marches": marches}
     json_path = DIST_DIR / f"marches-securises_{year}-{month}.json"
