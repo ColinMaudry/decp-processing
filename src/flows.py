@@ -195,7 +195,7 @@ def scrap_marches_securises(mode=None, year=None):
 
     elif mode == "all":
         current_year = int(current_year)
-        for year in reversed(range(2018, current_year + 1)):
+        for year in reversed(range(2018, current_year + 2)):
             scrap_marches_securises("year", str(year))
 
     else:
