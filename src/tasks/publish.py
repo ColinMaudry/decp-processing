@@ -54,7 +54,7 @@ def publish_to_datagouv():
             print("OK")
 
 
-def get_resource_id(dataset_id, year, month) -> str or None:
+def get_resource_id(dataset_id, filepath) -> str or None:
     response = get(
         f"{DATAGOUVFR_API}/datasets/{dataset_id}/",
         headers={"X-API-KEY": DATAGOUVFR_API_KEY},
@@ -62,7 +62,7 @@ def get_resource_id(dataset_id, year, month) -> str or None:
     resources = response.json()["resources"]
     description = ""
     for resource in resources:
-        if resource["title"] == f"marches-securises-{year}-{month}.json":
+        if resource["title"] == str(filepath).split("/")[-1]:
             return resource["id"], None
         if resource["type"] == "main":
             description = resource["description"]
@@ -95,13 +95,14 @@ def publish_new_resource(dataset_id, file_path, description):
 
 def publish_scrap_to_datagouv(year: str, month: str, file_path):
     dataset_id = "68ebb48dd708fdb2d7c15bff"
-    print(f"Mise à jour des données marches-securises de {year}-{month}...")
-    resource_id, description = get_resource_id(dataset_id, year, month)
+    resource_id, description = get_resource_id(dataset_id, file_path)
     if resource_id is None:
+        print(f"Publication des données marches-securises de {year}-{month}...")
         result = publish_new_resource(dataset_id, file_path, description)
         if result:
             print("OK (nouvelle ressource)")
     else:
+        print(f"Mise à jour des données marches-securises de {year}-{month}...")
         result = update_resource(dataset_id, resource_id, file_path, DATAGOUVFR_API_KEY)
         if result["success"] is True:
-            print("OK")
+            print("OK (mise à jour)")
