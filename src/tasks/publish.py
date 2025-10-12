@@ -61,3 +61,12 @@ def publish_to_datagouv(context: str):
         )
         if result["success"] is True:
             print("OK")
+
+
+def publish_scrap_to_datagouv(year: str, file_path):
+    dataset_id = "68ebb48dd708fdb2d7c15bff"
+    resources = {"2025": "8001b9e5-94bd-484e-b351-f9cbe82f8d84"}
+    print(f"Mise à jour des données marches-securises.fr de {year}...")
+    result = update_resource(dataset_id, resources[year], file_path, DATAGOUVFR_API_KEY)
+    if result["success"] is True:
+        print("OK")

@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 import shutil
 
@@ -21,9 +22,9 @@ from config import (
 from tasks.clean import clean_decp
 from tasks.dataset_utils import list_resources
 from tasks.enrich import enrich_from_sirene
-from tasks.get import get_resource
+from tasks.get import get_marches_dicts, get_resource
 from tasks.output import generate_final_schema, save_to_files, save_to_sqlite
-from tasks.publish import publish_to_datagouv
+from tasks.publish import publish_scrap_to_datagouv, publish_to_datagouv
 from tasks.transform import (
     concat_decp_json,
     get_prepare_unites_legales,
@@ -173,11 +174,14 @@ def sirene_preprocess():
 @flow
 def scrap_marches_securises():
     # Préparation de la liste d'URL de recherche
-    urls = [
-        "https://www.marches-securises.fr/entreprise/?module=liste_donnees_essentielles&page=1&siret_pa=&siret_pa1=&date_deb=2024-01-01&date_fin=2024-02-31&date_deb_ms=2024-01-01&date_fin_ms=2024-03-31&ref_ume=&cpv_et=&type_procedure=&type_marche=&objet=&rs_oe=&dep_liste=13&ctrl_key=aWwwS1pLUlFzejBOYitCWEZzZTEzZz09&text=&donnees_essentielles=1&search=table_ms&"
-    ]
-    print(urls)
+    dicts = get_marches_dicts("2025")
+    dicts = {"marches": dicts}
+    json_path = DIST_DIR / "marches_securises_2025.json"
+    with open(json_path, "w") as f:
+        f.write(json.dumps(dicts))
+    publish_scrap_to_datagouv("2025", json_path)
 
 
 if __name__ == "__main__":
-    decp_processing()
+    # decp_processing()
+    scrap_marches_securises()
