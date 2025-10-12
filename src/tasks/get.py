@@ -13,11 +13,11 @@ from bs4 import BeautifulSoup
 from httpx import get, stream
 from lxml import etree
 from prefect import task
-from publish import publish_scrap_to_datagouv
 
 from config import DECP_FORMAT_2019, DECP_FORMATS, DIST_DIR, DecpFormat
 from tasks.clean import clean_invalid_characters, extract_innermost_struct
 from tasks.output import sink_to_files
+from tasks.publish import publish_scrap_to_datagouv
 from tasks.utils import gen_artifact_row, stream_replace_bytestring
 
 
@@ -257,8 +257,8 @@ def get_html(url: str, root: str = "") -> str or None:
     try:
         response = get_response()
     except (httpx.ConnectError, httpx.ReadTimeout, httpx.HTTPStatusError):
-        print("1s break and retrying...")
-        sleep(1)
+        print("3s break and retrying...")
+        sleep(3)
         try:
             response = get_response()
         except (httpx.ConnectError, httpx.ReadTimeout, httpx.HTTPStatusError):
@@ -266,19 +266,19 @@ def get_html(url: str, root: str = "") -> str or None:
             return None
 
     html = response.text
-    sleep(0.2)
+    sleep(0.1)
     return html
 
 
+@task
 def scrap_marches_securises_month(year: str, month: str) -> list:
     marches = []
-    day_end = "31"
     page = 1
     while True:
-        print("Month: ", month, "Page: ", str(page))
+        print("Year: ", year, "Month: ", month, "Page: ", str(page))
 
         search_url = (
-            f"https://www.marches-securises.fr/entreprise/?module=liste_donnees_essentielles&page={str(page)}&siret_pa=&siret_pa1=&date_deb={year}-{month}-01&date_fin={year}-{month}-{day_end}&date_deb_ms={year}-{month}-01&date_fin_ms={year}-{month}-{day_end}&ref_ume=&cpv_et=&type_procedure=&type_marche=&objet=&rs_oe=&dep_liste=&ctrl_key=aWwwS1pLUlFzejBOYitCWEZzZTEzZz09&text=&donnees_essentielles=1&search="
+            f"https://www.marches-securises.fr/entreprise/?module=liste_donnees_essentielles&page={str(page)}&siret_pa=&siret_pa1=&date_deb={year}-{month}-01&date_fin={year}-{month}-31&date_deb_ms={year}-{month}-01&date_fin_ms={year}-{month}-31&ref_ume=&cpv_et=&type_procedure=&type_marche=&objet=&rs_oe=&dep_liste=&ctrl_key=aWwwS1pLUlFzejBOYitCWEZzZTEzZz09&text=&donnees_essentielles=1&search="
             f"table_ms&"
         )
         html_result_page = get_html(search_url)

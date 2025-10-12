@@ -65,7 +65,8 @@ def publish_to_datagouv(context: str):
 
 def get_resource_id(dataset_id, year, month) -> str or None:
     response = get(
-        f"https://www.data.gouv.fr/api/1/datasets/{dataset_id}"
+        f"https://www.data.gouv.fr/api/1/datasets/{dataset_id}/",
+        headers={"X-API-KEY": DATAGOUVFR_API_KEY},
     ).raise_for_status()
     resources = response.json()["resources"]
     description = ""
@@ -94,7 +95,7 @@ def publish_new_resource(dataset_id, file_path, description):
     url = f"{DATAGOUVFR_API}/datasets/{dataset_id}/resources/{new_resource_id}/"
     response = put(
         url,
-        json={"title": file_path.split("/")[-1], "description": description},
+        json={"title": str(file_path).split("/")[-1], "description": description},
         headers=headers,
     ).raise_for_status()
 
@@ -103,11 +104,13 @@ def publish_new_resource(dataset_id, file_path, description):
 
 def publish_scrap_to_datagouv(year: str, month: str, file_path):
     dataset_id = "68ebb48dd708fdb2d7c15bff"
-    print(f"Mise à jour des données marches-securises de {year}...")
+    print(f"Mise à jour des données marches-securises de {year}-{month}...")
     resource_id, description = get_resource_id(dataset_id, year, month)
     if resource_id is None:
         result = publish_new_resource(dataset_id, file_path, description)
+        if result:
+            print("OK (nouvelle ressource)")
     else:
         result = update_resource(dataset_id, resource_id, file_path, DATAGOUVFR_API_KEY)
-    if result["success"] is True:
-        print("OK")
+        if result["success"] is True:
+            print("OK")

@@ -173,7 +173,7 @@ def sirene_preprocess():
 
 
 @flow
-def scrap_marches_securises(mode, year):
+def scrap_marches_securises(mode=None, year=None):
     mode = mode or MARCHES_SECURISES_SCRAPING_MODE
 
     current_year = DATE_NOW[:4]
@@ -189,7 +189,7 @@ def scrap_marches_securises(mode, year):
 
     elif mode == "all":
         current_year = int(current_year)
-        for year in range(2018, current_year + 1):
+        for year in reversed(range(2018, current_year + 1)):
             scrap_marches_securises("year", str(year))
 
     else:
