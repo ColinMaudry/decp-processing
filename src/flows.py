@@ -1,5 +1,4 @@
 import datetime
-import json
 import os
 import shutil
 
@@ -15,16 +14,18 @@ from config import (
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
+    MARCHES_SECURISES_SCRAPING_MODE,
     MAX_PREFECT_WORKERS,
+    MONTH_NOW,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
 )
 from tasks.clean import clean_decp
 from tasks.dataset_utils import list_resources
 from tasks.enrich import enrich_from_sirene
-from tasks.get import get_marches_dicts, get_resource
+from tasks.get import get_resource, scrap_marches_securises_month
 from tasks.output import generate_final_schema, save_to_files, save_to_sqlite
-from tasks.publish import publish_scrap_to_datagouv, publish_to_datagouv
+from tasks.publish import publish_to_datagouv
 from tasks.transform import (
     concat_decp_json,
     get_prepare_unites_legales,
@@ -172,14 +173,27 @@ def sirene_preprocess():
 
 
 @flow
-def scrap_marches_securises():
-    # Préparation de la liste d'URL de recherche
-    dicts = get_marches_dicts("2025")
-    dicts = {"marches": dicts}
-    json_path = DIST_DIR / "marches_securises_2025.json"
-    with open(json_path, "w") as f:
-        f.write(json.dumps(dicts))
-    publish_scrap_to_datagouv("2025", json_path)
+def scrap_marches_securises(mode, year):
+    mode = mode or MARCHES_SECURISES_SCRAPING_MODE
+
+    current_year = DATE_NOW[:4]
+
+    if mode == "month":
+        scrap_marches_securises_month(current_year, MONTH_NOW)
+
+    elif mode == "year":
+        year = year or current_year
+        for month in range(1, 13):
+            month = str(month).zfill(2)
+            scrap_marches_securises_month(year, month)
+
+    elif mode == "all":
+        current_year = int(current_year)
+        for year in range(2018, current_year + 1):
+            scrap_marches_securises("year", str(year))
+
+    else:
+        print("Mauvaise configuration")
 
 
 if __name__ == "__main__":

@@ -52,6 +52,9 @@ sirene_data_parent_dir = Path(os.getenv("SIRENE_DATA_PARENT_DIR", DATA_DIR))
 SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
 # SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
 
+# Mode de scraping de marches-securises.fr
+MARCHES_SECURISES_SCRAPING_MODE = os.getenv("MARCHES_SECURISES_SCRAPING_MODE", "month")
+
 # Dossier de stockage des résultats de tâches et du cache
 # https://docs.prefect.io/v3/advanced/results#default-persistence-configuration
 PREFECT_LOCAL_STORAGE_PATH = Path(os.getenv("PREFECT_LOCAL_STORAGE_PATH"))
@@ -60,15 +63,10 @@ PREFECT_LOCAL_STORAGE_PATH.mkdir(exist_ok=True, parents=True)
 # POSTGRESQL
 POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI")
 
-
 with open(
     os.getenv("DATASETS_REFERENCE_FILEPATH", DATA_DIR / "source_datasets.json"), "r"
 ) as f:
     TRACKED_DATASETS = json.load(f)
-
-BOOKMARK_FILEPATH = Path(
-    os.getenv("BOOKMARK_FILEPATH", DATA_DIR / "system" / "processed_bookmarks.json")
-)
 
 # Liste et ordre des colonnes pour le mono dataframe de base (avant normalisation et spécialisation)
 # Sert aussi à vérifier qu'au moins ces colonnes sont présentes (d'autres peuvent être présentes en plus, les colonnes "innatendues")

@@ -1,4 +1,4 @@
-from httpx import post
+from httpx import get, post, put
 
 from config import DATAGOUVFR_API, DATAGOUVFR_API_KEY, DIST_DIR
 
@@ -63,10 +63,51 @@ def publish_to_datagouv(context: str):
             print("OK")
 
 
-def publish_scrap_to_datagouv(year: str, file_path):
+def get_resource_id(dataset_id, year, month) -> str or None:
+    response = get(
+        f"https://www.data.gouv.fr/api/1/datasets/{dataset_id}"
+    ).raise_for_status()
+    resources = response.json()["resources"]
+    description = ""
+    for resource in resources:
+        if resource["title"] == f"marches-securises-{year}-{month}.json":
+            return resource["id"], None
+        if resource["type"] == "main":
+            description = resource["description"]
+    return None, description
+
+
+def publish_new_resource(dataset_id, file_path, description):
+    # Upload de la nouvelle ressource
+    url = f"{DATAGOUVFR_API}/datasets/{dataset_id}/upload/"
+    headers = {"X-API-KEY": DATAGOUVFR_API_KEY}
+    response = post(
+        url,
+        files={
+            "file": open(file_path, "rb"),
+        },
+        headers=headers,
+    ).raise_for_status()
+    new_resource_id = response.json()["id"]
+
+    # Màj des métadonnées
+    url = f"{DATAGOUVFR_API}/datasets/{dataset_id}/resources/{new_resource_id}/"
+    response = put(
+        url,
+        json={"title": file_path.split("/")[-1], "description": description},
+        headers=headers,
+    ).raise_for_status()
+
+    return response.json()
+
+
+def publish_scrap_to_datagouv(year: str, month: str, file_path):
     dataset_id = "68ebb48dd708fdb2d7c15bff"
-    resources = {"2025": "8001b9e5-94bd-484e-b351-f9cbe82f8d84"}
-    print(f"Mise à jour des données marches-securises.fr de {year}...")
-    result = update_resource(dataset_id, resources[year], file_path, DATAGOUVFR_API_KEY)
+    print(f"Mise à jour des données marches-securises de {year}...")
+    resource_id, description = get_resource_id(dataset_id, year, month)
+    if resource_id is None:
+        result = publish_new_resource(dataset_id, file_path, description)
+    else:
+        result = update_resource(dataset_id, resource_id, file_path, DATAGOUVFR_API_KEY)
     if result["success"] is True:
         print("OK")

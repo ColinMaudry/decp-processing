@@ -1,7 +1,6 @@
 import json
 import tempfile
 from collections.abc import Iterator
-from datetime import date
 from functools import partial
 from pathlib import Path
 from time import sleep
@@ -14,6 +13,7 @@ from bs4 import BeautifulSoup
 from httpx import get, stream
 from lxml import etree
 from prefect import task
+from publish import publish_scrap_to_datagouv
 
 from config import DECP_FORMAT_2019, DECP_FORMATS, DIST_DIR, DecpFormat
 from tasks.clean import clean_invalid_characters, extract_innermost_struct
@@ -270,49 +270,46 @@ def get_html(url: str, root: str = "") -> str or None:
     return html
 
 
-def get_marches_dicts(year: str, website: str = "marches-securises.fr") -> list:
-    today = date.today()
+def scrap_marches_securises_month(year: str, month: str) -> list:
     marches = []
-    for month in range(1, 13):
-        if month == today.month:
-            day_end = today.day
+    day_end = "31"
+    page = 1
+    while True:
+        print("Month: ", month, "Page: ", str(page))
+
+        search_url = (
+            f"https://www.marches-securises.fr/entreprise/?module=liste_donnees_essentielles&page={str(page)}&siret_pa=&siret_pa1=&date_deb={year}-{month}-01&date_fin={year}-{month}-{day_end}&date_deb_ms={year}-{month}-01&date_fin_ms={year}-{month}-{day_end}&ref_ume=&cpv_et=&type_procedure=&type_marche=&objet=&rs_oe=&dep_liste=&ctrl_key=aWwwS1pLUlFzejBOYitCWEZzZTEzZz09&text=&donnees_essentielles=1&search="
+            f"table_ms&"
+        )
+        html_result_page = get_html(search_url)
+        soup = BeautifulSoup(html_result_page, "html.parser")
+        result_div = soup.find("div", attrs={"id": "liste_consultations"})
+        json_links = result_div.find_all(
+            "a", attrs={"title": "Télécharger au format Json"}
+        )
+        if json_links is None:
+            break
         else:
-            day_end = 31
-        day_end = str(day_end).zfill(2)
-        month = str(month).zfill(2)
-        page = 1
-        while True:
-            print("Month: ", month, "Page: ", str(page))
-
-            search_url = (
-                f"https://www.marches-securises.fr/entreprise/?module=liste_donnees_essentielles&page={str(page)}&siret_pa=&siret_pa1=&date_deb={year}-{month}-01&date_fin={year}-{month}-{day_end}&date_deb_ms={year}-{month}-01&date_fin_ms={year}-{month}-{day_end}&ref_ume=&cpv_et=&type_procedure=&type_marche=&objet=&rs_oe=&dep_liste=&ctrl_key=aWwwS1pLUlFzejBOYitCWEZzZTEzZz09&text=&donnees_essentielles=1&search="
-                f"table_ms&"
+            page += 1
+        for json_link in json_links:
+            json_href = "https://www.marches-securises.fr" + json_link["href"]
+            print(json_href)
+            json_html_page = (
+                get_html(json_href).replace("</head>", "</head><body>")
+                + "</body></html>"
             )
-            html_result_page = get_html(search_url)
-            soup = BeautifulSoup(html_result_page, "html.parser")
-            result_div = soup.find("div", attrs={"id": "liste_consultations"})
-            json_links = result_div.find_all(
-                "a", attrs={"title": "Télécharger au format Json"}
-            )
-            if json_links is None:
-                break
-            else:
-                page += 1
-            for json_link in json_links:
-                json_href = "https://www.marches-securises.fr" + json_link["href"]
-                print(json_href)
-                json_html_page = (
-                    get_html(json_href).replace("</head>", "</head><body>")
-                    + "</body></html>"
-                )
-                if json_html_page:
-                    json_soup = BeautifulSoup(json_html_page, "html.parser")
-                    try:
-                        decp_json = json.loads(json_soup.find("body").string)
-                    except Exception as e:
-                        print(json_html_page)
-                        print(e)
-                        continue
-                    marches.append(decp_json)
-
+            if json_html_page:
+                json_soup = BeautifulSoup(json_html_page, "html.parser")
+                try:
+                    decp_json = json.loads(json_soup.find("body").string)
+                except Exception as e:
+                    print(json_html_page)
+                    print(e)
+                    continue
+                marches.append(decp_json)
+    dicts = {"marches": marches}
+    json_path = DIST_DIR / f"marches-securises_{year}-{month}.json"
+    with open(json_path, "w") as f:
+        f.write(json.dumps(dicts))
+    publish_scrap_to_datagouv(year, month, json_path)
     return marches
