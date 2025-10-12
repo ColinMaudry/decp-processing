@@ -37,6 +37,7 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     lf = lf.with_columns(
         pl.when(pl.col("uid").is_in(MARCHES_BAD_MONTANT))
         .then(pl.lit(1))
+        .otherwise(pl.col("montant"))
         .alias("montant")
     )
 
