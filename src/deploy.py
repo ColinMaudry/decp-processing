@@ -1,5 +1,6 @@
 from dotenv import dotenv_values
 from prefect import flow
+from prefect.runner.storage import GitRepository
 
 if __name__ == "__main__":
     env = dotenv_values()
@@ -23,4 +24,14 @@ if __name__ == "__main__":
         work_pool_name="local",
         ignore_warnings=True,
         cron="0 1 3 * *",
+    )
+
+    flow.from_source(
+        source=GitRepository(
+            url="https://github.com/ColinMaudry/decp-processing.git", branch="dev"
+        ),
+        entrypoint="src/flows.py:scrap_marches_securises",
+    ).deploy(
+        name="scrap-marches-securises-dev",
+        ignore_warnings=True,
     )
