@@ -53,3 +53,13 @@ if __name__ == "__main__":
         work_pool_name="local",
         ignore_warnings=True,
     )
+
+    flow.from_source(
+        source=GitRepository(
+            url="https://github.com/ColinMaudry/decp-processing.git", branch="dev"
+        ),
+        entrypoint="src/flows.py:scrap_marches_securises",
+    ).deploy(
+        name="scrap-marches-securises-dev",
+        ignore_warnings=True,
+    )

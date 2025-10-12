@@ -41,8 +41,11 @@ DECP_PROCESSING_PUBLISH = os.getenv("DECP_PROCESSING_PUBLISH", "").lower() == "t
 # Timeout pour la publication de chaque ressource sur data.gouv.fr
 DECP_PROCESSING_PUBLISH_TIMEOUT = int(os.getenv("DECP_PROCESSING_PUBLISH_TIMEOUT", 300))
 
+# URL de l'API data.gouv.fr
+DATAGOUVFR_API = "https://www.data.gouv.fr/api/1"
+
 # Clé d'API data.gouv.fr
-API_KEY = os.getenv("DATAGOUVFR_API_KEY", "")
+DATAGOUVFR_API_KEY = os.getenv("DATAGOUVFR_API_KEY", "")
 
 # Dossier racine
 BASE_DIR = Path(__file__).absolute().parent.parent
@@ -58,6 +61,9 @@ sirene_data_parent_dir = make_path_from_env("SIRENE_DATA_PARENT_DIR", DATA_DIR)
 SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
 # SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
 
+# Mode de scraping de marches-securises.fr
+MARCHES_SECURISES_SCRAPING_MODE = os.getenv("MARCHES_SECURISES_SCRAPING_MODE", "month")
+
 # Dossier de stockage des résultats de tâches et du cache
 # https://docs.prefect.io/v3/advanced/results#default-persistence-configuration
 PREFECT_LOCAL_STORAGE_PATH = make_path_from_env(
@@ -68,7 +74,6 @@ PREFECT_LOCAL_STORAGE_PATH.mkdir(exist_ok=True, parents=True)
 
 # POSTGRESQL
 POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI")
-
 
 with open(
     make_path_from_env(

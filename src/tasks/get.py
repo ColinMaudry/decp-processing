@@ -1,12 +1,16 @@
+import json
 import tempfile
 from collections.abc import Iterator
 from functools import partial
 from pathlib import Path
+from time import sleep
 
+import httpx
 import ijson
 import orjson
 import polars as pl
-from httpx import stream
+from bs4 import BeautifulSoup
+from httpx import get, stream
 from lxml import etree
 from prefect import task
 
@@ -19,6 +23,7 @@ from config import (
 )
 from tasks.clean import clean_invalid_characters, extract_innermost_struct
 from tasks.output import sink_to_files
+from tasks.publish import publish_scrap_to_datagouv
 from tasks.utils import gen_artifact_row, stream_replace_bytestring
 
 
@@ -246,3 +251,74 @@ def norm_titulaire(titulaire: dict):
     if "titulaire" in titulaire:
         titulaire = titulaire["titulaire"]
     return titulaire
+
+
+def get_html(url: str, root: str = "") -> str or None:
+    def get_response() -> httpx.Response:
+        return get(url, timeout=timeout).raise_for_status()
+
+    if url.startswith("/"):
+        if root == "":
+            print("Root not specified and URL starts with /")
+            raise ValueError
+        url = root + url
+    timeout = httpx.Timeout(20.0, connect=60.0, pool=20.0, read=20.0)
+    try:
+        response = get_response()
+    except (httpx.ConnectError, httpx.ReadTimeout, httpx.HTTPStatusError):
+        print("3s break and retrying...")
+        sleep(3)
+        try:
+            response = get_response()
+        except (httpx.ConnectError, httpx.ReadTimeout, httpx.HTTPStatusError):
+            print("Skipped")
+            return None
+
+    html = response.text
+    sleep(0.1)
+    return html
+
+
+@task
+def scrap_marches_securises_month(year: str, month: str) -> list:
+    marches = []
+    page = 1
+    while True:
+        print("Year: ", year, "Month: ", month, "Page: ", str(page))
+
+        search_url = (
+            f"https://www.marches-securises.fr/entreprise/?module=liste_donnees_essentielles&page={str(page)}&siret_pa=&siret_pa1=&date_deb={year}-{month}-01&date_fin={year}-{month}-31&date_deb_ms={year}-{month}-01&date_fin_ms={year}-{month}-31&ref_ume=&cpv_et=&type_procedure=&type_marche=&objet=&rs_oe=&dep_liste=&ctrl_key=aWwwS1pLUlFzejBOYitCWEZzZTEzZz09&text=&donnees_essentielles=1&search="
+            f"table_ms&"
+        )
+        html_result_page = get_html(search_url)
+        soup = BeautifulSoup(html_result_page, "html.parser")
+        result_div = soup.find("div", attrs={"id": "liste_consultations"})
+        json_links = result_div.find_all(
+            "a", attrs={"title": "Télécharger au format Json"}
+        )
+        if json_links is None:
+            break
+        else:
+            page += 1
+        for json_link in json_links:
+            json_href = "https://www.marches-securises.fr" + json_link["href"]
+            print(json_href)
+            json_html_page = (
+                get_html(json_href).replace("</head>", "</head><body>")
+                + "</body></html>"
+            )
+            if json_html_page:
+                json_soup = BeautifulSoup(json_html_page, "html.parser")
+                try:
+                    decp_json = json.loads(json_soup.find("body").string)
+                except Exception as e:
+                    print(json_html_page)
+                    print(e)
+                    continue
+                marches.append(decp_json)
+    dicts = {"marches": marches}
+    json_path = DIST_DIR / f"marches-securises_{year}-{month}.json"
+    with open(json_path, "w") as f:
+        f.write(json.dumps(dicts))
+    publish_scrap_to_datagouv(year, month, json_path)
+    return marches

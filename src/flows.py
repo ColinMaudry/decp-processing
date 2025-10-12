@@ -15,14 +15,16 @@ from config import (
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
+    MARCHES_SECURISES_SCRAPING_MODE,
     MAX_PREFECT_WORKERS,
+    MONTH_NOW,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
 )
 from tasks.clean import clean_decp
 from tasks.dataset_utils import list_resources
 from tasks.enrich import enrich_from_sirene
-from tasks.get import get_resource
+from tasks.get import get_resource, scrap_marches_securises_month
 from tasks.output import generate_final_schema, save_to_databases, save_to_files
 from tasks.publish import publish_to_datagouv
 from tasks.transform import (
@@ -176,5 +178,30 @@ def sirene_preprocess():
     print("☑️  Fin du flow sirene_preprocess.")
 
 
+@flow
+def scrap_marches_securises(mode=None, year=None):
+    mode = mode or MARCHES_SECURISES_SCRAPING_MODE
+
+    current_year = DATE_NOW[:4]
+
+    if mode == "month":
+        scrap_marches_securises_month(current_year, MONTH_NOW)
+
+    elif mode == "year":
+        year = year or current_year
+        for month in range(1, 13):
+            month = str(month).zfill(2)
+            scrap_marches_securises_month(year, month)
+
+    elif mode == "all":
+        current_year = int(current_year)
+        for year in reversed(range(2018, current_year + 1)):
+            scrap_marches_securises("year", str(year))
+
+    else:
+        print("Mauvaise configuration")
+
+
 if __name__ == "__main__":
-    decp_processing()
+    # decp_processing()
+    scrap_marches_securises()
