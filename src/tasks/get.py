@@ -284,8 +284,6 @@ def scrap_marches_securises_month(year: str, month: str) -> list:
     marches = []
     page = 1
     while True:
-        print("Year: ", year, "Month: ", month, "Page: ", str(page))
-
         search_url = (
             f"https://www.marches-securises.fr/entreprise/?module=liste_donnees_essentielles&page={str(page)}&siret_pa=&siret_pa1=&date_deb={year}-{month}-01&date_fin={year}-{month}-31&date_deb_ms={year}-{month}-01&date_fin_ms={year}-{month}-31&ref_ume=&cpv_et=&type_procedure=&type_marche=&objet=&rs_oe=&dep_liste=&ctrl_key=aWwwS1pLUlFzejBOYitCWEZzZTEzZz09&text=&donnees_essentielles=1&search="
             f"table_ms&"
@@ -293,16 +291,17 @@ def scrap_marches_securises_month(year: str, month: str) -> list:
         html_result_page = get_html(search_url)
         soup = BeautifulSoup(html_result_page, "html.parser")
         result_div = soup.find("div", attrs={"id": "liste_consultations"})
+        nb_pages = int(result_div.find("div", attrs={"id": "titre"}).string[:-1]) + 1
+        print("Year: ", year, "Month: ", month, "Page: ", str(page), "/", str(nb_pages))
         json_links = result_div.find_all(
             "a", attrs={"title": "Télécharger au format Json"}
         )
-        if json_links is None:
+        if not json_links:
             break
         else:
             page += 1
         for json_link in json_links:
             json_href = "https://www.marches-securises.fr" + json_link["href"]
-            print(json_href)
             json_html_page = get_html(json_href)
             if json_html_page:
                 json_html_page = (

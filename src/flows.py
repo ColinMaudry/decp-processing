@@ -189,7 +189,7 @@ def scrap_marches_securises(mode=None, year=None):
 
     elif mode == "year":
         year = year or current_year
-        for month in range(1, 13):
+        for month in reversed(range(1, 13)):
             month = str(month).zfill(2)
             scrap_marches_securises_month(year, month)
 
