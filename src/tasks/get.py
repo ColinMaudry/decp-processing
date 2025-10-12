@@ -303,19 +303,20 @@ def scrap_marches_securises_month(year: str, month: str) -> list:
         for json_link in json_links:
             json_href = "https://www.marches-securises.fr" + json_link["href"]
             print(json_href)
-            json_html_page = (
-                get_html(json_href).replace("</head>", "</head><body>")
-                + "</body></html>"
-            )
+            json_html_page = get_html(json_href)
             if json_html_page:
-                json_soup = BeautifulSoup(json_html_page, "html.parser")
-                try:
-                    decp_json = json.loads(json_soup.find("body").string)
-                except Exception as e:
-                    print(json_html_page)
-                    print(e)
-                    continue
-                marches.append(decp_json)
+                json_html_page.replace("</head>", "</head><body>") + "</body></html>"
+            else:
+                "json_html_page is None, skipping..."
+                continue
+            json_soup = BeautifulSoup(json_html_page, "html.parser")
+            try:
+                decp_json = json.loads(json_soup.find("body").string)
+            except Exception as e:
+                print(json_html_page)
+                print(e)
+                continue
+            marches.append(decp_json)
     dicts = {"marches": marches}
     json_path = DIST_DIR / f"marches-securises_{year}-{month}.json"
     with open(json_path, "w") as f:
