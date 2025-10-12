@@ -61,5 +61,7 @@ if __name__ == "__main__":
         entrypoint="src/flows.py:scrap_marches_securises",
     ).deploy(
         name="scrap-marches-securises-dev",
+        description="Scraping des données de marches-securises.fr.",
         ignore_warnings=True,
+        work_pool_name="local",
     )
