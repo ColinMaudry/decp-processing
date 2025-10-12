@@ -1,3 +1,4 @@
+import re
 import shutil
 import time
 from datetime import datetime
@@ -24,7 +25,7 @@ def stream_replace_bytestring(iterator, old_bytestring: bytes, new_bytestring: b
 
     for chunk in iterator:
         buffer += chunk
-        buffer = buffer.replace(old_bytestring, new_bytestring)
+        buffer = re.sub(old_bytestring, new_bytestring, buffer)
         # On garde un bout de quelques caractères au cas où le pattern est coupé entre les deux chunks
         safe_end = len(buffer) - length_to_replace + 1
 
@@ -34,7 +35,7 @@ def stream_replace_bytestring(iterator, old_bytestring: bytes, new_bytestring: b
             yield chunk
 
     if buffer:
-        buffer = buffer.replace(old_bytestring, new_bytestring)
+        buffer = re.sub(old_bytestring, new_bytestring, buffer)
         yield buffer
 
 
@@ -166,11 +167,11 @@ def generate_stats(df: pl.DataFrame):
         stats[f"{str(year)}_nb_notifications_marchés"] = df_date_notification.height
 
         if df_date_notification.height > 0:
-            stats[f"{str(year)}_somme_montant_marchés_notifiés"] = (
-                df_date_notification.group_by("montant").sum()["montant"][0]
+            stats[f"{str(year)}_somme_montant_marchés_notifiés"] = int(
+                df_date_notification.select(pl.sum("montant")).item()
             )
-            stats[f"{str(year)}_médiane_montant_marchés_notifiés"] = (
-                df_date_notification.group_by("montant").median()["montant"][0]
+            stats[f"{str(year)}_médiane_montant_marchés_notifiés"] = int(
+                df_date_notification.select(pl.median("montant")).item()
             )
         else:
             stats[f"{str(year)}_somme_montant_marchés_notifiés"] = ""
@@ -185,10 +186,11 @@ def generate_stats(df: pl.DataFrame):
 
 
 def generate_public_source_stats(df_uid: pl.DataFrame) -> None:
-    df_marches = df_uid.select("uid", "acheteur_id", "sourceDataset")
+    print("Génération des statistiques sur les sources de données...")
+    df_uid = df_uid.select("uid", "acheteur_id", "sourceDataset")
 
     df_acheteurs = (
-        df_marches.select("acheteur_id", "sourceDataset")
+        df_uid.select("acheteur_id", "sourceDataset")
         .unique()
         .group_by("sourceDataset")
         .len()
@@ -196,15 +198,10 @@ def generate_public_source_stats(df_uid: pl.DataFrame) -> None:
     df_acheteurs = df_acheteurs.rename({"len": "nb_acheteurs"})
 
     # group + count
-    df_marches = (
-        df_marches.select("uid", "sourceDataset")
-        .unique()
-        .group_by("sourceDataset")
-        .len()
+    df_uid = (
+        df_uid.select("uid", "sourceDataset").unique().group_by("sourceDataset").len()
     )
-    df_marches = df_marches.rename({"len": "nb_marchés"}).sort(
-        by="nb_marchés", descending=True
-    )
+    df_uid = df_uid.rename({"len": "nb_marchés"}).sort(by="nb_marchés", descending=True)
 
     # lecture des sources en df
     df_sources: pl.DataFrame = pl.DataFrame(TRACKED_DATASETS)
@@ -229,7 +226,7 @@ def generate_public_source_stats(df_uid: pl.DataFrame) -> None:
         coalesce=True,
     )
     df_sources = df_sources.join(
-        df_marches, left_on="code", right_on="sourceDataset", how="full", coalesce=True
+        df_uid, left_on="code", right_on="sourceDataset", how="full", coalesce=True
     )
 
     # ordre des colonnes

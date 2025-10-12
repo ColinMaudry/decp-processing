@@ -99,9 +99,9 @@
         "marcheInnovant": true
       },
       {
-        "id": "2020-698182-01",
+        "id": "2020F00075",
         "acheteur": {
-          "id": "22870851700989"
+          "id": "22130001500247"
         },
         "nature": "Marché",
         "objet": "Construction d'un stade d'athlétisme couvert, site de Chéops 87 à Limoges - mission de contrôle technique",
@@ -114,7 +114,7 @@
         "dureeMois": 40,
         "dateNotification": "2020-02-06",
         "datePublicationDonnees": "2020-02-14",
-        "montant": 23004.0,
+        "montant": 1.0e17,
         "formePrix": "Forfaitaire",
         "attributionAvance": false,
         "offresRecues": 5,
@@ -348,7 +348,7 @@
         "valeurGlobale": 0.0,
         "montantSubventionPublique": 0.0,
         "donneesExecution": "",
-        "concessionnaires": ""
+        "concessionnaires": NaN
       },
       {
         "id": "2019K1209",

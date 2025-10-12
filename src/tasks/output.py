@@ -1,6 +1,8 @@
 import json
 import sqlite3
-from collections import OrderedDict
+from collections import ChainMap
+from itertools import groupby
+from operator import itemgetter
 from pathlib import Path
 
 import polars as pl
@@ -36,16 +38,18 @@ def save_to_postgres(df: pl.DataFrame, table_name: str):
     )
 
 
-def save_to_sqlite(df: pl.DataFrame, database: str, table_name: str, primary_key: str):
+def save_to_sqlite(lf: pl.LazyFrame, database: str, table_name: str, primary_key: str):
     # Création de la table, avec les définitions de colonnes et de la ou des clés primaires
     column_definitions = []
-    for column_name, column_type in zip(df.columns, df.dtypes):
-        sql_type = "TEXT"  # Default
-        if column_type in [pl.Int16, pl.Int64, pl.Boolean]:
+    schema = lf.collect_schema()
+    for column in schema.keys():
+        if schema[column] in [pl.Int16, pl.Int64, pl.Boolean]:
             sql_type = "INTEGER"
-        elif column_type in [pl.Float32, pl.Float64]:
+        elif schema[column] in [pl.Float32, pl.Float64]:
             sql_type = "REAL"
-        column_definitions.append(f'"{column_name}" {sql_type}')
+        else:
+            sql_type = "TEXT"
+        column_definitions.append(f'"{column}" {sql_type}')
 
     if "." in primary_key and '"' not in primary_key:
         raise ValueError(
@@ -66,44 +70,71 @@ def save_to_sqlite(df: pl.DataFrame, database: str, table_name: str, primary_key
     connection.commit()
     connection.close()
 
-    df.write_database(
-        f'"{table_name}"',
-        f"sqlite:///{DIST_DIR}/{database}.sqlite",
-        if_table_exists="append",
-    )
+    # Batch size
+    batch_size = 50000
+    offset = 0
+    while True:
+        # Récupération du batch
+        batch = lf.slice(offset, batch_size).collect(engine="streaming")
+
+        # Fin de la boucle si plus de données
+        if batch.height == 0:
+            break
+
+        # Écriture du batch dans SQLite
+        batch.write_database(
+            f'"{table_name}"',
+            connection=f"sqlite:///{DIST_DIR}/{database}.sqlite",
+            if_table_exists="append",
+        )
+
+        offset += batch_size
 
 
 def save_to_databases(
-    df: pl.DataFrame, database: str, table_name: str, primary_key: str
+    lf: pl.LazyFrame, database: str, table_name: str, primary_key: str
 ):
-    save_to_sqlite(df, database, table_name, primary_key)
-    if (
-        POSTGRESQL_DB_URI != "postgresql://user:pass@server:port/database"
-        and POSTGRESQL_DB_URI is not None
-    ):
-        save_to_postgres(df, table_name)
+    save_to_sqlite(lf, database, table_name, primary_key)
+
+    # Pas utilisé pour l'instant
+    # if (
+    #     POSTGRESQL_DB_URI != "postgresql://user:pass@server:port/database"
+    #     and POSTGRESQL_DB_URI is not None
+    # ):
+    #     save_to_postgres(df, table_name)
 
 
 def generate_final_schema(df):
-    final_schema = OrderedDict()
+    """Création d'un TableSchema pour décrire les données publiées"""
+    df_schema = []
+
+    polars_frictionless_mapping = {
+        "String": "string",
+        "Float64": "number",
+        "Int16": "integer",
+        "Boolean": "boolean",
+        "Date": "date",
+    }
 
     # conversion en dict sérialisable en JSON
     for col in df.columns:
-        final_schema[col] = {"datatype": df.schema[col].__str__()}
+        polars_type = df.schema[col].__str__()
+        df_schema.append(
+            {"name": col, "type": polars_frictionless_mapping[polars_type]}
+        )
 
     # récupération de data/data_fields.json
     with open(DATA_DIR / "schema_base.json", "r", encoding="utf-8") as file:
-        base_json = json.load(file, object_pairs_hook=OrderedDict)
+        base_json = json.load(file)
 
     # fusion des deux
-    for field in final_schema:
-        if field not in base_json:
-            print(field + " absent de schema_base.json !")
-        else:
-            merged = OrderedDict(base_json[field])  # Copy to preserve order
-            merged.update(final_schema[field])  # Add/override with datatype
-            final_schema[field] = merged
+    # https://www.paigeniedringhaus.com/blog/filter-merge-and-update-python-lists-based-on-object-attributes#merge-two-lists-together-by-matching-object-keys
+    merged_fields = groupby(
+        sorted(base_json["fields"] + df_schema, key=itemgetter("name")),
+        itemgetter("name"),
+    )
+    merged_schema = {"fields": [dict(ChainMap(*g)) for k, g in merged_fields]}
 
     # création de dist/schema.json
     with open(DIST_DIR / "schema.json", "w", encoding="utf-8") as file:
-        json.dump(final_schema, file, indent=4, ensure_ascii=False, sort_keys=False)
+        json.dump(merged_schema, file, indent=4, ensure_ascii=False, sort_keys=False)

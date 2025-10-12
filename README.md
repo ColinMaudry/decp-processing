@@ -1,6 +1,6 @@
 # DECP processing
 
-> version 2.0 ([notes de version](https://github.com/ColinMaudry/decp-processing/blob/main/CHANGELOG.md))
+> version 2.0.5 ([notes de version](https://github.com/ColinMaudry/decp-processing/blob/main/CHANGELOG.md))
 
 Projet de traitement et de publication de meilleures données sur les marchés publics attribués en France. Vous pouvez consulter, filtrer et télécharger
 ces données sur le site [decp.info](https://decp.info). Enfin la section [À propos](https://decp.info/a-propos) décrit les objectifs du projet et regroupe toutes les informations clés.
@@ -99,6 +99,11 @@ systemctl start prefect-worker.service
 ```
 
 Un nouveau worker doit apparaître dans l'interface de gestion de prefect.
+
+Déploiement des flows (exécution programmée de main ou ponctuelle de dev) :
+
+1. Configurer .env pour que `PREFECT_API_URL` pointe vers le serveur où on souhaite déployer
+2. Éxécuter `python src/deploy.py`
 
 ### Avec Docker sous Windows, peu testé
 

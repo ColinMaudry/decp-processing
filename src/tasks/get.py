@@ -14,7 +14,13 @@ from httpx import get, stream
 from lxml import etree
 from prefect import task
 
-from config import DECP_FORMAT_2019, DECP_FORMATS, DIST_DIR, DecpFormat
+from config import (
+    DECP_FORMAT_2019,
+    DECP_FORMATS,
+    DECP_PROCESSING_PUBLISH,
+    DIST_DIR,
+    DecpFormat,
+)
 from tasks.clean import clean_invalid_characters, extract_innermost_struct
 from tasks.output import sink_to_files
 from tasks.publish import publish_scrap_to_datagouv
@@ -67,8 +73,9 @@ def get_resource(
 
     # Ajout des stats de la ressource à l'artifact
     # https://github.com/ColinMaudry/decp-processing/issues/89
-    artifact_row = gen_artifact_row(r, lf, url, fields, decp_format)  # noqa
-    resources_artifact.append(artifact_row)
+    if DECP_PROCESSING_PUBLISH:
+        artifact_row = gen_artifact_row(r, lf, url, fields, decp_format)  # noqa
+        resources_artifact.append(artifact_row)
 
     # Exemple https://www.data.gouv.fr/datasets/5cd57bf68b4c4179299eb0e9/#/resources/bb90091c-f0cb-4a59-ad41-b0ab929aad93
     resource_web_url = (
@@ -115,10 +122,12 @@ def json_stream_to_parquet(
             use_float=True,
         )
 
-    tmp_file = tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson", delete=True)
+    tmp_file = tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson", delete=False)
 
     http_stream_iter = stream_get(url)
-    stream_replace_iter = stream_replace_bytestring(http_stream_iter, b"NaN,", b"null,")
+    stream_replace_iter = stream_replace_bytestring(
+        http_stream_iter, rb"NaN([,\n])", rb"null\1"
+    )
 
     # In first iteration, will find the right format
     chunk = next(stream_replace_iter)
