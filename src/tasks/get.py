@@ -291,8 +291,7 @@ def scrap_marches_securises_month(year: str, month: str) -> list:
         html_result_page = get_html(search_url)
         soup = BeautifulSoup(html_result_page, "html.parser")
         result_div = soup.find("div", attrs={"id": "liste_consultations"})
-        nb_pages = int(result_div.find("div", attrs={"id": "titre"}).string[:-1]) + 1
-        print("Year: ", year, "Month: ", month, "Page: ", str(page), "/", str(nb_pages))
+        print("Year: ", year, "Month: ", month, "Page: ", str(page))
         json_links = result_div.find_all(
             "a", attrs={"title": "Télécharger au format Json"}
         )
