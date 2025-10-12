@@ -279,7 +279,7 @@ def get_html(url: str, root: str = "") -> str or None:
     return html
 
 
-@task
+@task(log_prints=True)
 def scrap_marches_securises_month(year: str, month: str) -> list:
     marches = []
     page = 1
