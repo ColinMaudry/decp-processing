@@ -16,6 +16,13 @@ if __name__ == "__main__":
         work_pool_name="local",
         ignore_warnings=True,
         cron="0 6 * * 1-5",
+        job_variables={
+            "env": {
+                "DECP_PROCESSING_PUBLISH": "True",
+                "DECP_DIST_DIR": "/srv/shared/decp/prod/dist",
+                "PREFECT_TASKS_REFRESH_CACHE": "False",
+            }
+        },
     )
 
     flow.from_source(
@@ -29,6 +36,13 @@ if __name__ == "__main__":
         description="Déploiement de la branche dev.",
         work_pool_name="local",
         ignore_warnings=True,
+        job_variables={
+            "env": {
+                "DECP_PROCESSING_PUBLISH": "False",
+                "DECP_DIST_DIR": "/srv/shared/decp/dev/dist",
+                "PREFECT_TASKS_REFRESH_CACHE": "True",
+            }
+        },
     )
 
     flow.from_source(
@@ -40,6 +54,13 @@ if __name__ == "__main__":
         work_pool_name="local",
         ignore_warnings=True,
         cron="0 1 3 * *",
+        job_variables={
+            "env": {
+                "DECP_PROCESSING_PUBLISH": "True",
+                "DECP_DIST_DIR": "/srv/shared/decp/prod/dist",
+                "PREFECT_TASKS_REFRESH_CACHE": "False",
+            }
+        },
     )
 
     flow.from_source(
@@ -52,6 +73,32 @@ if __name__ == "__main__":
         description="Préparation des données SIRENE.",
         work_pool_name="local",
         ignore_warnings=True,
+        job_variables={
+            "env": {
+                "DECP_PROCESSING_PUBLISH": "False",
+                "DECP_DIST_DIR": "/srv/shared/decp/dev/dist",
+                "PREFECT_TASKS_REFRESH_CACHE": "True",
+            }
+        },
+    )
+
+    flow.from_source(
+        source=GitRepository(
+            url="https://github.com/ColinMaudry/decp-processing.git", branch="main"
+        ),
+        entrypoint="src/flows.py:scrap_marches_securises",
+    ).deploy(
+        name="scrap-marches-securises",
+        description="Scraping des données de marches-securises.fr.",
+        ignore_warnings=True,
+        work_pool_name="local",
+        job_variables={
+            "env": {
+                "DECP_PROCESSING_PUBLISH": "True",
+                "DECP_DIST_DIR": "/srv/shared/decp/prod/dist",
+                "PREFECT_TASKS_REFRESH_CACHE": "False",
+            }
+        },
     )
 
     flow.from_source(
@@ -64,4 +111,11 @@ if __name__ == "__main__":
         description="Scraping des données de marches-securises.fr.",
         ignore_warnings=True,
         work_pool_name="local",
+        job_variables={
+            "env": {
+                "DECP_PROCESSING_PUBLISH": "True",
+                "DECP_DIST_DIR": "/srv/shared/decp/dev/dist",
+                "PREFECT_TASKS_REFRESH_CACHE": "True",
+            }
+        },
     )
