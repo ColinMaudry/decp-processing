@@ -32,8 +32,11 @@ MONTH_NOW = DATE_NOW[:7]  # YYYY-MM
 # Publication ou non des fichiers produits sur data.gouv.fr
 DECP_PROCESSING_PUBLISH = os.environ.get("DECP_PROCESSING_PUBLISH", "")
 
+# URL de l'API data.gouv.fr
+DATAGOUVFR_API = "https://www.data.gouv.fr/api/1"
+
 # Clé d'API data.gouv.fr
-API_KEY = os.environ.get("DATAGOUVFR_API_KEY", "")
+DATAGOUVFR_API_KEY = os.environ.get("DATAGOUVFR_API_KEY", "")
 
 # Dossier racine
 BASE_DIR = Path(__file__).parent.parent

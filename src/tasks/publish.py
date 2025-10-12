@@ -1,19 +1,17 @@
 from httpx import post
 
-from config import API_KEY, DIST_DIR
+from config import DATAGOUVFR_API, DATAGOUVFR_API_KEY, DIST_DIR
 
 
-def update_resource(api, dataset_id, resource_id, file_path, api_key):
-    url = f"{api}/datasets/{dataset_id}/resources/{resource_id}/upload/"
+def update_resource(dataset_id, resource_id, file_path, api_key):
+    url = f"{DATAGOUVFR_API}/datasets/{dataset_id}/resources/{resource_id}/upload/"
     headers = {"X-API-KEY": api_key}
     file = {"file": open(file_path, "rb")}
-    # TODO: replace requests.post with httpx.post
-    response = post(url, files=file, headers=headers, timeout=120)
+    response = post(url, files=file, headers=headers, timeout=120).raise_for_status()
     return response.json()
 
 
 def publish_to_datagouv(context: str):
-    api = "https://www.data.gouv.fr/api/1"
     dataset_id = "608c055b35eb4e6ee20eb325"
 
     uploads = [
@@ -59,7 +57,7 @@ def publish_to_datagouv(context: str):
     for upload in uploads:
         print(f"Mise à jour de {upload['file']}...")
         result = update_resource(
-            api, dataset_id, upload["resource_id"], upload["file"], API_KEY
+            dataset_id, upload["resource_id"], upload["file"], DATAGOUVFR_API_KEY
         )
         if result["success"] is True:
             print("OK")

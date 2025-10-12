@@ -4,7 +4,7 @@ from httpx import get
 from prefect import task
 from prefect.cache_policies import INPUTS
 
-from config import API_KEY, EXCLUDED_RESOURCES
+from config import DATAGOUVFR_API_KEY, EXCLUDED_RESOURCES
 
 
 def list_datasets_by_org(org_id: str) -> list[dict]:
@@ -51,7 +51,7 @@ def handle_paginated_calls(url: str) -> list[dict]:
     data = []
     while url:
         response = get(
-            url, follow_redirects=True, headers={"X-API-KEY": API_KEY}
+            url, follow_redirects=True, headers={"X-API-KEY": DATAGOUVFR_API_KEY}
         ).json()
         data.extend(response["data"])
         url = response.get("next_page")
