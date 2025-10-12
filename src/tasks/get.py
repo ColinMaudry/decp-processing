@@ -326,9 +326,9 @@ def scrap_marches_securises_month(year: str, month: str) -> list:
             json_href = "https://www.marches-securises.fr" + json_link["href"]
             decp_json = get_json_marches_securises(json_href)
             marches.append(decp_json)
-    dicts = {"marches": marches}
-    json_path = DIST_DIR / f"marches-securises_{year}-{month}.json"
-    with open(json_path, "w") as f:
-        f.write(json.dumps(dicts))
-    publish_scrap_to_datagouv(year, month, json_path)
-    return marches
+    if len(marches) > 0:
+        dicts = {"marches": marches}
+        json_path = DIST_DIR / f"marches-securises_{year}-{month}.json"
+        with open(json_path, "w") as f:
+            f.write(json.dumps(dicts))
+        publish_scrap_to_datagouv(year, month, json_path)
