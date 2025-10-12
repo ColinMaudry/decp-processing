@@ -182,10 +182,6 @@ def sirene_preprocess():
 def scrap_marches_securises(mode=None, year=None):
     mode = mode or MARCHES_SECURISES_SCRAPING_MODE
 
-    # Réinitialisation de DIST_DIR
-    if not os.path.exists(DIST_DIR):
-        os.makedirs(DIST_DIR)
-
     current_year = DATE_NOW[:4]
 
     if mode == "month":
