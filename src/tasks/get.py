@@ -1,4 +1,3 @@
-import datetime
 import json
 import tempfile
 from collections.abc import Iterator
@@ -14,7 +13,6 @@ from bs4 import BeautifulSoup
 from httpx import get, stream
 from lxml import etree
 from prefect import task
-from prefect.cache_policies import INPUTS
 
 from config import (
     DECP_FORMAT_2019,
@@ -279,11 +277,11 @@ def get_html(url: str, root: str = "") -> str or None:
     return html
 
 
-@task(
-    cache_policy=INPUTS,
-    persist_result=True,
-    cache_expiration=datetime.timedelta(days=15),
-)
+# @task(
+#     cache_policy=INPUTS,
+#     persist_result=True,
+#     cache_expiration=datetime.timedelta(days=15),
+# )
 def get_json_marches_securises(url: str) -> dict or None:
     json_html_page = get_html(url)
     sleep(0.1)
