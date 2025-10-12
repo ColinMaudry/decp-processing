@@ -1,3 +1,7 @@
+#### 2.1.0 2025
+
+- scraping des données DECP de [marches-securises.fr](https://www.data.gouv.fr/datasets/donnees-essentielles-de-la-commande-publique-de-marches-securises-fr/) ([#111](https://github.com/ColinMaudry/decp-processing/issues/111))
+
 #### 2.0.5 - 2025-10-08
 
 - correction des NaN dans les données consolidées par le MINEF ([#127](https://github.com/ColinMaudry/decp-processing/issues/127))
