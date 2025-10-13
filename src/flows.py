@@ -1,12 +1,16 @@
 import datetime
 import os
 import shutil
+from time import sleep
 
 import polars as pl
 from prefect import flow, task
 from prefect.artifacts import create_table_artifact
 from prefect.task_runners import ConcurrentTaskRunner
 from prefect.transactions import transaction
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
 
 from config import (
     BASE_DF_COLUMNS,
@@ -200,6 +204,42 @@ def scrap_marches_securises(mode=None, year=None):
 
     else:
         print("Mauvaise configuration")
+
+
+@flow(log_prints=True)
+def scrap_aws(mode=None, year=None):
+    options = Options()
+    options.add_argument("--headless")
+    options.set_preference("browser.download.folderList", 2)
+    options.set_preference("browser.download.manager.showWhenStarting", False)
+    options.set_preference("browser.download.dir", DIST_DIR)
+
+    driver = webdriver.Firefox(options=options)
+    driver.get("https://www.marches-publics.info/Annonces/rechercher")
+
+    # Formulaire recherche données essentielles
+    sleep(1)
+    de_radio = driver.find_element(By.ID, "typeDE")
+    de_radio.click()
+
+    # Remplir le formulaire
+    notif_debut = driver.find_element(By.ID, "dateNotifDebut")
+    notif_debut.clear()
+    notif_debut.send_keys("2025-01-01")
+    notif_fin = driver.find_element(By.ID, "dateNotifFin")
+    notif_fin.clear()
+    notif_fin.send_keys("2025-01-03")
+
+    sleep(1)
+
+    driver.find_element(By.ID, "sub").click()
+    driver.find_element(By.ID, "downloadDonnees").click()
+    # Le téléchargement se prépare et se lance en arrière plan
+    # une boucle while serait plus précise (while le fichier est pas téléchargé dans DIST_DIR, sleep(0.2))
+    sleep(3)
+    # Le fichier donneesEssentielles.json est dans DIST_DIR, il faut le renommer avant de télécharger le suivant.
+
+    driver.close()
 
 
 if __name__ == "__main__":
