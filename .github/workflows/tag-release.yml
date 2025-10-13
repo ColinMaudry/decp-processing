@@ -17,13 +17,11 @@ jobs:
         run: echo "TAG_MESSAGE=`git show ${{ github.ref_name }} | grep '^\- '`" >> "$GITHUB_ENV"
       - name: Create Release
         id: create_release
-        uses: actions/create-release@latest
+        uses: ncipollo/release-action@v1.20.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
           TAG_MESSAGE: ${{ env.TAG_MESSAGE }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref_name }}
           body: ${{ env.TAG_MESSAGE }}
           draft: false
           prerelease: false
