@@ -18,7 +18,8 @@ dependencies = [
     "ijson==3.4.0",
     "lxml",
     "psycopg2",
-    "bs4"
+    "bs4",
+    "selenium"
 ]
 
 [project.optional-dependencies]
