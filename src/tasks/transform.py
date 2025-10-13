@@ -2,7 +2,6 @@ import os
 
 import polars as pl
 import polars.selectors as cs
-from httpx import get
 from prefect import task
 
 from config import DATA_DIR, DecpFormat
@@ -326,23 +325,6 @@ def concat_decp_json(dfs: list) -> pl.DataFrame:
     print("-- ", index_size_before - df_clean.height, " doublons supprimés")
 
     return df_clean
-
-
-def setup_tableschema_columns(df: pl.DataFrame):
-    # Ajout colonnes manquantes
-    df = df.with_columns(pl.lit("").alias("lieuExecution_nom"))  # TODO
-    df = df.with_columns(pl.lit("").alias("objetModification"))  # TODO
-    df = df.with_columns(pl.lit("").alias("donneesActuelles"))  # TODO
-    df = df.with_columns(pl.lit("").alias("anomalies"))  # TODO
-
-    tableschema = get(
-        "https://raw.githubusercontent.com/ColinMaudry/decp-table-schema/refs/heads/main/schema.json",
-        follow_redirects=True,
-    ).json()
-    fields = [field["name"] for field in tableschema["fields"]]
-    df = df.select(fields)
-
-    return df
 
 
 def extract_unique_acheteurs_siret(df: pl.LazyFrame):

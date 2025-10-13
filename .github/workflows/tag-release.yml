@@ -1,0 +1,27 @@
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Auto-release d'un tag
+
+jobs:
+  build:
+    name: auto-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+      - name: Get tag message
+        run: echo "TAG_MESSAGE=`git show ${{ github.ref_name }} | grep '^\- '`" >> "$GITHUB_ENV"
+      - name: Create Release
+        id: create_release
+        uses: ncipollo/release-action@v1.20.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          TAG_MESSAGE: ${{ env.TAG_MESSAGE }}
+        with:
+          body: ${{ env.TAG_MESSAGE }}
+          draft: false
+          prerelease: false

@@ -14,7 +14,7 @@ build
 .vscode
 .idea
 todo.md
-test.*
+stats.ipynb
 wiki
 *.lock
 data/sirene*

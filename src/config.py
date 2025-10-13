@@ -36,13 +36,20 @@ DATE_NOW = datetime.now().isoformat()[0:10]  # YYYY-MM-DD
 MONTH_NOW = DATE_NOW[:7]  # YYYY-MM
 
 # Publication ou non des fichiers produits sur data.gouv.fr
-DECP_PROCESSING_PUBLISH = os.getenv("DECP_PROCESSING_PUBLISH", "")
+DECP_PROCESSING_PUBLISH = os.getenv("DECP_PROCESSING_PUBLISH", "").lower() == "true"
 
 # Timeout pour la publication de chaque ressource sur data.gouv.fr
-DECP_PROCESSING_PUBLISH_TIMEOUT = int(os.getenv("DECP_PROCESSING_PUBLISH_TIMEOUT", 300))
+DECP_PROCESSING_PUBLISH_TIMEOUT = os.getenv("DECP_PROCESSING_PUBLISH_TIMEOUT", 300)
+if DECP_PROCESSING_PUBLISH_TIMEOUT == "":
+    DECP_PROCESSING_PUBLISH_TIMEOUT = 300
+else:
+    DECP_PROCESSING_PUBLISH_TIMEOUT = int(DECP_PROCESSING_PUBLISH_TIMEOUT)
+
+# URL de l'API data.gouv.fr
+DATAGOUVFR_API = "https://www.data.gouv.fr/api/1"
 
 # Clé d'API data.gouv.fr
-API_KEY = os.getenv("DATAGOUVFR_API_KEY", "")
+DATAGOUVFR_API_KEY = os.getenv("DATAGOUVFR_API_KEY", "")
 
 # Dossier racine
 BASE_DIR = Path(__file__).absolute().parent.parent
@@ -52,11 +59,14 @@ DATA_DIR = make_path_from_env("DATA_DIR", BASE_DIR / "data")
 DATA_DIR.mkdir(exist_ok=True, parents=True)
 
 DIST_DIR = make_path_from_env("DECP_DIST_DIR", BASE_DIR / "dist")
-DIST_DIR.mkdir(exist_ok=True, parents=True)
+DIST_DIR.mkdir(exist_ok=True, parents=True, mode=777)
 
 sirene_data_parent_dir = make_path_from_env("SIRENE_DATA_PARENT_DIR", DATA_DIR)
 SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
 # SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
+
+# Mode de scraping de marches-securises.fr
+MARCHES_SECURISES_SCRAPING_MODE = os.getenv("MARCHES_SECURISES_SCRAPING_MODE", "month")
 
 # Dossier de stockage des résultats de tâches et du cache
 # https://docs.prefect.io/v3/advanced/results#default-persistence-configuration
@@ -68,7 +78,6 @@ PREFECT_LOCAL_STORAGE_PATH.mkdir(exist_ok=True, parents=True)
 
 # POSTGRESQL
 POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI")
-
 
 with open(
     make_path_from_env(
@@ -154,6 +163,9 @@ EXCLUDED_RESOURCES = [
     "2d6dd1a6-8471-48c0-a207-6715cff06a99",  # données Région Bretagne JSON non-réglementaire
     "7629a6a1-3b8a-4570-8562-3a7cf82be88e",  # données Région Bretagne XML non-réglementaire
 ]
+
+# Ces marchés ont des montants invalides, donc on les met à 1 euro.
+MARCHES_BAD_MONTANT = ["221300015002472020F00075"]
 
 
 @dataclass

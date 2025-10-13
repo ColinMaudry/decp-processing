@@ -1,6 +1,8 @@
 import json
 import sqlite3
-from collections import OrderedDict
+from collections import ChainMap
+from itertools import groupby
+from operator import itemgetter
 from pathlib import Path
 
 import polars as pl
@@ -103,25 +105,36 @@ def save_to_databases(
 
 
 def generate_final_schema(df):
-    final_schema = OrderedDict()
+    """Création d'un TableSchema pour décrire les données publiées"""
+    df_schema = []
+
+    polars_frictionless_mapping = {
+        "String": "string",
+        "Float64": "number",
+        "Int16": "integer",
+        "Boolean": "boolean",
+        "Date": "date",
+    }
 
     # conversion en dict sérialisable en JSON
     for col in df.columns:
-        final_schema[col] = {"datatype": df.schema[col].__str__()}
+        polars_type = df.schema[col].__str__()
+        df_schema.append(
+            {"name": col, "type": polars_frictionless_mapping[polars_type]}
+        )
 
     # récupération de data/data_fields.json
     with open(DATA_DIR / "schema_base.json", "r", encoding="utf-8") as file:
-        base_json = json.load(file, object_pairs_hook=OrderedDict)
+        base_json = json.load(file)
 
     # fusion des deux
-    for field in final_schema:
-        if field not in base_json:
-            print(field + " absent de schema_base.json !")
-        else:
-            merged = OrderedDict(base_json[field])  # Copy to preserve order
-            merged.update(final_schema[field])  # Add/override with datatype
-            final_schema[field] = merged
+    # https://www.paigeniedringhaus.com/blog/filter-merge-and-update-python-lists-based-on-object-attributes#merge-two-lists-together-by-matching-object-keys
+    merged_fields = groupby(
+        sorted(base_json["fields"] + df_schema, key=itemgetter("name")),
+        itemgetter("name"),
+    )
+    merged_schema = {"fields": [dict(ChainMap(*g)) for k, g in merged_fields]}
 
     # création de dist/schema.json
     with open(DIST_DIR / "schema.json", "w", encoding="utf-8") as file:
-        json.dump(final_schema, file, indent=4, ensure_ascii=False, sort_keys=False)
+        json.dump(merged_schema, file, indent=4, ensure_ascii=False, sort_keys=False)

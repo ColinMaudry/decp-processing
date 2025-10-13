@@ -1,3 +1,4 @@
+import re
 import shutil
 import time
 from datetime import datetime
@@ -24,7 +25,7 @@ def stream_replace_bytestring(iterator, old_bytestring: bytes, new_bytestring: b
 
     for chunk in iterator:
         buffer += chunk
-        buffer = buffer.replace(old_bytestring, new_bytestring)
+        buffer = re.sub(old_bytestring, new_bytestring, buffer)
         # On garde un bout de quelques caractères au cas où le pattern est coupé entre les deux chunks
         safe_end = len(buffer) - length_to_replace + 1
 
@@ -34,7 +35,7 @@ def stream_replace_bytestring(iterator, old_bytestring: bytes, new_bytestring: b
             yield chunk
 
     if buffer:
-        buffer = buffer.replace(old_bytestring, new_bytestring)
+        buffer = re.sub(old_bytestring, new_bytestring, buffer)
         yield buffer
 
 
@@ -132,6 +133,7 @@ def generate_stats(df: pl.DataFrame):
         .unique(subset=["uid"])
     )
 
+    # Statistiques sur les sources de données (statistiques.csv)
     generate_public_source_stats(df_uid)
 
     resources = df_uid["sourceFile"].unique().to_list()
@@ -171,7 +173,6 @@ def generate_stats(df: pl.DataFrame):
             stats[f"{str(year)}_médiane_montant_marchés_notifiés"] = int(
                 df_date_notification.select(pl.median("montant")).item()
             )
-
         else:
             stats[f"{str(year)}_somme_montant_marchés_notifiés"] = ""
             stats[f"{str(year)}_médiane_montant_marchés_notifiés"] = ""
