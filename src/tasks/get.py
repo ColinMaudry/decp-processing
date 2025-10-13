@@ -313,13 +313,23 @@ def scrap_marches_securises_month(year: str, month: str):
                 f"https://www.marches-securises.fr/entreprise/?module=liste_donnees_essentielles&page={str(page)}&siret_pa=&siret_pa1=&date_deb={year}-{month}-01&date_fin={year}-{month}-31&date_deb_ms={year}-{month}-01&date_fin_ms={year}-{month}-31&ref_ume=&cpv_et=&type_procedure=&type_marche=&objet=&rs_oe=&dep_liste=&ctrl_key=aWwwS1pLUlFzejBOYitCWEZzZTEzZz09&text=&donnees_essentielles=1&search="
                 f"table_ms&"
             )
-            html_result_page = get_html(search_url, client)
-            soup = BeautifulSoup(html_result_page, "html.parser")
-            result_div = soup.find("div", attrs={"id": "liste_consultations"})
-            print("Year: ", year, "Month: ", month, "Page: ", str(page))
-            json_links = result_div.find_all(
-                "a", attrs={"title": "Télécharger au format Json"}
-            )
+
+            def parse_result_page():
+                html_result_page = get_html(search_url, client)
+                soup = BeautifulSoup(html_result_page, "html.parser")
+                result_div = soup.find("div", attrs={"id": "liste_consultations"})
+                print("Year: ", year, "Month: ", month, "Page: ", str(page))
+                return result_div.find_all(
+                    "a", attrs={"title": "Télécharger au format Json"}
+                )
+
+            try:
+                json_links = parse_result_page()
+            except AttributeError:
+                sleep(3)
+                "Retrying result page download and parsing..."
+                json_links = parse_result_page()
+
             if not json_links:
                 break
             else:

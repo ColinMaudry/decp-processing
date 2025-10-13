@@ -1,5 +1,6 @@
 #### 2.1.1 2025-10-13
 
+- Stabilisation du scraping de marches-securises.fr
 - Amélioration du rendu des messages de release
 
 ## 2.1.0 2025-10-13
