@@ -37,6 +37,7 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     lf = lf.with_columns(
         pl.when(pl.col("uid").is_in(MARCHES_BAD_MONTANT))
         .then(pl.lit(1))
+        .otherwise(pl.col("montant"))
         .alias("montant")
     )
 
@@ -81,6 +82,25 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
 
     # Explosion des titulaires
     lf = explode_titulaires(lf, decp_format)
+
+    # Remplacement des "" par null
+    lf = lf.with_columns(
+        pl.when(pl.col(pl.String).str.len_chars() == 0)
+        .then(None)
+        .otherwise(pl.col(pl.String))
+        .name.keep()
+    )
+
+    # Type identifiant = SIRET si vide (marches-securises.fr)
+    lf = lf.with_columns(
+        pl.when(
+            (pl.col("titulaire_typeIdentifiant").is_null())
+            & (pl.col("titulaire_id").str.len_chars() == 14)
+        )
+        .then(pl.lit("SIRET"))
+        .otherwise(pl.col("titulaire_typeIdentifiant"))
+        .alias("titulaire_typeIdentifiant")
+    )
 
     # NC
     lf = lf.with_columns(pl.col(pl.Utf8).replace("NC", None))

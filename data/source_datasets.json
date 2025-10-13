@@ -262,5 +262,10 @@
     "name": "AIFE_DE_13001977100018",
     "owner_org_name": "Agence pour l'Informatique Financière de l'Etat",
     "code": "aife_dume"
+  },
+  {
+    "id": "68ebb48dd708fdb2d7c15bff",
+    "name": "Données de marches-securises.fr",
+    "code": "marches-securises_scrap"
   }
 ]
