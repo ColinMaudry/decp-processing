@@ -203,5 +203,5 @@ def scrap_marches_securises(mode=None, year=None):
 
 
 if __name__ == "__main__":
-    # decp_processing()
-    scrap_marches_securises()
+    decp_processing()
+    # scrap_marches_securises()
