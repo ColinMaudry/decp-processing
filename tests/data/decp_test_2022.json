@@ -392,48 +392,6 @@
               "typeIdentifiant": "SIRET",
               "id": "39830819700035"
             }
-          },
-          {
-            "titulaire": {
-              "typeIdentifiant": "SIRET",
-              "id": "42473124800060"
-            }
-          },
-          {
-            "titulaire": {
-              "typeIdentifiant": "SIRET",
-              "id": "44775451600022"
-            }
-          },
-          {
-            "titulaire": {
-              "typeIdentifiant": "SIRET",
-              "id": "49291816400020"
-            }
-          },
-          {
-            "titulaire": {
-              "typeIdentifiant": "SIRET",
-              "id": "52356666900025"
-            }
-          },
-          {
-            "titulaire": {
-              "typeIdentifiant": "SIRET",
-              "id": "80312749700029"
-            }
-          },
-          {
-            "titulaire": {
-              "typeIdentifiant": "SIRET",
-              "id": "95039847900085"
-            }
-          },
-          {
-            "titulaire": {
-              "typeIdentifiant": "SIRET",
-              "id": "96650098500033"
-            }
           }
         ],
         "considerationsSociales": {
@@ -474,20 +432,6 @@
               "id": 2,
               "dateNotificationModification": "2022-06-15",
               "datePublicationDonneesModification": "2022-06-29"
-            }
-          },
-          {
-            "modification": {
-              "id": 3,
-              "dateNotificationModification": "2022-06-29",
-              "datePublicationDonneesModification": "2022-06-29"
-            }
-          },
-          {
-            "modification": {
-              "id": 4,
-              "dateNotificationModification": "2022-07-26",
-              "datePublicationDonneesModification": "2022-07-26"
             }
           },
           {

@@ -37,60 +37,22 @@ def process_string_lists(lf: pl.LazyFrame):
     return lf
 
 
-def explode_titulaires(df: pl.LazyFrame, decp_format: DecpFormat):
+def explode_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat):
     # Explosion des champs titulaires sur plusieurs lignes (un titulaire de marché par ligne)
     # et une colonne par champ
 
     # Structure originale 2022
-    # [{{"id": "abc", "typeIdentifiant": "SIRET"}}]
+    # [{"titulaire": {"id": "abc", "typeIdentifiant": "SIRET"}}]
+    # mais simpliée dans filter_titulaires() (équivalent format 2019)
+    # [{"id": "abc", "typeIdentifiant": "SIRET"}]
 
     # Explosion de la liste de titulaires en autant de nouvelles lignes
-    df = df.explode("titulaires")
-
-    if decp_format.label == "DECP 2022":
-        # Renommage du premier objet englobant
-        df = df.with_columns(
-            pl.col("titulaires")
-            .struct.rename_fields(["titulaires.object"])
-            .alias("titulaires"),
-        )
-
-        # Extraction du premier objet dans une nouvelle colonne
-        df = df.unnest("titulaires")
-        df = df.rename({"titulaires.object": "titulaires"})
-
-    # Renommage des champs de l'objet titulaire
-    df = df.select(
-        pl.col("*"),
-        pl.col("titulaires")
-        .struct.rename_fields(["titulaire_typeIdentifiant", "titulaire_id"])
-        .alias("titulaire"),
-    )
-
-    # Extraction de l'objet titulaire
-    df = df.unnest("titulaire")
-
-    # Suppression des anciennes colonnes
-    df = df.drop(["titulaires"])
+    lf = lf.explode("titulaires").unnest("titulaires")
 
     # Cast l'identifiant en string
-    df = df.with_columns(pl.col("titulaire_id").cast(pl.String))
+    # lf = lf.with_columns(pl.col("titulaire_id").cast(pl.String))
 
-    # Correction des cas où typeIdentifiant et id sont inversés:
-    df = df.with_columns(
-        [
-            pl.when(pl.col("titulaire_typeIdentifiant").str.contains(r"[0-9]"))
-            .then(pl.col("titulaire_id"))
-            .otherwise(pl.col("titulaire_typeIdentifiant"))
-            .alias("titulaire_typeIdentifiant"),
-            pl.when(pl.col("titulaire_typeIdentifiant").str.contains(r"[0-9]"))
-            .then(pl.col("titulaire_typeIdentifiant"))
-            .otherwise(pl.col("titulaire_id"))
-            .alias("titulaire_id"),
-        ]
-    )
-
-    return df
+    return lf
 
 
 def remove_modifications_duplicates(df):
@@ -147,15 +109,23 @@ def replace_with_modification_data(lf: pl.LazyFrame):
     )  # sans les lignes de données initiales
 
     # Étape 2: Dédupliquer et créer une copie du DataFrame initial sans les colonnes "modifications"
-    # Tri par dateNotification DESC pour sélectionner la ligne la plus récente
-    lf = lf.sort(["uid", "dateNotification"], descending=[False, True]).unique("uid", keep="first")
+    # On peut dédupliquer aveuglément car la seule chose qui varient dans les lignes d'un même
+    # uid, c'est les données de modifs
+    lf = lf.unique("uid")
 
     # Garder TOUTES les colonnes sauf les colonnes modification_*
     lf_base = lf.drop(cs.starts_with("modification_"))
 
     # Étape 3: Ajouter le modification_id et la colonne données actuelles pour chaque modif
     # Colonnes qui peuvent changer avec les modifications
-    modification_columns = ["uid", "dateNotification", "datePublicationDonnees", "montant", "dureeMois", "titulaires"]
+    modification_columns = [
+        "uid",
+        "dateNotification",
+        "datePublicationDonnees",
+        "montant",
+        "dureeMois",
+        "titulaires",
+    ]
 
     lf = (
         pl.concat(
@@ -184,33 +154,7 @@ def replace_with_modification_data(lf: pl.LazyFrame):
         )
     )
 
-    # Étape 4a: Remplacer les listes de titulaires "vides" (contenant uniquement des structs avec des nulls) par null
-    # Car Polars ne considère pas [{{null,null}}] comme une valeur null lors du fill_null()
-    # Structure: List(Struct({'titulaire': Struct({'typeIdentifiant': String, 'id': String})}))
-    lf = lf.with_columns(
-        pl.when(
-            pl.col("titulaires").list.len() > 0
-        )
-        .then(
-            # Si la liste n'est pas vide, vérifier si tous les éléments sont des structs vides
-            # On accède au champ "titulaire" puis on vérifie si typeIdentifiant ET id sont null
-            pl.when(
-                pl.col("titulaires")
-                .list.eval(
-                    # Pour chaque élément de la liste, accéder au struct "titulaire" puis vérifier ses champs
-                    pl.element().struct.field("titulaire").struct.field("typeIdentifiant").is_null()
-                    & pl.element().struct.field("titulaire").struct.field("id").is_null()
-                )
-                .list.all()  # Vérifier que TOUS les éléments de la liste ont typeIdentifiant=null ET id=null
-            )
-            .then(None)  # Remplacer par null si tous les structs sont vides
-            .otherwise(pl.col("titulaires"))  # Garder la liste sinon
-        )
-        .otherwise(None)  # Si liste vide, mettre null
-        .alias("titulaires")
-    )
-
-    # Étape 4b: Remplir les valeurs nulles en utilisant les dernières valeurs non-nulles pour chaque id
+    # Étape 4: Remplir les valeurs nulles en utilisant les dernières valeurs non-nulles pour chaque id
     lf = lf.with_columns(
         pl.col("montant", "dureeMois", "titulaires")
         .fill_null(strategy="backward")
@@ -219,8 +163,11 @@ def replace_with_modification_data(lf: pl.LazyFrame):
 
     # Étape 5: Réintroduire les colonnes fixes (qui ne changent pas avec les modifications)
     # Sélectionner uniquement les colonnes qui ne sont pas dans modification_columns
-    columns_to_keep = [col for col in lf_base.collect_schema().names()
-                       if col not in modification_columns]
+    columns_to_keep = [
+        col
+        for col in lf_base.collect_schema().names()
+        if col not in modification_columns
+    ]
 
     # Créer un DataFrame avec uniquement les colonnes fixes, dédupliqué par uid
     lf_fixed_columns = lf_base.select(["uid"] + columns_to_keep).unique("uid")

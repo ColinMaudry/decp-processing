@@ -1,3 +1,7 @@
+#### 2.1.3 2025-10-14
+
+- Exclusion de marches-securises.fr de la consolidation le temps de le réparer
+
 #### 2.1.2 2025-10-13
 
 - Solutionnage des blocs titulaires vides ([#131](https://github.com/ColinMaudry/decp-processing/pull/131)) merci [imanuch](https://github.com/imanuch) !
