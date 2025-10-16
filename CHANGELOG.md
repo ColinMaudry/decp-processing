@@ -1,3 +1,12 @@
+#### 2.1.5 2025-10-16
+
+- Possibilité d'exclure des ressources ou de solo un dataset depuis .env
+
+#### 2.1.4 2025-10-15
+
+- Extension du timeout pour la publication de nouvelles ressources sur data.gouv.fr
+- Correction des titulaires null en cascade pour un marché et ses modifications
+
 #### 2.1.3 2025-10-14
 
 - Exclusion de marches-securises.fr de la consolidation le temps de le réparer

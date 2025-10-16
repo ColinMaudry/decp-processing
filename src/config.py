@@ -79,14 +79,6 @@ PREFECT_LOCAL_STORAGE_PATH.mkdir(exist_ok=True, parents=True)
 # POSTGRESQL
 POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI")
 
-with open(
-    make_path_from_env(
-        "DATASETS_REFERENCE_FILEPATH", DATA_DIR / "source_datasets.json"
-    ),
-    "r",
-) as f:
-    TRACKED_DATASETS = json.load(f)
-
 # Liste et ordre des colonnes pour le mono dataframe de base (avant normalisation et spécialisation)
 # Sert aussi à vérifier qu'au moins ces colonnes sont présentes (d'autres peuvent être présentes en plus, les colonnes "innatendues")
 BASE_DF_COLUMNS = [
@@ -153,16 +145,37 @@ COLUMNS_TO_DROP = [
 ]
 
 # Liste des ID de ressources présentes dans un dataset à traiter, au format JSON ou XML, mais exclues du traitement
-EXCLUDED_RESOURCES = [
-    "17046b18-8921-486a-bc31-c9196d5c3e9c",  # decp.xml : fichier XML consolidé par le MINEF mais abandonné
-    "68bd2001-3420-4d94-bc49-c90878df322c",  # decp.ocds.json : fichier au format JSON mais OCDS, pas DECP
-    "59ba0edb-cf94-4bf1-a546-61f561553917",  # decp-2022.json : format bizarre, entre 2019 et 2022 ~8000 marchés
-    "9c4f84d6-6fc9-4c82-a7f8-fb60d54fa188",  # données Région Bretagne inexistante (404)
-    "8133b5b6-d097-4a5f-91cc-e94b11db3e2a",  # données Région Bretagne inexistante (404)
-    "e10ea7c4-4992-45d8-a191-07dac6991f89",  # données Région Bretagne inexistante (404)
-    "2d6dd1a6-8471-48c0-a207-6715cff06a99",  # données Région Bretagne JSON non-réglementaire
-    "7629a6a1-3b8a-4570-8562-3a7cf82be88e",  # données Région Bretagne XML non-réglementaire
-]
+EXCLUDED_RESOURCES = os.getenv("EXCLUDED_RESOURCES", "").replace(" ", "")
+EXCLUDED_RESOURCES = EXCLUDED_RESOURCES.split(",")
+EXCLUDED_RESOURCES = (
+    [
+        "17046b18-8921-486a-bc31-c9196d5c3e9c",  # decp.xml : fichier XML consolidé par le MINEF mais abandonné
+        "68bd2001-3420-4d94-bc49-c90878df322c",  # decp.ocds.json : fichier au format JSON mais OCDS, pas DECP
+        "59ba0edb-cf94-4bf1-a546-61f561553917",  # decp-2022.json : format bizarre, entre 2019 et 2022 ~8000 marchés
+        "9c4f84d6-6fc9-4c82-a7f8-fb60d54fa188",  # données Région Bretagne inexistante (404)
+        "8133b5b6-d097-4a5f-91cc-e94b11db3e2a",  # données Région Bretagne inexistante (404)
+        "e10ea7c4-4992-45d8-a191-07dac6991f89",  # données Région Bretagne inexistante (404)
+        "2d6dd1a6-8471-48c0-a207-6715cff06a99",  # données Région Bretagne JSON non-réglementaire
+        "7629a6a1-3b8a-4570-8562-3a7cf82be88e",  # données Région Bretagne XML non-réglementaire
+    ]
+    + EXCLUDED_RESOURCES
+)
+
+# Liste des datasets à traiter
+
+# Ne traiter qu'un seul dataset identifier par son ID
+SOLO_DATASET = os.getenv("SOLO_DATASET", "")
+
+with open(
+    make_path_from_env(
+        "DATASETS_REFERENCE_FILEPATH", DATA_DIR / "source_datasets.json"
+    ),
+    "r",
+) as f:
+    TRACKED_DATASETS = json.load(f)
+for dataset in TRACKED_DATASETS:
+    if dataset["id"] == SOLO_DATASET:
+        TRACKED_DATASETS = [dataset]
 
 # Ces marchés ont des montants invalides, donc on les met à 1 euro.
 MARCHES_BAD_MONTANT = ["221300015002472020F00075"]
