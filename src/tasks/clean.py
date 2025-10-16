@@ -187,7 +187,6 @@ def clean_titulaires(lf: pl.LazyFrame) -> pl.LazyFrame:
                     new_item["titulaire_typeIdentifiant"] = item.get("typeIdentifiant")
                 else:
                     continue
-                print("new_item", new_item)
                 # Keep if at least one is NOT null
                 if (
                     new_item["titulaire_id"] is not None

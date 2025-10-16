@@ -10,11 +10,13 @@ import polars as pl
 from config import DATA_DIR, DIST_DIR, POSTGRESQL_DB_URI
 
 
-def save_to_files(df: pl.DataFrame, path: str | Path, file_format=None):
+def save_to_files(df: pl.DataFrame, path: Path, file_format=None):
     if file_format is None:
         file_format = ["csv", "parquet"]
     if "parquet" in file_format:
-        df.write_parquet(f"{path}.parquet")
+        tmp_path = path.with_suffix(".parquet.tmp")
+        df.write_parquet(tmp_path)
+        tmp_path.rename(path.with_suffix(".parquet"))
     if "csv" in file_format:
         df.write_csv(f"{path}.csv")
 
