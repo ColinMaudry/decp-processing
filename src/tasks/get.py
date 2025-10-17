@@ -245,22 +245,25 @@ def parse_element(elem):
 def write_marche_rows(marche: dict, file, decp_format: DecpFormat) -> set[str]:
     """Ajout d'une ligne ndjson pour chaque modification/version du marché."""
     fields = set()
-    for mod in yield_modifications(marche):
-        # Pour decp-2019.json : désimbrication des données des titulaires
-        # voir https://github.com/ColinMaudry/decp-processing/issues/114
-        # complète probablement norm_titulaires(), qui ne faisait pas complètement le taff, donc à fusionner
-        if decp_format.label == "DECP 2019":
-            for f in ["titulaires", "modification_titulaires"]:
-                liste_titulaires = mod.get(f)
-                if liste_titulaires and isinstance(liste_titulaires[0], list):
-                    mod[f] = extract_innermost_struct(liste_titulaires)
-        file.write(orjson.dumps(mod))
-        file.write(b"\n")
-        fields = fields.union(mod.keys())
+    if marche:  # marche peut être null (marches-securises.fr)
+        for mod in yield_modifications(marche):
+            if mod is None:
+                continue
+            # Pour decp-2019.json : désimbrication des données des titulaires
+            # voir https://github.com/ColinMaudry/decp-processing/issues/114
+            # complète probablement norm_titulaires(), qui ne faisait pas complètement le taff, donc à fusionner
+            if decp_format.label == "DECP 2019":
+                for f in ["titulaires", "modification_titulaires"]:
+                    liste_titulaires = mod.get(f)
+                    if liste_titulaires and isinstance(liste_titulaires[0], list):
+                        mod[f] = extract_innermost_struct(liste_titulaires)
+            file.write(orjson.dumps(mod))
+            file.write(b"\n")
+            fields = fields.union(mod.keys())
     return fields
 
 
-def yield_modifications(row: dict, separator="_") -> Iterator[dict]:
+def yield_modifications(row: dict, separator="_") -> Iterator[dict] or None:
     """Pour chaque modification, génère un objet/dict marché aplati."""
     raw_mods = row.pop("modifications", [])
     # Couvre le format 2022:

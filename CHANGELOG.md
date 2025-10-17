@@ -1,9 +1,10 @@
-#### 2.1.4 2025-10-15
+#### 2.2.0 2025-10-17
 
 - Extension du timeout pour la publication de nouvelles ressources sur data.gouv.fr
 - Correction des titulaires null en cascade pour un marché et ses modifications
 - Possibilité d'exclure des ressources ou de solo un dataset depuis .env
 - Renommage atomique de decp.parquet pour facilité sa lecture par decp.info
+- Support des marchés vides (marches-securises.fr)
 
 #### 2.1.3 2025-10-14
 
