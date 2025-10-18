@@ -22,6 +22,16 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
         lf = lf.drop("acheteur.id")
 
     # Suppression des marchés qui n'ont pas d'id ou d'acheteur_id
+    # Remplacement des "" par null pour les id et acheteur_id
+    lf = lf.with_columns(
+        [
+            pl.when(pl.col(col).str.len_chars() == 0)
+            .then(None)
+            .otherwise(pl.col(col))
+            .alias(col)
+            for col in ["id", "acheteur_id"]
+        ]
+    )
     lf = lf.filter(pl.col("id").is_not_null() & pl.col("acheteur_id").is_not_null())
 
     # Nettoyage des identifiants de marchés
