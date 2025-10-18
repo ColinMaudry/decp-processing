@@ -185,7 +185,7 @@ def scrap_marches_securises(mode=None, year=None):
     current_year = DATE_NOW[:4]
 
     if mode == "month":
-        scrap_marches_securises_month(current_year, MONTH_NOW)
+        scrap_marches_securises_month(current_year, MONTH_NOW[-2:])
 
     elif mode == "year":
         year = year or current_year

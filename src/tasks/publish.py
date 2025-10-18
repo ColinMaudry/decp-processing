@@ -79,6 +79,7 @@ def publish_new_resource(dataset_id, file_path, description):
             "file": open(file_path, "rb"),
         },
         headers=headers,
+        timeout=DECP_PROCESSING_PUBLISH_TIMEOUT,
     ).raise_for_status()
     new_resource_id = response.json()["id"]
 

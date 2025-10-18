@@ -15,7 +15,7 @@ from lxml import etree
 from prefect import task
 
 from config import (
-    DECP_FORMAT_2019,
+    DECP_FORMAT_2022,
     DECP_FORMATS,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
@@ -163,49 +163,107 @@ def json_stream_to_parquet(
 def xml_stream_to_parquet(
     url: str, output_path: Path, fix_chars=False
 ) -> tuple[set, DecpFormat]:
-    # Pour l'instant tous les fichiers XML (AIFE), sont au format 2019, donc pas de détection.
+    """Uniquement utilisé pour les données publiées par l'AIFE."""
+
     fields = set()
     parser = etree.XMLPullParser(tag="marche", recover=True)
     with tempfile.NamedTemporaryFile(
-        mode="wb", suffix=".ndjson", delete=True
+        mode="wb", suffix=".ndjson", delete=False
     ) as tmp_file:
         for chunk in stream_get(url):
             if fix_chars:
                 chunk = clean_invalid_characters(chunk)
             parser.feed(chunk)
             for _, elem in parser.read_events():
-                _, marche = xml_to_dict(elem)
-                new_fields = write_marche_rows(marche, tmp_file, DECP_FORMAT_2019)
+                marche = parse_element(elem)
+                new_fields = write_marche_rows(marche, tmp_file, DECP_FORMAT_2022)
                 fields = fields.union(new_fields)
-        lf = pl.scan_ndjson(tmp_file.name, schema=DECP_FORMAT_2019.schema)
+        lf = pl.scan_ndjson(tmp_file.name, schema=DECP_FORMAT_2022.schema)
         sink_to_files(lf, output_path, file_format="parquet")
-    return fields, DECP_FORMAT_2019
+    return fields, DECP_FORMAT_2022
 
 
-def xml_to_dict(element: etree.Element):
-    return element.tag, dict(map(xml_to_dict, element)) or element.text
+# Générée par la LLM Euria, développée par Infomaniak
+def parse_element(elem):
+    """
+    Parse un élément XML en dictionnaire Python.
+    Pour les tags comme <modalitesExecution>, <considerationsSociales>, etc.,
+    on conserve la structure : {"modaliteExecution": [...]} au lieu de [...] (format 2022)
+    """
+
+    # Si l'élément n'a ni enfants ni texte → retourne None
+    if len(elem) == 0 and not elem.text:
+        return None
+
+    # Si l'élément n'a pas d'enfants → retourne son texte (nettoyé)
+    if len(elem) == 0:
+        return elem.text.strip() if elem.text else ""
+
+    # Collecte les enfants sous forme de listes (même si un seul enfant)
+    children = {}
+    for child in elem:
+        tag = child.tag
+        if tag not in children:
+            children[tag] = []
+        children[tag].append(parse_element(child))
+
+    # Cas spéciaux : ces éléments doivent toujours être des objets avec une clé liste
+    if elem.tag == "titulaires":
+        # Chaque <titulaire> devient un objet dans une liste
+        return [{"titulaire": item} for item in children.get("titulaire", [])]
+
+    # Pour les tags comme <considerationsSociales>, <modalitesExecution>, etc.
+    # on utilise le premier tag enfant existant
+    elif elem.tag in [
+        "considerationsSociales",
+        "considerationsEnvironnementales",
+        "techniques",
+        "modalitesExecution",
+        "typesPrix",
+    ]:
+        # On récupère le premier tag enfant (s’il existe)
+        if children:
+            # On prend le premier tag enfant comme clé
+            first_child_tag = next(iter(children.keys()))
+            # On retourne un objet avec cette clé → valeur = liste des enfants
+            return {first_child_tag: children[first_child_tag]}
+        else:
+            # Si pas d'enfant → retourne un objet vide
+            return {next(iter(children.keys())) if children else "": []}
+
+    # Pour tous les autres éléments : si un seul enfant → valeur simple, sinon liste
+    result = {}
+    for tag, values in children.items():
+        if len(values) == 1:
+            result[tag] = values[0]  # Pas de liste si un seul élément
+        else:
+            result[tag] = values  # Sinon, on garde la liste
+
+    return result
 
 
 def write_marche_rows(marche: dict, file, decp_format: DecpFormat) -> set[str]:
     """Ajout d'une ligne ndjson pour chaque modification/version du marché."""
     fields = set()
-    for mod in yield_modifications(marche):
-        # Pour decp-2019.json : désimbrication des données des titulaires
-        # voir https://github.com/ColinMaudry/decp-processing/issues/114
-        # complète probablement norm_titulaires(), qui ne faisait pas complètement le taff, donc à fusionner
-        if decp_format.label == "DECP 2019":
-            for f in ["titulaires", "modification_titulaires"]:
-                liste_titulaires = mod.get(f)
-                if liste_titulaires and isinstance(liste_titulaires[0], list):
-                    mod[f] = extract_innermost_struct(liste_titulaires)
-
-        file.write(orjson.dumps(mod))
-        file.write(b"\n")
-        fields = fields.union(mod.keys())
+    if marche:  # marche peut être null (marches-securises.fr)
+        for mod in yield_modifications(marche):
+            if mod is None:
+                continue
+            # Pour decp-2019.json : désimbrication des données des titulaires
+            # voir https://github.com/ColinMaudry/decp-processing/issues/114
+            # complète probablement norm_titulaires(), qui ne faisait pas complètement le taff, donc à fusionner
+            if decp_format.label == "DECP 2019":
+                for f in ["titulaires", "modification_titulaires"]:
+                    liste_titulaires = mod.get(f)
+                    if liste_titulaires and isinstance(liste_titulaires[0], list):
+                        mod[f] = extract_innermost_struct(liste_titulaires)
+            file.write(orjson.dumps(mod))
+            file.write(b"\n")
+            fields = fields.union(mod.keys())
     return fields
 
 
-def yield_modifications(row: dict, separator="_") -> Iterator[dict]:
+def yield_modifications(row: dict, separator="_") -> Iterator[dict] or None:
     """Pour chaque modification, génère un objet/dict marché aplati."""
     raw_mods = row.pop("modifications", [])
     # Couvre le format 2022:
@@ -337,7 +395,8 @@ def scrap_marches_securises_month(year: str, month: str):
             for json_link in json_links:
                 json_href = "https://www.marches-securises.fr" + json_link["href"]
                 decp_json = get_json_marches_securises(json_href, client)
-                marches.append(decp_json)
+                if decp_json:
+                    marches.append(decp_json)
         if len(marches) > 0:
             dicts = {"marches": marches}
             json_path = DIST_DIR / f"marches-securises_{year}-{month}.json"

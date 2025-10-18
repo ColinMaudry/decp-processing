@@ -77,7 +77,10 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     # Valeurs équivalentes à null transformées en null
     lf = clean_null_equivalent(lf)
 
-    # Explosion et traitement des modifications
+    # Normalisation des titulaires
+    lf = clean_titulaires(lf)
+
+    # Application des modifications
     lf = process_modifications(lf)
 
     # Explosion des titulaires
@@ -149,6 +152,83 @@ def clean_null_equivalent(lf: pl.LazyFrame) -> pl.LazyFrame:
             .name.keep()
             for col_name in mapping_null
             if col_name in columns
+        ]
+    )
+
+    return lf
+
+
+def clean_titulaires(lf: pl.LazyFrame) -> pl.LazyFrame:
+    # Étape 1: Remplacer les listes de titulaires "vides" (contenant uniquement des structs avec des nulls) par null
+    # Car Polars ne considère pas [{{null,null}}] comme une valeur null lors du fill_null()
+    # Structure: List(Struct({'titulaire': Struct({'typeIdentifiant': String, 'id': String})}))
+    def filter_titulaires(titulaires_list):
+        """
+        Filter a list of titulaire objects:
+        - If object has 'titulaire' key → check id/typeIdentifiant inside it.
+        - Else → check id/typeIdentifiant directly.
+        - Keep only if at least one of id or typeIdentifiant is NOT null.
+        - Return None if the resulting list is empty.
+        """
+        # if not isinstance(titulaires_list, list):
+        #     print("not a list")
+        #     return []
+
+        valid_items = []
+        for item in titulaires_list:
+            new_item = {}
+            # Extract id and typeIdentifiant
+            if isinstance(item, dict):
+                if "titulaire" in item and isinstance(item["titulaire"], dict):
+                    item = item["titulaire"]
+
+                if isinstance(item, dict) and "id" in item and item["id"] is not None:
+                    new_item["titulaire_id"] = item.get("id")
+                    new_item["titulaire_typeIdentifiant"] = item.get("typeIdentifiant")
+                else:
+                    continue
+                # Keep if at least one is NOT null
+                if (
+                    new_item["titulaire_id"] is not None
+                    or new_item["titulaire_typeIdentifiant"] is not None
+                ):
+                    valid_items.append(new_item)
+
+        # Return an empty list if no valid items left
+        return valid_items
+
+    # Apply to your Polars DataFrame
+    lf = lf.with_columns(
+        pl.col("titulaires")
+        .map_elements(
+            filter_titulaires,
+            return_dtype=pl.List(
+                pl.Struct(
+                    {"titulaire_id": pl.String, "titulaire_typeIdentifiant": pl.String}
+                )
+            ),
+        )
+        .alias("titulaires"),
+        pl.col("modification_titulaires")
+        .map_elements(
+            filter_titulaires,
+            return_dtype=pl.List(
+                pl.Struct(
+                    {"titulaire_id": pl.String, "titulaire_typeIdentifiant": pl.String}
+                )
+            ),
+        )
+        .alias("modification_titulaires"),
+    )
+
+    # Remplacer les listes de titulaires vides par null (filter_titulaires() ne peut retourner None)
+    lf = lf.with_columns(
+        [
+            pl.when(pl.col(col).list.len() == 0)
+            .then(None)
+            .otherwise(pl.col(col))
+            .alias(col)
+            for col in ["titulaires", "modification_titulaires"]
         ]
     )
 

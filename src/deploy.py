@@ -92,11 +92,13 @@ if __name__ == "__main__":
         description="Scraping des données de marches-securises.fr.",
         ignore_warnings=True,
         work_pool_name="local",
+        cron="0 0 * * 1-5",
         job_variables={
             "env": {
                 "DECP_PROCESSING_PUBLISH": "True",
                 "DECP_DIST_DIR": "/srv/shared/decp/prod/dist",
                 "PREFECT_TASKS_REFRESH_CACHE": "False",
+                "MARCHES_SECURISES_SCRAPING_MODE": "month",
             }
         },
     )
