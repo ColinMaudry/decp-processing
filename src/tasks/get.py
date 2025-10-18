@@ -395,7 +395,8 @@ def scrap_marches_securises_month(year: str, month: str):
             for json_link in json_links:
                 json_href = "https://www.marches-securises.fr" + json_link["href"]
                 decp_json = get_json_marches_securises(json_href, client)
-                marches.append(decp_json)
+                if decp_json:
+                    marches.append(decp_json)
         if len(marches) > 0:
             dicts = {"marches": marches}
             json_path = DIST_DIR / f"marches-securises_{year}-{month}.json"
