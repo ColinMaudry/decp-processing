@@ -374,6 +374,8 @@ def scrap_marches_securises_month(year: str, month: str):
 
             def parse_result_page():
                 html_result_page = get_html(search_url, client)
+                if html_result_page is None:
+                    return None
                 soup = BeautifulSoup(html_result_page, "html.parser")
                 result_div = soup.find("div", attrs={"id": "liste_consultations"})
                 print("Year: ", year, "Month: ", month, "Page: ", str(page))
