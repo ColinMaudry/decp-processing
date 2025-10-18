@@ -1,4 +1,9 @@
-#### 2.2.0 2025-10-18
+#### 2.2.1 2025-10-18
+
+- Nettoyage des "" id et acheteur_id avant filtrage et uid
+- Ne pas parser une page qui retourne None (scrap)
+
+## 2.2.0 2025-10-18
 
 - Extension du timeout pour la publication de nouvelles ressources sur data.gouv.fr
 - Correction des titulaires null en cascade pour un marché et ses modifications
