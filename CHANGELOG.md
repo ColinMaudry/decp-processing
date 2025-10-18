@@ -1,4 +1,4 @@
-#### 2.2.0 2025-10-17
+#### 2.2.0 2025-10-18
 
 - Extension du timeout pour la publication de nouvelles ressources sur data.gouv.fr
 - Correction des titulaires null en cascade pour un marché et ses modifications
