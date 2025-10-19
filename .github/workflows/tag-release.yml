@@ -12,9 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@master
+        uses: actions/checkout@v4
       - name: Get tag message
-        run: echo "TAG_MESSAGE=`git show ${{ github.ref_name }} | grep '^\- '`" >> "$GITHUB_ENV"
+        run: |
+          TAG_MESSAGE=$(git tag -l --format='%(contents)' ${{ github.ref_name }})
+          echo "TAG_MESSAGE=${TAG_MESSAGE}" >> $GITHUB_ENV
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1.20.0
