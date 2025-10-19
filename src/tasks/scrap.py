@@ -140,7 +140,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             end_date_str_ = end_date_.isoformat()
             sleep(1)
             print()
-            print(f"## {start_date_str} -> {end_date_str_}")
+            print(f"➡️  {start_date_str} -> {end_date_str_}")
 
             # Formulaire recherche données essentielles
             form = driver.find_element(By.ID, "formRech")
