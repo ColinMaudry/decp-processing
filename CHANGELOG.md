@@ -1,3 +1,7 @@
+## 2.3.0
+
+- scraping des données DECP de [marches-oublics.infos (AWS)](https://www.data.gouv.fr/datasets/68caf6b135f19236a4f37a32/) ([#118](https://github.com/ColinMaudry/decp-processing/issues/118))
+
 #### 2.2.1 2025-10-18
 
 - Nettoyage des "" id et acheteur_id avant filtrage et uid

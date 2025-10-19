@@ -94,16 +94,20 @@ def publish_new_resource(dataset_id, file_path, description):
     return response.json()
 
 
-def publish_scrap_to_datagouv(year: str, month: str, file_path):
-    dataset_id = "68ebb48dd708fdb2d7c15bff"
+def publish_scrap_to_datagouv(year: str, month: str, file_path, target):
+    dataset_ids = {
+        "aws": "68caf6b135f19236a4f37a32",
+        "marches-securises.fr": "68ebb48dd708fdb2d7c15bff",
+    }
+    dataset_id = dataset_ids[target]
     resource_id, description = get_resource_id(dataset_id, file_path)
     if resource_id is None:
-        print(f"Publication des données marches-securises de {year}-{month}...")
+        print(f"Publication des données {target} de {year}-{month}...")
         result = publish_new_resource(dataset_id, file_path, description)
         if result:
             print("OK (nouvelle ressource)")
     else:
-        print(f"Mise à jour des données marches-securises de {year}-{month}...")
+        print(f"Mise à jour des données {target} de {year}-{month}...")
         result = update_resource(dataset_id, resource_id, file_path, DATAGOUVFR_API_KEY)
         if result["success"] is True:
             print("OK (mise à jour)")
