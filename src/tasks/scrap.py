@@ -203,9 +203,8 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             with open(final_json_path, "r") as f:
                 json_text = f.read().replace("\n\n,\nInternal Server Error", "")
             marches = json.loads(json_text)["marches"]
-            print("longueur marchés", len(marches))
             marches_month.extend(marches)
-            print("longueur marchés month", len(marches_month))
+            print(f"longueur marchés {len(marches)} (mois : {len(marches_month)})")
         else:
             print("Aucun fichier téléchargé.")
 
