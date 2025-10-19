@@ -26,6 +26,17 @@
         "last_modified": "2025-07-08T19:00:00Z",
         "filesize": 766654,
         "metrics": { "views": 10 }
+      },
+      {
+        "id": "decp_2022_xml",
+        "title": "decp_2022 .xml",
+        "checksum": { "value": "333333333333333" },
+        "latest": "./tests/data/decp_test.xml",
+        "format": "xml",
+        "created_at": "2025-07-08T18:00:00Z",
+        "last_modified": "2025-07-08T19:00:00Z",
+        "filesize": 766654,
+        "metrics": { "views": 10 }
       }
     ]
   }

@@ -22,6 +22,16 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
         lf = lf.drop("acheteur.id")
 
     # Suppression des marchés qui n'ont pas d'id ou d'acheteur_id
+    # Remplacement des "" par null pour les id et acheteur_id
+    lf = lf.with_columns(
+        [
+            pl.when(pl.col(col).str.len_chars() == 0)
+            .then(None)
+            .otherwise(pl.col(col))
+            .alias(col)
+            for col in ["id", "acheteur_id"]
+        ]
+    )
     lf = lf.filter(pl.col("id").is_not_null() & pl.col("acheteur_id").is_not_null())
 
     # Nettoyage des identifiants de marchés
@@ -77,7 +87,10 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     # Valeurs équivalentes à null transformées en null
     lf = clean_null_equivalent(lf)
 
-    # Explosion et traitement des modifications
+    # Normalisation des titulaires
+    lf = clean_titulaires(lf)
+
+    # Application des modifications
     lf = process_modifications(lf)
 
     # Explosion des titulaires
@@ -149,6 +162,74 @@ def clean_null_equivalent(lf: pl.LazyFrame) -> pl.LazyFrame:
             .name.keep()
             for col_name in mapping_null
             if col_name in columns
+        ]
+    )
+
+    return lf
+
+
+def clean_titulaires(lf: pl.LazyFrame) -> pl.LazyFrame:
+    def filter_titulaires(titulaires_list):
+        """
+        Filtrer une liste d’objets `titulaire`
+        - Si l’objet contient le champ `'titulaire'` → vérifier les champs `id` et `typeIdentifiant` à l’intérieur.
+        - Sinon → vérifier directement les champs `id` et `typeIdentifiant` au niveau de l’objet.
+        - Conserver uniquement les objets où **au moins un** des deux champs (`id` ou `typeIdentifiant`) **n’est pas nul**.
+        - Si la liste résultante est vide → retourner `null`.
+
+        J'aurais aimé écrire cette fonction en pur Polars (Expression API), mais c'était compliqué compte tneu du nombre de cas de figures à prendre compte (champs absents/présents).
+        """
+
+        valid_items = []
+        for item in titulaires_list:
+            new_item = {}
+            # Extract id and typeIdentifiant
+            if isinstance(item, dict):
+                if "titulaire" in item and isinstance(item["titulaire"], dict):
+                    item = item["titulaire"]
+
+                if isinstance(item, dict) and "id" in item and item["id"] is not None:
+                    new_item["titulaire_id"] = item.get("id")
+                    new_item["titulaire_typeIdentifiant"] = item.get("typeIdentifiant")
+                else:
+                    continue
+                # Keep if at least one is NOT null
+                if (
+                    new_item["titulaire_id"] is not None
+                    or new_item["titulaire_typeIdentifiant"] is not None
+                ):
+                    valid_items.append(new_item)
+
+        # Return an empty list if no valid items left
+        return valid_items
+
+    lf = lf.with_columns(
+        [
+            pl.col(col)
+            .map_elements(
+                filter_titulaires,
+                return_dtype=pl.List(
+                    pl.Struct(
+                        {
+                            "titulaire_id": pl.String,
+                            "titulaire_typeIdentifiant": pl.String,
+                        }
+                    )
+                ),
+            )
+            .alias(col)
+            for col in ["titulaires", "modification_titulaires"]
+        ]
+    )
+
+    # Remplacer les listes de titulaires vides par null (filter_titulaires() ne peut retourner None)
+    lf = lf.with_columns(
+        [
+            pl.when(pl.col(col).list.len() == 0)
+            .then(None)
+            .otherwise(pl.col(col))
+            .alias(col)
+            for col in ["titulaires", "modification_titulaires"]
         ]
     )
 

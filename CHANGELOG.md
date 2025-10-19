@@ -1,3 +1,20 @@
+#### 2.2.1 2025-10-18
+
+- Nettoyage des "" id et acheteur_id avant filtrage et uid
+- Ne pas parser une page qui retourne None (scrap)
+
+## 2.2.0 2025-10-18
+
+- Extension du timeout pour la publication de nouvelles ressources sur data.gouv.fr
+- Correction des titulaires null en cascade pour un marché et ses modifications
+- Possibilité d'exclure des ressources ou de solo un dataset depuis .env
+- Renommage atomique de decp.parquet pour facilité sa lecture par decp.info
+- Support des marchés vides (marches-securises.fr)
+
+#### 2.1.3 2025-10-14
+
+- Exclusion de marches-securises.fr de la consolidation le temps de le réparer
+
 #### 2.1.2 2025-10-13
 
 - Solutionnage des blocs titulaires vides ([#131](https://github.com/ColinMaudry/decp-processing/pull/131)) merci [imanuch](https://github.com/imanuch) !
