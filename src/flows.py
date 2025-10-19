@@ -1,16 +1,14 @@
 import datetime
 import os
 import shutil
-from time import sleep
+from pathlib import Path
+from shutil import rmtree
 
 import polars as pl
 from prefect import flow, task
 from prefect.artifacts import create_table_artifact
 from prefect.task_runners import ConcurrentTaskRunner
 from prefect.transactions import transaction
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
 
 from config import (
     BASE_DF_COLUMNS,
@@ -19,7 +17,6 @@ from config import (
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
-    MARCHES_SECURISES_SCRAPING_MODE,
     MAX_PREFECT_WORKERS,
     MONTH_NOW,
     SIRENE_DATA_DIR,
@@ -28,9 +25,10 @@ from config import (
 from tasks.clean import clean_decp
 from tasks.dataset_utils import list_resources
 from tasks.enrich import enrich_from_sirene
-from tasks.get import get_resource, scrap_marches_securises_month
+from tasks.get import get_resource
 from tasks.output import generate_final_schema, save_to_databases, save_to_files
 from tasks.publish import publish_to_datagouv
+from tasks.scrap import scrap_aws_month, scrap_marches_securises_month
 from tasks.transform import (
     concat_decp_json,
     get_prepare_unites_legales,
@@ -183,65 +181,45 @@ def sirene_preprocess():
 
 
 @flow(log_prints=True)
-def scrap_marches_securises(mode=None, year=None):
-    mode = mode or MARCHES_SECURISES_SCRAPING_MODE
+def scrap(target: str, mode: str = None, year=None):
+    # Remise à zéro du dossier dist
+    dist_dir: Path = DIST_DIR / target
+    if dist_dir.exists():
+        print(f"Suppression de {dist_dir}...")
+        rmtree(dist_dir)
+    else:
+        dist_dir.mkdir(parents=True)
+
+    # Sélection de la fonction de scraping en fonction de target
+    if target == "aws":
+        scrap_target_month = scrap_aws_month
+    elif target == "marches-securises.fr":
+        scrap_target_month = scrap_marches_securises_month
+    else:
+        print("Quel target ?")
+        raise ValueError
 
     current_year = DATE_NOW[:4]
 
+    # Sélection de la plage temporelle
     if mode == "month":
-        scrap_marches_securises_month(current_year, MONTH_NOW)
+        scrap_target_month(current_year, MONTH_NOW[-2:], dist_dir)
 
     elif mode == "year":
         year = year or current_year
         for month in reversed(range(1, 13)):
             month = str(month).zfill(2)
-            scrap_marches_securises_month(year, month)
+            scrap_target_month(year, month, dist_dir)
 
     elif mode == "all":
         current_year = int(current_year)
         for year in reversed(range(2018, current_year + 2)):
-            scrap_marches_securises("year", str(year))
+            scrap(target="target", mode="year", year=str(year))
 
     else:
         print("Mauvaise configuration")
 
 
-@flow(log_prints=True)
-def scrap_aws(mode=None, year=None):
-    options = Options()
-    options.add_argument("--headless")
-    options.set_preference("browser.download.folderList", 2)
-    options.set_preference("browser.download.manager.showWhenStarting", False)
-    options.set_preference("browser.download.dir", DIST_DIR)
-
-    driver = webdriver.Firefox(options=options)
-    driver.get("https://www.marches-publics.info/Annonces/rechercher")
-
-    # Formulaire recherche données essentielles
-    sleep(1)
-    de_radio = driver.find_element(By.ID, "typeDE")
-    de_radio.click()
-
-    # Remplir le formulaire
-    notif_debut = driver.find_element(By.ID, "dateNotifDebut")
-    notif_debut.clear()
-    notif_debut.send_keys("2025-01-01")
-    notif_fin = driver.find_element(By.ID, "dateNotifFin")
-    notif_fin.clear()
-    notif_fin.send_keys("2025-01-03")
-
-    sleep(1)
-
-    driver.find_element(By.ID, "sub").click()
-    driver.find_element(By.ID, "downloadDonnees").click()
-    # Le téléchargement se prépare et se lance en arrière plan
-    # une boucle while serait plus précise (while le fichier est pas téléchargé dans DIST_DIR, sleep(0.2))
-    sleep(3)
-    # Le fichier donneesEssentielles.json est dans DIST_DIR, il faut le renommer avant de télécharger le suivant.
-
-    driver.close()
-
-
 if __name__ == "__main__":
     # decp_processing()
-    scrap_marches_securises()
+    scrap("aws", mode="month")

@@ -1,27 +1,253 @@
+import calendar
+import json
+import time
+from datetime import date, timedelta
+from pathlib import Path
+from time import sleep
+
+import httpx
 from bs4 import BeautifulSoup
-from httpx import get
+from prefect import task
+from selenium import webdriver
+from selenium.common import TimeoutException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.support.wait import WebDriverWait
+
+from tasks.publish import publish_scrap_to_datagouv
 
 
-def get_parse_html(url):
-    html = get(url).text
-    soup = BeautifulSoup(html, "lxml")
-    return soup
+def get_html(url: str, client: httpx.Client) -> str or None:
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8",
+        "Connection": "keep-alive",
+    }
+
+    def get_response() -> httpx.Response:
+        return client.get(url, timeout=timeout, headers=headers).raise_for_status()
+
+    timeout = httpx.Timeout(20.0, connect=60.0, pool=20.0, read=20.0)
+    try:
+        response = get_response()
+    except (httpx.ConnectError, httpx.ReadTimeout, httpx.HTTPStatusError):
+        print("3s break and retrying...")
+        sleep(3)
+        try:
+            response = get_response()
+        except (httpx.ConnectError, httpx.ReadTimeout, httpx.HTTPStatusError):
+            print("Skipped")
+            return None
+    html = response.text
+    return html
 
 
-def get_search_results_pages(search_results_soup) -> list:
-    results = []
-    while len(results) > 0:
-        pass
+# @task(
+#     cache_policy=INPUTS,
+#     persist_result=True,
+#     cache_expiration=datetime.timedelta(days=15),
+# )
+def get_json_marches_securises(url: str, client: httpx.Client) -> dict or None:
+    json_html_page = get_html(url, client)
+    sleep(0.1)
+    if json_html_page:
+        json_html_page = (
+            json_html_page.replace("</head>", "</head><body>") + "</body></html>"
+        )
+    else:
+        print("json_html_page is None, skipping...")
+        return None
+    json_html_page_soup = BeautifulSoup(json_html_page, "html.parser")
+    try:
+        decp_json = json.loads(json_html_page_soup.find("body").string)
+    except Exception as e:
+        print(json_html_page)
+        print(e)
+        return None
+    return decp_json
 
 
-# Pour chaque page de recherche, extraction de la liste des pages
+@task(log_prints=True)
+def scrap_marches_securises_month(year: str, month: str, dist_dir: Path):
+    marches = []
+    page = 1
+    with httpx.Client() as client:
+        while True:
+            search_url = (
+                f"https://www.marches-securises.fr/entreprise/?module=liste_donnees_essentielles&page={str(page)}&siret_pa=&siret_pa1=&date_deb={year}-{month}-01&date_fin={year}-{month}-31&date_deb_ms={year}-{month}-01&date_fin_ms={year}-{month}-31&ref_ume=&cpv_et=&type_procedure=&type_marche=&objet=&rs_oe=&dep_liste=&ctrl_key=aWwwS1pLUlFzejBOYitCWEZzZTEzZz09&text=&donnees_essentielles=1&search="
+                f"table_ms&"
+            )
 
-# On vise en résultat un JSON par recherche
+            def parse_result_page():
+                html_result_page = get_html(search_url, client)
+                soup = BeautifulSoup(html_result_page, "html.parser")
+                result_div = soup.find("div", attrs={"id": "liste_consultations"})
+                print("Year: ", year, "Month: ", month, "Page: ", str(page))
+                return result_div.find_all(
+                    "a", attrs={"title": "Télécharger au format Json"}
+                )
 
-# Pour chaque page, une liste de HTML+JSON
+            try:
+                json_links = parse_result_page()
+            except AttributeError:
+                sleep(3)
+                "Retrying result page download and parsing..."
+                json_links = parse_result_page()
 
-# Pour chaque JSON, extraction + redressement
+            if not json_links:
+                break
+            else:
+                page += 1
+            for json_link in json_links:
+                json_href = "https://www.marches-securises.fr" + json_link["href"]
+                decp_json = get_json_marches_securises(json_href, client)
+                marches.append(decp_json)
+        if len(marches) > 0:
+            dicts = {"marches": marches}
+            json_path = dist_dir / f"marches-securises_{year}-{month}.json"
+            with open(json_path, "w") as f:
+                f.write(json.dumps(dicts))
+            publish_scrap_to_datagouv(year, month, json_path)
 
-# fusion des JSON par plage temporelle
 
-# publication sur data.gouv.fr
+@task(log_prints=True)
+def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
+    options = Options()
+    # options.add_argument("--headless")
+    options.set_preference("browser.download.folderList", 2)
+    options.set_preference("browser.download.manager.showWhenStarting", False)
+    options.set_preference("browser.download.dir", str(dist_dir))
+
+    driver = webdriver.Firefox(options=options)
+    driver.implicitly_wait(10)  # secondes
+
+    end_date = start_date = date(int(year), int(month), 1)
+    base_duration = timedelta(days=3)
+    nb_days_in_month = calendar.monthrange(start_date.year, start_date.month)[1]
+    last_month_day = start_date + timedelta(days=nb_days_in_month - 1)
+    marches_month = []
+
+    while end_date < last_month_day:
+        start_date_str = start_date.isoformat()
+        end_date = start_date + base_duration
+
+        if end_date > last_month_day:
+            end_date = last_month_day
+
+        driver.get("https://www.marches-publics.info/Annonces/rechercher")
+
+        def search_form(end_date_: date) -> date:
+            end_date_str_ = end_date_.isoformat()
+            sleep(1)
+            print()
+            print(f"## {start_date_str} -> {end_date_str_}")
+
+            # Formulaire recherche données essentielles
+            form = driver.find_element(By.ID, "formRech")
+            de_radio = form.find_element(By.ID, "typeDE")
+            de_radio.click()
+
+            # Remplir le formulaire
+            notif_debut = form.find_element(By.ID, "dateNotifDebut")
+            notif_debut.clear()
+            notif_debut.send_keys(start_date_str)
+            notif_fin = form.find_element(By.ID, "dateNotifFin")
+            notif_fin.clear()
+            notif_fin.send_keys(end_date_str_)
+
+            form.find_element(By.ID, "sub").click()
+            sleep(1)
+
+            # Soit le bouton de téléchargement apparaît, soit il y a une erreur parce
+            # que de trop nombreux résultats sont retournés
+            result = wait_for_either_element(driver)
+
+            if result == "error":
+                # On réessaie avec moins de réultats
+                if end_date_ != start_date:
+                    end_date_ = search_form(end_date_ - timedelta(days=1))
+                else:
+                    print("start_date == end_date et trop de résultats !")
+            elif result is None:
+                print("Pas de téléchargement, on skip.")
+            elif result == "timeout":
+                # On réessaie
+                end_date_ = search_form(end_date_)
+
+            return end_date
+
+        end_date = search_form(end_date)
+        end_date_str = end_date.isoformat()
+
+        json_path = dist_dir / "donneesEssentielles.json"
+
+        start_time = time.time()
+        last_size = 0
+        timeout = 10
+        downloaded = False
+
+        while time.time() - start_time < timeout and downloaded is False:
+            if json_path.exists():
+                current_size = json_path.stat().st_size
+                if current_size == last_size and current_size > 0:
+                    print(f"✅ {json_path.name} téléchargé.")
+                    sleep(0.1)
+                    json_path.rename(dist_dir / f"{start_date_str}_{end_date_str}.json")
+                    downloaded = True
+                last_size = current_size
+            time.sleep(0.2)
+
+        json_path = dist_dir / f"{start_date_str}_{end_date_str}.json"
+        if json_path.exists():
+            marches = json.load(open(json_path))["marches"]
+            print("longueur marchés", len(marches))
+            marches_month.extend(marches)
+            print("longueur marchés month", len(marches_month))
+        else:
+            print("Aucun fichier téléchargé.")
+
+        start_date = end_date + timedelta(days=1)
+
+    driver.close()
+
+
+def wait_for_either_element(driver, timeout=10):
+    """
+    Attend de voir si le bouton de téléchargement apparaît ou bien le message d'erreur.
+    Fonction générée en grande partie avec la LLM Euria, développée par Infomaniak
+    """
+    try:
+        # Wait for either element to appear
+        wait = WebDriverWait(driver, timeout)
+        result = wait.until(
+            lambda d: (
+                d.find_element(By.ID, "downloadDonnees")
+                if d.find_elements(By.ID, "downloadDonnees")
+                else None
+            )
+            or (
+                d.find_element(By.CLASS_NAME, "alert")
+                if d.find_elements(By.CLASS_NAME, "alert")
+                else None
+            )
+        )
+
+        # Determine which one appeared
+        if result.get_attribute("id") == "downloadDonnees":
+            result.click()
+            print("download started...")
+            sleep(2)
+            return "download"
+        elif "recherche" in result:
+            print("too many results")
+            return "error"
+        else:
+            print("Ni téléchargement, ni erreur...")
+            return None  # Should not happen
+
+    except TimeoutException:
+        print("[Timeout] Ni bouton ni erreur dans le temps impart...")
+        return "timeout"
+    except Exception as e:
+        print(f"[Error] Unexpected error while waiting: {e}")
+        return None
