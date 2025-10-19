@@ -107,13 +107,13 @@ def scrap_marches_securises_month(year: str, month: str, dist_dir: Path):
             json_path = dist_dir / f"marches-securises_{year}-{month}.json"
             with open(json_path, "w") as f:
                 f.write(json.dumps(dicts))
-            publish_scrap_to_datagouv(year, month, json_path)
+            publish_scrap_to_datagouv(year, month, json_path, "marches-securises.fr")
 
 
 @task(log_prints=True)
 def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
     options = Options()
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
     options.set_preference("browser.download.folderList", 2)
     options.set_preference("browser.download.manager.showWhenStarting", False)
     options.set_preference("browser.download.dir", str(dist_dir))
@@ -154,7 +154,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             notif_fin = form.find_element(By.ID, "dateNotifFin")
             notif_fin.clear()
             notif_fin.send_keys(end_date_str_)
-
+            sleep(0.1)
             form.find_element(By.ID, "sub").click()
             sleep(1)
 
@@ -174,6 +174,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
                 # On réessaie
                 end_date_ = search_form(end_date_)
 
+            # End search_form()
             return end_date
 
         end_date = search_form(end_date)
@@ -185,6 +186,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
         last_size = 0
         timeout = 10
         downloaded = False
+        final_json_path = dist_dir / f"{start_date_str}_{end_date_str}.json"
 
         while time.time() - start_time < timeout and downloaded is False:
             if json_path.exists():
@@ -192,14 +194,13 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
                 if current_size == last_size and current_size > 0:
                     print(f"✅ {json_path.name} téléchargé.")
                     sleep(0.1)
-                    json_path.rename(dist_dir / f"{start_date_str}_{end_date_str}.json")
+                    json_path.rename(final_json_path)
                     downloaded = True
                 last_size = current_size
             time.sleep(0.2)
 
-        json_path = dist_dir / f"{start_date_str}_{end_date_str}.json"
-        if json_path.exists():
-            marches = json.load(open(json_path))["marches"]
+        if final_json_path.exists():
+            marches = json.load(open(final_json_path))["marches"]
             print("longueur marchés", len(marches))
             marches_month.extend(marches)
             print("longueur marchés month", len(marches_month))
@@ -207,8 +208,19 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             print("Aucun fichier téléchargé.")
 
         start_date = end_date + timedelta(days=1)
+        # End while loop du mois
 
     driver.close()
+
+    if len(marches_month) > 0:
+        # Format 2022, donc double niveau
+        dicts = {"marches": {"marche": marches_month}}
+        json_path = dist_dir / f"aws_{year}-{month}.json"
+        with open(json_path, "w") as f:
+            f.write(json.dumps(dicts))
+        publish_scrap_to_datagouv(year, month, json_path, "aws")
+
+    # End scrap AWS
 
 
 def wait_for_either_element(driver, timeout=10):
@@ -216,13 +228,15 @@ def wait_for_either_element(driver, timeout=10):
     Attend de voir si le bouton de téléchargement apparaît ou bien le message d'erreur.
     Fonction générée en grande partie avec la LLM Euria, développée par Infomaniak
     """
+    download_button_id = "downloadDonnees"
+
     try:
         # Wait for either element to appear
         wait = WebDriverWait(driver, timeout)
         result = wait.until(
             lambda d: (
-                d.find_element(By.ID, "downloadDonnees")
-                if d.find_elements(By.ID, "downloadDonnees")
+                d.find_element(By.ID, download_button_id)
+                if d.find_elements(By.ID, download_button_id)
                 else None
             )
             or (
@@ -233,7 +247,7 @@ def wait_for_either_element(driver, timeout=10):
         )
 
         # Determine which one appeared
-        if result.get_attribute("id") == "downloadDonnees":
+        if result.get_attribute("id") == download_button_id:
             result.click()
             print("download started...")
             sleep(2)
@@ -246,7 +260,7 @@ def wait_for_either_element(driver, timeout=10):
             return None  # Should not happen
 
     except TimeoutException:
-        print("[Timeout] Ni bouton ni erreur dans le temps impart...")
+        print("[Timeout] Ni bouton ni erreur dans le temps imparti...")
         return "timeout"
     except Exception as e:
         print(f"[Error] Unexpected error while waiting: {e}")
