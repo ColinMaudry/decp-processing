@@ -13,16 +13,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required to fetch tags properly
       - name: Get tag message
         run: |
           TAG_MESSAGE=$(git tag -l --format='%(contents)' ${{ github.ref_name }})
+          echo "$TAG_MESSAGE"
           echo "TAG_MESSAGE=${TAG_MESSAGE}" >> $GITHUB_ENV
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1.20.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-          TAG_MESSAGE: ${{ env.TAG_MESSAGE }}
         with:
           body: ${{ env.TAG_MESSAGE }}
           draft: false
