@@ -139,7 +139,6 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
         def search_form(end_date_: date) -> date:
             end_date_str_ = end_date_.isoformat()
             sleep(1)
-            print()
             print(f"➡️  {start_date_str} -> {end_date_str_}")
 
             # Formulaire recherche données essentielles
@@ -200,7 +199,10 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             time.sleep(0.2)
 
         if final_json_path.exists():
-            marches = json.load(open(final_json_path))["marches"]
+            # Nettoyage du fichier
+            with open(final_json_path, "r") as f:
+                json_text = f.read().replace("\n\n,\nInternal Server Error", "")
+            marches = json.loads(json_text)["marches"]
             print("longueur marchés", len(marches))
             marches_month.extend(marches)
             print("longueur marchés month", len(marches_month))
