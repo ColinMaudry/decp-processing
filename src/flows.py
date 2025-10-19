@@ -1,6 +1,8 @@
 import datetime
 import os
 import shutil
+from pathlib import Path
+from shutil import rmtree
 
 import polars as pl
 from prefect import flow, task
@@ -15,18 +17,20 @@ from config import (
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
-    MARCHES_SECURISES_SCRAPING_MODE,
     MAX_PREFECT_WORKERS,
     MONTH_NOW,
+    SCRAPING_MODE,
+    SCRAPING_TARGET,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
 )
 from tasks.clean import clean_decp
 from tasks.dataset_utils import list_resources
 from tasks.enrich import enrich_from_sirene
-from tasks.get import get_resource, scrap_marches_securises_month
+from tasks.get import get_resource
 from tasks.output import generate_final_schema, save_to_databases, save_to_files
 from tasks.publish import publish_to_datagouv
+from tasks.scrap import scrap_aws_month, scrap_marches_securises_month
 from tasks.transform import (
     concat_decp_json,
     get_prepare_unites_legales,
@@ -179,29 +183,53 @@ def sirene_preprocess():
 
 
 @flow(log_prints=True)
-def scrap_marches_securises(mode=None, year=None):
-    mode = mode or MARCHES_SECURISES_SCRAPING_MODE
+def scrap(target: str = None, mode: str = None, month=None, year=None):
+    # Remise à zéro du dossier dist
+    dist_dir: Path = DIST_DIR / target
+    if dist_dir.exists():
+        print(f"Suppression de {dist_dir}...")
+        rmtree(dist_dir)
+    else:
+        dist_dir.mkdir(parents=True)
+
+    # Sélection du target
+    target = target or SCRAPING_TARGET
+
+    # Sélection de la fonction de scraping en fonction de target
+    if target == "aws":
+        scrap_target_month = scrap_aws_month
+    elif target == "marches-securises.fr":
+        scrap_target_month = scrap_marches_securises_month
+    else:
+        print("Quel target ?")
+        raise ValueError
 
     current_year = DATE_NOW[:4]
+    current_month = MONTH_NOW[-2:]
+    month = month or current_month
+    year = year or current_year
 
+    # Sélection du mode
+    mode = mode or SCRAPING_MODE
+
+    # Sélection de la plage temporelle
     if mode == "month":
-        scrap_marches_securises_month(current_year, MONTH_NOW[-2:])
+        scrap_target_month(year, month, dist_dir)
 
     elif mode == "year":
-        year = year or current_year
         for month in reversed(range(1, 13)):
             month = str(month).zfill(2)
-            scrap_marches_securises_month(year, month)
+            scrap_target_month(year, month, dist_dir)
 
     elif mode == "all":
         current_year = int(current_year)
         for year in reversed(range(2018, current_year + 2)):
-            scrap_marches_securises("year", str(year))
+            scrap(target="target", mode="year", year=str(year))
 
     else:
         print("Mauvaise configuration")
 
 
 if __name__ == "__main__":
-    decp_processing()
-    # scrap_marches_securises()
+    # decp_processing()
+    scrap("aws", mode="month", month="03")

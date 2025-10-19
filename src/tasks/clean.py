@@ -169,20 +169,16 @@ def clean_null_equivalent(lf: pl.LazyFrame) -> pl.LazyFrame:
 
 
 def clean_titulaires(lf: pl.LazyFrame) -> pl.LazyFrame:
-    # Étape 1: Remplacer les listes de titulaires "vides" (contenant uniquement des structs avec des nulls) par null
-    # Car Polars ne considère pas [{{null,null}}] comme une valeur null lors du fill_null()
-    # Structure: List(Struct({'titulaire': Struct({'typeIdentifiant': String, 'id': String})}))
     def filter_titulaires(titulaires_list):
         """
-        Filter a list of titulaire objects:
-        - If object has 'titulaire' key → check id/typeIdentifiant inside it.
-        - Else → check id/typeIdentifiant directly.
-        - Keep only if at least one of id or typeIdentifiant is NOT null.
-        - Return None if the resulting list is empty.
+        Filtrer une liste d’objets `titulaire`
+        - Si l’objet contient le champ `'titulaire'` → vérifier les champs `id` et `typeIdentifiant` à l’intérieur.
+        - Sinon → vérifier directement les champs `id` et `typeIdentifiant` au niveau de l’objet.
+        - Conserver uniquement les objets où **au moins un** des deux champs (`id` ou `typeIdentifiant`) **n’est pas nul**.
+        - Si la liste résultante est vide → retourner `null`.
+
+        J'aurais aimé écrire cette fonction en pur Polars (Expression API), mais c'était compliqué compte tneu du nombre de cas de figures à prendre compte (champs absents/présents).
         """
-        # if not isinstance(titulaires_list, list):
-        #     print("not a list")
-        #     return []
 
         valid_items = []
         for item in titulaires_list:
@@ -207,28 +203,23 @@ def clean_titulaires(lf: pl.LazyFrame) -> pl.LazyFrame:
         # Return an empty list if no valid items left
         return valid_items
 
-    # Apply to your Polars DataFrame
     lf = lf.with_columns(
-        pl.col("titulaires")
-        .map_elements(
-            filter_titulaires,
-            return_dtype=pl.List(
-                pl.Struct(
-                    {"titulaire_id": pl.String, "titulaire_typeIdentifiant": pl.String}
-                )
-            ),
-        )
-        .alias("titulaires"),
-        pl.col("modification_titulaires")
-        .map_elements(
-            filter_titulaires,
-            return_dtype=pl.List(
-                pl.Struct(
-                    {"titulaire_id": pl.String, "titulaire_typeIdentifiant": pl.String}
-                )
-            ),
-        )
-        .alias("modification_titulaires"),
+        [
+            pl.col(col)
+            .map_elements(
+                filter_titulaires,
+                return_dtype=pl.List(
+                    pl.Struct(
+                        {
+                            "titulaire_id": pl.String,
+                            "titulaire_typeIdentifiant": pl.String,
+                        }
+                    )
+                ),
+            )
+            .alias(col)
+            for col in ["titulaires", "modification_titulaires"]
+        ]
     )
 
     # Remplacer les listes de titulaires vides par null (filter_titulaires() ne peut retourner None)
