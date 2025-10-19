@@ -65,8 +65,12 @@ sirene_data_parent_dir = make_path_from_env("SIRENE_DATA_PARENT_DIR", DATA_DIR)
 SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
 # SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
 
-# Mode de scraping de marches-securises.fr
-MARCHES_SECURISES_SCRAPING_MODE = os.getenv("MARCHES_SECURISES_SCRAPING_MODE", "month")
+# Mode de scraping
+SCRAPING_MODE = os.getenv("SCRAPING_MODE", "month")
+
+# Target (plateforme cible pour le scraping)
+SCRAPING_TARGET = os.getenv("SCRAPING_TARGET")
+
 
 # Dossier de stockage des résultats de tâches et du cache
 # https://docs.prefect.io/v3/advanced/results#default-persistence-configuration

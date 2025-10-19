@@ -19,6 +19,8 @@ from config import (
     DIST_DIR,
     MAX_PREFECT_WORKERS,
     MONTH_NOW,
+    SCRAPING_MODE,
+    SCRAPING_TARGET,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
 )
@@ -181,7 +183,7 @@ def sirene_preprocess():
 
 
 @flow(log_prints=True)
-def scrap(target: str, mode: str = None, year=None):
+def scrap(target: str = None, mode: str = None, year=None):
     # Remise à zéro du dossier dist
     dist_dir: Path = DIST_DIR / target
     if dist_dir.exists():
@@ -189,6 +191,9 @@ def scrap(target: str, mode: str = None, year=None):
         rmtree(dist_dir)
     else:
         dist_dir.mkdir(parents=True)
+
+    # Sélection du target
+    target = target or SCRAPING_TARGET
 
     # Sélection de la fonction de scraping en fonction de target
     if target == "aws":
@@ -200,6 +205,9 @@ def scrap(target: str, mode: str = None, year=None):
         raise ValueError
 
     current_year = DATE_NOW[:4]
+
+    # Sélection du mode
+    mode = mode or SCRAPING_MODE
 
     # Sélection de la plage temporelle
     if mode == "month":
