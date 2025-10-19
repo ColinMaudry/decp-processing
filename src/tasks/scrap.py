@@ -199,10 +199,17 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             time.sleep(0.2)
 
         if final_json_path.exists():
-            # Nettoyage du fichier
             with open(final_json_path, "r") as f:
-                json_text = f.read().replace("\n\n,\nInternal Server Error", "")
-            marches = json.loads(json_text)["marches"]
+                json_text = f.read()
+            try:
+                marches = json.loads(json_text)["marches"]
+            except json.decoder.JSONDecodeError:
+                print("⚠️  Le décodage JSON a échoué, tentative de correction...")
+                replacements = {"\n\n,\nInternal Server Error": "", "[\n,": "["}
+                for key in replacements.keys():
+                    json_text = json_text.replace(key, replacements[key])
+                marches = json.loads(json_text)["marches"]
+
             marches_month.extend(marches)
             print(f"longueur marchés {len(marches)} (mois : {len(marches_month)})")
         else:
