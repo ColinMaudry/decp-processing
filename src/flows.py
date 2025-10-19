@@ -183,7 +183,7 @@ def sirene_preprocess():
 
 
 @flow(log_prints=True)
-def scrap(target: str = None, mode: str = None, year=None):
+def scrap(target: str = None, mode: str = None, month=None, year=None):
     # Remise à zéro du dossier dist
     dist_dir: Path = DIST_DIR / target
     if dist_dir.exists():
@@ -205,16 +205,18 @@ def scrap(target: str = None, mode: str = None, year=None):
         raise ValueError
 
     current_year = DATE_NOW[:4]
+    current_month = MONTH_NOW[-2:]
+    month = month or current_month
+    year = year or current_year
 
     # Sélection du mode
     mode = mode or SCRAPING_MODE
 
     # Sélection de la plage temporelle
     if mode == "month":
-        scrap_target_month(current_year, MONTH_NOW[-2:], dist_dir)
+        scrap_target_month(year, month, dist_dir)
 
     elif mode == "year":
-        year = year or current_year
         for month in reversed(range(1, 13)):
             month = str(month).zfill(2)
             scrap_target_month(year, month, dist_dir)
@@ -230,4 +232,4 @@ def scrap(target: str = None, mode: str = None, year=None):
 
 if __name__ == "__main__":
     # decp_processing()
-    scrap("aws", mode="month")
+    scrap("aws", mode="month", month="03")
