@@ -1,6 +1,9 @@
-## 2.3.0
+## 2.3.0 2025-10-19
 
-- scraping des données DECP de [marches-oublics.infos (AWS)](https://www.data.gouv.fr/datasets/68caf6b135f19236a4f37a32/) ([#118](https://github.com/ColinMaudry/decp-processing/issues/118))
+- scraping des données DECP de marches-oublics.infos (AWS) ([#118](https://github.com/ColinMaudry/decp-processing/issues/118))
+- ajout des [données AWS scrapées](<(https://www.data.gouv.fr/datasets/68caf6b135f19236a4f37a32/)>) à la consolidation
+- ajout des[ données officielles AWS](https://www.data.gouv.fr/datasets/declaration-des-donnees-essentielles-avenue-web-systemes/) (a priori incomplètes) à la consolidation
+- scripts de scrap plus flexibles
 
 #### 2.2.1 2025-10-18
 
