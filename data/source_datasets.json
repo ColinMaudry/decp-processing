@@ -267,5 +267,10 @@
     "id": "68ebb48dd708fdb2d7c15bff",
     "name": "Données des marchés publics de marches-securises.fr",
     "code": "scrap_marches-securises.fr"
+  },
+  {
+    "id": "65cf11893fda573b53b19f52",
+    "name": "Données de marches-publics.info (AWS) - officiel",
+    "code": "marches-publics.info_aws"
   }
 ]
