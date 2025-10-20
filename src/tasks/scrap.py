@@ -207,7 +207,11 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
                 marches = json.loads(json_text)["marches"]
             except json.decoder.JSONDecodeError:
                 print("⚠️  Le décodage JSON a échoué, tentative de correction...")
-                replacements = {"\n\n,\nInternal Server Error": "", "[\n,": "["}
+                replacements = {
+                    "\n\n,\nInternal Server Error": "",
+                    "[\n,": "[",
+                    '"Le Bois de Plantes"': "Le Bois de Plantes",
+                }
                 for key in replacements.keys():
                     json_text = json_text.replace(key, replacements[key])
                 marches = json.loads(json_text)["marches"]
