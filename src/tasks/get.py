@@ -101,7 +101,7 @@ def find_json_decp_format(chunk, decp_formats):
     raise ValueError("Pas de match trouvé parmis les schémas passés")
 
 
-@task(persist_result=False)
+@task(persist_result=False, log_prints=True)
 def json_stream_to_parquet(
     url: str, output_path: Path, decp_formats: list[DecpFormat] | None = None
 ) -> tuple[set, DecpFormat]:
@@ -122,7 +122,20 @@ def json_stream_to_parquet(
     http_stream_iter = stream_get(url)
     stream_replace_iter = stream_replace_bytestring(
         http_stream_iter, rb"NaN([,\n])", rb"null\1"
-    )
+    )  # Nan => null
+
+    # Le dataset AWS scraping a pas mal de bugs
+    if "/68caf6b135f19236a4f37a32/" in url:
+        print("Remplacements spécifiques pour AWS...")
+        stream_replace_iter = stream_replace_bytestring(
+            stream_replace_bytestring(
+                stream_replace_bytestring(stream_replace_iter, rb"(\\\\\\)", rb"\\"),
+                rb"\\\\",
+                rb"\\",
+            ),
+            rb"\\ ",
+            rb" ",
+        )
 
     # In first iteration, will find the right format
     chunk = next(stream_replace_iter)
