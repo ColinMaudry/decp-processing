@@ -161,6 +161,7 @@ EXCLUDED_RESOURCES = (
         "e10ea7c4-4992-45d8-a191-07dac6991f89",  # données Région Bretagne inexistante (404)
         "2d6dd1a6-8471-48c0-a207-6715cff06a99",  # données Région Bretagne JSON non-réglementaire
         "7629a6a1-3b8a-4570-8562-3a7cf82be88e",  # données Région Bretagne XML non-réglementaire
+        "3bdd5a64-c28e-4c6a-84fd-5a28bcaa53e9",  # remplacements de chaînes de caractères dans les fichiers JSON AWS
     ]
     + EXCLUDED_RESOURCES
 )

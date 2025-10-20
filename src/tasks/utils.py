@@ -20,6 +20,9 @@ from config import (
 
 
 def stream_replace_bytestring(iterator, old_bytestring: bytes, new_bytestring: bytes):
+    """
+    Remplacement de texte encodé avec regex, avec prise en compte des bords de "chunk (merci Euria la LLM d'Infomaniak)
+    """
     buffer = b""
     length_to_replace = len(old_bytestring)
 
