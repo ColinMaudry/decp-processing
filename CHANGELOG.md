@@ -1,3 +1,7 @@
+#### 2.3.2 2025-10-20
+
+- Remplacements de texte pendant le scraping AWS pour produire du JSON valide
+
 #### 2.3.1 2025-10-20
 
 - stabilisation du scrap de marche-securises.fr (si `parse_result_page()` échoue)
