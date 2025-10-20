@@ -1,3 +1,8 @@
+#### 2.3.1 2025-10-20
+
+- stabilisation du scrap de marche-securises.fr (si `parse_result_page()` échoue)
+- remplacements dans les données AWS pour redresser le JSON invalide (guillemets, etc.)
+
 ## 2.3.0 2025-10-19
 
 - scraping des données DECP de marches-oublics.infos (AWS) ([#118](https://github.com/ColinMaudry/decp-processing/issues/118))
