@@ -128,6 +128,10 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
     nb_days_in_month = calendar.monthrange(start_date.year, start_date.month)[1]
     last_month_day = start_date + timedelta(days=nb_days_in_month - 1)
     marches_month = []
+    replacements = httpx.get(
+        "https://www.data.gouv.fr/api/1/datasets/r/3bdd5a64-c28e-4c6a-84fd-5a28bcaa53e9",
+        follow_redirects=True,
+    ).json()
 
     while end_date < last_month_day:
         start_date_str = start_date.isoformat()
@@ -207,11 +211,6 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
                 marches = json.loads(json_text)["marches"]
             except json.decoder.JSONDecodeError:
                 print("⚠️  Le décodage JSON a échoué, tentative de correction...")
-                replacements = {
-                    "\n\n,\nInternal Server Error": "",
-                    "[\n,": "[",
-                    '"Le Bois de Plantes"': "Le Bois de Plantes",
-                }
                 for key in replacements.keys():
                     json_text = json_text.replace(key, replacements[key])
                 marches = json.loads(json_text)["marches"]
