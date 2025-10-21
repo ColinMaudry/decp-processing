@@ -1,7 +1,7 @@
 [project]
 name = "decp-processing"
 description = "Traitement des données des marchés publics français."
-version = "2.3.2"
+version = "2.3.3"
 requires-python = ">= 3.9"
 authors = [
     { name = "Colin Maudry", email = "colin+decp@maudry.com" }

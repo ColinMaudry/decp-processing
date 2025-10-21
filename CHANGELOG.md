@@ -1,3 +1,7 @@
+#### 2.3.3 2025-10-21
+
+- Regex générique pour corriger les problèmes d'échappements dans le JSON AWS
+
 #### 2.3.2 2025-10-20
 
 - Remplacements de texte pendant le scraping AWS pour produire du JSON valide
