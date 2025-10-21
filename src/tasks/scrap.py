@@ -1,5 +1,6 @@
 import calendar
 import json
+import re
 import time
 from datetime import date, timedelta
 from pathlib import Path
@@ -128,10 +129,6 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
     nb_days_in_month = calendar.monthrange(start_date.year, start_date.month)[1]
     last_month_day = start_date + timedelta(days=nb_days_in_month - 1)
     marches_month = []
-    replacements = httpx.get(
-        "https://www.data.gouv.fr/api/1/datasets/r/3bdd5a64-c28e-4c6a-84fd-5a28bcaa53e9",
-        follow_redirects=True,
-    ).json()
 
     while end_date < last_month_day:
         start_date_str = start_date.isoformat()
@@ -210,9 +207,21 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             try:
                 marches = json.loads(json_text)["marches"]
             except json.decoder.JSONDecodeError:
-                print("⚠️  Le décodage JSON a échoué, tentative de correction...")
-                for key in replacements.keys():
-                    json_text = json_text.replace(key, replacements[key])
+                print("Le décodage JSON a échoué, tentative de correction...")
+
+                def fix_unescaped_quotes_in_objet(text):
+                    """Générée avec l'aide de ChatGPT (GPT-4o)"""
+
+                    # Match the value of "objet" up to the "montant" key
+                    def replacer(match):
+                        # Escape quotes that are not already escaped
+                        fixed_objet = re.sub(r'(?<!\\)"', r"\"", match.group(1))
+                        return f'"objet":"{fixed_objet}","'
+
+                    fixed_text = re.sub(r'"objet":"(.*?)","', replacer, text)
+                    return fixed_text
+
+                json_text = fix_unescaped_quotes_in_objet(json_text)
                 marches = json.loads(json_text)["marches"]
 
             marches_month.extend(marches)
