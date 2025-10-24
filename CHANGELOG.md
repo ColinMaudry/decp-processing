@@ -1,3 +1,7 @@
+#### 2.3.4 2025-10-24
+
+- Correction du nettoyage des backslash AWS
+
 #### 2.3.3 2025-10-21
 
 - Regex générique pour corriger les problèmes d'échappements dans le JSON AWS

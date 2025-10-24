@@ -82,27 +82,27 @@ if __name__ == "__main__":
     #     },
     # )
 
-    # flow.from_source(
-    #     source=GitRepository(
-    #         url="https://github.com/ColinMaudry/decp-processing.git", branch="main"
-    #     ),
-    #     entrypoint="src/flows.py:scrap",
-    # ).deploy(
-    #     name="scrap-marches-securises",
-    #     description="Scraping des données de marches-securises.fr.",
-    #     ignore_warnings=True,
-    #     work_pool_name="local",
-    #     cron="0 0 * * 1-5",
-    #     job_variables={
-    #         "env": {
-    #             "DECP_PROCESSING_PUBLISH": "True",
-    #             "DECP_DIST_DIR": "/srv/shared/decp/prod/dist",
-    #             "PREFECT_TASKS_REFRESH_CACHE": "False",
-    #             "SCRAPING_MODE": "month",
-    #             "SCRAPING_TARGET": "marches-securises.fr",
-    #         }
-    #     },
-    # )
+    flow.from_source(
+        source=GitRepository(
+            url="https://github.com/ColinMaudry/decp-processing.git", branch="main"
+        ),
+        entrypoint="src/flows.py:scrap",
+    ).deploy(
+        name="scrap-marches-securises",
+        description="Scraping des données de marches-securises.fr.",
+        ignore_warnings=True,
+        work_pool_name="local",
+        cron="0 0 * * 1-5",
+        job_variables={
+            "env": {
+                "DECP_PROCESSING_PUBLISH": "True",
+                "DECP_DIST_DIR": "/srv/shared/decp/prod/dist",
+                "PREFECT_TASKS_REFRESH_CACHE": "False",
+                "SCRAPING_MODE": "month",
+                "SCRAPING_TARGET": "marches-securises.fr",
+            }
+        },
+    )
 
     # flow.from_source(
     #     source=GitRepository(
@@ -126,24 +126,24 @@ if __name__ == "__main__":
     #     },
     # )
 
-    # flow.from_source(
-    #     source=GitRepository(
-    #         url="https://github.com/ColinMaudry/decp-processing.git", branch="main"
-    #     ),
-    #     entrypoint="src/flows.py:scrap",
-    # ).deploy(
-    #     name="scrap",
-    #     description="Scraping des données.",
-    #     ignore_warnings=True,
-    #     work_pool_name="local",
-    #     job_variables={
-    #         "env": {
-    #             "DECP_PROCESSING_PUBLISH": "True",
-    #             "DECP_DIST_DIR": "/srv/shared/decp/prod/dist",
-    #             "PREFECT_TASKS_REFRESH_CACHE": "True",
-    #         }
-    #     },
-    # )
+    flow.from_source(
+        source=GitRepository(
+            url="https://github.com/ColinMaudry/decp-processing.git", branch="main"
+        ),
+        entrypoint="src/flows.py:scrap",
+    ).deploy(
+        name="scrap",
+        description="Scraping des données.",
+        ignore_warnings=True,
+        work_pool_name="local",
+        job_variables={
+            "env": {
+                "DECP_PROCESSING_PUBLISH": "True",
+                "DECP_DIST_DIR": "/srv/shared/decp/prod/dist",
+                "PREFECT_TASKS_REFRESH_CACHE": "True",
+            }
+        },
+    )
 
     flow.from_source(
         source=GitRepository(
