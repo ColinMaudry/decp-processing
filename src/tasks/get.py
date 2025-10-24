@@ -124,8 +124,8 @@ def json_stream_to_parquet(
         http_stream_iter, rb"NaN([,\n])", rb"null\1"
     )  # Nan => null
 
-    # Le dataset AWS scraping a pas mal de bugs
-    if "/68caf6b135f19236a4f37a32/" or "/aws/" in url:
+    # Le dataset AWS scraping a pas mal de bugs de backslash
+    if "/68caf6b135f19236a4f37a32/" in url or "/aws/" in url:
         print("Remplacements spécifiques pour AWS...")
         stream_replace_iter = stream_replace_bytestring(
             stream_replace_bytestring(

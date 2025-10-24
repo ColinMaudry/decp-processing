@@ -231,5 +231,5 @@ def scrap(target: str = None, mode: str = None, month=None, year=None):
 
 
 if __name__ == "__main__":
-    # decp_processing()
-    scrap("aws", mode="month", month="03")
+    decp_processing()
+    # scrap("aws", mode="month", month="03")
