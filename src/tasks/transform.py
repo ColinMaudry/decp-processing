@@ -274,22 +274,22 @@ def concat_decp_json(dfs: list) -> pl.DataFrame:
     return df_clean
 
 
-def extract_unique_acheteurs_siret(df: pl.LazyFrame):
+def extract_unique_acheteurs_siret(lf: pl.LazyFrame):
     # Extraction des SIRET des DECP dans une copie du df de base
-    df = df.select("acheteur_id")
-    df = df.unique().filter(pl.col("acheteur_id") != "")
-    df = df.sort(by="acheteur_id")
-    return df
+    lf = lf.select("acheteur_id")
+    lf = lf.unique()
+    lf = lf.sort(by="acheteur_id")
+    return lf
 
 
-def extract_unique_titulaires_siret(df: pl.LazyFrame):
+def extract_unique_titulaires_siret(lf: pl.LazyFrame):
     # Extraction des SIRET des DECP dans une copie du df de base
-    df = df.select("titulaire_id", "titulaire_typeIdentifiant")
-    df = df.unique().filter(
+    lf = lf.select("titulaire_id", "titulaire_typeIdentifiant")
+    lf = lf.unique().filter(
         pl.col("titulaire_id") != "", pl.col("titulaire_typeIdentifiant") == "SIRET"
     )
-    df = df.sort(by="titulaire_id")
-    return df
+    lf = lf.sort(by="titulaire_id")
+    return lf
 
 
 @task
@@ -302,6 +302,32 @@ def get_prepare_unites_legales(processed_parquet_path):
         .sort("dateDebut", descending=False)
         .unique(subset=["siren"], keep="last")
         .select(["siren", "denominationUniteLegale"])
+        .sink_parquet(processed_parquet_path)
+    )
+
+
+def get_prepare_etablissements(processed_parquet_path):
+    print("Téléchargement des données établissements et sélection des colonnes...")
+
+    schema = {
+        "siret": pl.String,
+        "codeCommuneEtablissement": pl.String,
+        "coordonneeLambertAbscisseEtablissement": pl.Float64,
+        "coordonneeLambertOrdonneeEtablissement": pl.Float64,
+        "etatAdministratifEtablissement": pl.Enum(["A", "F"]),
+        "activitePrincipaleEtablissement": pl.String,
+        "nomenclatureActivitePrincipaleEtablissement": pl.Enum(
+            ["NAF1993", "NAFRev1", "NAFRev2", "NAP"]
+        ),
+    }
+
+    (
+        pl.scan_parquet(os.environ["SIRENE_ETABLISSEMENTS_URL"])
+        .select(schema.keys())
+        .filter(pl.col("siret").is_not_null())
+        .with_columns(
+            [pl.col(col).cast(schema[col]).alias(col) for col in schema.keys()]
+        )
         .sink_parquet(processed_parquet_path)
     )
 

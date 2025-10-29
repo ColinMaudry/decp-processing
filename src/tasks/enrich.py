@@ -9,35 +9,12 @@ from tasks.transform import (
 )
 
 
-def add_etablissement_data(
-    df: pl.LazyFrame, etablissement_columns: list, siret_column: str
-) -> pl.LazyFrame:
-    # Récupération des données SIRET titulaires
-    schema_etablissements = {
-        "siret": "object",
-        "siren": "object",
-        "longitude": "float",
-        "latitude": "float",
-        "activitePrincipaleEtablissement": "object",
-        "codeCommuneEtablissement": "object",
-        "etatAdministratifEtablissement": "category",
-    }
-    # TODO: fix
-    etablissement_df_chunked = pl.scan_csv(
-        SIRENE_DATA_DIR / "etablissements.parquet",
-        dtype=schema_etablissements,
-        index_col=None,
-        usecols=["siret"] + etablissement_columns,
-    )
+def add_etablissement_data(lf: pl.LazyFrame, siret_column: str) -> pl.LazyFrame:
+    # Récupération des données SIRET titulaires préparées
+    lf_etablissement = pl.scan_parquet(SIRENE_DATA_DIR / "etablissements.parquet")
 
-    df = pl.merge(
-        df,
-        etablissement_df_chunked,
-        how="inner",
-        left_on="titulaire_id",
-        right_on="siret",
-    )
-    return df
+    lf = lf.join(lf_etablissement, how="inner", left_on=siret_column, right_on="siret")
+    return lf
 
 
 def add_unite_legale_data(
@@ -72,21 +49,21 @@ def enrich_from_sirene(df: pl.LazyFrame):
     # DONNÉES SIRENE ACHETEURS
 
     print("Extraction des SIRET des acheteurs...")
-    df_sirets_acheteurs = extract_unique_acheteurs_siret(df.clone())
+    lf_sirets_acheteurs = extract_unique_acheteurs_siret(df.clone())
 
-    # print("Ajout des données établissements (acheteurs)...")
-    # df_sirets_acheteurs = add_etablissement_data(
-    #     df_sirets_acheteurs, ["enseigne1Etablissement"], "acheteur_id"
-    # )
+    print("Ajout des données établissements (acheteurs)...")
+    lf_sirets_acheteurs = add_etablissement_data(
+        lf_sirets_acheteurs, [""], "acheteur_id"
+    )
 
     print("Ajout des données unités légales (acheteurs)...")
     df = add_unite_legale_data(
-        df, df_sirets_acheteurs, siret_column="acheteur_id", type_siret="acheteur"
+        df, lf_sirets_acheteurs, siret_column="acheteur_id", type_siret="acheteur"
     )
-    del df_sirets_acheteurs
+    del lf_sirets_acheteurs
 
     # print("Construction du champ acheteur_nom à partir des données SIRENE...")
-    # df_sirets_acheteurs = make_acheteur_nom(df_sirets_acheteurs)
+    # lf_sirets_acheteurs = make_acheteur_nom(lf_sirets_acheteurs)
 
     # DONNÉES SIRENE TITULAIRES
 
