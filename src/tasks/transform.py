@@ -328,6 +328,13 @@ def get_prepare_etablissements(processed_parquet_path):
         .with_columns(
             [pl.col(col).cast(schema[col]).alias(col) for col in schema.keys()]
         )
+        .with_columns(
+            pl.when(pl.col("codeCommuneEtablissement").str.starts_with("97"))
+            .then(pl.col("codeCommuneEtablissement").str.head(3).alias("departement"))
+            .otherwise(
+                pl.col("codeCommuneEtablissement").str.head(2).alias("departement")
+            )
+        )
         .sink_parquet(processed_parquet_path)
     )
 
