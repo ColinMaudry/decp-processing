@@ -9,57 +9,65 @@ from tasks.transform import (
 )
 
 
-def add_etablissement_data(lf: pl.LazyFrame, siret_column: str) -> pl.LazyFrame:
+def add_etablissement_data(
+    lf_sirets: pl.LazyFrame, siret_column: str, type_siret: str
+) -> pl.LazyFrame:
     # Récupération des données SIRET titulaires préparées
     lf_etablissement = pl.scan_parquet(SIRENE_DATA_DIR / "etablissements.parquet")
 
-    lf = lf.join(lf_etablissement, how="inner", left_on=siret_column, right_on="siret")
-    return lf
+    # Pas besoin de garder les SIRET qui ne matchent pas dans ce df intermédiaire, puisqu'on
+    # merge in fine avec le reste des données (how = inner)
+    lf_sirets = lf_sirets.join(
+        lf_etablissement, how="inner", left_on=siret_column, right_on="siret"
+    )
+    lf_sirets = lf_sirets.rename(
+        {
+            "departement": f"{type_siret}_departement",
+            "coordonneeLambertAbscisseEtablissement": f"{type_siret}_abscisse",
+            "coordonneeLambertOrdonneeEtablissement": f"{type_siret}_ordonnee",
+        }
+    )
+    return lf_sirets
 
 
 def add_unite_legale_data(
-    df: pl.LazyFrame, df_sirets: pl.LazyFrame, siret_column: str, type_siret: str
+    lf_sirets: pl.LazyFrame, siret_column: str, type_siret: str
 ) -> pl.LazyFrame:
     # Extraction du SIREN à partir du SIRET (9 premiers caractères)
-    df_sirets = df_sirets.with_columns(pl.col(siret_column).str.head(9).alias("siren"))
+    lf_sirets = lf_sirets.with_columns(pl.col(siret_column).str.head(9).alias("siren"))
 
     # Récupération des données des unités légales issues du flow de preprocess
     unites_legales_lf = pl.scan_parquet(SIRENE_DATA_DIR / "unites_legales.parquet")
 
     # Pas besoin de garder les SIRET qui ne matchent pas dans ce df intermédiaire, puisqu'on
     # merge in fine avec le reste des données
-    df_sirets = df_sirets.join(unites_legales_lf, how="inner", on="siren")
-    df_sirets = df_sirets.rename(
+    lf_sirets = lf_sirets.join(unites_legales_lf, how="inner", on="siren")
+    lf_sirets = lf_sirets.rename(
         {"denominationUniteLegale": f"{type_siret}_nom", "siren": f"{type_siret}_siren"}
     )
-    if type_siret == "acheteur":
-        # Ajout des données acheteurs enrichies au df de base
-        df = df.join(df_sirets, how="left", on="acheteur_id")
-    elif type_siret == "titulaire":
-        # En joignant en utilisant à la fois le SIRET et le typeIdentifiant, on s'assure qu'on ne joint pas sur
-        # des id de titulaires non-SIRET
-        df = df.join(
-            df_sirets, how="left", on=["titulaire_id", "titulaire_typeIdentifiant"]
-        )
-    return df
+
+    return lf_sirets
 
 
 @task(log_prints=True)
-def enrich_from_sirene(df: pl.LazyFrame):
+def enrich_from_sirene(lf: pl.LazyFrame):
     # DONNÉES SIRENE ACHETEURS
 
     print("Extraction des SIRET des acheteurs...")
-    lf_sirets_acheteurs = extract_unique_acheteurs_siret(df.clone())
+    lf_sirets_acheteurs = extract_unique_acheteurs_siret(lf.clone())
 
     print("Ajout des données établissements (acheteurs)...")
     lf_sirets_acheteurs = add_etablissement_data(
-        lf_sirets_acheteurs, [""], "acheteur_id"
+        lf_sirets_acheteurs, "acheteur_id", "acheteur"
     )
 
     print("Ajout des données unités légales (acheteurs)...")
-    df = add_unite_legale_data(
-        df, lf_sirets_acheteurs, siret_column="acheteur_id", type_siret="acheteur"
+    lf_sirets_acheteurs = add_unite_legale_data(
+        lf_sirets_acheteurs, siret_column="acheteur_id", type_siret="acheteur"
     )
+
+    lf = lf.join(lf_sirets_acheteurs, how="left", on="acheteur_id")
+
     del lf_sirets_acheteurs
 
     # print("Construction du champ acheteur_nom à partir des données SIRENE...")
@@ -71,30 +79,28 @@ def enrich_from_sirene(df: pl.LazyFrame):
     # cf https://github.com/ColinMaudry/decp-processing/issues/17
 
     print("Extraction des SIRET des titulaires...")
-    df_sirets_titulaires = extract_unique_titulaires_siret(df)
+    lf_sirets_titulaires = extract_unique_titulaires_siret(lf)
 
     # print("Ajout des données établissements (titulaires)...")
-    # df_sirets_titulaires = add_etablissement_data_to_titulaires(df_sirets_titulaires)
+    # lf_sirets_titulaires = add_etablissement_data_to_titulaires(lf_sirets_titulaires)
 
     print("Ajout des données unités légales (titulaires)...")
-    df = add_unite_legale_data(
-        df, df_sirets_titulaires, siret_column="titulaire_id", type_siret="titulaire"
+    lf_sirets_titulaires = add_unite_legale_data(
+        lf_sirets_titulaires, siret_column="titulaire_id", type_siret="titulaire"
     )
-    del df_sirets_titulaires
+
+    # En joignant en utilisant à la fois le SIRET et le typeIdentifiant, on s'assure qu'on ne joint pas sur
+    # des id de titulaires non-SIRET
+    lf = lf.join(
+        lf_sirets_titulaires,
+        how="left",
+        on=["titulaire_id", "titulaire_typeIdentifiant"],
+    )
+
+    del lf_sirets_titulaires
     # print("Amélioration des données unités légales des titulaires...")
-    # df_sirets_titulaires = improve_titulaire_unite_legale_data(df_sirets_titulaires)
+    # lf_sirets_titulaires = improve_titulaire_unite_legale_data(lf_sirets_titulaires)
 
-    # print("Renommage de certaines colonnes unités légales (titulaires)...")
-    # df_sirets_titulaires = rename_titulaire_sirene_columns(df_sirets_titulaires)
+    lf = lf.drop(cs.ends_with("_siren"))
 
-    # print("Jointure pour créer les données DECP Titulaires...")
-    # df_decp_titulaires = merge_sirets_titulaires(df, df_sirets_titulaires)
-    # del df_sirets_titulaires
-
-    # print("Enregistrement des DECP Titulaires aux formats CSV et Parquet...")
-    # save_to_files(df_decp_titulaires, f"{DIST_DIR}/decp-titulaires")
-    # del df_decp_titulaires
-
-    df = df.drop(cs.ends_with("_siren"))
-
-    return df
+    return lf
