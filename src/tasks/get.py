@@ -326,7 +326,19 @@ def norm_titulaire(titulaire: dict):
     return titulaire
 
 
-def get_etablissements(schema: dict, processed_parquet_path: Path):
+def get_etablissements(processed_parquet_path: Path):
+    schema = {
+        "siret": pl.String,
+        # "codeCommuneEtablissement": pl.String,
+        "latitude": pl.Float64,
+        "longitude": pl.Float64,
+        # "etatAdministratifEtablissement": pl.Enum(["A", "F"]),
+        # "activitePrincipaleEtablissement": pl.String,
+        # "nomenclatureActivitePrincipaleEtablissement": pl.Enum(
+        #     ["NAF1993", "NAFRev1", "NAFRev2", "NAP"]
+        # ),
+    }
+
     lfs = []
     columns = list(schema.keys())
     print(columns)

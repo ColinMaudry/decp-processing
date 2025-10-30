@@ -27,13 +27,12 @@ from config import (
 from tasks.clean import clean_decp
 from tasks.dataset_utils import list_resources
 from tasks.enrich import enrich_from_sirene
-from tasks.get import get_resource
+from tasks.get import get_etablissements, get_resource
 from tasks.output import generate_final_schema, save_to_databases, save_to_files
 from tasks.publish import publish_to_datagouv
 from tasks.scrap import scrap_aws_month, scrap_marches_securises_month
 from tasks.transform import (
     concat_decp_json,
-    get_prepare_etablissements,
     get_prepare_unites_legales,
     normalize_tables,
     sort_columns,
@@ -172,8 +171,6 @@ def sirene_preprocess():
     with transaction():
         create_sirene_data_dir()
 
-        # TODO préparer lest données établissements
-
         # préparer les données unités légales
         processed_ul_parquet_path = SIRENE_DATA_DIR / "unites_legales.parquet"
         if not processed_ul_parquet_path.exists():
@@ -183,8 +180,8 @@ def sirene_preprocess():
         # préparer les données établissements
         processed_etab_parquet_path = SIRENE_DATA_DIR / "etablissements.parquet"
         if not processed_etab_parquet_path.exists():
-            print("Prépararion des établissements...")
-            get_prepare_etablissements(processed_etab_parquet_path)
+            print("Téléchargement et préparation des établissements...")
+            get_etablissements(processed_etab_parquet_path)
 
     print("☑️  Fin du flow sirene_preprocess.")
 
