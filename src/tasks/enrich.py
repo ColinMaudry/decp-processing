@@ -1,5 +1,6 @@
 import polars as pl
 import polars.selectors as cs
+from polars_ds import haversine
 from prefect import task
 
 from config import SIRENE_DATA_DIR
@@ -22,9 +23,9 @@ def add_etablissement_data(
     )
     lf_sirets = lf_sirets.rename(
         {
-            "departement": f"{type_siret}_departement",
-            "coordonneeLambertAbscisseEtablissement": f"{type_siret}_abscisse",
-            "coordonneeLambertOrdonneeEtablissement": f"{type_siret}_ordonnee",
+            # "departement": f"{type_siret}_departement",
+            "latitude": f"{type_siret}_latitude",
+            "longitude": f"{type_siret}_longitude",
         }
     )
     return lf_sirets
@@ -75,14 +76,13 @@ def enrich_from_sirene(lf: pl.LazyFrame):
 
     # DONNÉES SIRENE TITULAIRES
 
-    # Enrichissement des données pas prioritaire
-    # cf https://github.com/ColinMaudry/decp-processing/issues/17
-
     print("Extraction des SIRET des titulaires...")
-    lf_sirets_titulaires = extract_unique_titulaires_siret(lf)
+    lf_sirets_titulaires = extract_unique_titulaires_siret(lf.clone())
 
-    # print("Ajout des données établissements (titulaires)...")
-    # lf_sirets_titulaires = add_etablissement_data_to_titulaires(lf_sirets_titulaires)
+    print("Ajout des données établissements (titulaires)...")
+    lf_sirets_titulaires = add_etablissement_data(
+        lf_sirets_titulaires, "titulaire_id", "titulaire"
+    )
 
     print("Ajout des données unités légales (titulaires)...")
     lf_sirets_titulaires = add_unite_legale_data(
@@ -101,6 +101,24 @@ def enrich_from_sirene(lf: pl.LazyFrame):
     # print("Amélioration des données unités légales des titulaires...")
     # lf_sirets_titulaires = improve_titulaire_unite_legale_data(lf_sirets_titulaires)
 
+    lf = calculate_distance(lf)
+
     lf = lf.drop(cs.ends_with("_siren"))
 
+    return lf
+
+
+def calculate_distance(lf: pl.LazyFrame) -> pl.LazyFrame:
+    # Utilisation de polars_ds.haversine
+    # https://polars-ds-extension.readthedocs.io/en/latest/num.html#polars_ds.exprs.num.haversine
+    lf = lf.with_columns(
+        haversine(
+            pl.col("acheteur_latitude"),
+            pl.col("acheteur_longitude"),
+            pl.col("titulaire_latitude"),
+            pl.col("titulaire_longitude"),
+        )
+        .round(mode="half_away_from_zero")
+        .alias("distance")
+    )
     return lf

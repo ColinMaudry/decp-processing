@@ -320,6 +320,7 @@ def norm_titulaires(titulaires):
     return None
 
 
+# Récupération des données des établissements
 def norm_titulaire(titulaire: dict):
     if "titulaire" in titulaire:
         titulaire = titulaire["titulaire"]

@@ -234,6 +234,13 @@
       "short_name": "Id. accord-cadre"
     },
     {
+      "type": "string",
+      "name": "distance",
+      "title": "Distance acheteur-titulaire",
+      "description": "Distance en kilomètres entre l'adresse de l'acheteur et celle du titulaire.",
+      "short_name": "Distance"
+    },
+    {
       "type": "integer",
       "name": "modification_id",
       "title": "Identifiant modification",
