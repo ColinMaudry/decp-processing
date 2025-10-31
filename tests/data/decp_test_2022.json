@@ -376,10 +376,8 @@
         "typeGroupementOperateurs": "Pas de groupement",
         "titulaires": [
           {
-            "titulaire": {
-              "typeIdentifiant": "SIRET",
-              "id": "39210031900038"
-            }
+            "typeIdentifiant": "SIRET",
+            "id": "39210031900038"
           },
           {
             "titulaire": {

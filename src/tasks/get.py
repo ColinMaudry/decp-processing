@@ -6,8 +6,9 @@ from pathlib import Path
 import ijson
 import orjson
 import polars as pl
-from httpx import stream
-from lxml import etree
+from httpx import HTTPStatusError, TimeoutException, get, stream
+from lxml import etree, html
+from lxml.html import HtmlElement
 from prefect import task
 
 from config import (
@@ -319,7 +320,50 @@ def norm_titulaires(titulaires):
     return None
 
 
+# Récupération des données des établissements
 def norm_titulaire(titulaire: dict):
     if "titulaire" in titulaire:
         titulaire = titulaire["titulaire"]
     return titulaire
+
+
+def get_etablissements(processed_parquet_path: Path):
+    schema = {
+        "siret": pl.String,
+        # "codeCommuneEtablissement": pl.String,
+        "latitude": pl.Float64,
+        "longitude": pl.Float64,
+        # "etatAdministratifEtablissement": pl.Enum(["A", "F"]),
+        # "activitePrincipaleEtablissement": pl.String,
+        # "nomenclatureActivitePrincipaleEtablissement": pl.Enum(
+        #     ["NAF1993", "NAFRev1", "NAFRev2", "NAP"]
+        # ),
+    }
+
+    lfs = []
+    columns = list(schema.keys())
+    print(columns)
+    base_url = "https://files.data.gouv.fr/geo-sirene/last/dep/"
+    htmlpage: str = get(base_url).text
+    htmlpage: HtmlElement = html.fromstring(htmlpage)
+    for link in htmlpage.findall(".//a"):
+        href = link.get("href")
+        if href.startswith("geo_siret"):
+            print(href)
+            href = base_url + href
+            try:
+                response = get(href, timeout=10).raise_for_status()
+            except (HTTPStatusError, TimeoutException) as e:
+                print(e)
+                print("Nouvel essai...")
+                response = get(href, timeout=10).raise_for_status()
+            content = response.content
+            lf = pl.scan_csv(content, infer_schema_length=50000)
+            lf = lf.select(columns)
+            lf = lf.with_columns(
+                [pl.col(col).cast(schema[col]).alias(col) for col in schema.keys()]
+            )
+            lfs.append(lf)
+
+    df_etablissements: pl.LazyFrame = pl.concat(lfs)
+    df_etablissements.sink_parquet(processed_parquet_path)

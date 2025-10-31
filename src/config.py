@@ -65,6 +65,8 @@ sirene_data_parent_dir = make_path_from_env("SIRENE_DATA_PARENT_DIR", DATA_DIR)
 SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
 # SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
 
+SIRENE_UNITES_LEGALES_URL = os.getenv("SIRENE_UNITES_LEGALES_URL", "")
+
 # Mode de scraping
 SCRAPING_MODE = os.getenv("SCRAPING_MODE", "month")
 
@@ -119,8 +121,13 @@ BASE_DF_COLUMNS = [
     "lieuExecution_code",
     "lieuExecution_typeCode",
     "idAccordCadre",
+    "distance",
     "modification_id",
     "donneesActuelles",
+    "acheteur_latitude",
+    "acheteur_longitude",
+    "titulaire_latitude",
+    "titulaire_longitude",
     "sourceDataset",
     "sourceFile",
 ]

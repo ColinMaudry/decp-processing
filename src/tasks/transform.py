@@ -1,10 +1,10 @@
-import os
+from pathlib import Path
 
 import polars as pl
 import polars.selectors as cs
 from prefect import task
 
-from config import DATA_DIR, DecpFormat
+from config import DATA_DIR, SIRENE_UNITES_LEGALES_URL, DecpFormat
 from tasks.output import save_to_databases
 
 
@@ -274,36 +274,46 @@ def concat_decp_json(dfs: list) -> pl.DataFrame:
     return df_clean
 
 
-def extract_unique_acheteurs_siret(df: pl.LazyFrame):
+def extract_unique_acheteurs_siret(lf: pl.LazyFrame):
     # Extraction des SIRET des DECP dans une copie du df de base
-    df = df.select("acheteur_id")
-    df = df.unique().filter(pl.col("acheteur_id") != "")
-    df = df.sort(by="acheteur_id")
-    return df
+    lf = lf.select("acheteur_id")
+    lf = lf.unique()
+    lf = lf.sort(by="acheteur_id")
+    return lf
 
 
-def extract_unique_titulaires_siret(df: pl.LazyFrame):
+def extract_unique_titulaires_siret(lf: pl.LazyFrame):
     # Extraction des SIRET des DECP dans une copie du df de base
-    df = df.select("titulaire_id", "titulaire_typeIdentifiant")
-    df = df.unique().filter(
+    lf = lf.select("titulaire_id", "titulaire_typeIdentifiant")
+    lf = lf.unique().filter(
         pl.col("titulaire_id") != "", pl.col("titulaire_typeIdentifiant") == "SIRET"
     )
-    df = df.sort(by="titulaire_id")
-    return df
+    lf = lf.sort(by="titulaire_id")
+    return lf
 
 
 @task
 def get_prepare_unites_legales(processed_parquet_path):
     print("Téléchargement des données unité légales et sélection des colonnes...")
     (
-        pl.scan_parquet(os.environ["SIRENE_UNITES_LEGALES_URL"])
+        pl.scan_parquet(SIRENE_UNITES_LEGALES_URL)
+        .select(["siren", "denominationUniteLegale"])
         .filter(pl.col("siren").is_not_null())
         .filter(pl.col("denominationUniteLegale").is_not_null())
-        .sort("dateDebut", descending=False)
-        .unique(subset=["siren"], keep="last")
-        .select(["siren", "denominationUniteLegale"])
+        .unique()
         .sink_parquet(processed_parquet_path)
     )
+
+
+def prepare_etablissements(processed_parquet_path: Path, lf: pl.LazyFrame) -> None:
+    # Inutilisé pour l'instant car je n'utilise pas les codes commune
+    lf = lf.filter(pl.col("siret").is_not_null())
+    lf = lf.with_columns(
+        pl.when(pl.col("codeCommuneEtablissement").str.starts_with("97"))
+        .then(pl.col("codeCommuneEtablissement").str.head(3).alias("departement"))
+        .otherwise(pl.col("codeCommuneEtablissement").str.head(2).alias("departement"))
+    )
+    lf.sink_parquet(processed_parquet_path)
 
 
 def sort_columns(df: pl.DataFrame, config_columns):
