@@ -283,6 +283,20 @@
       "short_title": "Région acheteur"
     },
     {
+      "type": "number",
+      "name": "acheteur_latitude",
+      "title": "Latitude de l'acheteur",
+      "description": "Latitude des coordonnées géographiques de l'acheteur.",
+      "short_title": "Latitude acheteur"
+    },
+    {
+      "type": "number",
+      "name": "acheteur_longitude",
+      "title": "Longitude de l'acheteur",
+      "description": "Longitude des coordonnées géographiques de l'acheteur.",
+      "short_title": "Longitude acheteur"
+    },
+    {
       "type": "string",
       "name": "titulaire_commune_code",
       "title": "Commune du titulaire (code)",
@@ -315,7 +329,7 @@
       "type": "string",
       "name": "titulaire_region_code",
       "title": "Région du titulaire (code)",
-      "description": "Code de la réguion où se trouve le titulaire.",
+      "description": "Code de la région où se trouve le titulaire.",
       "short_title": "Région tit. (code)"
     },
     {
@@ -324,6 +338,21 @@
       "title": "Région du titulaire",
       "description": "Nom de la région où se trouve le titulaire.",
       "short_title": "Région titulaire"
+    },
+
+    {
+      "type": "number",
+      "name": "titulaire_latitude",
+      "title": "Latitude du titulaire",
+      "description": "Latitude des coordonnées géographiques du titulaire.",
+      "short_title": "Latitude titulaire"
+    },
+    {
+      "type": "number",
+      "name": "titulaire_longitude",
+      "title": "Longitude du titulaire",
+      "description": "Longitude des coordonnées géographiques du titulaire.",
+      "short_title": "Longitude titulaire"
     },
 
     {
