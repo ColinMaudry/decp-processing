@@ -241,6 +241,92 @@
       "short_name": "Distance"
     },
     {
+      "type": "string",
+      "name": "acheteur_commune_code",
+      "title": "Commune de l'acheteur (code)",
+      "description": "Code de la commune où se trouve l'acheteur.",
+      "short_name": "Commune ach. (code)"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_commune_nom",
+      "title": "Commune de l'acheteur",
+      "description": "Nom de la commune où se trouve l'acheteur.",
+      "short_name": "Commune acheteur"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_departement_code",
+      "title": "Département de l'acheteur (code)",
+      "description": "Code du département où se trouve l'acheteur.",
+      "short_name": "Département ach. (code)"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_departement_nom",
+      "title": "Département de l'acheteur",
+      "description": "Nom du département où se trouve l'acheteur.",
+      "short_name": "Département acheteur"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_region_code",
+      "title": "Région de l'acheteur (code)",
+      "description": "Code de la réguion où se trouve l'acheteur.",
+      "short_name": "Région ach. (code)"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_region_nom",
+      "title": "Région de l'acheteur",
+      "description": "Nom de la région où se trouve l'acheteur.",
+      "short_name": "Région acheteur"
+    },
+    {
+      "type": "string",
+      "name": "titulaire_commune_code",
+      "title": "Commune du titulaire (code)",
+      "description": "Code de la commune où se trouve le titulaire.",
+      "short_name": "Commune tit. (code)"
+    },
+    {
+      "type": "string",
+      "name": "titulaire_commune_nom",
+      "title": "Commune du titulaire",
+      "description": "Nom de la commune où se trouve le titulaire.",
+      "short_name": "Commune titulaire"
+    },
+    {
+      "type": "string",
+      "name": "titulaire_departement_code",
+      "title": "Département du titulaire (code)",
+      "description": "Code du département où se trouve le titulaire.",
+      "short_name": "Département tit. (code)"
+    },
+    {
+      "type": "string",
+      "name": "titulaire_departement_nom",
+      "title": "Département du titulaire",
+      "description": "Nom du département où se trouve le titulaire.",
+      "short_name": "Département titulaire"
+    },
+
+    {
+      "type": "string",
+      "name": "titulaire_region_code",
+      "title": "Région du titulaire (code)",
+      "description": "Code de la réguion où se trouve le titulaire.",
+      "short_name": "Région tit. (code)"
+    },
+    {
+      "type": "string",
+      "name": "titulaire_region_nom",
+      "title": "Région du titulaire",
+      "description": "Nom de la région où se trouve le titulaire.",
+      "short_name": "Région titulaire"
+    },
+
+    {
       "type": "integer",
       "name": "modification_id",
       "title": "Identifiant modification",
