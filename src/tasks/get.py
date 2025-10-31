@@ -327,10 +327,10 @@ def norm_titulaire(titulaire: dict):
     return titulaire
 
 
-def get_etablissements(processed_parquet_path: Path):
+def get_etablissements() -> pl.LazyFrame:
     schema = {
         "siret": pl.String,
-        # "codeCommuneEtablissement": pl.String,
+        "codeCommuneEtablissement": pl.String,
         "latitude": pl.Float64,
         "longitude": pl.Float64,
         # "etatAdministratifEtablissement": pl.Enum(["A", "F"]),
@@ -346,7 +346,7 @@ def get_etablissements(processed_parquet_path: Path):
     base_url = "https://files.data.gouv.fr/geo-sirene/last/dep/"
     htmlpage: str = get(base_url).text
     htmlpage: HtmlElement = html.fromstring(htmlpage)
-    for link in htmlpage.findall(".//a"):
+    for link in htmlpage.findall(".//a")[:5]:
         href = link.get("href")
         if href.startswith("geo_siret"):
             print(href)
@@ -360,10 +360,21 @@ def get_etablissements(processed_parquet_path: Path):
             content = response.content
             lf = pl.scan_csv(content, infer_schema_length=50000)
             lf = lf.select(columns)
+
+            # Cast les bon datatypes
             lf = lf.with_columns(
                 [pl.col(col).cast(schema[col]).alias(col) for col in schema.keys()]
             )
+
+            # Ajoute des zéros s'ils ont été perdus en début d'identifiant
+            lf = lf.with_columns(
+                [
+                    pl.col(col).str.pad_start(5, "0")
+                    for col in ["siret", "codeCommuneEtablissement"]
+                ]
+            )
+
             lfs.append(lf)
 
-    df_etablissements: pl.LazyFrame = pl.concat(lfs)
-    df_etablissements.sink_parquet(processed_parquet_path)
+    lf_etablissements: pl.LazyFrame = pl.concat(lfs)
+    return lf_etablissements

@@ -305,14 +305,15 @@ def get_prepare_unites_legales(processed_parquet_path):
     )
 
 
-def prepare_etablissements(processed_parquet_path: Path, lf: pl.LazyFrame) -> None:
+def prepare_etablissements(lf: pl.LazyFrame, processed_parquet_path: Path) -> None:
     # Inutilisé pour l'instant car je n'utilise pas les codes commune
     lf = lf.filter(pl.col("siret").is_not_null())
-    lf = lf.with_columns(
-        pl.when(pl.col("codeCommuneEtablissement").str.starts_with("97"))
-        .then(pl.col("codeCommuneEtablissement").str.head(3).alias("departement"))
-        .otherwise(pl.col("codeCommuneEtablissement").str.head(2).alias("departement"))
-    )
+    lf = lf.rename({"codeCommuneEtablissement": "commune_code"})
+
+    # Ajout des noms de départements, noms régions,
+    lf_cog = pl.scan_parquet(DATA_DIR / "code_officiel_geographique.parquet")
+    lf = lf.join(lf_cog, on="commune_code", how="left")
+
     lf.sink_parquet(processed_parquet_path)
 
 

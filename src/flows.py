@@ -35,6 +35,7 @@ from tasks.transform import (
     concat_decp_json,
     get_prepare_unites_legales,
     normalize_tables,
+    prepare_etablissements,
     sort_columns,
 )
 from tasks.utils import (
@@ -181,7 +182,8 @@ def sirene_preprocess():
         processed_etab_parquet_path = SIRENE_DATA_DIR / "etablissements.parquet"
         if not processed_etab_parquet_path.exists():
             print("Téléchargement et préparation des établissements...")
-            get_etablissements(processed_etab_parquet_path)
+            lf = get_etablissements()
+            prepare_etablissements(lf, processed_etab_parquet_path)
 
     print("☑️  Fin du flow sirene_preprocess.")
 
