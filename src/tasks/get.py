@@ -1,3 +1,4 @@
+import concurrent.futures
 import datetime
 import tempfile
 from collections.abc import Iterator
@@ -10,7 +11,6 @@ import orjson
 import polars as pl
 from httpx import Client, HTTPStatusError, TimeoutException, get
 from lxml import etree, html
-from lxml.html import HtmlElement
 from prefect import task
 from prefect.transactions import transaction
 
@@ -341,61 +341,71 @@ def get_etablissements() -> pl.LazyFrame:
         "codeCommuneEtablissement": pl.String,
         "latitude": pl.Float64,
         "longitude": pl.Float64,
-        # "etatAdministratifEtablissement": pl.Enum(["A", "F"]),
-        # "activitePrincipaleEtablissement": pl.String,
-        # "nomenclatureActivitePrincipaleEtablissement": pl.Enum(
-        #     ["NAF1993", "NAFRev1", "NAFRev2", "NAP"]
-        # ),
     }
 
-    lfs = []
     columns = list(schema.keys())
     print(columns)
+
     base_url = "https://files.data.gouv.fr/geo-sirene/last/dep/"
     htmlpage: str = get(base_url).text
-    htmlpage: HtmlElement = html.fromstring(htmlpage)
+    htmlpage: html.HtmlElement = html.fromstring(htmlpage)
     http_client = Client()
 
+    # Préparation des hrefs
+    hrefs = []
     for link in htmlpage.findall(".//a"):
         href = link.get("href")
         if href.startswith("geo_siret"):
-            print(href)
-            href = base_url + href
+            hrefs.append(base_url + href)
+
+    # Fonction de traitement pour un fichier
+    def process_file(_href: str):
+        print(_href.split("/")[-1])
+        try:
+            response = http_client.get(
+                _href, headers=HTTP_HEADERS, timeout=10
+            ).raise_for_status()
+        except (HTTPStatusError, TimeoutException) as err:
+            print(err)
+            print("Nouvel essai...")
+            response = http_client.get(
+                _href, headers=HTTP_HEADERS, timeout=10
+            ).raise_for_status()
+
+        content = response.content
+        lff = pl.scan_csv(content, infer_schema_length=1000, schema_overrides=schema)
+        lff = lff.select(columns)
+        lff = lff.with_columns(
+            [
+                pl.col("codeCommuneEtablissement").str.pad_start(5, "0"),
+                pl.col("siret").str.pad_start(14, "0"),
+            ]
+        )
+        return lff
+
+    # Traitement en parrallèle avec 8 threads
+    lfs = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        futures = [executor.submit(process_file, href) for href in hrefs]
+        for future in concurrent.futures.as_completed(futures):
             try:
-                response = http_client.get(
-                    href, headers=HTTP_HEADERS, timeout=10
-                ).raise_for_status()
-            except (HTTPStatusError, TimeoutException) as e:
-                print(e)
-                print("Nouvel essai...")
-                response = http_client.get(
-                    href, headers=HTTP_HEADERS, timeout=10
-                ).raise_for_status()
-            content = response.content
-            lf = pl.scan_csv(content, infer_schema_length=1000, schema_overrides=schema)
-            lf = lf.select(columns)
+                lf = future.result()
+                lfs.append(lf)
+            except Exception as e:
+                print(f"Error processing file: {e}")
 
-            # Ajoute des zéros s'ils ont été perdus en début d'identifiant
-            lf = lf.with_columns(
-                [
-                    pl.col("codeCommuneEtablissement").str.pad_start(5, "0"),
-                    pl.col("siret").str.pad_start(14, "0"),
-                ]
-            )
-
-            lfs.append(lf)
-
+    print("Concaténation...")
     lf_etablissements: pl.LazyFrame = pl.concat(lfs)
     return lf_etablissements
 
 
-def get_insee_data(url, schema_overrides, columns) -> pl.DataFrame:
+def get_insee_cog_data(url, schema_overrides, columns) -> pl.DataFrame:
     try:
         df_insee = pl.read_csv(url, schema_overrides=schema_overrides, columns=columns)
     except ConnectionResetError:
-        print("Connnection error, retrying in 2 seconds...")
+        print("Connection error, retrying in 2 seconds...")
         sleep(2)
-        df_insee = get_insee_data(
+        df_insee = get_insee_cog_data(
             url, schema_overrides=schema_overrides, columns=columns
         )
     return df_insee

@@ -2,7 +2,7 @@ import polars as pl
 from prefect import flow
 
 from config import DATA_DIR
-from tasks.get import get_insee_data
+from tasks.get import get_insee_cog_data
 
 
 @flow(log_prints=True)
@@ -14,14 +14,14 @@ def get_cog():
     # # # # # # # # #
 
     # Métropole et DOM
-    df_com = get_insee_data(
+    df_com = get_insee_cog_data(
         "https://www.insee.fr/fr/statistiques/fichier/8377162/v_commune_2025.csv",
         schema_overrides={"COM": pl.String, "DEP": pl.String, "REG": pl.String},
         columns=["COM", "LIBELLE", "REG", "DEP"],
     )
 
     # Territoires d'outre mer
-    df_com_tom = get_insee_data(
+    df_com_tom = get_insee_cog_data(
         "https://www.insee.fr/fr/statistiques/fichier/8377162/v_commune_comer_2025.csv",
         schema_overrides={"COM_COMER": pl.String, "COMER": pl.String},
         columns=["COM_COMER", "LIBELLE", "COMER"],
@@ -43,13 +43,13 @@ def get_cog():
     # Départements  #
     # # # # # # # # #
 
-    df_dep = get_insee_data(
+    df_dep = get_insee_cog_data(
         "https://www.insee.fr/fr/statistiques/fichier/8377162/v_departement_2025.csv",
         schema_overrides={"DEP": pl.String},
         columns=["DEP", "LIBELLE"],
     )
 
-    df_dep_tom = get_insee_data(
+    df_dep_tom = get_insee_cog_data(
         "https://www.insee.fr/fr/statistiques/fichier/8377162/v_comer_2025.csv",
         schema_overrides={"COMER": pl.String},
         columns=["COMER", "LIBELLE"],
@@ -64,14 +64,14 @@ def get_cog():
     # Régions       #
     # # # # # # # # #
 
-    df_reg = get_insee_data(
+    df_reg = get_insee_cog_data(
         "https://www.insee.fr/fr/statistiques/fichier/8377162/v_region_2025.csv",
         schema_overrides={"REG": pl.String},
         columns=["REG", "LIBELLE"],
     )
     # On utilise les noms de départements des TOM comme noms de région
     df_dep_tom = df_dep_tom.rename({"DEP": "REG"}).select(df_reg.columns)
-    df_reg.extend(df_dep_tom).rename({"LIBELLE": "region_nom"})
+    df_reg = df_reg.extend(df_dep_tom).rename({"LIBELLE": "region_nom"})
 
     print(df_reg)
 
