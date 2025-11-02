@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import httpx
 from dotenv import find_dotenv, load_dotenv
 from ijson import sendable_list
 
@@ -37,6 +38,13 @@ MONTH_NOW = DATE_NOW[:7]  # YYYY-MM
 
 # Publication ou non des fichiers produits sur data.gouv.fr
 DECP_PROCESSING_PUBLISH = os.getenv("DECP_PROCESSING_PUBLISH", "").lower() == "true"
+
+# Client HTTP
+HTTP_CLIENT = httpx.Client()
+HTTP_HEADERS = {
+    "Connection": "keep-alive",
+    "User-agent": "Projet : https://decp.info/a-propos | Client HTTP : https://pypi.org/project/httpx/",
+}
 
 # Timeout pour la publication de chaque ressource sur data.gouv.fr
 DECP_PROCESSING_PUBLISH_TIMEOUT = os.getenv("DECP_PROCESSING_PUBLISH_TIMEOUT", 300)

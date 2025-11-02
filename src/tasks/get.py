@@ -6,7 +6,7 @@ from pathlib import Path
 import ijson
 import orjson
 import polars as pl
-from httpx import HTTPStatusError, TimeoutException, get, stream
+from httpx import Client, HTTPStatusError, TimeoutException, get
 from lxml import etree, html
 from lxml.html import HtmlElement
 from prefect import task
@@ -16,6 +16,8 @@ from config import (
     DECP_FORMATS,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
+    HTTP_CLIENT,
+    HTTP_HEADERS,
     DecpFormat,
 )
 from tasks.clean import clean_invalid_characters, extract_innermost_struct
@@ -26,7 +28,9 @@ from tasks.utils import gen_artifact_row, stream_replace_bytestring
 @task(retries=3, retry_delay_seconds=3)
 def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par défaut)
     if url.startswith("http"):
-        with stream("GET", url, follow_redirects=True) as response:
+        with HTTP_CLIENT.stream(
+            "GET", url, headers=HTTP_HEADERS, follow_redirects=True
+        ) as response:
             yield from response.iter_bytes(chunk_size)
     else:
         # Données de test.
@@ -346,19 +350,25 @@ def get_etablissements() -> pl.LazyFrame:
     base_url = "https://files.data.gouv.fr/geo-sirene/last/dep/"
     htmlpage: str = get(base_url).text
     htmlpage: HtmlElement = html.fromstring(htmlpage)
-    for link in htmlpage.findall(".//a")[:5]:
+    http_client = Client()
+
+    for link in htmlpage.findall(".//a")[-5:]:
         href = link.get("href")
         if href.startswith("geo_siret"):
             print(href)
             href = base_url + href
             try:
-                response = get(href, timeout=10).raise_for_status()
+                response = http_client.get(
+                    href, headers=HTTP_HEADERS, timeout=10
+                ).raise_for_status()
             except (HTTPStatusError, TimeoutException) as e:
                 print(e)
                 print("Nouvel essai...")
-                response = get(href, timeout=10).raise_for_status()
+                response = http_client.get(
+                    href, headers=HTTP_HEADERS, timeout=10
+                ).raise_for_status()
             content = response.content
-            lf = pl.scan_csv(content, infer_schema_length=50000)
+            lf = pl.scan_csv(content, infer_schema_length=1000, schema_overrides=schema)
             lf = lf.select(columns)
 
             # Cast les bon datatypes
@@ -369,8 +379,8 @@ def get_etablissements() -> pl.LazyFrame:
             # Ajoute des zéros s'ils ont été perdus en début d'identifiant
             lf = lf.with_columns(
                 [
-                    pl.col(col).str.pad_start(5, "0")
-                    for col in ["siret", "codeCommuneEtablissement"]
+                    pl.col("codeCommuneEtablissement").str.pad_start(5, "0"),
+                    pl.col("siret").str.pad_start(14, "0"),
                 ]
             )
 
