@@ -2,6 +2,7 @@ from prefect import flow
 from prefect.transactions import transaction
 
 from config import SIRENE_DATA_DIR
+from flows.get_cog import get_cog
 from tasks.get import get_etablissements
 from tasks.transform import get_prepare_unites_legales, prepare_etablissements
 from tasks.utils import create_sirene_data_dir
@@ -18,10 +19,13 @@ def sirene_preprocess():
     with transaction():
         create_sirene_data_dir()
 
+        # Récupération et préparation des données du Code Officiel Géographique
+        get_cog()
+
         # préparer les données unités légales
         processed_ul_parquet_path = SIRENE_DATA_DIR / "unites_legales.parquet"
         if not processed_ul_parquet_path.exists():
-            print("Prépararion des unités légales...")
+            print("Téléchargement et préparation des unités légales...")
             get_prepare_unites_legales(processed_ul_parquet_path)
 
         # préparer les données établissements

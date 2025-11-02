@@ -9,6 +9,8 @@ from tasks.get import get_insee_cog_data
 def get_cog():
     """Téléchargement et préparation des données du Code Officiel Géographique"""
 
+    print("Téléchargement et préparation des données du Code Officiel Géographique...")
+
     # # # # # # # # #
     # Communes      #
     # # # # # # # # #
