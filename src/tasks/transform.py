@@ -306,8 +306,6 @@ def get_prepare_unites_legales(processed_parquet_path):
 
 
 def prepare_etablissements(lf: pl.LazyFrame, processed_parquet_path: Path) -> None:
-    # Inutilisé pour l'instant car je n'utilise pas les codes commune
-    lf = lf.filter(pl.col("siret").is_not_null())
     lf = lf.rename({"codeCommuneEtablissement": "commune_code"})
 
     # Ajout des noms de départements, noms régions,

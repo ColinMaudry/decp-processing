@@ -23,7 +23,6 @@ def add_etablissement_data(
     )
     lf_sirets = lf_sirets.rename(
         {
-            # "departement": f"{type_siret}_departement",
             "latitude": f"{type_siret}_latitude",
             "longitude": f"{type_siret}_longitude",
             "commune_code": f"{type_siret}_commune_code",

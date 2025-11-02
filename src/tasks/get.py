@@ -2,6 +2,7 @@ import tempfile
 from collections.abc import Iterator
 from functools import partial
 from pathlib import Path
+from time import sleep
 
 import ijson
 import orjson
@@ -371,11 +372,6 @@ def get_etablissements() -> pl.LazyFrame:
             lf = pl.scan_csv(content, infer_schema_length=1000, schema_overrides=schema)
             lf = lf.select(columns)
 
-            # Cast les bon datatypes
-            lf = lf.with_columns(
-                [pl.col(col).cast(schema[col]).alias(col) for col in schema.keys()]
-            )
-
             # Ajoute des zéros s'ils ont été perdus en début d'identifiant
             lf = lf.with_columns(
                 [
@@ -388,3 +384,15 @@ def get_etablissements() -> pl.LazyFrame:
 
     lf_etablissements: pl.LazyFrame = pl.concat(lfs)
     return lf_etablissements
+
+
+def get_insee_data(url, schema_overrides, columns) -> pl.DataFrame:
+    try:
+        df_insee = pl.read_csv(url, schema_overrides=schema_overrides, columns=columns)
+    except ConnectionResetError:
+        print("Connnection error, retrying in 2 seconds...")
+        sleep(2)
+        df_insee = get_insee_data(
+            url, schema_overrides=schema_overrides, columns=columns
+        )
+    return df_insee
