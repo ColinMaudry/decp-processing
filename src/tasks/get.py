@@ -1,3 +1,4 @@
+import datetime
 import tempfile
 from collections.abc import Iterator
 from functools import partial
@@ -11,8 +12,10 @@ from httpx import Client, HTTPStatusError, TimeoutException, get
 from lxml import etree, html
 from lxml.html import HtmlElement
 from prefect import task
+from prefect.transactions import transaction
 
 from config import (
+    CACHE_EXPIRATION_TIME_HOURS,
     DECP_FORMAT_2022,
     DECP_FORMATS,
     DECP_PROCESSING_PUBLISH,
@@ -21,9 +24,9 @@ from config import (
     HTTP_HEADERS,
     DecpFormat,
 )
-from tasks.clean import clean_invalid_characters, extract_innermost_struct
+from tasks.clean import clean_decp, clean_invalid_characters, extract_innermost_struct
 from tasks.output import sink_to_files
-from tasks.utils import gen_artifact_row, stream_replace_bytestring
+from tasks.utils import gen_artifact_row, get_clean_cache_key, stream_replace_bytestring
 
 
 @task(retries=3, retry_delay_seconds=3)
@@ -396,3 +399,23 @@ def get_insee_data(url, schema_overrides, columns) -> pl.DataFrame:
             url, schema_overrides=schema_overrides, columns=columns
         )
     return df_insee
+
+
+@task(
+    log_prints=True,
+    persist_result=True,
+    cache_expiration=datetime.timedelta(hours=CACHE_EXPIRATION_TIME_HOURS),
+    cache_key_fn=get_clean_cache_key,
+)
+def get_clean(resource, resources_artifact: list) -> pl.DataFrame or None:
+    # Récupération des données source...
+    with transaction():
+        lf, decp_format = get_resource(resource, resources_artifact)
+
+        # Nettoyage des données source et typage des colonnes...
+        # si la ressource est dans un format supporté
+        if lf is not None:
+            lf = clean_decp(lf, decp_format)
+            df = lf.collect(engine="streaming")
+
+    return df
