@@ -356,7 +356,7 @@ def get_etablissements() -> pl.LazyFrame:
     htmlpage: HtmlElement = html.fromstring(htmlpage)
     http_client = Client()
 
-    for link in htmlpage.findall(".//a")[-5:]:
+    for link in htmlpage.findall(".//a"):
         href = link.get("href")
         if href.startswith("geo_siret"):
             print(href)
