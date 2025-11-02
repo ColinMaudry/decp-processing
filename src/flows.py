@@ -123,7 +123,7 @@ def decp_processing(enable_cache_removal: bool = False):
     # Preprocessing des données SIRENE si :
     # - le dossier n'existe pas encore (= les données n'ont pas déjà été preprocessed ce mois-ci)
     # - on est au moins le 5 du mois (pour être sûr que les données SIRENE ont été mises à jour sur data.gouv.fr)
-    if not SIRENE_DATA_DIR.exists() and int(DATE_NOW[-2:]) >= 5:
+    if not SIRENE_DATA_DIR.exists():
         sirene_preprocess()
     lf: pl.LazyFrame = enrich_from_sirene(df.lazy())
 

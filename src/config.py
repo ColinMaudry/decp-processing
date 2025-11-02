@@ -3,7 +3,7 @@ import os
 import shutil
 from collections.abc import Coroutine
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
@@ -61,8 +61,20 @@ DATA_DIR.mkdir(exist_ok=True, parents=True)
 DIST_DIR = make_path_from_env("DECP_DIST_DIR", BASE_DIR / "dist")
 DIST_DIR.mkdir(exist_ok=True, parents=True, mode=777)
 
-sirene_data_parent_dir = make_path_from_env("SIRENE_DATA_PARENT_DIR", DATA_DIR)
-SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
+
+def make_sirene_data_dir(sirene_data_parent_dir) -> Path:
+    default_dir = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
+    # Si on est au début du mois, utiliser les données SIRENE du mois précédent
+    # car les nouvelles données n'ont peut-être pas été encore générées
+    if int(DATE_NOW[-2:]) <= 5:
+        last_month = datetime.today() - timedelta(days=27)
+        last_month = f"{str(last_month.year)}-{str(last_month.month)}"
+        return sirene_data_parent_dir / f"sirene_{last_month}"
+    return default_dir
+
+
+SIRENE_DATA_PARENT_DIR = make_path_from_env("SIRENE_DATA_PARENT_DIR", DATA_DIR)
+SIRENE_DATA_DIR = make_sirene_data_dir(SIRENE_DATA_PARENT_DIR)
 # SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
 
 SIRENE_UNITES_LEGALES_URL = os.getenv("SIRENE_UNITES_LEGALES_URL", "")
