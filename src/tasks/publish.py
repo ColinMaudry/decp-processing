@@ -43,6 +43,10 @@ def publish_to_datagouv():
             "file": str(DIST_DIR / "statistiques.csv"),
             "resource_id": "8ded94de-3b80-4840-a5bb-7faad1c9c234",
         },
+        {
+            "file": str(DIST_DIR / "probabilites_naf_cpv.csv"),
+            "resource_id": "b6a502cd-560b-4350-a146-e837692f4b66",
+        },
     ]
 
     for upload in uploads:
