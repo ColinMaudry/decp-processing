@@ -3,9 +3,10 @@ import os
 import shutil
 from collections.abc import Coroutine
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
+import httpx
 from dotenv import find_dotenv, load_dotenv
 from ijson import sendable_list
 
@@ -38,6 +39,13 @@ MONTH_NOW = DATE_NOW[:7]  # YYYY-MM
 # Publication ou non des fichiers produits sur data.gouv.fr
 DECP_PROCESSING_PUBLISH = os.getenv("DECP_PROCESSING_PUBLISH", "").lower() == "true"
 
+# Client HTTP
+HTTP_CLIENT = httpx.Client()
+HTTP_HEADERS = {
+    "Connection": "keep-alive",
+    "User-agent": "Projet : https://decp.info/a-propos | Client HTTP : https://pypi.org/project/httpx/",
+}
+
 # Timeout pour la publication de chaque ressource sur data.gouv.fr
 DECP_PROCESSING_PUBLISH_TIMEOUT = os.getenv("DECP_PROCESSING_PUBLISH_TIMEOUT", 300)
 if DECP_PROCESSING_PUBLISH_TIMEOUT == "":
@@ -61,8 +69,20 @@ DATA_DIR.mkdir(exist_ok=True, parents=True)
 DIST_DIR = make_path_from_env("DECP_DIST_DIR", BASE_DIR / "dist")
 DIST_DIR.mkdir(exist_ok=True, parents=True, mode=777)
 
-sirene_data_parent_dir = make_path_from_env("SIRENE_DATA_PARENT_DIR", DATA_DIR)
-SIRENE_DATA_DIR = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
+
+def make_sirene_data_dir(sirene_data_parent_dir) -> Path:
+    default_dir = sirene_data_parent_dir / f"sirene_{MONTH_NOW}"
+    # Si on est au début du mois, utiliser les données SIRENE du mois précédent
+    # car les nouvelles données n'ont peut-être pas été encore générées
+    if int(DATE_NOW[-2:]) <= 5:
+        last_month = datetime.today() - timedelta(days=27)
+        last_month = f"{str(last_month.year)}-{str(last_month.month)}"
+        return sirene_data_parent_dir / f"sirene_{last_month}"
+    return default_dir
+
+
+SIRENE_DATA_PARENT_DIR = make_path_from_env("SIRENE_DATA_PARENT_DIR", DATA_DIR)
+SIRENE_DATA_DIR = make_sirene_data_dir(SIRENE_DATA_PARENT_DIR)
 # SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
 
 SIRENE_UNITES_LEGALES_URL = os.getenv("SIRENE_UNITES_LEGALES_URL", "")
@@ -87,50 +107,8 @@ POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI")
 
 # Liste et ordre des colonnes pour le mono dataframe de base (avant normalisation et spécialisation)
 # Sert aussi à vérifier qu'au moins ces colonnes sont présentes (d'autres peuvent être présentes en plus, les colonnes "innatendues")
-BASE_DF_COLUMNS = [
-    "uid",
-    "id",
-    "nature",
-    "acheteur_id",
-    "acheteur_nom",
-    "titulaire_id",
-    "titulaire_typeIdentifiant",
-    "titulaire_nom",
-    "objet",
-    "montant",
-    "codeCPV",
-    "procedure",
-    "techniques",
-    "dureeMois",
-    "offresRecues",
-    "dateNotification",
-    "datePublicationDonnees",
-    "formePrix",
-    "typesPrix",
-    "attributionAvance",
-    "tauxAvance",
-    "marcheInnovant",
-    "modalitesExecution",
-    "considerationsSociales",
-    "considerationsEnvironnementales",
-    "ccag",
-    "sousTraitanceDeclaree",
-    "typeGroupementOperateurs",
-    "origineUE",
-    "origineFrance",
-    "lieuExecution_code",
-    "lieuExecution_typeCode",
-    "idAccordCadre",
-    "distance",
-    "modification_id",
-    "donneesActuelles",
-    "acheteur_latitude",
-    "acheteur_longitude",
-    "titulaire_latitude",
-    "titulaire_longitude",
-    "sourceDataset",
-    "sourceFile",
-]
+schema_fields = json.load(open(DATA_DIR / "schema_base.json", "r"))["fields"]
+BASE_DF_COLUMNS = [field["name"] for field in schema_fields]
 
 COLUMNS_TO_DROP = [
     # Pas encore incluses

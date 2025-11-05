@@ -5,7 +5,6 @@ import polars.selectors as cs
 from prefect import task
 
 from config import DATA_DIR, SIRENE_UNITES_LEGALES_URL, DecpFormat
-from tasks.output import save_to_databases
 
 
 def process_string_lists(lf: pl.LazyFrame):
@@ -197,60 +196,6 @@ def process_modifications(lf: pl.LazyFrame) -> pl.LazyFrame:
     return lf
 
 
-def normalize_tables(lf: pl.LazyFrame):
-    # MARCHES
-
-    lf_marches: pl.LazyFrame = lf.drop(cs.starts_with("titulaire", "acheteur"))
-    lf_marches = lf_marches.unique(subset=["uid", "modification_id"]).sort(
-        by="dateNotification", descending=True
-    )
-    save_to_databases(lf_marches, "decp", "marches", "uid, modification_id")
-
-    # ACHETEURS
-
-    lf_acheteurs: pl.LazyFrame = lf.select(cs.starts_with("acheteur"))
-    lf_acheteurs = lf_acheteurs.rename(lambda name: name.removeprefix("acheteur_"))
-    lf_acheteurs = lf_acheteurs.unique().sort(by="id")
-    save_to_databases(lf_acheteurs, "decp", "acheteurs", "id")
-
-    # TITULAIRES
-
-    ## Table entreprises
-    lf_titulaires: pl.LazyFrame = lf.select(cs.starts_with("titulaire"))
-
-    ### On garde les champs id et typeIdentifiant en clé primaire composite
-    lf_titulaires = lf_titulaires.rename(lambda name: name.removeprefix("titulaire_"))
-    lf_titulaires = lf_titulaires.unique().sort(by=["id"])
-    save_to_databases(lf_titulaires, "decp", "entreprises", "id, typeIdentifiant")
-    del lf_titulaires
-
-    ## Table marches_titulaires
-    lf_marches_titulaires: pl.LazyFrame = lf.select(
-        "uid", "modification_id", "titulaire_id", "titulaire_typeIdentifiant"
-    )
-
-    save_to_databases(
-        lf_marches_titulaires,
-        "decp",
-        "marches_titulaires",
-        '"uid", "modification_id", "titulaire_id", "titulaire_typeIdentifiant"',
-    )
-
-    ## Table marches_acheteurs
-    lf_marches_acheteurs: pl.LazyFrame = lf.select(
-        "uid", "modification_id", "acheteur_id"
-    ).unique()
-
-    save_to_databases(
-        lf_marches_acheteurs,
-        "decp",
-        "marches_acheteurs",
-        '"uid", "modification_id", "acheteur_id"',
-    )
-
-    # TODO ajouter les sous-traitants quand ils seront ajoutés aux données
-
-
 def concat_decp_json(dfs: list) -> pl.DataFrame:
     df = pl.concat(dfs, how="diagonal_relaxed")
 
@@ -305,14 +250,13 @@ def get_prepare_unites_legales(processed_parquet_path):
     )
 
 
-def prepare_etablissements(processed_parquet_path: Path, lf: pl.LazyFrame) -> None:
-    # Inutilisé pour l'instant car je n'utilise pas les codes commune
-    lf = lf.filter(pl.col("siret").is_not_null())
-    lf = lf.with_columns(
-        pl.when(pl.col("codeCommuneEtablissement").str.starts_with("97"))
-        .then(pl.col("codeCommuneEtablissement").str.head(3).alias("departement"))
-        .otherwise(pl.col("codeCommuneEtablissement").str.head(2).alias("departement"))
-    )
+def prepare_etablissements(lf: pl.LazyFrame, processed_parquet_path: Path) -> None:
+    lf = lf.rename({"codeCommuneEtablissement": "commune_code"})
+
+    # Ajout des noms de départements, noms régions,
+    lf_cog = pl.scan_parquet(DATA_DIR / "code_officiel_geographique.parquet")
+    lf = lf.join(lf_cog, on="commune_code", how="left")
+
     lf.sink_parquet(processed_parquet_path)
 
 

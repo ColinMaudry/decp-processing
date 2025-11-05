@@ -1,6 +1,7 @@
 ## 2.4.0 2025-10-31
 
 - Ajout d'une colonne `distance` pour indiquer la distance en kilomètres entre l'acheteur et le titulaire (financé par [Odialis](https://www.odialis.fr))
+- Ajout de colonnes commune, région et département (nom et code) pour les acheteurs et les titulaires basés en France ([#140](https://github.com/ColinMaudry/decp-processing/issues/140)) (financé par [Odialis](https://www.odialis.fr))
 
 #### 2.3.4 2025-10-24
 
