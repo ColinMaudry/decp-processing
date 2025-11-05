@@ -81,6 +81,9 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
         )
     )
 
+    # Codes CPV, suppression du caractères de contrôle ("-[0-9]$")
+    lf = lf.with_columns(pl.col("codeCPV").str.split("-").list[0].alias("codeCPV"))
+
     # Champs liste
     lf = process_string_lists(lf)
 

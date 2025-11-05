@@ -2,6 +2,7 @@ import os
 import shutil
 
 import polars as pl
+import polars.selectors as cs
 from prefect import flow
 from prefect.artifacts import create_table_artifact
 from prefect.task_runners import ConcurrentTaskRunner
@@ -22,7 +23,7 @@ from tasks.enrich import enrich_from_sirene
 from tasks.get import get_clean
 from tasks.output import generate_final_schema, save_to_files
 from tasks.publish import publish_to_datagouv
-from tasks.transform import concat_decp_json, sort_columns
+from tasks.transform import calculate_naf_cpv_matching, concat_decp_json, sort_columns
 from tasks.utils import generate_stats, remove_unused_cache
 
 
@@ -73,6 +74,10 @@ def decp_processing(enable_cache_removal: bool = False):
     if os.path.exists(DIST_DIR):
         shutil.rmtree(DIST_DIR)
     os.makedirs(DIST_DIR)
+
+    print("Génération des probabilités NAF/CPV...")
+    calculate_naf_cpv_matching(df)
+    df = df.drop(cs.starts_with("activite"))
 
     print("Génération de l'artefact (statistiques) sur le base df...")
     generate_stats(df)

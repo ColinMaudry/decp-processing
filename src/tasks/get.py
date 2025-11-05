@@ -341,6 +341,8 @@ def get_etablissements() -> pl.LazyFrame:
         "codeCommuneEtablissement": pl.String,
         "latitude": pl.Float64,
         "longitude": pl.Float64,
+        "activitePrincipaleEtablissement": pl.String,
+        "nomenclatureActivitePrincipaleEtablissement": pl.String,
     }
 
     columns = list(schema.keys())
@@ -373,7 +375,7 @@ def get_etablissements() -> pl.LazyFrame:
             ).raise_for_status()
 
         content = response.content
-        lff = pl.scan_csv(content, infer_schema_length=1000, schema_overrides=schema)
+        lff = pl.scan_csv(content, schema_overrides=schema)
         lff = lff.select(columns)
         lff = lff.with_columns(
             [

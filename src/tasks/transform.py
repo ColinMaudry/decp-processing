@@ -4,7 +4,8 @@ import polars as pl
 import polars.selectors as cs
 from prefect import task
 
-from config import DATA_DIR, SIRENE_UNITES_LEGALES_URL, DecpFormat
+from config import DATA_DIR, DIST_DIR, SIRENE_UNITES_LEGALES_URL, DecpFormat
+from tasks.output import save_to_files
 
 
 def process_string_lists(lf: pl.LazyFrame):
@@ -251,7 +252,13 @@ def get_prepare_unites_legales(processed_parquet_path):
 
 
 def prepare_etablissements(lf: pl.LazyFrame, processed_parquet_path: Path) -> None:
-    lf = lf.rename({"codeCommuneEtablissement": "commune_code"})
+    lf = lf.rename(
+        {
+            "codeCommuneEtablissement": "commune_code",
+            "activitePrincipaleEtablissement": "activite_code",
+            "nomenclatureActivitePrincipaleEtablissement": "activite_nomenclature",
+        }
+    )
 
     # Ajout des noms de départements, noms régions,
     lf_cog = pl.scan_parquet(DATA_DIR / "code_officiel_geographique.parquet")
@@ -270,6 +277,114 @@ def sort_columns(df: pl.DataFrame, config_columns):
     print("Colonnes inattendues:", other_columns)
 
     return df.select(config_columns + other_columns)
+
+
+def calculate_naf_cpv_matching(df: pl.DataFrame):
+    lf_naf_cpv = df.lazy()
+
+    # Unité de base pour le comptage : dernière version d'un marché attribué (donc pas forcément attributaire initial)
+    lf_naf_cpv = (
+        lf_naf_cpv.select(
+            "uid",
+            "codeCPV",
+            "activite_code",
+            "activite_nomenclature",
+            "donneesActuelles",
+        )
+        .filter(pl.col("donneesActuelles"))
+        .unique("uid")
+    )
+
+    # Nettoyage et normalisation
+    lf_naf_cpv = lf_naf_cpv.select(
+        [
+            pl.col("activite_code")
+            .str.strip_chars()
+            .str.to_uppercase()
+            .alias("activite_code"),
+            pl.col("activite_nomenclature")
+            .str.strip_chars()
+            .str.to_uppercase()
+            .alias("activite_nomenclature"),
+            pl.col("codeCPV").str.strip_chars().alias("cpv_code"),
+        ]
+    ).drop_nulls()
+
+    # Fusion temporaire du code NAF et de sa nomenclature par simplicité
+    lf_naf_cpv = lf_naf_cpv.with_columns(
+        pl.concat_str(
+            pl.col("activite_nomenclature"), pl.lit("__"), pl.col("activite_code")
+        ).alias("activite")
+    ).drop("activite_code", "activite_nomenclature")
+
+    # Groupage par NAF, CPV, avec compte des CPV
+    lf_naf_cpv = lf_naf_cpv.group_by(["activite", "cpv_code"]).agg(
+        pl.count().alias("compte")
+    )
+
+    # Pas de pivot en Lazy, donc on repasse en DataFrame
+    df_occurences_cpv = lf_naf_cpv.collect()
+    df_occurences_cpv = df_occurences_cpv.pivot(
+        index="activite", on="cpv_code", values="compte", aggregate_function=None
+    )
+    df_occurences_cpv = df_occurences_cpv.fill_null(0)
+
+    # Extraire les NAF et CPVliste_activite
+    liste_activite = df_occurences_cpv["activite"]
+    cpv_occurrence_only = df_occurences_cpv.drop("activite")
+    cpv_occurrence_only_np = cpv_occurrence_only.to_numpy()
+
+    # Normalisation par ligne (somme = 1) et DataFrame de probabilités
+    row_sums = cpv_occurrence_only_np.sum(axis=1, keepdims=True)
+    prob_matrix = cpv_occurrence_only_np / row_sums  # Probabilité conditionnelle
+    df_proba = pl.DataFrame(
+        prob_matrix,
+        schema=[str(col) for col in cpv_occurrence_only.columns],  # CPV comme colonnes
+    ).with_columns(liste_activite)
+    df_proba = df_proba.select(cs.by_name("activite"), cs.exclude("activite"))
+
+    # (en option) Matrice de similarité
+    # similarity_matrix = cosine_similarity(prob_matrix)
+    # df_similarity = pl.DataFrame(
+    #     similarity_matrix,
+    #     schema=liste_activite.to_list()
+    # ).with_columns(pl.Series("activite", liste_activite))
+
+    # Formatage des résultats en tableau utilisable
+    results = []
+    cpv_cols = df_proba.select(
+        ~cs.by_name("activite")
+    ).columns  # Tous les CPV (hors 'activite')
+
+    for row in df_proba.iter_rows(named=True):
+        activite = row["activite"]
+        scores = {cpv: row[cpv] for cpv in cpv_cols}
+        # Trier par score décroissant
+        for cpv, score in scores.items():
+            results.append({"activite": activite, "cpv": cpv, "score": score})
+
+    df_results = pl.DataFrame(results)
+    df_results = df_results.with_columns(
+        pl.col("score")
+        .rank(method="dense", descending=True)
+        .over("activite")
+        .alias("rank")
+    )
+    df_results = df_results.filter(pl.col("rank") <= 10).drop("rank")
+    df_results = df_results.filter(pl.col("score") > 0)
+    df_results = df_results.sort(by=["activite", "score"], descending=[False, True])
+    df_results = (
+        df_results.with_columns(
+            pl.col("activite").str.split("__").list[0].alias("activite_nomenclature")
+        )
+        .with_columns(pl.col("activite").str.split("__").list[1].alias("activite_code"))
+        .drop("activite")
+    )
+    df_results = df_results.select(
+        cs.starts_with("activite"), ~cs.starts_with("activite")
+    )
+
+    save_to_files(df_results, DIST_DIR / "probabilite_naf_cpv", "csv")
 
 
 #

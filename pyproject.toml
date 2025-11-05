@@ -20,7 +20,8 @@ dependencies = [
     "psycopg2",
     "bs4",
     "selenium",
-    "polars_ds"
+    "polars_ds",
+    "scikit-learn"
 ]
 
 [project.optional-dependencies]

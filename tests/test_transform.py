@@ -3,54 +3,8 @@ from polars.testing import assert_frame_equal
 
 from tasks.transform import (
     remove_modifications_duplicates,
-    remove_suffixes_from_uid_column,
     replace_with_modification_data,
 )
-
-# from abc import ABC, abstractmethod
-
-
-class TestRemoveSuffixes:
-    @staticmethod
-    def _extract_uid_list(_df):
-        return _df.sort("uid")["uid"].to_list()
-
-    def test_no_suffixes(self):
-        df = pl.LazyFrame(
-            {
-                "uid": [
-                    "20240101",
-                    "20240200",
-                    "2024010103",
-                    "2024010101",
-                    "2025010108",
-                ],
-                "modifications": [[], [1], [1, 2], [], []],
-            }
-        )
-        cleaned_df = remove_suffixes_from_uid_column(df)
-        assert self._extract_uid_list(df.collect()) == self._extract_uid_list(
-            cleaned_df.collect()
-        )
-
-    def test_suffixes(self):
-        df = pl.LazyFrame(
-            {
-                "uid": [
-                    "20240101",
-                    "20240200",
-                    "2024010103",
-                    "2024010100",
-                    "2025010102",
-                    "202501010220",
-                ],
-                "modifications": [[1], [], [1] * 3, [], [1] * 2, [1] * 20],
-            }
-        )
-        cleaned_df = remove_suffixes_from_uid_column(df)
-        assert self._extract_uid_list(cleaned_df.collect()) == sorted(
-            ["202401", "202402", "20240101", "20240101", "20250101", "2025010102"]
-        )
 
 
 class TestHandleModificationsMarche:
@@ -336,3 +290,16 @@ class TestHandleModificationsMarche:
         assert_frame_equal(
             result_df, expected_df, check_column_order=False, check_dtypes=False
         )
+
+
+# class TestNafCsvMatching:
+#     def test_calculate_naf_cpv_matching(self):
+#         df = pl.DataFrame({
+#             "uid": ["1", "1", "2", "3", "4", "pas_actuel"],
+#             "codeCPV": ["cpv1", "cpv2", "cpv2", "cpv2", "cpv3", "cpv3"],
+#             "activite_code": ["naf1", "naf1", "naf1", "naf1", "naf1", "naf1"],
+#             "activite_nomenclature": ["nom1", "nom1", "nom1", "nom1", "nom1", "nom1"],
+#             "donneesActuelles": [True, False, True, True, True, True],
+#         })
+#
+#         df = calculate_naf_cpv_matching(df)

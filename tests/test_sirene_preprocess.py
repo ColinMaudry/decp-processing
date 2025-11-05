@@ -1,4 +1,4 @@
-from flows import sirene_preprocess
+from flows.sirene_preprocess import sirene_preprocess
 from tests.fixtures import prefect_test_harness
 
 
