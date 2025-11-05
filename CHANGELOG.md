@@ -1,7 +1,8 @@
-## 2.4.0 2025-10-31
+## 2.4.0 2025-11-05
 
-- Ajout d'une colonne `distance` pour indiquer la distance en kilomètres entre l'acheteur et le titulaire (financé par [Odialis](https://www.odialis.fr))
+- Ajout d'une colonne `distance` pour indiquer la distance en kilomètres entre l'acheteur et le titulaire ([#138](https://github.com/ColinMaudry/decp-processing/issues/138)) (financé par [Odialis](https://www.odialis.fr))
 - Ajout de colonnes commune, région et département (nom et code) pour les acheteurs et les titulaires basés en France ([#140](https://github.com/ColinMaudry/decp-processing/issues/140)) (financé par [Odialis](https://www.odialis.fr))
+- Ajout de la génération d'un fichier de probabilités de code CPV par code NAF ([#142](https://github.com/ColinMaudry/decp-processing/issues/142), voir [probabilites_naf_cpv.csv](https://www.data.gouv.fr/datasets/donnees-essentielles-de-la-commande-publique-consolidees-format-tabulaire/#/resources/b6a502cd-560b-4350-a146-e837692f4b66)) (financé par [Odialis](<(https://www.odialis.fr)>))
 
 #### 2.3.4 2025-10-24
 
