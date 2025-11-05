@@ -10,7 +10,7 @@ import httpx
 from dotenv import find_dotenv, load_dotenv
 from ijson import sendable_list
 
-from schemas import SCHEMA_MARCHE_2019, SCHEMA_MARCHE_2022
+from src.schemas import SCHEMA_MARCHE_2019, SCHEMA_MARCHE_2022
 
 dotenv_path = find_dotenv()
 if dotenv_path == "":

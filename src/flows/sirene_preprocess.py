@@ -1,11 +1,11 @@
 from prefect import flow
 from prefect.transactions import transaction
 
-from config import SIRENE_DATA_DIR
-from flows.get_cog import get_cog
-from tasks.get import get_etablissements
-from tasks.transform import get_prepare_unites_legales, prepare_etablissements
-from tasks.utils import create_sirene_data_dir
+from src.config import SIRENE_DATA_DIR
+from src.flows.get_cog import get_cog
+from src.tasks.get import get_etablissements
+from src.tasks.transform import get_prepare_unites_legales, prepare_etablissements
+from src.tasks.utils import create_sirene_data_dir
 
 
 @flow(log_prints=True)
