@@ -19,7 +19,8 @@ dependencies = [
     "lxml",
     "psycopg2",
     "bs4",
-    "selenium"
+    "selenium",
+    "polars_ds"
 ]
 
 [project.optional-dependencies]
