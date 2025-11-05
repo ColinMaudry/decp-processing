@@ -6,6 +6,8 @@ from operator import itemgetter
 from pathlib import Path
 
 import polars as pl
+from polars import selectors as cs
+from prefect import task
 
 from config import DATA_DIR, DIST_DIR, POSTGRESQL_DB_URI
 
@@ -140,3 +142,78 @@ def generate_final_schema(df):
     # création de dist/schema.json
     with open(DIST_DIR / "schema.json", "w", encoding="utf-8") as file:
         json.dump(merged_schema, file, indent=4, ensure_ascii=False, sort_keys=False)
+
+
+@task(log_prints=True)
+def make_data_tables():
+    """Tâches consacrées à la transformation des données dans un format relationnel (SQL)."""
+
+    print("Création de la base données au format relationnel...")
+
+    lf: pl.LazyFrame = pl.scan_parquet(DIST_DIR / "decp.parquet")
+
+    print("Enregistrement des DECP (base DataFrame) dans les bases de données...")
+    print(DIST_DIR / "decp.parquet")
+    save_to_databases(
+        lf,
+        "decp",
+        "data.gouv.fr.2022.clean",
+        "uid, titulaire_id, titulaire_typeIdentifiant, modification_id",
+    )
+
+    print("Normalisation des tables...")
+    normalize_tables(lf)
+
+
+def normalize_tables(lf: pl.LazyFrame):
+    # MARCHES
+
+    lf_marches: pl.LazyFrame = lf.drop(cs.starts_with("titulaire", "acheteur"))
+    lf_marches = lf_marches.unique(subset=["uid", "modification_id"]).sort(
+        by="dateNotification", descending=True
+    )
+    save_to_databases(lf_marches, "decp", "marches", "uid, modification_id")
+
+    # ACHETEURS
+
+    lf_acheteurs: pl.LazyFrame = lf.select(cs.starts_with("acheteur"))
+    lf_acheteurs = lf_acheteurs.rename(lambda name: name.removeprefix("acheteur_"))
+    lf_acheteurs = lf_acheteurs.unique().sort(by="id")
+    save_to_databases(lf_acheteurs, "decp", "acheteurs", "id")
+
+    # TITULAIRES
+
+    ## Table entreprises
+    lf_titulaires: pl.LazyFrame = lf.select(cs.starts_with("titulaire"))
+
+    ### On garde les champs id et typeIdentifiant en clé primaire composite
+    lf_titulaires = lf_titulaires.rename(lambda name: name.removeprefix("titulaire_"))
+    lf_titulaires = lf_titulaires.unique().sort(by=["id"])
+    save_to_databases(lf_titulaires, "decp", "entreprises", "id, typeIdentifiant")
+    del lf_titulaires
+
+    ## Table marches_titulaires
+    lf_marches_titulaires: pl.LazyFrame = lf.select(
+        "uid", "modification_id", "titulaire_id", "titulaire_typeIdentifiant"
+    )
+
+    save_to_databases(
+        lf_marches_titulaires,
+        "decp",
+        "marches_titulaires",
+        '"uid", "modification_id", "titulaire_id", "titulaire_typeIdentifiant"',
+    )
+
+    ## Table marches_acheteurs
+    lf_marches_acheteurs: pl.LazyFrame = lf.select(
+        "uid", "modification_id", "acheteur_id"
+    ).unique()
+
+    save_to_databases(
+        lf_marches_acheteurs,
+        "decp",
+        "marches_acheteurs",
+        '"uid", "modification_id", "acheteur_id"',
+    )
+
+    # TODO ajouter les sous-traitants quand ils seront ajoutés aux données

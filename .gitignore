@@ -6,6 +6,7 @@ logs
 .venv
 *.egg-info
 *.parquet
+!code_officiel_geographique.parquet
 *.gz
 *.zip
 __pycache__

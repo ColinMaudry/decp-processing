@@ -1,11 +1,11 @@
-import os
+from pathlib import Path
 
 import polars as pl
 import polars.selectors as cs
 from prefect import task
 
-from config import DATA_DIR, DecpFormat
-from tasks.output import save_to_databases
+from config import DATA_DIR, DIST_DIR, SIRENE_UNITES_LEGALES_URL, DecpFormat
+from tasks.output import save_to_files
 
 
 def process_string_lists(lf: pl.LazyFrame):
@@ -197,60 +197,6 @@ def process_modifications(lf: pl.LazyFrame) -> pl.LazyFrame:
     return lf
 
 
-def normalize_tables(lf: pl.LazyFrame):
-    # MARCHES
-
-    lf_marches: pl.LazyFrame = lf.drop(cs.starts_with("titulaire", "acheteur"))
-    lf_marches = lf_marches.unique(subset=["uid", "modification_id"]).sort(
-        by="dateNotification", descending=True
-    )
-    save_to_databases(lf_marches, "decp", "marches", "uid, modification_id")
-
-    # ACHETEURS
-
-    lf_acheteurs: pl.LazyFrame = lf.select(cs.starts_with("acheteur"))
-    lf_acheteurs = lf_acheteurs.rename(lambda name: name.removeprefix("acheteur_"))
-    lf_acheteurs = lf_acheteurs.unique().sort(by="id")
-    save_to_databases(lf_acheteurs, "decp", "acheteurs", "id")
-
-    # TITULAIRES
-
-    ## Table entreprises
-    lf_titulaires: pl.LazyFrame = lf.select(cs.starts_with("titulaire"))
-
-    ### On garde les champs id et typeIdentifiant en clé primaire composite
-    lf_titulaires = lf_titulaires.rename(lambda name: name.removeprefix("titulaire_"))
-    lf_titulaires = lf_titulaires.unique().sort(by=["id"])
-    save_to_databases(lf_titulaires, "decp", "entreprises", "id, typeIdentifiant")
-    del lf_titulaires
-
-    ## Table marches_titulaires
-    lf_marches_titulaires: pl.LazyFrame = lf.select(
-        "uid", "modification_id", "titulaire_id", "titulaire_typeIdentifiant"
-    )
-
-    save_to_databases(
-        lf_marches_titulaires,
-        "decp",
-        "marches_titulaires",
-        '"uid", "modification_id", "titulaire_id", "titulaire_typeIdentifiant"',
-    )
-
-    ## Table marches_acheteurs
-    lf_marches_acheteurs: pl.LazyFrame = lf.select(
-        "uid", "modification_id", "acheteur_id"
-    ).unique()
-
-    save_to_databases(
-        lf_marches_acheteurs,
-        "decp",
-        "marches_acheteurs",
-        '"uid", "modification_id", "acheteur_id"',
-    )
-
-    # TODO ajouter les sous-traitants quand ils seront ajoutés aux données
-
-
 def concat_decp_json(dfs: list) -> pl.DataFrame:
     df = pl.concat(dfs, how="diagonal_relaxed")
 
@@ -274,36 +220,51 @@ def concat_decp_json(dfs: list) -> pl.DataFrame:
     return df_clean
 
 
-def extract_unique_acheteurs_siret(df: pl.LazyFrame):
+def extract_unique_acheteurs_siret(lf: pl.LazyFrame):
     # Extraction des SIRET des DECP dans une copie du df de base
-    df = df.select("acheteur_id")
-    df = df.unique().filter(pl.col("acheteur_id") != "")
-    df = df.sort(by="acheteur_id")
-    return df
+    lf = lf.select("acheteur_id")
+    lf = lf.unique()
+    lf = lf.sort(by="acheteur_id")
+    return lf
 
 
-def extract_unique_titulaires_siret(df: pl.LazyFrame):
+def extract_unique_titulaires_siret(lf: pl.LazyFrame):
     # Extraction des SIRET des DECP dans une copie du df de base
-    df = df.select("titulaire_id", "titulaire_typeIdentifiant")
-    df = df.unique().filter(
+    lf = lf.select("titulaire_id", "titulaire_typeIdentifiant")
+    lf = lf.unique().filter(
         pl.col("titulaire_id") != "", pl.col("titulaire_typeIdentifiant") == "SIRET"
     )
-    df = df.sort(by="titulaire_id")
-    return df
+    lf = lf.sort(by="titulaire_id")
+    return lf
 
 
 @task
 def get_prepare_unites_legales(processed_parquet_path):
     print("Téléchargement des données unité légales et sélection des colonnes...")
     (
-        pl.scan_parquet(os.environ["SIRENE_UNITES_LEGALES_URL"])
+        pl.scan_parquet(SIRENE_UNITES_LEGALES_URL)
+        .select(["siren", "denominationUniteLegale"])
         .filter(pl.col("siren").is_not_null())
         .filter(pl.col("denominationUniteLegale").is_not_null())
-        .sort("dateDebut", descending=False)
-        .unique(subset=["siren"], keep="last")
-        .select(["siren", "denominationUniteLegale"])
+        .unique()
         .sink_parquet(processed_parquet_path)
     )
+
+
+def prepare_etablissements(lf: pl.LazyFrame, processed_parquet_path: Path) -> None:
+    lf = lf.rename(
+        {
+            "codeCommuneEtablissement": "commune_code",
+            "activitePrincipaleEtablissement": "activite_code",
+            "nomenclatureActivitePrincipaleEtablissement": "activite_nomenclature",
+        }
+    )
+
+    # Ajout des noms de départements, noms régions,
+    lf_cog = pl.scan_parquet(DATA_DIR / "code_officiel_geographique.parquet")
+    lf = lf.join(lf_cog, on="commune_code", how="left")
+
+    lf.sink_parquet(processed_parquet_path)
 
 
 def sort_columns(df: pl.DataFrame, config_columns):
@@ -316,6 +277,114 @@ def sort_columns(df: pl.DataFrame, config_columns):
     print("Colonnes inattendues:", other_columns)
 
     return df.select(config_columns + other_columns)
+
+
+def calculate_naf_cpv_matching(df: pl.DataFrame):
+    lf_naf_cpv = df.lazy()
+
+    # Unité de base pour le comptage : dernière version d'un marché attribué (donc pas forcément attributaire initial)
+    lf_naf_cpv = (
+        lf_naf_cpv.select(
+            "uid",
+            "codeCPV",
+            "activite_code",
+            "activite_nomenclature",
+            "donneesActuelles",
+        )
+        .filter(pl.col("donneesActuelles"))
+        .unique("uid")
+    )
+
+    # Nettoyage et normalisation
+    lf_naf_cpv = lf_naf_cpv.select(
+        [
+            pl.col("activite_code")
+            .str.strip_chars()
+            .str.to_uppercase()
+            .alias("activite_code"),
+            pl.col("activite_nomenclature")
+            .str.strip_chars()
+            .str.to_uppercase()
+            .alias("activite_nomenclature"),
+            pl.col("codeCPV").str.strip_chars().alias("cpv_code"),
+        ]
+    ).drop_nulls()
+
+    # Fusion temporaire du code NAF et de sa nomenclature par simplicité
+    lf_naf_cpv = lf_naf_cpv.with_columns(
+        pl.concat_str(
+            pl.col("activite_nomenclature"), pl.lit("__"), pl.col("activite_code")
+        ).alias("activite")
+    ).drop("activite_code", "activite_nomenclature")
+
+    # Groupage par NAF, CPV, avec compte des CPV
+    lf_naf_cpv = lf_naf_cpv.group_by(["activite", "cpv_code"]).agg(
+        pl.count().alias("compte")
+    )
+
+    # Pas de pivot en Lazy, donc on repasse en DataFrame
+    df_occurences_cpv = lf_naf_cpv.collect()
+    df_occurences_cpv = df_occurences_cpv.pivot(
+        index="activite", on="cpv_code", values="compte", aggregate_function=None
+    )
+    df_occurences_cpv = df_occurences_cpv.fill_null(0)
+
+    # Extraire les NAF et CPVliste_activite
+    liste_activite = df_occurences_cpv["activite"]
+    cpv_occurrence_only = df_occurences_cpv.drop("activite")
+    cpv_occurrence_only_np = cpv_occurrence_only.to_numpy()
+
+    # Normalisation par ligne (somme = 1) et DataFrame de probabilités
+    row_sums = cpv_occurrence_only_np.sum(axis=1, keepdims=True)
+    prob_matrix = cpv_occurrence_only_np / row_sums  # Probabilité conditionnelle
+    df_proba = pl.DataFrame(
+        prob_matrix,
+        schema=[str(col) for col in cpv_occurrence_only.columns],  # CPV comme colonnes
+    ).with_columns(liste_activite)
+    df_proba = df_proba.select(cs.by_name("activite"), cs.exclude("activite"))
+
+    # (en option) Matrice de similarité
+    # similarity_matrix = cosine_similarity(prob_matrix)
+    # df_similarity = pl.DataFrame(
+    #     similarity_matrix,
+    #     schema=liste_activite.to_list()
+    # ).with_columns(pl.Series("activite", liste_activite))
+
+    # Formatage des résultats en tableau utilisable
+    results = []
+    cpv_cols = df_proba.select(
+        ~cs.by_name("activite")
+    ).columns  # Tous les CPV (hors 'activite')
+
+    for row in df_proba.iter_rows(named=True):
+        activite = row["activite"]
+        scores = {cpv: row[cpv] for cpv in cpv_cols}
+        # Trier par score décroissant
+        for cpv, score in scores.items():
+            results.append({"activite": activite, "cpv": cpv, "score": score})
+
+    df_results = pl.DataFrame(results)
+    df_results = df_results.with_columns(
+        pl.col("score")
+        .rank(method="dense", descending=True)
+        .over("activite")
+        .alias("rank")
+    )
+    df_results = df_results.filter(pl.col("rank") <= 10).drop("rank")
+    df_results = df_results.filter(pl.col("score") > 0)
+    df_results = df_results.sort(by=["activite", "score"], descending=[False, True])
+    df_results = (
+        df_results.with_columns(
+            pl.col("activite").str.split("__").list[0].alias("activite_nomenclature")
+        )
+        .with_columns(pl.col("activite").str.split("__").list[1].alias("activite_code"))
+        .drop("activite")
+    )
+    df_results = df_results.select(
+        cs.starts_with("activite"), ~cs.starts_with("activite")
+    )
+
+    save_to_files(df_results, DIST_DIR / "probabilite_naf_cpv", "csv")
 
 
 #
