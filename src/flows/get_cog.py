@@ -1,8 +1,8 @@
 import polars as pl
 from prefect import flow
 
-from config import DATA_DIR
-from tasks.get import get_insee_cog_data
+from src.config import DATA_DIR
+from src.tasks.get import get_insee_cog_data
 
 
 @flow(log_prints=True)
