@@ -251,7 +251,13 @@ def get_prepare_unites_legales(processed_parquet_path):
 
 
 def prepare_etablissements(lf: pl.LazyFrame, processed_parquet_path: Path) -> None:
-    lf = lf.rename({"codeCommuneEtablissement": "commune_code"})
+    lf = lf.rename(
+        {
+            "codeCommuneEtablissement": "commune_code",
+            "activitePrincipaleEtablissement": "activite_code",
+            "nomenclatureActivitePrincipaleEtablissement": "activite_nomenclature",
+        }
+    )
 
     # Ajout des noms de départements, noms régions,
     lf_cog = pl.scan_parquet(DATA_DIR / "code_officiel_geographique.parquet")
