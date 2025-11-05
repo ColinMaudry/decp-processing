@@ -74,9 +74,8 @@ def decp_processing(enable_cache_removal: bool = False):
         shutil.rmtree(DIST_DIR)
     os.makedirs(DIST_DIR)
 
-    if DECP_PROCESSING_PUBLISH:
-        print("Génération de l'artefact (statistiques) sur le base df...")
-        generate_stats(df)
+    print("Génération de l'artefact (statistiques) sur le base df...")
+    generate_stats(df)
 
     print("Génération du schéma et enregistrement des DECP aux formats CSV, Parquet...")
     df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
