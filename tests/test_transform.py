@@ -290,3 +290,16 @@ class TestHandleModificationsMarche:
         assert_frame_equal(
             result_df, expected_df, check_column_order=False, check_dtypes=False
         )
+
+
+# class TestNafCsvMatching:
+#     def test_calculate_naf_cpv_matching(self):
+#         df = pl.DataFrame({
+#             "uid": ["1", "1", "2", "3", "4", "pas_actuel"],
+#             "codeCPV": ["cpv1", "cpv2", "cpv2", "cpv2", "cpv3", "cpv3"],
+#             "activite_code": ["naf1", "naf1", "naf1", "naf1", "naf1", "naf1"],
+#             "activite_nomenclature": ["nom1", "nom1", "nom1", "nom1", "nom1", "nom1"],
+#             "donneesActuelles": [True, False, True, True, True, True],
+#         })
+#
+#         df = calculate_naf_cpv_matching(df)
