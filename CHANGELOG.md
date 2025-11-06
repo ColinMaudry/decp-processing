@@ -1,3 +1,7 @@
+#### 2.4.1 2025-11-06
+
+- Correction des imports de modules
+
 ## 2.4.0 2025-11-05
 
 - Ajout d'une colonne `distance` pour indiquer la distance en kilomètres entre l'acheteur et le titulaire ([#138](https://github.com/ColinMaudry/decp-processing/issues/138)) (financé par [Odialis](https://www.odialis.fr))
