@@ -1,6 +1,6 @@
 from httpx import get, post, put
 
-from config import (
+from src.config import (
     DATAGOUVFR_API,
     DATAGOUVFR_API_KEY,
     DECP_PROCESSING_PUBLISH_TIMEOUT,

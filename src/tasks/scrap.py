@@ -15,7 +15,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 
-from tasks.publish import publish_scrap_to_datagouv
+from src.tasks.publish import publish_scrap_to_datagouv
 
 
 def get_html(url: str, client: httpx.Client) -> str or None:

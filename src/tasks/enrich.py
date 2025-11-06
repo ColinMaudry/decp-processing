@@ -3,8 +3,8 @@ import polars.selectors as cs
 from polars_ds import haversine
 from prefect import task
 
-from config import SIRENE_DATA_DIR
-from tasks.transform import (
+from src.config import SIRENE_DATA_DIR
+from src.tasks.transform import (
     extract_unique_acheteurs_siret,
     extract_unique_titulaires_siret,
 )

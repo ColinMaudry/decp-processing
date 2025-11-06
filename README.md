@@ -65,13 +65,13 @@ pip install .
 Pour les contributeurices, installez les dépendances de développement et l'auto-formatage au moment des commits :
 
 ```bash
-pip install .[dev]
+pip install -e .[dev]
 pre-commit install
 # à chaque commit black et cie se lancent et reformattent les fichiers si besoin, ça peut demander de "git add"
 # de nouveau pour prendre en compte le reformatage dans le commit
 
 # installation des dépendances sous zsh
-pip install .'[dev]'
+pip install -e .'[dev]'
 ```
 
 Faites une copie du fichier template.env, renommez-le en .env et adaptez les valeurs :
@@ -105,22 +105,6 @@ Déploiement des flows (exécution programmée de main ou ponctuelle de dev) :
 1. Configurer .env pour que `PREFECT_API_URL` pointe vers le serveur où on souhaite déployer
 2. Éxécuter `python src/deploy.py`
 
-### Avec Docker sous Windows, peu testé
-
-Construire et lancer le container
-
-```bash
-script\docker_build_and_run.bat
-```
-
-Démarrer le serveur prefect une fois dans le container
-
-```bash
-script\start_server_in_docker.sh
-```
-
-Le serveur est accessible sur le navigateur à l'adresse http://127.0.0.1:4200/
-
 ## Lancer le traitement des données (pour le développement en local)
 
 Le pré-traitement des données SIRENE doit être fait une fois pour que le traitement principal soit fonctionnel.
@@ -132,7 +116,7 @@ pytest tests/test_sirene_preprocess.py
 Lancement du traitement principal (data_tables + decp.info) via un serveur prefect à usage unique
 
 ```bash
-python src/flows.py
+python -m src.run_flow decp_processing
 ```
 
 ## Lancer le traitement des données (sur le serveur Prefect configuré dans .env)

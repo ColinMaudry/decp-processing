@@ -9,7 +9,7 @@ import polars as pl
 from polars import selectors as cs
 from prefect import task
 
-from config import DATA_DIR, DIST_DIR, POSTGRESQL_DB_URI
+from src.config import DATA_DIR, DIST_DIR, POSTGRESQL_DB_URI
 
 
 def save_to_files(df: pl.DataFrame, path: Path, file_format=None):

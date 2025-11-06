@@ -39,8 +39,6 @@ def get_cog():
     df_com = df_com.rename({"LIBELLE": "commune_nom"})
     df_com = df_com.filter(pl.col("DEP") != "")
 
-    print(df_com)
-
     # # # # # # # # #
     # Départements  #
     # # # # # # # # #
@@ -60,8 +58,6 @@ def get_cog():
     df_dep = df_dep.extend(df_dep_tom)
     df_dep = df_dep.rename({"LIBELLE": "departement_nom"})
 
-    print(df_dep)
-
     # # # # # # # # #
     # Régions       #
     # # # # # # # # #
@@ -75,8 +71,6 @@ def get_cog():
     df_dep_tom = df_dep_tom.rename({"DEP": "REG"}).select(df_reg.columns)
     df_reg = df_reg.extend(df_dep_tom).rename({"LIBELLE": "region_nom"})
 
-    print(df_reg)
-
     # # # # # # # # #
     # Jointures     #
     # # # # # # # # #
@@ -86,7 +80,5 @@ def get_cog():
     df = df.rename(
         {"COM": "commune_code", "DEP": "departement_code", "REG": "region_code"}
     ).sort(by="commune_code")
-
-    print(df)
 
     df.write_parquet(DATA_DIR / "code_officiel_geographique.parquet")
