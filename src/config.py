@@ -29,7 +29,7 @@ def make_path_from_env(env: str, alternative_path: Path) -> Path:
 
 print("""
 ##########
-Config
+# Config #
 ##########
 """)
 
@@ -207,3 +207,5 @@ class DecpFormat:
 DECP_FORMAT_2019 = DecpFormat("DECP 2019", SCHEMA_MARCHE_2019, "marches")
 DECP_FORMAT_2022 = DecpFormat("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
 DECP_FORMATS = [DECP_FORMAT_2019, DECP_FORMAT_2022]
+
+print("")
