@@ -7,7 +7,7 @@ from prefect import flow
 from prefect.artifacts import create_table_artifact
 from prefect.task_runners import ConcurrentTaskRunner
 
-from config import (
+from src.config import (
     BASE_DF_COLUMNS,
     BASE_DIR,
     DATE_NOW,
@@ -17,14 +17,18 @@ from config import (
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
 )
-from flows.sirene_preprocess import sirene_preprocess
-from tasks.dataset_utils import list_resources
-from tasks.enrich import enrich_from_sirene
-from tasks.get import get_clean
-from tasks.output import generate_final_schema, save_to_files
-from tasks.publish import publish_to_datagouv
-from tasks.transform import calculate_naf_cpv_matching, concat_decp_json, sort_columns
-from tasks.utils import generate_stats, remove_unused_cache
+from src.flows.sirene_preprocess import sirene_preprocess
+from src.tasks.dataset_utils import list_resources
+from src.tasks.enrich import enrich_from_sirene
+from src.tasks.get import get_clean
+from src.tasks.output import generate_final_schema, save_to_files
+from src.tasks.publish import publish_to_datagouv
+from src.tasks.transform import (
+    calculate_naf_cpv_matching,
+    concat_decp_json,
+    sort_columns,
+)
+from src.tasks.utils import generate_stats, remove_unused_cache
 
 
 @flow(
@@ -63,6 +67,7 @@ def decp_processing(enable_cache_removal: bool = False):
     # Preprocessing des données SIRENE si :
     # - le dossier n'existe pas encore (= les données n'ont pas déjà été preprocessed ce mois-ci)
     # - on est au moins le 5 du mois (pour être sûr que les données SIRENE ont été mises à jour sur data.gouv.fr)
+    print(SIRENE_DATA_DIR)
     if not SIRENE_DATA_DIR.exists():
         sirene_preprocess()
 

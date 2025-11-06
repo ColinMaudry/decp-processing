@@ -8,7 +8,7 @@ import polars as pl
 from prefect import task
 from prefect.artifacts import create_table_artifact
 
-from config import (
+from src.config import (
     CACHE_EXPIRATION_TIME_HOURS,
     DATE_NOW,
     DIST_DIR,

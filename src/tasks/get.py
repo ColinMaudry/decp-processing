@@ -14,7 +14,7 @@ from lxml import etree, html
 from prefect import task
 from prefect.transactions import transaction
 
-from config import (
+from src.config import (
     CACHE_EXPIRATION_TIME_HOURS,
     DECP_FORMAT_2022,
     DECP_FORMATS,
@@ -24,9 +24,17 @@ from config import (
     HTTP_HEADERS,
     DecpFormat,
 )
-from tasks.clean import clean_decp, clean_invalid_characters, extract_innermost_struct
-from tasks.output import sink_to_files
-from tasks.utils import gen_artifact_row, get_clean_cache_key, stream_replace_bytestring
+from src.tasks.clean import (
+    clean_decp,
+    clean_invalid_characters,
+    extract_innermost_struct,
+)
+from src.tasks.output import sink_to_files
+from src.tasks.utils import (
+    gen_artifact_row,
+    get_clean_cache_key,
+    stream_replace_bytestring,
+)
 
 
 @task(retries=3, retry_delay_seconds=3)

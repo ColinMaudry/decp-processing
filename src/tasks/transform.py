@@ -4,8 +4,8 @@ import polars as pl
 import polars.selectors as cs
 from prefect import task
 
-from config import DATA_DIR, DIST_DIR, SIRENE_UNITES_LEGALES_URL, DecpFormat
-from tasks.output import save_to_files
+from src.config import DATA_DIR, DIST_DIR, SIRENE_UNITES_LEGALES_URL, DecpFormat
+from src.tasks.output import save_to_files
 
 
 def process_string_lists(lf: pl.LazyFrame):
@@ -384,7 +384,7 @@ def calculate_naf_cpv_matching(df: pl.DataFrame):
         cs.starts_with("activite"), ~cs.starts_with("activite")
     )
 
-    save_to_files(df_results, DIST_DIR / "probabilite_naf_cpv", "csv")
+    save_to_files(df_results, DIST_DIR / "probabilites_naf_cpv", "csv")
 
 
 #

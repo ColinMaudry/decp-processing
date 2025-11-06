@@ -4,7 +4,7 @@ from httpx import get
 from prefect import task
 from prefect.cache_policies import INPUTS
 
-from config import DATAGOUVFR_API_KEY, EXCLUDED_RESOURCES
+from src.config import DATAGOUVFR_API_KEY, EXCLUDED_RESOURCES
 
 
 def handle_paginated_calls(url: str) -> list[dict]:
