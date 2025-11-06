@@ -60,9 +60,7 @@ DATAGOUVFR_API = "https://www.data.gouv.fr/api/1"
 DATAGOUVFR_API_KEY = os.getenv("DATAGOUVFR_API_KEY", "")
 
 # Dossier racine
-BASE_DIR = make_path_from_env("DECP_BASE_DIR", Path(""))
-if BASE_DIR == Path(""):
-    raise ValueError("La variable d'environnement DECP_BASE_DIR n'est pas configurée.")
+BASE_DIR = make_path_from_env("DECP_BASE_DIR", Path(__file__).absolute().parent.parent)
 
 # Les variables configurées sur le serveur doivent avoir la priorité
 DATA_DIR = make_path_from_env("DECP_DATA_DIR", BASE_DIR / "data")
