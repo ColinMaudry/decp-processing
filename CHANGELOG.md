@@ -1,3 +1,7 @@
+#### 2.4.2 2025-11-12
+
+- Correction des montants de marchés supérieurs à 99 milliards, ramenés à 12,311111111 milliards
+
 #### 2.4.1 2025-11-06
 
 - Correction des imports de modules
