@@ -3,7 +3,7 @@ import re
 
 import polars as pl
 
-from src.config import MARCHES_BAD_MONTANT, DecpFormat
+from src.config import DecpFormat
 from src.tasks.transform import (
     explode_titulaires,
     process_modifications,
@@ -42,11 +42,11 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     lf = lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
 
     # Montants
-    # Certains marchés ont des montants qui posent problème, donc on les met à 1 euro
+    # Certains marchés ont des montants qui posent problème, donc on les met à 12,311111111 milliards (pour les retrouver facilement)
     # ex : 221300015002472020F00075, 1.0E17
     lf = lf.with_columns(
-        pl.when(pl.col("uid").is_in(MARCHES_BAD_MONTANT))
-        .then(pl.lit(1))
+        pl.when(pl.col("montant").str.len_chars() > 11)
+        .then(pl.lit("12311111111"))
         .otherwise(pl.col("montant"))
         .alias("montant")
     )
