@@ -28,4 +28,4 @@ if __name__ == "__main__":
     if func_name != "scrap":
         FUNCTIONS[func_name]()
     else:
-        scrap(target="aws", mode="month")
+        scrap(target="aws", mode="year", year="2025")

@@ -143,7 +143,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
 
         driver.get("https://www.marches-publics.info/Annonces/rechercher")
 
-        def search_form(end_date_: date) -> tuple[date, int]:
+        def search_form(end_date_: date) -> tuple[date, str, int]:
             end_date_str_ = end_date_.isoformat()
             sleep(1)
             print(f"➡️  {start_date_str} -> {end_date_str_}")
@@ -166,24 +166,36 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
 
             # Soit le bouton de téléchargement apparaît, soit il y a une erreur parce
             # que de trop nombreux résultats sont retournés
-            result, nb_results = wait_for_either_element(driver)
-
-            if result == "error":
-                # On réessaie avec moins de réultats
-                if end_date_ != start_date:
-                    end_date_ = search_form(end_date_ - timedelta(days=1))
-                else:
-                    print("start_date == end_date et trop de résultats !")
-            elif result is None:
-                print("Pas de téléchargement, on skip.")
-            elif result == "timeout":
-                # On réessaie
-                end_date_ = search_form(end_date_)
+            result_code_, nb_results_ = wait_for_either_element(driver)
 
             # End search_form()
-            return end_date, nb_results
+            return end_date, result_code_, nb_results_
 
-        end_date, nb_results = search_form(end_date)
+        end_date, result_code, nb_results = search_form(end_date)
+
+        if result_code == "too_many":
+            # On réessaie avec moins de résultats
+            if end_date != start_date:
+                "💥  Trop de résultats, on réessaie avec un jour de moins"
+                end_date = search_form(end_date - timedelta(days=1))
+                continue
+            else:
+                print("start_date == end_date et trop de résultats, on skip !")
+                start_date = end_date + timedelta(days=1)
+                continue
+        elif result_code == "no_result":
+            print("👻  Aucun résultat, on skip.")
+            start_date = end_date + timedelta(days=1)
+            continue
+        elif result_code == "timeout":
+            # On réessaie après 10 secondes
+            sleep(10)
+            continue
+        elif result_code is None:
+            print("❓  Pas de téléchargement, on skip.")
+            start_date = end_date + timedelta(days=1)
+            continue
+
         end_date_str = end_date.isoformat()
 
         json_path = dist_dir / "donneesEssentielles.json"
@@ -233,7 +245,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             if len(marches) == nb_results:
                 marches_month.extend(marches)
                 print(
-                    f"✅  Téléchargement valide, longueur marchés {len(marches)} (mois : {len(marches_month)})"
+                    f"✅ Téléchargement valide, longueur marchés {len(marches)} (mois : {len(marches_month)})"
                 )
 
                 # On passe aux jours suivants
@@ -281,6 +293,8 @@ def wait_for_either_element(driver, timeout=10) -> tuple[str or None, int]:
                 else None
             )
         )
+        if result.text:
+            print(result.text)
 
         # Determine which one appeared
         if result.get_attribute("id") == download_button_id:
@@ -296,9 +310,12 @@ def wait_for_either_element(driver, timeout=10) -> tuple[str or None, int]:
             result.click()
             sleep(2)
             return "download", nb_results
-        elif "recherche" in result:
+        elif "préciser" in result:
             print("too many results")
-            return "error", 0
+            return "too_many", 0
+        elif "Aucun" in result:
+            print("no result")
+            return "no_result", 0
         else:
             print("Ni téléchargement, ni erreur...")
             return None, 0  # Should not happen
