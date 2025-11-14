@@ -49,7 +49,7 @@ def scrap(target: str = None, mode: str = None, month=None, year=None):
     elif mode == "all":
         current_year = int(current_year)
         for year in reversed(range(2018, current_year + 2)):
-            scrap(target="target", mode="year", year=str(year))
+            scrap(target=target, mode="year", year=str(year))
 
     else:
         print("Mauvaise configuration")
