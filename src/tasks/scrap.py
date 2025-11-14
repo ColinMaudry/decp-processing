@@ -198,7 +198,6 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             if json_path.exists():
                 current_size = json_path.stat().st_size
                 if current_size == last_size and current_size > 0:
-                    print(f"{json_path.name} téléchargé.")
                     sleep(0.1)
                     json_path.rename(final_json_path)
                     downloaded = True
@@ -206,7 +205,6 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             time.sleep(0.2)
 
         if final_json_path.exists():
-            print("json path exists")
             with open(final_json_path, "r") as f:
                 json_text = f.read()
             try:
@@ -242,12 +240,11 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
                 start_date = end_date + timedelta(days=1)
             else:
                 # On reste sur les mêmes jours
-                print(
-                    "Résultats de recherche différents marchés téléchargés, on réessaie..."
-                )
+                pass
+
         else:
             # On reste sur les mêmes jours
-            print("Aucun fichier téléchargé. On réessaie...")
+            pass
 
     driver.close()
 
@@ -297,7 +294,6 @@ def wait_for_either_element(driver, timeout=10) -> tuple[str or None, int]:
             nb_results = int(nb_results)
             # Résulats de recherche OK
             result.click()
-            print("download intent...")
             sleep(2)
             return "download", nb_results
         elif "recherche" in result:
