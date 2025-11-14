@@ -134,7 +134,15 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
         follow_redirects=True,
     ).json()
 
+    retry_count = 0
+
     while end_date < last_month_day:
+        # On évite de boucler sans fin
+        if retry_count > 3:
+            retry_count = 0
+            start_date = end_date + timedelta(days=1)
+            continue
+
         start_date_str = start_date.isoformat()
         end_date = start_date + base_duration
 
@@ -190,6 +198,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
         elif result_code == "timeout":
             # On réessaie après 10 secondes
             sleep(10)
+            retry_count += 1
             continue
         elif result_code is None:
             print("❓  Pas de téléchargement, on skip.")
@@ -242,21 +251,28 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
                 for key in replacements.keys():
                     json_text = json_text.replace(key, replacements[key])
                 marches = json.loads(json_text)["marches"]
-            if len(marches) == nb_results:
+            nb_marches = len(marches)
+            nb_marches_month = len(marches_month)
+            if nb_marches == nb_results:
                 marches_month.extend(marches)
                 print(
-                    f"✅ Téléchargement valide, longueur marchés {len(marches)} (mois : {len(marches_month)})"
+                    f"✅ Téléchargement valide, longueur marchés {nb_marches} (mois : {nb_marches_month})"
                 )
 
                 # On passe aux jours suivants
                 start_date = end_date + timedelta(days=1)
+                continue
             else:
                 # On reste sur les mêmes jours
-                pass
+                print(f"{nb_results} résultats != {nb_marches} marchés téléchargés")
+                retry_count += 1
+                continue
 
         else:
+            print("Pas de JSON téléchargé")
             # On reste sur les mêmes jours
-            pass
+            retry_count += 1
+            continue
 
     driver.close()
 
