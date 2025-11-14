@@ -310,6 +310,10 @@ def calculate_naf_cpv_matching(df: pl.DataFrame):
         ]
     ).drop_nulls()
 
+    cpv_naf_counts = lf_naf_cpv.group_by(
+        "cpv_code", "activite_code", "activite_nomenclature"
+    ).agg(pl.count().alias("nb_marches"))
+
     # Fusion temporaire du code NAF et de sa nomenclature par simplicité
     lf_naf_cpv = lf_naf_cpv.with_columns(
         pl.concat_str(
@@ -370,7 +374,7 @@ def calculate_naf_cpv_matching(df: pl.DataFrame):
         .over("activite")
         .alias("rank")
     )
-    df_results = df_results.filter(pl.col("rank") <= 10).drop("rank")
+    df_results = df_results.filter(pl.col("rank") <= 10)
     df_results = df_results.filter(pl.col("score") > 0)
     df_results = df_results.sort(by=["activite", "score"], descending=[False, True])
     df_results = (
@@ -382,6 +386,14 @@ def calculate_naf_cpv_matching(df: pl.DataFrame):
     )
     df_results = df_results.select(
         cs.starts_with("activite"), ~cs.starts_with("activite")
+    )
+
+    # Nombre de marchés par CPV
+    df_results = df_results.join(
+        cpv_naf_counts.collect(),
+        left_on=["cpv", "activite_code", "activite_nomenclature"],
+        right_on=["cpv_code", "activite_code", "activite_nomenclature"],
+        how="left",
     )
 
     save_to_files(df_results, DIST_DIR / "probabilites_naf_cpv", "csv")
