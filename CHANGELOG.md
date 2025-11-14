@@ -1,6 +1,7 @@
 #### 2.4.3 2025-11-14
 
-- Correction des soucis de scraping AWS ([#143](https://github.com/ColinMaudry/decp-processing/issues/143))
+- Stabilisation du scrap AWS (mais c'est pas encore ça) ([#143](https://github.com/ColinMaudry/decp-processing/issues/143))
+- Ajout du nombre de marchés dans les stats NAF/CPV ([#142](https://github.com/ColinMaudry/decp-processing/issues/142))
 
 #### 2.4.2 2025-11-12
 
