@@ -1,13 +1,15 @@
 import sys
 
-from flows.decp_processing import decp_processing
-from flows.get_cog import get_cog
-from flows.sirene_preprocess import sirene_preprocess
+from src.flows.decp_processing import decp_processing
+from src.flows.get_cog import get_cog
+from src.flows.scrap import scrap
+from src.flows.sirene_preprocess import sirene_preprocess
 
 FUNCTIONS = {
     "sirene_preprocess": sirene_preprocess,
     "decp_processing": decp_processing,
     "get_cog": get_cog,
+    "scrap": scrap,
 }
 
 if __name__ == "__main__":
@@ -23,4 +25,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Call the function
-    FUNCTIONS[func_name]()
+    if func_name != "scrap":
+        FUNCTIONS[func_name]()
+    else:
+        scrap(target="aws", mode="month")

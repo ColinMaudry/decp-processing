@@ -116,7 +116,7 @@ def scrap_marches_securises_month(year: str, month: str, dist_dir: Path):
 @task(log_prints=True)
 def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
     options = Options()
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
     options.set_preference("browser.download.folderList", 2)
     options.set_preference("browser.download.manager.showWhenStarting", False)
     options.set_preference("browser.download.dir", str(dist_dir))
@@ -143,7 +143,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
 
         driver.get("https://www.marches-publics.info/Annonces/rechercher")
 
-        def search_form(end_date_: date) -> date:
+        def search_form(end_date_: date) -> tuple[date, int]:
             end_date_str_ = end_date_.isoformat()
             sleep(1)
             print(f"➡️  {start_date_str} -> {end_date_str_}")
@@ -166,7 +166,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
 
             # Soit le bouton de téléchargement apparaît, soit il y a une erreur parce
             # que de trop nombreux résultats sont retournés
-            result = wait_for_either_element(driver)
+            result, nb_results = wait_for_either_element(driver)
 
             if result == "error":
                 # On réessaie avec moins de réultats
@@ -181,9 +181,9 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
                 end_date_ = search_form(end_date_)
 
             # End search_form()
-            return end_date
+            return end_date, nb_results
 
-        end_date = search_form(end_date)
+        end_date, nb_results = search_form(end_date)
         end_date_str = end_date.isoformat()
 
         json_path = dist_dir / "donneesEssentielles.json"
@@ -198,7 +198,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             if json_path.exists():
                 current_size = json_path.stat().st_size
                 if current_size == last_size and current_size > 0:
-                    print(f"✅ {json_path.name} téléchargé.")
+                    print(f"{json_path.name} téléchargé.")
                     sleep(0.1)
                     json_path.rename(final_json_path)
                     downloaded = True
@@ -206,6 +206,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             time.sleep(0.2)
 
         if final_json_path.exists():
+            print("json path exists")
             with open(final_json_path, "r") as f:
                 json_text = f.read()
             try:
@@ -231,14 +232,22 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
                 for key in replacements.keys():
                     json_text = json_text.replace(key, replacements[key])
                 marches = json.loads(json_text)["marches"]
+            if len(marches) == nb_results:
+                marches_month.extend(marches)
+                print(
+                    f"✅  Téléchargement valide, longueur marchés {len(marches)} (mois : {len(marches_month)})"
+                )
 
-            marches_month.extend(marches)
-            print(f"longueur marchés {len(marches)} (mois : {len(marches_month)})")
+                # On passe aux jours suivants
+                start_date = end_date + timedelta(days=1)
+            else:
+                # On reste sur les mêmes jours
+                print(
+                    "Résultats de recherche différents marchés téléchargés, on réessaie..."
+                )
         else:
-            print("Aucun fichier téléchargé.")
-
-        start_date = end_date + timedelta(days=1)
-        # End while loop du mois
+            # On reste sur les mêmes jours
+            print("Aucun fichier téléchargé. On réessaie...")
 
     driver.close()
 
@@ -253,7 +262,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
     # End scrap AWS
 
 
-def wait_for_either_element(driver, timeout=10):
+def wait_for_either_element(driver, timeout=10) -> tuple[str or None, int]:
     """
     Attend de voir si le bouton de téléchargement apparaît ou bien le message d'erreur.
     Fonction générée en grande partie avec la LLM Euria, développée par Infomaniak
@@ -278,20 +287,29 @@ def wait_for_either_element(driver, timeout=10):
 
         # Determine which one appeared
         if result.get_attribute("id") == download_button_id:
+            nb_results = (
+                driver.find_element(By.ID, "content")
+                .find_element(By.CLASS_NAME, "full")
+                .find_element(By.TAG_NAME, "h2")
+                .find_element(By.TAG_NAME, "strong")
+                .text.strip()
+            )
+            nb_results = int(nb_results)
+            # Résulats de recherche OK
             result.click()
-            print("download started...")
+            print("download intent...")
             sleep(2)
-            return "download"
+            return "download", nb_results
         elif "recherche" in result:
             print("too many results")
-            return "error"
+            return "error", 0
         else:
             print("Ni téléchargement, ni erreur...")
-            return None  # Should not happen
+            return None, 0  # Should not happen
 
     except TimeoutException:
         print("[Timeout] Ni bouton ni erreur dans le temps imparti...")
-        return "timeout"
+        return "timeout", 0
     except Exception as e:
         print(f"[Error] Unexpected error while waiting: {e}")
-        return None
+        return None, 0
