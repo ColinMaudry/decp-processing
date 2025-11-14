@@ -116,7 +116,7 @@ def scrap_marches_securises_month(year: str, month: str, dist_dir: Path):
 @task(log_prints=True)
 def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
     options = Options()
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
     options.set_preference("browser.download.folderList", 2)
     options.set_preference("browser.download.manager.showWhenStarting", False)
     options.set_preference("browser.download.dir", str(dist_dir))
