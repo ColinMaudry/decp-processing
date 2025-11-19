@@ -21,6 +21,7 @@ if __name__ == "__main__":
                 "DECP_PROCESSING_PUBLISH": "True",
                 "DECP_DIST_DIR": "/srv/shared/decp/prod/dist",
                 "PREFECT_TASKS_REFRESH_CACHE": "False",
+                "EXCLUDED_RESOURCES": "501b5201-bc83-4b59-b335-449b34043446,bd33e98f-f8e3-49ba-9f26-51c95fe57234",
             }
         },
     )
