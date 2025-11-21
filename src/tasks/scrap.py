@@ -251,7 +251,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
 
     driver.close()
 
-    if len(marches_month) > 0:
+    if len(marches_month) > 0 and isinstance(marches_month, list):
         # Format 2022, donc double niveau
         dicts = {"marches": {"marche": marches_month}}
         json_path = dist_dir / f"aws_{year}-{month}.json"
