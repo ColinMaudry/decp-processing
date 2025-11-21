@@ -1,3 +1,11 @@
+### 2.5.0 2025-11-21
+
+- Ajout de la durée restante dans le marché en mois ([#35](https://github.com/ColinMaudry/decp-processing/issues/135))
+- Amélioration de la conso mémoire de la correction des titulaires ([#146](https://github.com/ColinMaudry/decp-processing/issues/146))
+- Vérfication de la structude des données scrapées (AWS)
+- Gestion propre des erreurs 429 Too Many Redirects ([6fbd71e0](https://github.com/ColinMaudry/decp-processing/commit/ 6fbd71e0bca0534ee360dc172f3565607dac5bef))
+- Skipper et non fail les ressources qui ne sont conformes à aucun schéma (2019 ou 2022)
+
 #### 2.4.3 2025-11-14
 
 - Stabilisation du scrap AWS (mais c'est pas encore ça) ([#143](https://github.com/ColinMaudry/decp-processing/issues/143))

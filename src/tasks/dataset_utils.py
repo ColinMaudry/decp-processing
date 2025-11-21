@@ -50,7 +50,9 @@ def list_resources_by_dataset(dataset_id: str) -> list[dict]:
     cache_policy=INPUTS,
     cache_expiration=datetime.timedelta(hours=23),
 )
-def list_resources(datasets: list[dict]) -> list[dict]:
+def list_resources(
+    datasets: list[dict], excluded_resources=EXCLUDED_RESOURCES
+) -> list[dict]:
     """
     Prépare la liste des ressources JSON à traiter pour un ou plusieurs jeux de données.
 
@@ -86,7 +88,7 @@ def list_resources(datasets: list[dict]) -> list[dict]:
             # - des fichiers XML abandonnés
             if (
                 resource["format"] in ["json", "xml"]
-                and resource["id"] not in EXCLUDED_RESOURCES
+                and resource["id"] not in excluded_resources
             ):
                 resource = {
                     "dataset_id": dataset["id"],
