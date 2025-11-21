@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 
 import polars as pl
@@ -385,6 +386,29 @@ def calculate_naf_cpv_matching(df: pl.DataFrame):
     )
 
     save_to_files(df_results, DIST_DIR / "probabilites_naf_cpv", "csv")
+
+
+def add_duree_restante(lff: pl.LazyFrame):
+    today = datetime.now().date()
+    duree_mois_days_int = pl.col("dureeMois") * 30
+    lff = lff.with_columns(
+        (
+            pl.duration(days=duree_mois_days_int) - (today - pl.col("dateNotification"))
+        ).alias("dureeRestanteMois")
+    )
+    lff = lff.with_columns(
+        ((pl.col("dureeRestanteMois").dt.total_days() / 30) + 1)
+        .round(1)
+        .alias("dureeRestanteMois")
+    )
+    lff = lff.with_columns(
+        pl.when(pl.col("dureeRestanteMois") < 0)
+        .then(pl.lit(0))
+        .otherwise(pl.col("dureeRestanteMois"))
+        .alias("dureeRestanteMois")
+    )
+
+    return lff
 
 
 #

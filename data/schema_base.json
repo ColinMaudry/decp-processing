@@ -99,6 +99,13 @@
       "short_title": null
     },
     {
+      "type": "number",
+      "name": "dureeRestanteMois",
+      "title": "Durée restante (mois)",
+      "description": "Durée approximative en mois restante dans le marché, en tenant compte de la date de notification et de la durée du marché. Ce nombre ne peut être inférieur à 0.",
+      "short_title": null
+    },
+    {
       "type": "integer",
       "name": "offresRecues",
       "title": "Offres reçues",
