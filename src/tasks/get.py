@@ -81,6 +81,9 @@ def get_resource(
         )
         return None, None
 
+    if decp_format is None:
+        return None, None
+
     lf: pl.LazyFrame = pl.scan_parquet(output_path.with_suffix(".parquet"))
 
     # Ajout des stats de la ressource à l'artifact
@@ -115,13 +118,14 @@ def find_json_decp_format(chunk, decp_formats):
             # Le parser a trouvé au moins un marché correspondant à ce format, donc on a
             # trouvé le bon format.
             return decp_format
-    raise ValueError("Pas de match trouvé parmis les schémas passés")
+    print("⚠️  Pas de match trouvé parmis les schémas passés")
+    return None
 
 
 @task(persist_result=False, log_prints=True)
 def json_stream_to_parquet(
     url: str, output_path: Path, decp_formats: list[DecpFormat] | None = None
-) -> tuple[set, DecpFormat]:
+) -> tuple[set, DecpFormat or None]:
     if decp_formats is None:
         decp_formats: list[DecpFormat] = DECP_FORMATS
 
@@ -158,6 +162,8 @@ def json_stream_to_parquet(
     chunk = next(stream_replace_iter)
 
     decp_format = find_json_decp_format(chunk, decp_formats)
+    if decp_format is None:
+        return set(), None
 
     for marche in decp_format.liste_marches_ijson:
         new_fields = write_marche_rows(marche, tmp_file, decp_format)
@@ -437,5 +443,7 @@ def get_clean(resource, resources_artifact: list) -> pl.DataFrame or None:
         if lf is not None:
             lf = clean_decp(lf, decp_format)
             df = lf.collect(engine="streaming")
+        else:
+            df = None
 
     return df

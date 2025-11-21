@@ -62,6 +62,7 @@ def decp_processing(enable_cache_removal: bool = False):
 
     print("Fusion des dataframes...")
     df: pl.DataFrame = concat_decp_json(dfs)
+    del dfs
 
     print("Ajout des données SIRENE...")
     # Preprocessing des données SIRENE si :
