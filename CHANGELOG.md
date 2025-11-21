@@ -1,3 +1,10 @@
+### 2.5.0 2025-11-21
+
+- Ajout de la durée restante dans le marché en mois ([#35](https://github.com/ColinMaudry/decp-processing/issues/135))
+- Amélioration de la conso mémoire de la correction des titulaires ([#146](https://github.com/ColinMaudry/decp-processing/issues/146))
+- Vérfication de la structude des données scrapées (AWS)
+- Skipper et non fail les ressources qui ne sont conformes à aucun schéma (2019 ou 2022)
+
 #### 2.4.3 2025-11-14
 
 - Correction des soucis de scraping AWS ([#143](https://github.com/ColinMaudry/decp-processing/issues/143))
