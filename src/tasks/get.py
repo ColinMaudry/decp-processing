@@ -6,6 +6,7 @@ from functools import partial
 from pathlib import Path
 from time import sleep
 
+import httpx
 import ijson
 import orjson
 import polars as pl
@@ -40,10 +41,15 @@ from src.tasks.utils import (
 @task(retries=3, retry_delay_seconds=3)
 def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par défaut)
     if url.startswith("http"):
-        with HTTP_CLIENT.stream(
-            "GET", url, headers=HTTP_HEADERS, follow_redirects=True
-        ) as response:
-            yield from response.iter_bytes(chunk_size)
+        try:
+            with HTTP_CLIENT.stream(
+                "GET", url, headers=HTTP_HEADERS, follow_redirects=True
+            ) as response:
+                yield from response.iter_bytes(chunk_size)
+        except httpx.TooManyRedirects:
+            print(f"⛔️ Erreur 429 Too Many Requests pour {url}")
+            return
+
     else:
         # Données de test.
         with open(url, "rb") as f:
@@ -141,6 +147,7 @@ def json_stream_to_parquet(
     tmp_file = tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson", delete=False)
 
     http_stream_iter = stream_get(url)
+
     stream_replace_iter = stream_replace_bytestring(
         http_stream_iter, rb"NaN([,\n])", rb"null\1"
     )  # Nan => null
@@ -159,7 +166,11 @@ def json_stream_to_parquet(
         )
 
     # In first iteration, will find the right format
-    chunk = next(stream_replace_iter)
+    try:
+        chunk = next(stream_replace_iter)
+    except StopIteration:
+        print(f"⚠️  Flux vide pour {url}")
+        return set(), None
 
     decp_format = find_json_decp_format(chunk, decp_formats)
     if decp_format is None:
