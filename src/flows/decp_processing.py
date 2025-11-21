@@ -24,6 +24,7 @@ from src.tasks.get import get_clean
 from src.tasks.output import generate_final_schema, save_to_files
 from src.tasks.publish import publish_to_datagouv
 from src.tasks.transform import (
+    add_duree_restante,
     calculate_naf_cpv_matching,
     concat_decp_json,
     sort_columns,
@@ -62,6 +63,7 @@ def decp_processing(enable_cache_removal: bool = False):
 
     print("Fusion des dataframes...")
     df: pl.DataFrame = concat_decp_json(dfs)
+    del dfs
 
     print("Ajout des données SIRENE...")
     # Preprocessing des données SIRENE si :
@@ -72,6 +74,9 @@ def decp_processing(enable_cache_removal: bool = False):
         sirene_preprocess()
 
     lf: pl.LazyFrame = enrich_from_sirene(df.lazy())
+
+    print("Ajout de la colonne 'dureeRestanteMois'...")
+    lf = add_duree_restante(lf)
 
     df: pl.DataFrame = lf.collect(engine="streaming")
 
