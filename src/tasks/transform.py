@@ -390,24 +390,16 @@ def calculate_naf_cpv_matching(df: pl.DataFrame):
 
 def add_duree_restante(lff: pl.LazyFrame):
     today = datetime.now().date()
-    duree_mois_days_int = pl.col("dureeMois") * 30
-    lff = lff.with_columns(
-        (
-            pl.duration(days=duree_mois_days_int) - (today - pl.col("dateNotification"))
-        ).alias("dureeRestanteMois")
-    )
-    lff = lff.with_columns(
-        ((pl.col("dureeRestanteMois").dt.total_days() / 30) + 1)
-        .round(1)
-        .alias("dureeRestanteMois")
-    )
-    lff = lff.with_columns(
-        pl.when(pl.col("dureeRestanteMois") < 0)
-        .then(pl.lit(0))
-        .otherwise(pl.col("dureeRestanteMois"))
-        .alias("dureeRestanteMois")
-    )
+    duree_mois_days_int = pl.col("dureeMois") * 30.5
+    end_date = pl.col("dateNotification") + pl.duration(days=duree_mois_days_int)
+    duree_restante_mois = ((end_date - today).dt.total_days() / 30).round(1)
 
+    lff = lff.with_columns(
+        pl.when(duree_restante_mois < 0)
+        .then(pl.lit(0))
+        .otherwise(duree_restante_mois)
+        .alias("dureeRestanteMois")
+    )
     return lff
 
 
