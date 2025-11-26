@@ -114,6 +114,7 @@ def generate_final_schema(df):
 
     polars_frictionless_mapping = {
         "String": "string",
+        "Float32": "number",
         "Float64": "number",
         "Int16": "integer",
         "Boolean": "boolean",

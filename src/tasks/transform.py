@@ -406,10 +406,19 @@ def add_duree_restante(lff: pl.LazyFrame):
     end_date = pl.col("dateNotification") + pl.duration(days=duree_mois_days_int)
     duree_restante_mois = ((end_date - today).dt.total_days() / 30).round(1)
 
+    # Pas de valeurs négatives.
     lff = lff.with_columns(
         pl.when(duree_restante_mois < 0)
         .then(pl.lit(0))
         .otherwise(duree_restante_mois)
+        .alias("dureeRestanteMois")
+    )
+
+    # Si dureeRestanteMois > dureeMois, dureeRestanteMois = dureeMois
+    lff = lff.with_columns(
+        pl.when(pl.col("dureeRestanteMois") > pl.col("dureeMois"))
+        .then(pl.col("dureeMois").cast(pl.Float32))
+        .otherwise(pl.col("dureeRestanteMois"))
         .alias("dureeRestanteMois")
     )
     return lff
