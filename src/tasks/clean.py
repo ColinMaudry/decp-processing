@@ -45,7 +45,7 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     # Certains marchés ont des montants qui posent problème, donc on les met à 12,311111111 milliards (pour les retrouver facilement)
     # ex : 221300015002472020F00075, 1.0E17
     lf = lf.with_columns(
-        pl.when(pl.col("montant").str.len_chars() > 11)
+        pl.when(pl.col("montant").str.split(".").list.get(0).str.len_chars() > 11)
         .then(pl.lit("12311111111"))
         .otherwise(pl.col("montant"))
         .alias("montant")
@@ -234,10 +234,10 @@ def fix_data_types(lf: pl.LazyFrame) -> pl.LazyFrame:
         "montant": pl.Float64,
         # "montantActeSousTraitance": pl.Float64,
         # "montantModificationActeSousTraitance": pl.Float64,
-        "tauxAvance": pl.Float64,
+        "tauxAvance": pl.Float32,
         # "variationPrixActeSousTraitance": pl.Float64,
-        "origineFrance": pl.Float64,
-        "origineUE": pl.Float64,
+        "origineFrance": pl.Float32,
+        "origineUE": pl.Float32,
         "modification_id": pl.Int16,
     }
 
