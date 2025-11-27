@@ -27,35 +27,6 @@ def explode_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat):
     return lf
 
 
-def remove_modifications_duplicates(df):
-    """On supprime les marches avec un suffixe correspondant à un autre marché"""
-    if "modifications" not in df.collect_schema().names():
-        return df
-    # Index sans les suffixes
-    df_cleaned = remove_suffixes_from_uid_column(df)
-    df_cleaned = df_cleaned.with_columns(
-        modifications_len=pl.col("modifications").list.len(),
-    )
-
-    df_cleaned = df_cleaned.sort("modifications_len").unique("uid", keep="last")
-    return df_cleaned
-
-
-def remove_suffixes_from_uid_column(df):
-    """Supprimer les suffixes des uid quand ce suffixe correspond au nombre de mofifications apportées au marché.
-    Exemple : uid = [acheteur_id]12302 et le marché a deux modifications. uid => [acheteur_id]123.
-    """
-    df = df.with_columns(
-        expected_suffix=pl.col("modifications").list.len().cast(pl.Utf8).str.zfill(2)
-    )
-    df = df.with_columns(
-        uid=pl.when(pl.col("uid").str.ends_with(pl.col("expected_suffix")))
-        .then(pl.col("uid").str.head(-2))
-        .otherwise(pl.col("uid"))
-    )
-    return df
-
-
 def replace_with_modification_data(lff: pl.LazyFrame):
     """
     Gère les modifications dans le DataFrame des DECP.
@@ -401,81 +372,81 @@ def add_duree_restante(lff: pl.LazyFrame):
 #
 
 
-def make_acheteur_nom(decp_acheteurs_df: pl.LazyFrame):
-    # Construction du champ acheteur_id
-
-    from numpy import nan as NaN
-
-    def construct_nom(row):
-        if row["enseigne1Etablissement"] is NaN:
-            return row["denominationUniteLegale"]
-        else:
-            return f"{row['denominationUniteLegale']} - {row['enseigne1Etablissement']}"
-
-    decp_acheteurs_df["acheteur_id"] = decp_acheteurs_df.apply(construct_nom, axis=1)
-
-    # TODO: ne garder que les colonnes acheteur_id et acheteur_id
-
-    return decp_acheteurs_df
-
-
-def improve_titulaire_unite_legale_data(df_sirets_titulaires: pl.DataFrame):
-    # Raccourcissement du code commune
-    df_sirets_titulaires["departement"] = df_sirets_titulaires[
-        "codeCommuneEtablissement"
-    ].str[:2]
-    df_sirets_titulaires = df_sirets_titulaires.drop(
-        columns=["codeCommuneEtablissement"]
-    )
-
-    # # Raccourcissement de l'activité principale
-    # pas sûr de pourquoi je voulais raccourcir le code NAF/APE. Pour récupérérer des libellés ?
-    # decp_titulaires_sirets_df['activitePrincipaleEtablissement'] = decp_titulaires_sirets_df['activitePrincipaleEtablissement'].str[:-3]
-
-    # Correction des données ESS et état
-    df_sirets_titulaires["etatAdministratifUniteLegale"] = df_sirets_titulaires[
-        "etatAdministratifUniteLegale"
-    ].cat.rename_categories({"A": "Active", "C": "Cessée"})
-    df_sirets_titulaires["economieSocialeSolidaireUniteLegale"] = df_sirets_titulaires[
-        "economieSocialeSolidaireUniteLegale"
-    ].replace({"O": "Oui", "N": "Non"})
-
-    df_sirets_titulaires = improve_categories_juridiques(df_sirets_titulaires)
-
-    return df_sirets_titulaires
-
-
-def improve_categories_juridiques(df_sirets_titulaires: pl.DataFrame):
-    # Récupération et raccourcissement des categories juridiques du fichier SIREN
-    df_sirets_titulaires["categorieJuridiqueUniteLegale"] = (
-        df_sirets_titulaires["categorieJuridiqueUniteLegale"].astype(str).str[:2]
-    )
-
-    # Récupération des libellés des catégories juridiques
-    cj_df = pl.read_csv(DATA_DIR / "cj.csv", index_col=None, dtype="object")
-    df_sirets_titulaires = pl.merge(
-        df_sirets_titulaires,
-        cj_df,
-        how="left",
-        left_on="categorieJuridiqueUniteLegale",
-        right_on="Code",
-    )
-    df_sirets_titulaires["categorieJuridique"] = df_sirets_titulaires["Libellé"]
-    df_sirets_titulaires = df_sirets_titulaires.drop(
-        columns=["Code", "categorieJuridiqueUniteLegale", "Libellé"]
-    )
-    return df_sirets_titulaires
-
-
-def rename_titulaire_sirene_columns(df_sirets_titulaires: pl.DataFrame):
-    # Renommage des colonnes
-
-    renaming = {
-        "activitePrincipaleEtablissement": "codeAPE",
-        "etatAdministratifUniteLegale": "etatEntreprise",
-        "etatAdministratifEtablissement": "etatEtablissement",
-    }
-
-    df_sirets_titulaires = df_sirets_titulaires.rename(columns=renaming)
-
-    return df_sirets_titulaires
+# def make_acheteur_nom(decp_acheteurs_df: pl.LazyFrame):
+#     # Construction du champ acheteur_id
+#
+#     from numpy import nan as NaN
+#
+#     def construct_nom(row):
+#         if row["enseigne1Etablissement"] is NaN:
+#             return row["denominationUniteLegale"]
+#         else:
+#             return f"{row['denominationUniteLegale']} - {row['enseigne1Etablissement']}"
+#
+#     decp_acheteurs_df["acheteur_id"] = decp_acheteurs_df.apply(construct_nom, axis=1)
+#
+#     # TODO: ne garder que les colonnes acheteur_id et acheteur_id
+#
+#     return decp_acheteurs_df
+#
+#
+# def improve_titulaire_unite_legale_data(df_sirets_titulaires: pl.DataFrame):
+#     # Raccourcissement du code commune
+#     df_sirets_titulaires["departement"] = df_sirets_titulaires[
+#         "codeCommuneEtablissement"
+#     ].str[:2]
+#     df_sirets_titulaires = df_sirets_titulaires.drop(
+#         columns=["codeCommuneEtablissement"]
+#     )
+#
+#     # # Raccourcissement de l'activité principale
+#     # pas sûr de pourquoi je voulais raccourcir le code NAF/APE. Pour récupérérer des libellés ?
+#     # decp_titulaires_sirets_df['activitePrincipaleEtablissement'] = decp_titulaires_sirets_df['activitePrincipaleEtablissement'].str[:-3]
+#
+#     # Correction des données ESS et état
+#     df_sirets_titulaires["etatAdministratifUniteLegale"] = df_sirets_titulaires[
+#         "etatAdministratifUniteLegale"
+#     ].cat.rename_categories({"A": "Active", "C": "Cessée"})
+#     df_sirets_titulaires["economieSocialeSolidaireUniteLegale"] = df_sirets_titulaires[
+#         "economieSocialeSolidaireUniteLegale"
+#     ].replace({"O": "Oui", "N": "Non"})
+#
+#     df_sirets_titulaires = improve_categories_juridiques(df_sirets_titulaires)
+#
+#     return df_sirets_titulaires
+#
+#
+# def improve_categories_juridiques(df_sirets_titulaires: pl.DataFrame):
+#     # Récupération et raccourcissement des categories juridiques du fichier SIREN
+#     df_sirets_titulaires["categorieJuridiqueUniteLegale"] = (
+#         df_sirets_titulaires["categorieJuridiqueUniteLegale"].astype(str).str[:2]
+#     )
+#
+#     # Récupération des libellés des catégories juridiques
+#     cj_df = pl.read_csv(DATA_DIR / "cj.csv", index_col=None, dtype="object")
+#     df_sirets_titulaires = pl.merge(
+#         df_sirets_titulaires,
+#         cj_df,
+#         how="left",
+#         left_on="categorieJuridiqueUniteLegale",
+#         right_on="Code",
+#     )
+#     df_sirets_titulaires["categorieJuridique"] = df_sirets_titulaires["Libellé"]
+#     df_sirets_titulaires = df_sirets_titulaires.drop(
+#         columns=["Code", "categorieJuridiqueUniteLegale", "Libellé"]
+#     )
+#     return df_sirets_titulaires
+#
+#
+# def rename_titulaire_sirene_columns(df_sirets_titulaires: pl.DataFrame):
+#     # Renommage des colonnes
+#
+#     renaming = {
+#         "activitePrincipaleEtablissement": "codeAPE",
+#         "etatAdministratifUniteLegale": "etatEntreprise",
+#         "etatAdministratifEtablissement": "etatEtablissement",
+#     }
+#
+#     df_sirets_titulaires = df_sirets_titulaires.rename(columns=renaming)
+#
+#     return df_sirets_titulaires
