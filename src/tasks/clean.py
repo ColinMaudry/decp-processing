@@ -233,6 +233,12 @@ def clean_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
 
 
 def fix_data_types(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """
+    To enable easier data ingestion, everything is initially cast as strings... until here. This
+    function casts the right datatype for each column.
+    :param lf:
+    :return:
+    """
     numeric_dtypes = {
         "dureeMois": pl.Int16,
         # "dureeMoisActeSousTraitance": pl.Int16,
