@@ -206,16 +206,27 @@ def test_clean_decp():
 
     # clean_decp expects certain columns
     data = {
-        "id": ["id1", "id2", ""],
+        "id": ["id.1", "id/2", ""],
         "acheteur_id": ["ach1", "ach2", ""],
-        "acheteur.id": ["ach1", "ach2", ""],
-        "montant": ["1000", "1.0E17", "2000"],
+        "acheteur.id": ["", "ach2", ""],
+        "montant": ["1000", "1000000000000.00", "2000"],
         "datePublicationDonnees": ["2023-01-01", "0002-11-30", "2023-01-02"],
         "dateNotification": ["2023-01-01", "2023-01-01", "2023-01-01"],
-        "nature": ["Marche", "subsequent", "Autre"],
+        "nature": ["Marche subsequent", "", "Autre"],
         "codeCPV": ["12345678-1", "87654321", "11111111"],
-        "titulaires": [[{"id": "t1", "typeIdentifiant": "SIRET"}], [], []],
-        "modification_titulaires": [[{"id": "m1", "typeIdentifiant": "SIRET"}], [], []],
+        "titulaires": [
+            [{"id": "t1", "typeIdentifiant": "SIRET"}],
+            [{"id": "t2", "typeIdentifiant": "SIRET"}],
+            [],
+        ],
+        "modification_titulaires": [None, None, None],
+        # Columns for string lists
+        "considerationsSociales_considerationSociale": [
+            ["Clause sociale", "Critère social"],
+            ["Critère social"],
+            [""],
+        ],
+        "considerationsSociales": [[], [], []],
         # Columns for fix_data_types
         "dureeMois": ["12", "24", "36"],
         "offresRecues": ["1", "2", "3"],
@@ -227,29 +238,53 @@ def test_clean_decp():
         "attributionAvance": ["false", "false", "false"],
         "marcheInnovant": ["false", "false", "false"],
         # Columns for clean_null_equivalent
-        "considerationsSociales": ["Oui", "Non", "Pas de considération sociale"],
         "considerationsEnvironnementales": [
-            "Oui",
-            "Non",
-            "Pas de considération environnementale",
+            ["Pas de considération environnementale"],
+            ["Clause environnementale"],
+            [""],
         ],
-        "ccag": ["CCAG", "CCAG", "Pas de CCAG"],
-        "typeGroupement": ["Conjoint", "Solidaire", "Pas de groupement"],
+        "ccag": ["Pas de CCAG", "CCAG", ""],
+        "typeGroupement": ["Pas de groupement", "Solidaire", ""],
     }
 
     lf = pl.LazyFrame(data)
 
     # Test with DECP 2019
-    result = clean_decp(lf, DECP_FORMAT_2019).collect()
+    df_result: pl.DataFrame = clean_decp(lf, DECP_FORMAT_2019).collect()
 
     # Check id cleaning
-    assert result.filter(pl.col("id") == "id1").height > 0
+    assert df_result.filter(pl.col("id") == "id_1").height > 0
+    assert df_result.filter(pl.col("id") == "id_2").height > 0
+
     # Empty id/acheteur_id should be filtered out
-    assert result.filter(pl.col("id") == "").height == 0
+    assert df_result.filter(pl.col("id") == "").height == 0
+
+    # Check uid creation
+    print(
+        df_result.select("uid", "titulaire_id", "modification_id", "donneesActuelles")
+    )
+    print(df_result["uid"].to_list())
+    assert df_result["uid"].to_list() == ["ach1id_1", "ach2id_2"]
+
+    # Check montant replacement
+    assert 12311111111.0 in df_result["montant"].to_list()
+    assert "1.0E17" not in df_result["montant"].to_list()
+
+    # Check string lists
+    assert "considerationsSociales_considerationSociale" not in df_result
+    assert "considerationsSociales" in df_result
+    assert df_result["considerationsSociales"].to_list() == [
+        "Clause sociale, Critère social",
+        "Critère social",
+    ]
+
+    # Check null equivalent
+    assert df_result["considerationsEnvironnementales"][0] == "Sans objet"
+    assert df_result["ccag"][0] == "Sans objet"
+    assert df_result["typeGroupement"][0] == "Sans objet"
 
     # Check nature replacement
-    assert "Marché" in result["nature"].to_list()
-    assert "subséquent" in result["nature"].to_list()
+    assert df_result["nature"][0] == "Marché subséquent"
 
     # Check codeCPV
-    assert result["codeCPV"][0] == "12345678"
+    assert df_result["codeCPV"][0] == "12345678"
