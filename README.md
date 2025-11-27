@@ -110,7 +110,7 @@ Déploiement des flows (exécution programmée de main ou ponctuelle de dev) :
 Le pré-traitement des données SIRENE doit être fait une fois pour que le traitement principal soit fonctionnel.
 
 ```bash
-pytest tests/test_sirene_preprocess.py
+python run_flow.py sirene_preprocess
 ```
 
 Lancement du traitement principal (data_tables + decp.info) via un serveur prefect à usage unique
