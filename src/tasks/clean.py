@@ -202,7 +202,15 @@ def clean_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
             titulaire_typeIdentifiant=pl.element().struct.field("typeIdentifiant"),
         )
 
-    for col in ["titulaires", "modification_titulaires"]:
+    # Get schema to check column dtypes
+    schema = lf.collect_schema()
+
+    for col in ["modification_titulaires", "titulaires"]:
+        # Skip processing if column dtype is Null (all values are null)
+        # This happens when modification_titulaires has no actual data
+        if schema[col] == pl.Null:
+            continue
+
         lf = lf.with_columns(
             pl.col(col)
             .list.eval(expr_titulaire)
@@ -219,15 +227,23 @@ def clean_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
         )
 
     # Remplacer les listes de titulaires vides par null
-    lf = lf.with_columns(
-        [
-            pl.when(pl.col(col).list.len() == 0)
-            .then(None)
-            .otherwise(pl.col(col))
-            .alias(col)
-            for col in ["titulaires", "modification_titulaires"]
-        ]
-    )
+    # Only process columns that have List dtype
+    cols_to_process = [
+        col
+        for col in ["titulaires", "modification_titulaires"]
+        if lf.collect_schema()[col] != pl.Null
+    ]
+
+    if cols_to_process:
+        lf = lf.with_columns(
+            [
+                pl.when(pl.col(col).list.len() == 0)
+                .then(None)
+                .otherwise(pl.col(col))
+                .alias(col)
+                for col in cols_to_process
+            ]
+        )
 
     return lf
 
