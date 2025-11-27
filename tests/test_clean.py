@@ -219,7 +219,9 @@ def test_clean_decp():
             [{"id": "t2", "typeIdentifiant": "SIRET"}],
             [],
         ],
+        # On ne teste pas les modifications
         "modification_titulaires": [None, None, None],
+        "modification_id": [None, None, None],
         # Columns for string lists
         "considerationsSociales_considerationSociale": [
             ["Clause sociale", "Critère social"],
@@ -233,7 +235,6 @@ def test_clean_decp():
         "tauxAvance": ["0", "0", "0"],
         "origineFrance": ["0", "0", "0"],
         "origineUE": ["0", "0", "0"],
-        "modification_id": ["0", "0", "0"],
         "sousTraitanceDeclaree": ["false", "false", "false"],
         "attributionAvance": ["false", "false", "false"],
         "marcheInnovant": ["false", "false", "false"],
@@ -260,10 +261,6 @@ def test_clean_decp():
     assert df_result.filter(pl.col("id") == "").height == 0
 
     # Check uid creation
-    print(
-        df_result.select("uid", "titulaire_id", "modification_id", "donneesActuelles")
-    )
-    print(df_result["uid"].to_list())
     assert df_result["uid"].to_list() == ["ach1id_1", "ach2id_2"]
 
     # Check montant replacement
