@@ -7,7 +7,7 @@ from tasks.transform import (
 
 
 class TestHandleModificationsMarche:
-    def test_handle_modifications_marche_all_cases(self):
+    def test_replace_with_modification_data(self):
         # Input LazyFrame - 3 test cases covering key scenarios
         lf = pl.LazyFrame(
             [
