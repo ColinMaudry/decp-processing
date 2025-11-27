@@ -27,6 +27,8 @@ def sirene_preprocess():
         if not processed_ul_parquet_path.exists():
             print("Téléchargement et préparation des unités légales...")
             get_prepare_unites_legales(processed_ul_parquet_path)
+        else:
+            print(processed_ul_parquet_path, " existe, skipping.")
 
         # préparer les données établissements
         processed_etab_parquet_path = SIRENE_DATA_DIR / "etablissements.parquet"
@@ -34,5 +36,7 @@ def sirene_preprocess():
             print("Téléchargement et préparation des établissements...")
             lf = get_etablissements()
             prepare_etablissements(lf, processed_etab_parquet_path)
+        else:
+            print(processed_etab_parquet_path, " existe, skipping.")
 
     print("☑️  Fin du flow sirene_preprocess.")
