@@ -59,7 +59,7 @@ source .venv/bin/activate
 Installez les dépendances :
 
 ```bash
-pip install .
+pip install -e .
 ```
 
 Pour les contributeurices, installez les dépendances de développement et l'auto-formatage au moment des commits :
