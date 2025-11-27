@@ -56,7 +56,7 @@ def remove_suffixes_from_uid_column(df):
     return df
 
 
-def replace_with_modification_data(lf: pl.LazyFrame):
+def replace_with_modification_data(lff: pl.LazyFrame):
     """
     Gère les modifications dans le DataFrame des DECP.
     À ce stade les modifications ont été exploded dans write_marche_rows().
@@ -65,16 +65,16 @@ def replace_with_modification_data(lf: pl.LazyFrame):
     Elle ajoute également la colonne "donneesActuelles" pour indiquer si la modification est la plus récente.
     """
     # Étape 1: Extraire les données des modifications en renommant les colonnes
-    schema = lf.collect_schema().names()
+    schema = lff.collect_schema().names()
     lf_mods = (
-        lf.select(cs.by_name("uid") | cs.starts_with("modification_"))
+        lff.select(cs.by_name("uid") | cs.starts_with("modification_"))
         .rename(
             {
                 column: column.removeprefix("modification_").removesuffix(
                     "Modification"
                 )
                 for column in schema
-                if column.startswith("modification_")
+                if column.startswith("modification_") and column != "modification_id"
             }
         )
         .filter(~pl.all_horizontal(pl.all().exclude("uid").is_null()))
@@ -83,10 +83,10 @@ def replace_with_modification_data(lf: pl.LazyFrame):
     # Étape 2: Dédupliquer et créer une copie du DataFrame initial sans les colonnes "modifications"
     # On peut dédupliquer aveuglément car la seule chose qui varient dans les lignes d'un même
     # uid, c'est les données de modifs
-    lf = lf.unique("uid")
+    lff = lff.unique("uid")
 
     # Garder TOUTES les colonnes sauf les colonnes modification_*
-    lf_base = lf.drop(cs.starts_with("modification_"))
+    lf_base = lff.drop(cs.starts_with("modification_"))
 
     # Étape 3: Ajouter le modification_id et la colonne données actuelles pour chaque modif
     # Colonnes qui peuvent changer avec les modifications
@@ -99,35 +99,35 @@ def replace_with_modification_data(lf: pl.LazyFrame):
         "titulaires",
     ]
 
-    lf = (
-        pl.concat(
-            [
-                lf_base.select(modification_columns),
-                lf_mods,
-            ],
-            how="vertical_relaxed",
-        )
-        .with_columns(
-            pl.col("dateNotification")
-            .rank(method="ordinal")
-            .over("uid")
-            .cast(pl.Int64)
-            .sub(1)
-            .alias("modification_id")
-        )
-        .with_columns(
-            (
-                pl.col("modification_id") == pl.col("modification_id").max().over("uid")
-            ).alias("donneesActuelles")
-        )
-        .sort(
-            ["uid", "dateNotification", "modification_id"],
-            descending=[False, True, True],
-        )
+    lff = pl.concat(
+        [
+            lf_base.select(modification_columns),
+            lf_mods,
+        ],
+        how="diagonal",
+    )
+
+    lff = lff.with_columns(
+        pl.col("dateNotification")
+        .rank(method="ordinal")
+        .over("uid")
+        .cast(pl.Int16)
+        .sub(1)
+        .alias("modification_id")
+    )
+
+    lff = lff.with_columns(
+        pl.col("modification_id")
+        == pl.col("modification_id").max().over("uid").alias("donneesActuelles")
+    )
+
+    lff = lff.sort(
+        ["uid", "dateNotification", "modification_id"],
+        descending=[False, True, True],
     )
 
     # Étape 4: Remplir les valeurs nulles en utilisant les dernières valeurs non-nulles pour chaque id
-    lf = lf.with_columns(
+    lff = lff.with_columns(
         pl.col("montant", "dureeMois", "titulaires")
         .fill_null(strategy="backward")
         .over("uid")
@@ -145,7 +145,7 @@ def replace_with_modification_data(lf: pl.LazyFrame):
     lf_fixed_columns = lf_base.select(["uid"] + columns_to_keep).unique("uid")
 
     # Joindre pour réintroduire les colonnes fixes
-    lf_final = lf.join(
+    lf_final = lff.join(
         lf_fixed_columns,
         on="uid",
         how="left",
