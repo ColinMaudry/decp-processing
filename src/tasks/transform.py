@@ -9,35 +9,6 @@ from src.config import DATA_DIR, DIST_DIR, SIRENE_UNITES_LEGALES_URL, DecpFormat
 from src.tasks.output import save_to_files
 
 
-def process_string_lists(lf: pl.LazyFrame):
-    string_lists_col_to_rename = [
-        "considerationsSociales_considerationSociale",
-        "considerationsEnvironnementales_considerationEnvironnementale",
-        "techniques_technique",
-        "typesPrix_typePrix",
-        "modalitesExecution_modaliteExecution",
-    ]
-    columns = lf.collect_schema().names()
-
-    # Pour s'assurer qu'on renomme pas une colonne si le bon nom de colonne existe déjà
-    for bad_col in string_lists_col_to_rename:
-        new_col = bad_col.split("_")[0]
-        if new_col in columns and bad_col in columns:
-            lf = lf.with_columns(
-                pl.when(pl.col(new_col).len() == 0)
-                .then(pl.col(bad_col))
-                .otherwise(pl.col(new_col))
-            )
-            lf = lf.drop(bad_col)
-        elif new_col not in columns and bad_col in columns:
-            lf = lf.rename({bad_col: new_col})
-
-    # Et on remplace la liste Python par une liste séparée par des virgules
-    lf = lf.with_columns(cs.by_dtype(pl.List(pl.String)).list.join(", ").name.keep())
-
-    return lf
-
-
 def explode_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat):
     # Explosion des champs titulaires sur plusieurs lignes (un titulaire de marché par ligne)
     # et une colonne par champ
