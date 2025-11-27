@@ -187,10 +187,19 @@ def get_prepare_unites_legales(processed_parquet_path):
     print("Téléchargement des données unité légales et sélection des colonnes...")
     (
         pl.scan_parquet(SIRENE_UNITES_LEGALES_URL)
-        .select(["siren", "denominationUniteLegale"])
-        .filter(pl.col("siren").is_not_null())
-        .filter(pl.col("denominationUniteLegale").is_not_null())
-        .unique()
+        .select(
+            [
+                "siren",
+                "denominationUniteLegale",
+                "prenomUsuelUniteLegale",
+                "nomUniteLegale",
+                "nomUsageUniteLegale",
+            ]
+        )
+        .filter(
+            pl.col("siren").is_not_null()
+        )  # utilisation du fichier Stock, normalement pas de siren null
+        .unique()  # utilisation du fichier Stock, normalement pas de doublons
         .sink_parquet(processed_parquet_path)
     )
 

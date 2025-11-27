@@ -368,6 +368,8 @@ def get_etablissements() -> pl.LazyFrame:
         "longitude": pl.Float64,
         "activitePrincipaleEtablissement": pl.String,
         "nomenclatureActivitePrincipaleEtablissement": pl.String,
+        "enseigne1Etablissement": pl.String,
+        "denominationUsuelleEtablissement": pl.String,
     }
 
     columns = list(schema.keys())
