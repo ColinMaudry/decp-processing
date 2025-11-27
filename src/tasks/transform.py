@@ -117,8 +117,9 @@ def replace_with_modification_data(lff: pl.LazyFrame):
     )
 
     lff = lff.with_columns(
-        pl.col("modification_id")
-        == pl.col("modification_id").max().over("uid").alias("donneesActuelles")
+        (
+            pl.col("modification_id") == pl.col("modification_id").max().over("uid")
+        ).alias("donneesActuelles")
     )
 
     lff = lff.sort(
