@@ -15,6 +15,7 @@ from lxml import etree, html
 from prefect import task
 from prefect.transactions import transaction
 
+from config import SIRENE_UNITES_LEGALES_URL
 from src.config import (
     CACHE_EXPIRATION_TIME_HOURS,
     DECP_FORMAT_2022,
@@ -36,6 +37,7 @@ from src.tasks.utils import (
     get_clean_cache_key,
     stream_replace_bytestring,
 )
+from tasks.transform import prepare_unites_legales
 
 
 @task(retries=3, retry_delay_seconds=3)
@@ -460,3 +462,13 @@ def get_clean(resource, resources_artifact: list) -> pl.DataFrame or None:
             df = None
 
     return df
+
+
+@task
+def get_unite_legales(processed_parquet_path):
+    print("Téléchargement des données unité légales et sélection des colonnes...")
+    (
+        pl.scan_parquet(SIRENE_UNITES_LEGALES_URL)
+        .pipe(prepare_unites_legales)
+        .sink_parquet(processed_parquet_path)
+    )

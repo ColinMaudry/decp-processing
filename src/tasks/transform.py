@@ -3,9 +3,8 @@ from pathlib import Path
 
 import polars as pl
 import polars.selectors as cs
-from prefect import task
 
-from src.config import DATA_DIR, DIST_DIR, SIRENE_UNITES_LEGALES_URL, DecpFormat
+from src.config import DATA_DIR, DIST_DIR, DecpFormat
 from src.tasks.output import save_to_files
 
 
@@ -182,25 +181,54 @@ def extract_unique_titulaires_siret(lf: pl.LazyFrame):
     return lf
 
 
-@task
-def get_prepare_unites_legales(processed_parquet_path):
-    print("Téléchargement des données unité légales et sélection des colonnes...")
-    (
-        pl.scan_parquet(SIRENE_UNITES_LEGALES_URL)
-        .select(
+def prepare_unites_legales(lf: pl.LazyFrame) -> pl.LazyFrame:
+    return (
+        lf.select(
             [
                 "siren",
                 "denominationUniteLegale",
                 "prenomUsuelUniteLegale",
-                "nomUniteLegale",
-                "nomUsageUniteLegale",
+                "nomUniteLegale",  # toujours rempli pour personnes physique
+                "nomUsageUniteLegale",  # parfois rempli, a la priorité sur nomUniteLegale
+                "statutDiffusionUniteLegale",  # P = non-diffusible
             ]
         )
         .filter(
             pl.col("siren").is_not_null()
         )  # utilisation du fichier Stock, normalement pas de siren null
         .unique()  # utilisation du fichier Stock, normalement pas de doublons
-        .sink_parquet(processed_parquet_path)
+        .with_columns(
+            pl.when(pl.col("nomUsageUniteLegale").is_not_null())
+            .then(pl.col("nomUsageUniteLegale"))
+            .otherwise(pl.col("nomUniteLegale"))
+            .alias("nomUniteLegale")
+        )
+        .with_columns(
+            pl.when(pl.col("nomUniteLegale").is_not_null())
+            .then(
+                pl.concat_str(
+                    pl.col("prenomUsuelUniteLegale"),
+                    pl.col("nomUniteLegale"),
+                    separator=" ",
+                )
+            )
+            .otherwise(pl.col("denominationUniteLegale"))
+            .alias("denominationUniteLegale")
+        )
+        .with_columns(
+            pl.when(pl.col("statutDiffusionUniteLegale") == "P")
+            .then(pl.lit("[Données personnelles non-diffusibles]"))
+            .otherwise(pl.col("denominationUniteLegale"))
+            .alias("denominationUniteLegale")
+        )
+        .drop(
+            [
+                "prenomUsuelUniteLegale",
+                "statutDiffusionUniteLegale",
+                "nomUniteLegale",
+                "nomUsageUniteLegale",
+            ]
+        )
     )
 
 
@@ -394,7 +422,7 @@ def add_duree_restante(lff: pl.LazyFrame):
 #
 #     decp_acheteurs_df["acheteur_id"] = decp_acheteurs_df.apply(construct_nom, axis=1)
 #
-#     # TODO: ne garder que les colonnes acheteur_id et acheteur_id
+#     # TODO: ne garder que les colonnes acheteur_id et acheteur_nom
 #
 #     return decp_acheteurs_df
 #
