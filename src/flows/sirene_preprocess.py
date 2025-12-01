@@ -35,7 +35,7 @@ def sirene_preprocess():
         if not processed_etab_parquet_path.exists():
             print("Téléchargement et préparation des établissements...")
             lf = get_etablissements()
-            prepare_etablissements(lf, processed_etab_parquet_path)
+            prepare_etablissements(lf).sink_parquet(processed_etab_parquet_path)
         else:
             print(processed_etab_parquet_path, " existe, skipping.")
 

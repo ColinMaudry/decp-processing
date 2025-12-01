@@ -2,6 +2,7 @@ import polars as pl
 from polars.testing import assert_frame_equal
 
 from tasks.transform import (
+    prepare_etablissements,
     prepare_unites_legales,
     replace_with_modification_data,
 )
@@ -40,7 +41,7 @@ class TestPrepareUnitesLegales:
                 },
                 # Cas 4: Nom non-diffusible
                 {
-                    "siren": "333333333",
+                    "siren": "44444444",
                     "denominationUniteLegale": None,
                     "prenomUsuelUniteLegale": "Ambroise",
                     "nomUniteLegale": "Croizat",
@@ -61,7 +62,7 @@ class TestPrepareUnitesLegales:
                 {"siren": "333333333", "denominationUniteLegale": "Ambroise Croizat"},
                 # Cas 4: denominationUniteLegale = non-diffusible
                 {
-                    "siren": "333333333",
+                    "siren": "44444444",
                     "denominationUniteLegale": "[Données personnelles non-diffusibles]",
                 },
             ]
@@ -75,6 +76,46 @@ class TestPrepareUnitesLegales:
         expected_df = expected_df.sort("siren")
 
         assert_frame_equal(result_df, expected_df)
+
+
+class TestPrepareEtablissements:
+    def test_prepare_etablissements(self):
+        lf = pl.LazyFrame(
+            [
+                {
+                    "siret": "11111111111",
+                    "codeCommuneEtablissement": "1053",
+                    "enseigne1Etablissement": None,
+                    "denominationUsuelleEtablissement": "Dénom usuelle",
+                    "activitePrincipaleEtablissement": "11.1A",
+                    "nomenclatureActivitePrincipaleEtablissement": "NAFv2",
+                }
+            ]
+        )
+
+        expected_df = pl.DataFrame(
+            [
+                {
+                    "siret": "00011111111111",
+                    "commune_code": "01053",
+                    "enseigne1Etablissement": "Dénom usuelle",
+                    "activite_code": "11.1A",
+                    "activite_nomenclature": "NAFv2",
+                    "commune_nom": "Bourg-en-Bresse",
+                    "departement_code": "01",
+                    "region_code": "84",
+                    "region_nom": "Auvergne-Rhône-Alpes",
+                    "departement_nom": "Ain",
+                }
+            ]
+        )
+
+        assert_frame_equal(
+            prepare_etablissements(lf).collect(),
+            expected_df,
+            check_column_order=False,
+            check_dtypes=True,
+        )
 
 
 class TestHandleModificationsMarche:

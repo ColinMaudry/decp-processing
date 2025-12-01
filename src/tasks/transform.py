@@ -1,5 +1,4 @@
 from datetime import datetime
-from pathlib import Path
 
 import polars as pl
 import polars.selectors as cs
@@ -232,8 +231,19 @@ def prepare_unites_legales(lf: pl.LazyFrame) -> pl.LazyFrame:
     )
 
 
-def prepare_etablissements(lf: pl.LazyFrame, processed_parquet_path: Path) -> None:
-    lf = lf.rename(
+def prepare_etablissements(lff: pl.LazyFrame) -> pl.LazyFrame:
+    lff = lff.with_columns(
+        [
+            pl.col("codeCommuneEtablissement").str.pad_start(5, "0"),
+            pl.col("siret").str.pad_start(14, "0"),
+            # Si enseigne1Etablissement est null, on utilise denominationUsuelleEtablissement
+            pl.coalesce(
+                "enseigne1Etablissement", "denominationUsuelleEtablissement"
+            ).alias("enseigne1Etablissement"),
+        ]
+    )
+    lff = lff.drop("denominationUsuelleEtablissement")
+    lff = lff.rename(
         {
             "codeCommuneEtablissement": "commune_code",
             "activitePrincipaleEtablissement": "activite_code",
@@ -241,11 +251,11 @@ def prepare_etablissements(lf: pl.LazyFrame, processed_parquet_path: Path) -> No
         }
     )
 
-    # Ajout des noms de départements, noms régions,
+    # Ajout des noms de commune, départements, régions
     lf_cog = pl.scan_parquet(DATA_DIR / "code_officiel_geographique.parquet")
-    lf = lf.join(lf_cog, on="commune_code", how="left")
+    lff = lff.join(lf_cog, on="commune_code", how="left")
 
-    lf.sink_parquet(processed_parquet_path)
+    return lff
 
 
 def sort_columns(df: pl.DataFrame, config_columns):
