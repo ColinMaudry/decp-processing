@@ -390,7 +390,7 @@ def get_etablissements() -> pl.LazyFrame:
             hrefs.append(base_url + href)
 
     # Fonction de traitement pour un fichier
-    def process_file(_href: str):
+    def get_process_file(_href: str):
         print(_href.split("/")[-1])
         try:
             response = http_client.get(
@@ -406,18 +406,12 @@ def get_etablissements() -> pl.LazyFrame:
         content = response.content
         lff = pl.scan_csv(content, schema_overrides=schema)
         lff = lff.select(columns)
-        lff = lff.with_columns(
-            [
-                pl.col("codeCommuneEtablissement").str.pad_start(5, "0"),
-                pl.col("siret").str.pad_start(14, "0"),
-            ]
-        )
         return lff
 
     # Traitement en parrallèle avec 8 threads
     lfs = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-        futures = [executor.submit(process_file, href) for href in hrefs]
+        futures = [executor.submit(get_process_file, href) for href in hrefs]
         for future in concurrent.futures.as_completed(futures):
             try:
                 lf = future.result()
