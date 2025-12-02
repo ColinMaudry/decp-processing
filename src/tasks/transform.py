@@ -239,10 +239,10 @@ def prepare_etablissements(lff: pl.LazyFrame) -> pl.LazyFrame:
             # Si enseigne1Etablissement est null, on utilise denominationUsuelleEtablissement
             pl.coalesce(
                 "enseigne1Etablissement", "denominationUsuelleEtablissement"
-            ).alias("enseigne1Etablissement"),
+            ).alias("etablissement_nom"),
         ]
     )
-    lff = lff.drop("denominationUsuelleEtablissement")
+    lff = lff.drop("denominationUsuelleEtablissement", "enseigne1Etablissement")
     lff = lff.rename(
         {
             "codeCommuneEtablissement": "commune_code",
@@ -278,6 +278,7 @@ def calculate_naf_cpv_matching(df: pl.DataFrame):
         lf_naf_cpv.select(
             "uid",
             "codeCPV",
+            "titulaire_id",
             "activite_code",
             "activite_nomenclature",
             "donneesActuelles",
