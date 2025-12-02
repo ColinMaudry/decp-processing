@@ -12,7 +12,7 @@ class TestPrepareUnitesLegales:
     def test_prepare_unites_legales(self):
         lf = pl.LazyFrame(
             [
-                # Cas 1: Personne morale$
+                # Cas 1: Personne morale
                 {
                     "siren": "111111111",
                     "denominationUniteLegale": "Org 1",
@@ -98,7 +98,7 @@ class TestPrepareEtablissements:
                 {
                     "siret": "00011111111111",
                     "commune_code": "01053",
-                    "enseigne1Etablissement": "Dénom usuelle",
+                    "etablissement_nom": "Dénom usuelle",
                     "activite_code": "11.1A",
                     "activite_nomenclature": "NAFv2",
                     "commune_nom": "Bourg-en-Bresse",
