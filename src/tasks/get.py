@@ -15,6 +15,7 @@ from lxml import etree, html
 from prefect import task
 from prefect.transactions import transaction
 
+from config import SIRENE_UNITES_LEGALES_URL
 from src.config import (
     CACHE_EXPIRATION_TIME_HOURS,
     DECP_FORMAT_2022,
@@ -36,6 +37,7 @@ from src.tasks.utils import (
     get_clean_cache_key,
     stream_replace_bytestring,
 )
+from tasks.transform import prepare_unites_legales
 
 
 @task(retries=3, retry_delay_seconds=3)
@@ -368,6 +370,8 @@ def get_etablissements() -> pl.LazyFrame:
         "longitude": pl.Float64,
         "activitePrincipaleEtablissement": pl.String,
         "nomenclatureActivitePrincipaleEtablissement": pl.String,
+        "enseigne1Etablissement": pl.String,
+        "denominationUsuelleEtablissement": pl.String,
     }
 
     columns = list(schema.keys())
@@ -386,7 +390,7 @@ def get_etablissements() -> pl.LazyFrame:
             hrefs.append(base_url + href)
 
     # Fonction de traitement pour un fichier
-    def process_file(_href: str):
+    def get_process_file(_href: str):
         print(_href.split("/")[-1])
         try:
             response = http_client.get(
@@ -402,18 +406,12 @@ def get_etablissements() -> pl.LazyFrame:
         content = response.content
         lff = pl.scan_csv(content, schema_overrides=schema)
         lff = lff.select(columns)
-        lff = lff.with_columns(
-            [
-                pl.col("codeCommuneEtablissement").str.pad_start(5, "0"),
-                pl.col("siret").str.pad_start(14, "0"),
-            ]
-        )
         return lff
 
     # Traitement en parrallèle avec 8 threads
     lfs = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-        futures = [executor.submit(process_file, href) for href in hrefs]
+        futures = [executor.submit(get_process_file, href) for href in hrefs]
         for future in concurrent.futures.as_completed(futures):
             try:
                 lf = future.result()
@@ -458,3 +456,13 @@ def get_clean(resource, resources_artifact: list) -> pl.DataFrame or None:
             df = None
 
     return df
+
+
+@task
+def get_unite_legales(processed_parquet_path):
+    print("Téléchargement des données unité légales et sélection des colonnes...")
+    (
+        pl.scan_parquet(SIRENE_UNITES_LEGALES_URL)
+        .pipe(prepare_unites_legales)
+        .sink_parquet(processed_parquet_path)
+    )

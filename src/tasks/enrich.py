@@ -21,6 +21,27 @@ def add_etablissement_data(
     lf_sirets = lf_sirets.join(
         lf_etablissements, how="inner", left_on=siret_column, right_on="siret"
     )
+
+    # On ne prend pas l'activité des acheteurs
+    if type_siret == "acheteur":
+        lf_sirets = lf_sirets.drop(cs.starts_with("activite_"))
+
+    # Si il y a un etablissement_nom (Enseigne1Etablissement ou denominationUsuelleEtablissement),
+    # on l'ajoute au nom de l'organisme, entre parenthèses
+    lf_sirets = lf_sirets.with_columns(
+        pl.when(pl.col("etablissement_nom").is_not_null())
+        .then(
+            pl.concat_str(
+                pl.col(f"{type_siret}_nom"),
+                pl.lit(" ("),
+                pl.col("etablissement_nom"),
+                pl.lit(")"),
+            )
+        )
+        .otherwise(pl.col(f"{type_siret}_nom"))
+        .alias(f"{type_siret}_nom")
+    ).drop("etablissement_nom")
+
     lf_sirets = lf_sirets.rename(
         {
             "latitude": f"{type_siret}_latitude",
@@ -66,17 +87,17 @@ def enrich_from_sirene(lf: pl.LazyFrame):
     print("Extraction des SIRET des acheteurs...")
     lf_sirets_acheteurs = extract_unique_acheteurs_siret(lf.clone())
 
-    print("Ajout des données établissements (acheteurs)...")
-    lf_sirets_acheteurs = add_etablissement_data(
-        lf_sirets_acheteurs, lf_etablissements, "acheteur_id", "acheteur"
-    )
-
     print("Ajout des données unités légales (acheteurs)...")
     lf_sirets_acheteurs = add_unite_legale_data(
         lf_sirets_acheteurs,
         lf_unites_legales,
         siret_column="acheteur_id",
         type_siret="acheteur",
+    )
+
+    print("Ajout des données établissements (acheteurs)...")
+    lf_sirets_acheteurs = add_etablissement_data(
+        lf_sirets_acheteurs, lf_etablissements, "acheteur_id", "acheteur"
     )
 
     lf = lf.join(lf_sirets_acheteurs, how="left", on="acheteur_id")
@@ -91,17 +112,17 @@ def enrich_from_sirene(lf: pl.LazyFrame):
     print("Extraction des SIRET des titulaires...")
     lf_sirets_titulaires = extract_unique_titulaires_siret(lf.clone())
 
-    print("Ajout des données établissements (titulaires)...")
-    lf_sirets_titulaires = add_etablissement_data(
-        lf_sirets_titulaires, lf_etablissements, "titulaire_id", "titulaire"
-    )
-
     print("Ajout des données unités légales (titulaires)...")
     lf_sirets_titulaires = add_unite_legale_data(
         lf_sirets_titulaires,
         lf_unites_legales,
         siret_column="titulaire_id",
         type_siret="titulaire",
+    )
+
+    print("Ajout des données établissements (titulaires)...")
+    lf_sirets_titulaires = add_etablissement_data(
+        lf_sirets_titulaires, lf_etablissements, "titulaire_id", "titulaire"
     )
 
     # En joignant en utilisant à la fois le SIRET et le typeIdentifiant, on s'assure qu'on ne joint pas sur

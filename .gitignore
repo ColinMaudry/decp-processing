@@ -6,6 +6,7 @@ logs
 .venv
 *.egg-info
 *.parquet
+!tests/data/sirene/*.parquet
 !code_officiel_geographique.parquet
 *.gz
 *.zip
