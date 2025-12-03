@@ -315,10 +315,10 @@ def yield_modifications(row: dict, separator="_") -> Iterator[dict] or None:
         raw_mods = raw_mods["modification"]
     # Couvre le (non-)format dans lequel "modifications" ou "modification" mène
     # directement à un dict contenant les métadonnées liées à une modification.
-    if isinstance(raw_mods, dict):
+    elif isinstance(raw_mods, dict):
         raw_mods = [raw_mods]
-
-    raw_mods = [] if raw_mods is None else raw_mods
+    elif isinstance(raw_mods, str) or raw_mods is None:
+        raw_mods = []
 
     mods = [{}] + raw_mods
     for i, mod in enumerate(mods):
