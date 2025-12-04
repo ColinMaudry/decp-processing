@@ -280,5 +280,11 @@
     "name": "Données de marches-publics.info (AWS) - scraping",
     "code": "scrap_marches-publics.info",
     "owner_org_name": "Colin Maudry"
+  },
+  {
+    "id": "651eb149add2f419788c36ef",
+    "name": "Données essentielles des marchés publics - Xmarchés",
+    "code": "xmarches",
+    "owner_org_name": "SPL-XDEMAT"
   }
 ]
