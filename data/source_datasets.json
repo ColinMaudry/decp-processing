@@ -270,6 +270,12 @@
     "owner_org_name": "AWSolutions"
   },
   {
+    "id": "5cdb1722634f41416ffe90e2",
+    "name": "Données de marches-publics.info (AWS) - legacy",
+    "code": "aws_marches-publics.info_legacy",
+    "owner_org_name": "MINEF"
+  },
+  {
     "id": "68caf6b135f19236a4f37a32",
     "name": "Données de marches-publics.info (AWS) - scraping",
     "code": "scrap_marches-publics.info",
