@@ -114,9 +114,6 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     # Normalisation des titulaires
     lf = clean_titulaires(lf, decp_format)
 
-    # Application des modifications
-    lf = process_modifications(lf)
-
     # Explosion des titulaires
     lf = explode_titulaires(lf, decp_format)
 
@@ -216,17 +213,11 @@ def clean_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
             titulaire_typeIdentifiant=pl.element().struct.field("typeIdentifiant"),
         )
 
-    # Get schema to check column dtypes
-    schema = lf.collect_schema()
-
-    for col in ["modification_titulaires", "titulaires"]:
-        # Skip processing if column dtype is Null (all values are null)
-        # This happens when modification_titulaires has no actual data
-        if schema[col] == pl.Null:
-            continue
-
+    # Skip processing if column dtype is Null (all values are null)
+    # This happens when modification_titulaires has no actual data
+    if lf.collect_schema()["titulaires"] != pl.Null:
         lf = lf.with_columns(
-            pl.col(col)
+            pl.col("titulaires")
             .list.eval(expr_titulaire)
             .list.eval(
                 # Filtrer les éléments où id ET typeIdentifiant sont null
@@ -237,25 +228,19 @@ def clean_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
                     .is_not_null()
                 )
             )
-            .alias(col)
+            .alias("titulaires")
         )
 
     # Remplacer les listes de titulaires vides par null
     # Only process columns that have List dtype
-    cols_to_process = [
-        col
-        for col in ["titulaires", "modification_titulaires"]
-        if lf.collect_schema()[col] != pl.Null
-    ]
 
-    if cols_to_process:
+    if lf.collect_schema()["titulaires"] != pl.Null:
         lf = lf.with_columns(
             [
-                pl.when(pl.col(col).list.len() == 0)
+                pl.when(pl.col("titulaires").list.len() == 0)
                 .then(None)
-                .otherwise(pl.col(col))
-                .alias(col)
-                for col in cols_to_process
+                .otherwise(pl.col("titulaires"))
+                .alias("titulaires")
             ]
         )
 

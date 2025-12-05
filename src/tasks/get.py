@@ -17,6 +17,7 @@ from prefect.transactions import transaction
 
 from src.config import (
     CACHE_EXPIRATION_TIME_HOURS,
+    DATA_DIR,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
     HTTP_CLIENT,
@@ -455,9 +456,11 @@ def get_clean(resource, resources_artifact: list) -> pl.DataFrame or None:
         # Nettoyage des données source et typage des colonnes...
         # si la ressource est dans un format supporté
         if lf is not None:
-            lf = clean_decp(lf, decp_format)
-            df = lf.collect(engine="streaming")
-        else:
-            df = None
+            lf: pl.LazyFrame = clean_decp(lf, decp_format)
+            parquet_path = DATA_DIR / "get" / f"{resource['id']}"
+            sink_to_files(
+                lf, parquet_path, file_format="parquet", compression="uncompressed"
+            )
+            return parquet_path.with_suffix(".parquet")
 
-    return df
+    return None

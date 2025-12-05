@@ -23,11 +23,13 @@ def save_to_files(df: pl.DataFrame, path: Path, file_format=None):
         df.write_csv(f"{path}.csv")
 
 
-def sink_to_files(lf: pl.LazyFrame, path: str | Path, file_format=None):
+def sink_to_files(
+    lf: pl.LazyFrame, path: str | Path, file_format=None, compression: str = "zstd"
+):
     if file_format is None:
         file_format = ["csv", "parquet"]
     if "parquet" in file_format:
-        lf.sink_parquet(f"{path}.parquet")
+        lf.sink_parquet(f"{path}.parquet", compression=compression)
     if "csv" in file_format:
         lf.sink_csv(f"{path}.csv")
 

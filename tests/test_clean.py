@@ -2,7 +2,8 @@ import datetime
 
 import polars as pl
 
-from src.config import DECP_FORMAT_2019, DECP_FORMAT_2022
+from src.config import DecpFormat
+from src.schemas import SCHEMA_MARCHE_2019, SCHEMA_MARCHE_2022
 from src.tasks.clean import (
     clean_decp,
     clean_invalid_characters,
@@ -81,6 +82,9 @@ def test_clean_null_equivalent():
 
 
 def test_clean_titulaires():
+    decp_format_2019 = DecpFormat("DECP 2019", SCHEMA_MARCHE_2019, "marches")
+    decp_format_2022 = DecpFormat("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
+
     # Test DECP 2019 format
     data_2019 = {
         "titulaires": [
@@ -100,7 +104,7 @@ def test_clean_titulaires():
         ),
     }
     lf_2019 = pl.LazyFrame(data_2019, schema=schema_2019)
-    result_2019 = clean_titulaires(lf_2019, DECP_FORMAT_2019).collect()
+    result_2019 = clean_titulaires(lf_2019, decp_format_2019).collect()
 
     titulaires_0 = result_2019["titulaires"][0]
     assert len(titulaires_0) == 2
@@ -137,7 +141,7 @@ def test_clean_titulaires():
         ),
     }
     lf_2022 = pl.LazyFrame(data_2022, schema=schema_2022)
-    result_2022 = clean_titulaires(lf_2022, DECP_FORMAT_2022).collect()
+    result_2022 = clean_titulaires(lf_2022, decp_format_2022).collect()
 
     titulaires_0 = result_2022["titulaires"][0]
     assert len(titulaires_0) == 1
@@ -251,7 +255,8 @@ def test_clean_decp():
     lf = pl.LazyFrame(data)
 
     # Test with DECP 2019
-    df_result: pl.DataFrame = clean_decp(lf, DECP_FORMAT_2019).collect()
+    decp_format_2019 = DecpFormat("DECP 2019", SCHEMA_MARCHE_2019, "marches")
+    df_result: pl.DataFrame = clean_decp(lf, decp_format_2019).collect()
 
     # Check id cleaning
     assert df_result.filter(pl.col("id") == "id_1").height > 0

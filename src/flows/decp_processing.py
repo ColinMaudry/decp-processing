@@ -10,6 +10,7 @@ from prefect.task_runners import ConcurrentTaskRunner
 from src.config import (
     BASE_DF_COLUMNS,
     BASE_DIR,
+    DATA_DIR,
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
@@ -26,7 +27,7 @@ from src.tasks.publish import publish_to_datagouv
 from src.tasks.transform import (
     add_duree_restante,
     calculate_naf_cpv_matching,
-    concat_decp_json,
+    concat_parquet_files,
     sort_columns,
 )
 from src.tasks.utils import generate_stats, remove_unused_cache
@@ -46,18 +47,23 @@ def decp_processing(enable_cache_removal: bool = False):
     resources_artifact = []
     futures = {}
 
+    get_dir = DATA_DIR / "get"
+    if os.path.exists(get_dir):
+        shutil.rmtree(get_dir)
+    os.makedirs(get_dir)
+
     # Traitement parallèle des ressources
     for resource in resources:
         if resource["filesize"] > 100:
             future = get_clean.submit(resource, resources_artifact)
             futures[future] = f"{resource['ori_filename']} ({resource['dataset_name']})"
 
-    dfs = []
+    parquet_files = []
     for f in futures:
         try:
             result = f.result()
             if result is not None:
-                dfs.append(result)
+                parquet_files.append(result)
         except Exception as e:
             resource = futures[f]
             print(f"❌ Erreur de traitement de {resource} ({type(e).__name__}):")
@@ -72,8 +78,8 @@ def decp_processing(enable_cache_removal: bool = False):
         del resources_artifact
 
     print("Fusion des dataframes...")
-    df: pl.DataFrame = concat_decp_json(dfs)
-    del dfs
+    df: pl.DataFrame = concat_parquet_files(parquet_files)
+    shutil.rmtree(DATA_DIR / "get")
 
     print("Ajout des données SIRENE...")
     # Preprocessing des données SIRENE si :

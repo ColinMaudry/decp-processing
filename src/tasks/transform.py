@@ -1,6 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
+import line_profiler
 import polars as pl
 import polars.selectors as cs
 from prefect import task
@@ -141,27 +142,25 @@ def process_modifications(lf: pl.LazyFrame) -> pl.LazyFrame:
     return lf
 
 
-def concat_decp_json(dfs: list) -> pl.DataFrame:
-    df = pl.concat(dfs, how="diagonal_relaxed")
+@line_profiler.profile
+def concat_parquet_files(parquet_files: list) -> pl.DataFrame:
+    lfs = [pl.scan_parquet(file) for file in parquet_files]
 
-    del dfs
+    lf_concat: pl.LazyFrame = pl.concat(lfs, how="vertical")
 
     print(
         "Suppression des lignes en doublon par UID + titulaire ID + titulaire type ID + modification_id"
     )
 
     # Exemple de doublon : 20005584600014157140791205100
-    index_size_before = df.height
-    df_clean = df.unique(
+    lf_concat = lf_concat.unique(
         subset=["uid", "titulaire_id", "titulaire_typeIdentifiant", "modification_id"],
         maintain_order=False,
-    )
+    ).sort(by=["dateNotification", "uid"], descending=[True, False])
 
-    del df
+    df: pl.DataFrame = lf_concat.collect(engine="streaming")
 
-    print("-- ", index_size_before - df_clean.height, " doublons supprimés")
-
-    return df_clean
+    return df
 
 
 def extract_unique_acheteurs_siret(lf: pl.LazyFrame):
