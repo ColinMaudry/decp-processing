@@ -17,14 +17,13 @@ from prefect.transactions import transaction
 
 from src.config import (
     CACHE_EXPIRATION_TIME_HOURS,
-    DECP_FORMAT_2022,
-    DECP_FORMATS,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
     HTTP_CLIENT,
     HTTP_HEADERS,
     DecpFormat,
 )
+from src.schemas import SCHEMA_MARCHE_2019, SCHEMA_MARCHE_2022
 from src.tasks.clean import (
     clean_decp,
     clean_invalid_characters,
@@ -61,16 +60,15 @@ def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par 
 def get_resource(
     r: dict, resources_artifact: list[dict] | list
 ) -> tuple[pl.LazyFrame | None, DecpFormat | None]:
-    decp_formats: list[DecpFormat] = DECP_FORMATS
-
-    print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
+    if DECP_PROCESSING_PUBLISH is False:
+        print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
 
     output_path = DIST_DIR / "get" / r["filename"]
     output_path.parent.mkdir(exist_ok=True)
     url = r["url"]
     file_format = r["format"]
     if file_format == "json":
-        fields, decp_format = json_stream_to_parquet(url, output_path, decp_formats)
+        fields, decp_format = json_stream_to_parquet(url, output_path, r)
     elif file_format == "xml":
         try:
             fields, decp_format = xml_stream_to_parquet(
@@ -117,23 +115,26 @@ def get_resource(
     return lf, decp_format
 
 
-def find_json_decp_format(chunk, decp_formats):
+def find_json_decp_format(chunk, decp_formats, resource: dict):
     for decp_format in decp_formats:
         decp_format.coroutine_ijson.send(chunk)
         if len(decp_format.liste_marches_ijson) > 0:
             # Le parser a trouvé au moins un marché correspondant à ce format, donc on a
             # trouvé le bon format.
             return decp_format
-    print("⚠️  Pas de match trouvé parmis les schémas passés")
+    print(
+        f"⚠️  Pas de match trouvé parmis les schémas passés ({resource['ori_filename']} ({resource['dataset_name']}))"
+    )
     return None
 
 
 @task(persist_result=False, log_prints=True)
 def json_stream_to_parquet(
-    url: str, output_path: Path, decp_formats: list[DecpFormat] | None = None
+    url: str, output_path: Path, resource: dict
 ) -> tuple[set, DecpFormat or None]:
-    if decp_formats is None:
-        decp_formats: list[DecpFormat] = DECP_FORMATS
+    decp_format_2019 = DecpFormat("DECP 2019", SCHEMA_MARCHE_2019, "marches")
+    decp_format_2022 = DecpFormat("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
+    decp_formats = [decp_format_2019, decp_format_2022]
 
     fields = set()
     for decp_format in decp_formats:
@@ -172,7 +173,7 @@ def json_stream_to_parquet(
         print(f"⚠️  Flux vide pour {url}")
         return set(), None
 
-    decp_format = find_json_decp_format(chunk, decp_formats)
+    decp_format = find_json_decp_format(chunk, decp_formats, resource)
     if decp_format is None:
         return set(), None
 
@@ -207,6 +208,8 @@ def xml_stream_to_parquet(
 ) -> tuple[set, DecpFormat]:
     """Uniquement utilisé pour les données publiées par l'AIFE."""
 
+    decp_format_2022 = DecpFormat("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
+
     fields = set()
     parser = etree.XMLPullParser(tag="marche", recover=True)
     with tempfile.NamedTemporaryFile(
@@ -218,11 +221,11 @@ def xml_stream_to_parquet(
             parser.feed(chunk)
             for _, elem in parser.read_events():
                 marche = parse_element(elem)
-                new_fields = write_marche_rows(marche, tmp_file, DECP_FORMAT_2022)
+                new_fields = write_marche_rows(marche, tmp_file, decp_format_2022)
                 fields = fields.union(new_fields)
-        lf = pl.scan_ndjson(tmp_file.name, schema=DECP_FORMAT_2022.schema)
+        lf = pl.scan_ndjson(tmp_file.name, schema=decp_format_2022.schema)
         sink_to_files(lf, output_path, file_format="parquet")
-    return fields, DECP_FORMAT_2022
+    return fields, decp_format_2022
 
 
 # Générée par la LLM Euria, développée par Infomaniak

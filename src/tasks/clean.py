@@ -79,13 +79,22 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
         pl.col(["datePublicationDonnees", "dateNotification"])
         .str.replace_many(date_replacements)
         .cast(pl.Utf8)
+        .name.keep()
+    )
+
+    # suppression des suffixes de fuseau horaire
+    lf = lf.with_columns(
+        pl.col(["datePublicationDonnees", "dateNotification"])
+        .str.split("+")
+        .list[0]
+        .name.keep()
     )
 
     # Nature
     lf = lf.with_columns(
-        pl.col("nature").str.replace_many(
-            {"Marche": "Marché", "subsequent": "subséquent"}
-        )
+        pl.col("nature")
+        .str.replace_many({"Marche": "Marché", "subsequent": "subséquent"})
+        .alias("nature")
     )
 
     # Codes CPV, suppression du caractères de contrôle ("-[0-9]$")

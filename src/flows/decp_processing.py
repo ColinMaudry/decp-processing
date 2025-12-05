@@ -44,14 +44,24 @@ def decp_processing(enable_cache_removal: bool = False):
 
     # Initialisation du tableau des artifacts de ressources
     resources_artifact = []
+    futures = {}
 
     # Traitement parallèle des ressources
-    futures = [
-        get_clean.submit(resource, resources_artifact)
-        for resource in resources
-        if resource["filesize"] > 100
-    ]
-    dfs: list[pl.DataFrame] = [f.result() for f in futures if f.result() is not None]
+    for resource in resources:
+        if resource["filesize"] > 100:
+            future = get_clean.submit(resource, resources_artifact)
+            futures[future] = f"{resource['ori_filename']} ({resource['dataset_name']})"
+
+    dfs = []
+    for f in futures:
+        try:
+            result = f.result()
+            if result is not None:
+                dfs.append(result)
+        except Exception as e:
+            resource = futures[f]
+            print(f"❌ Erreur de traitement de {resource} ({type(e).__name__}):")
+            print(e)  # str(e) if using logging()
 
     if DECP_PROCESSING_PUBLISH:
         create_table_artifact(
