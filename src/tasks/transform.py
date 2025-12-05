@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
-import line_profiler
+import memory_profiler
 import polars as pl
 import polars.selectors as cs
 from prefect import task
@@ -142,8 +142,7 @@ def process_modifications(lf: pl.LazyFrame) -> pl.LazyFrame:
     return lf
 
 
-@line_profiler.profile
-def concat_parquet_files(parquet_files: list) -> pl.DataFrame:
+def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
     lfs = [pl.scan_parquet(file) for file in parquet_files]
 
     lf_concat: pl.LazyFrame = pl.concat(lfs, how="vertical")
@@ -158,9 +157,7 @@ def concat_parquet_files(parquet_files: list) -> pl.DataFrame:
         maintain_order=False,
     ).sort(by=["dateNotification", "uid"], descending=[True, False])
 
-    df: pl.DataFrame = lf_concat.collect(engine="streaming")
-
-    return df
+    return lf_concat
 
 
 def extract_unique_acheteurs_siret(lf: pl.LazyFrame):
@@ -210,21 +207,21 @@ def prepare_etablissements(lf: pl.LazyFrame, processed_parquet_path: Path) -> No
     lf.sink_parquet(processed_parquet_path)
 
 
-def sort_columns(df: pl.DataFrame, config_columns):
+def sort_columns(lf: pl.LazyFrame, config_columns):
     # Les colonnes présentes mais absentes des colonnes attendues sont mises à la fin de la liste
+    schema = lf.collect_schema()
     other_columns = []
-    for col in df.columns:
+    for col in schema.keys():
         if col not in config_columns:
             other_columns.append(col)
 
     print("Colonnes inattendues:", other_columns)
 
-    return df.select(config_columns + other_columns)
+    return lf.select(config_columns + other_columns)
 
 
-def calculate_naf_cpv_matching(df: pl.DataFrame):
-    lf_naf_cpv = df.lazy()
-
+@memory_profiler.profile
+def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
     # Unité de base pour le comptage : dernière version d'un marché attribué (donc pas forcément attributaire initial)
     lf_naf_cpv = (
         lf_naf_cpv.select(

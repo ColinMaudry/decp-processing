@@ -110,9 +110,11 @@ def save_to_databases(
     #     save_to_postgres(df, table_name)
 
 
-def generate_final_schema(df):
+def generate_final_schema(lf):
     """Création d'un TableSchema pour décrire les données publiées"""
-    df_schema = []
+
+    schema = lf.collect_schema()
+    frictonless_schema = []
 
     polars_frictionless_mapping = {
         "String": "string",
@@ -124,9 +126,9 @@ def generate_final_schema(df):
     }
 
     # conversion en dict sérialisable en JSON
-    for col in df.columns:
-        polars_type = df.schema[col].__str__()
-        df_schema.append(
+    for col in schema.keys():
+        polars_type = schema[col].__str__()
+        frictonless_schema.append(
             {"name": col, "type": polars_frictionless_mapping[polars_type]}
         )
 
@@ -137,7 +139,7 @@ def generate_final_schema(df):
     # fusion des deux
     # https://www.paigeniedringhaus.com/blog/filter-merge-and-update-python-lists-based-on-object-attributes#merge-two-lists-together-by-matching-object-keys
     merged_fields = groupby(
-        sorted(base_json["fields"] + df_schema, key=itemgetter("name")),
+        sorted(base_json["fields"] + frictonless_schema, key=itemgetter("name")),
         itemgetter("name"),
     )
     merged_schema = {"fields": [dict(ChainMap(*g)) for k, g in merged_fields]}

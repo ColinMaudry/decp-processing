@@ -1,6 +1,7 @@
 import os
 import shutil
 
+import memory_profiler
 import polars as pl
 import polars.selectors as cs
 from prefect import flow
@@ -22,11 +23,10 @@ from src.flows.sirene_preprocess import sirene_preprocess
 from src.tasks.dataset_utils import list_resources
 from src.tasks.enrich import enrich_from_sirene
 from src.tasks.get import get_clean
-from src.tasks.output import generate_final_schema, save_to_files
+from src.tasks.output import generate_final_schema, sink_to_files
 from src.tasks.publish import publish_to_datagouv
 from src.tasks.transform import (
     add_duree_restante,
-    calculate_naf_cpv_matching,
     concat_parquet_files,
     sort_columns,
 )
@@ -37,6 +37,7 @@ from src.tasks.utils import generate_stats, remove_unused_cache
     log_prints=True,
     task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS),
 )
+@memory_profiler.profile
 def decp_processing(enable_cache_removal: bool = False):
     print(f"🚀  Début du flow decp-processing dans base dir {BASE_DIR} ")
 
@@ -78,8 +79,7 @@ def decp_processing(enable_cache_removal: bool = False):
         del resources_artifact
 
     print("Fusion des dataframes...")
-    df: pl.DataFrame = concat_parquet_files(parquet_files)
-    shutil.rmtree(DATA_DIR / "get")
+    lf: pl.LazyFrame = concat_parquet_files(parquet_files)
 
     print("Ajout des données SIRENE...")
     # Preprocessing des données SIRENE si :
@@ -89,29 +89,27 @@ def decp_processing(enable_cache_removal: bool = False):
     if not SIRENE_DATA_DIR.exists():
         sirene_preprocess()
 
-    lf: pl.LazyFrame = enrich_from_sirene(df.lazy())
+    lf: pl.LazyFrame = enrich_from_sirene(lf)
 
     print("Ajout de la colonne 'dureeRestanteMois'...")
     lf = add_duree_restante(lf)
-
-    df: pl.DataFrame = lf.collect(engine="streaming")
 
     # Réinitialisation de DIST_DIR
     if os.path.exists(DIST_DIR):
         shutil.rmtree(DIST_DIR)
     os.makedirs(DIST_DIR)
 
-    print("Génération des probabilités NAF/CPV...")
-    calculate_naf_cpv_matching(df)
-    df = df.drop(cs.starts_with("activite"))
+    print("Génération du schéma et enregistrement des DECP aux formats CSV, Parquet...")
+    lf: pl.LazyFrame = lf.drop(cs.starts_with("activite_"))
+    lf: pl.LazyFrame = sort_columns(lf, BASE_DF_COLUMNS)
+    generate_final_schema(lf)
+    sink_to_files(lf, DIST_DIR / "decp")
+    shutil.rmtree(DATA_DIR / "get")
 
     print("Génération de l'artefact (statistiques) sur le base df...")
+    df = pl.read_parquet(DIST_DIR / "decp.parquet")
     generate_stats(df)
 
-    print("Génération du schéma et enregistrement des DECP aux formats CSV, Parquet...")
-    df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
-    generate_final_schema(df)
-    save_to_files(df, DIST_DIR / "decp")
     del df
 
     # Base de données SQLite dédiée aux activités du Datalab d'Anticor
