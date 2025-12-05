@@ -8,7 +8,6 @@ from time import sleep
 
 import httpx
 import ijson
-import memory_profiler
 import orjson
 import polars as pl
 from httpx import Client, HTTPStatusError, TimeoutException, get
@@ -449,7 +448,6 @@ def get_insee_cog_data(url, schema_overrides, columns) -> pl.DataFrame:
     cache_expiration=datetime.timedelta(hours=CACHE_EXPIRATION_TIME_HOURS),
     cache_key_fn=get_clean_cache_key,
 )
-@memory_profiler.profile
 def get_clean(resource, resources_artifact: list) -> pl.DataFrame or None:
     # Récupération des données source...
     with transaction():

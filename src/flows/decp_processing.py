@@ -27,6 +27,7 @@ from src.tasks.output import generate_final_schema, sink_to_files
 from src.tasks.publish import publish_to_datagouv
 from src.tasks.transform import (
     add_duree_restante,
+    calculate_naf_cpv_matching,
     concat_parquet_files,
     sort_columns,
 )
@@ -99,18 +100,20 @@ def decp_processing(enable_cache_removal: bool = False):
         shutil.rmtree(DIST_DIR)
     os.makedirs(DIST_DIR)
 
+    sink_to_files(lf, DIST_DIR / "decp")
+    lf: pl.LazyFrame = pl.scan_parquet(DIST_DIR / "decp.parquet")
+
+    print("Génération des probabilités NAF/CPV...")
+    calculate_naf_cpv_matching(lf)
+    lf = lf.drop(cs.starts_with("activite"))
+
+    print("Génération de l'artefact (statistiques) sur le base df...")
+    generate_stats(lf.collect(engine="streaming"))
+
     print("Génération du schéma et enregistrement des DECP aux formats CSV, Parquet...")
-    lf: pl.LazyFrame = lf.drop(cs.starts_with("activite_"))
     lf: pl.LazyFrame = sort_columns(lf, BASE_DF_COLUMNS)
     generate_final_schema(lf)
     sink_to_files(lf, DIST_DIR / "decp")
-    shutil.rmtree(DATA_DIR / "get")
-
-    print("Génération de l'artefact (statistiques) sur le base df...")
-    df = pl.read_parquet(DIST_DIR / "decp.parquet")
-    generate_stats(df)
-
-    del df
 
     # Base de données SQLite dédiée aux activités du Datalab d'Anticor
     # Désactivé pour l'instant https://github.com/ColinMaudry/decp-processing/issues/124
@@ -125,5 +128,7 @@ def decp_processing(enable_cache_removal: bool = False):
     # Suppression des fichiers de cache inutilisés
     if enable_cache_removal:
         remove_unused_cache()
+
+    shutil.rmtree(DATA_DIR / "get")
 
     print("☑️  Fin du flow principal decp_processing.")

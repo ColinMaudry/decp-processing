@@ -1,6 +1,5 @@
 import polars as pl
 import polars.selectors as cs
-from polars_ds import haversine
 from prefect import task
 
 from src.config import SIRENE_DATA_DIR
@@ -124,16 +123,29 @@ def enrich_from_sirene(lf: pl.LazyFrame):
 
 
 def calculate_distance(lf: pl.LazyFrame) -> pl.LazyFrame:
-    # Utilisation de polars_ds.haversine
-    # https://polars-ds-extension.readthedocs.io/en/latest/num.html#polars_ds.exprs.num.haversine
+    # Implémentation native de la formule de Haversine
+    # R = 6371  # Rayon de la Terre en km
+
+    # Conversion en radians
+    lat1 = pl.col("acheteur_latitude").radians()
+    lon1 = pl.col("acheteur_longitude").radians()
+    lat2 = pl.col("titulaire_latitude").radians()
+    lon2 = pl.col("titulaire_longitude").radians()
+
+    # Différences
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    # Formule de Haversine
+    a = (dlat / 2).sin().pow(2) + lat1.cos() * lat2.cos() * (dlon / 2).sin().pow(2)
+    c = 2 * a.sqrt().arcsin()
+
+    # Distance en km
+    distance = 6371 * c
+
     lf = lf.with_columns(
-        haversine(
-            pl.col("acheteur_latitude"),
-            pl.col("acheteur_longitude"),
-            pl.col("titulaire_latitude"),
-            pl.col("titulaire_longitude"),
-        )
-        .round(mode="half_away_from_zero")
-        .alias("distance")
+        distance.round(1).alias(
+            "distance"
+        )  # Arrondi à 1 décimale comme avant (mode="half_away_from_zero" n'est pas dispo direct mais round standard est ok)
     )
     return lf

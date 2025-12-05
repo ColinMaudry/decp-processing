@@ -1,7 +1,6 @@
 from datetime import datetime
 from pathlib import Path
 
-import memory_profiler
 import polars as pl
 import polars.selectors as cs
 from prefect import task
@@ -164,7 +163,6 @@ def extract_unique_acheteurs_siret(lf: pl.LazyFrame):
     # Extraction des SIRET des DECP dans une copie du df de base
     lf = lf.select("acheteur_id")
     lf = lf.unique()
-    lf = lf.sort(by="acheteur_id")
     return lf
 
 
@@ -174,7 +172,6 @@ def extract_unique_titulaires_siret(lf: pl.LazyFrame):
     lf = lf.unique().filter(
         pl.col("titulaire_id") != "", pl.col("titulaire_typeIdentifiant") == "SIRET"
     )
-    lf = lf.sort(by="titulaire_id")
     return lf
 
 
@@ -187,7 +184,7 @@ def get_prepare_unites_legales(processed_parquet_path):
         .filter(pl.col("siren").is_not_null())
         .filter(pl.col("denominationUniteLegale").is_not_null())
         .unique()
-        .sink_parquet(processed_parquet_path)
+        .sink_parquet(processed_parquet_path, engine="streaming")
     )
 
 
@@ -204,7 +201,7 @@ def prepare_etablissements(lf: pl.LazyFrame, processed_parquet_path: Path) -> No
     lf_cog = pl.scan_parquet(DATA_DIR / "code_officiel_geographique.parquet")
     lf = lf.join(lf_cog, on="commune_code", how="left")
 
-    lf.sink_parquet(processed_parquet_path)
+    lf.sink_parquet(processed_parquet_path, engine="streaming")
 
 
 def sort_columns(lf: pl.LazyFrame, config_columns):
@@ -220,7 +217,6 @@ def sort_columns(lf: pl.LazyFrame, config_columns):
     return lf.select(config_columns + other_columns)
 
 
-@memory_profiler.profile
 def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
     # Unité de base pour le comptage : dernière version d'un marché attribué (donc pas forcément attributaire initial)
     lf_naf_cpv = (
@@ -267,7 +263,7 @@ def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
     )
 
     # Pas de pivot en Lazy, donc on repasse en DataFrame
-    df_occurences_cpv = lf_naf_cpv.collect()
+    df_occurences_cpv = lf_naf_cpv.collect(engine="streaming")
     df_occurences_cpv = df_occurences_cpv.pivot(
         index="activite", on="cpv_code", values="compte", aggregate_function=None
     )

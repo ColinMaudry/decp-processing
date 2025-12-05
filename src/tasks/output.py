@@ -28,10 +28,23 @@ def sink_to_files(
 ):
     if file_format is None:
         file_format = ["csv", "parquet"]
+
     if "parquet" in file_format:
-        lf.sink_parquet(f"{path}.parquet", compression=compression)
-    if "csv" in file_format:
-        lf.sink_csv(f"{path}.csv")
+        # Write to a temporary file first to avoid read-write conflicts
+        tmp_path = f"{path}.parquet.tmp"
+        lf.sink_parquet(tmp_path, compression=compression, engine="streaming")
+        Path(tmp_path).rename(f"{path}.parquet")
+
+        # If CSV is also requested, use the generated Parquet file as source
+        # This avoids re-calculating the whole LazyFrame plan
+        if "csv" in file_format:
+            pl.scan_parquet(f"{path}.parquet").sink_csv(
+                f"{path}.csv", engine="streaming"
+            )
+
+    elif "csv" in file_format:
+        # Fallback if only CSV is requested
+        lf.sink_csv(f"{path}.csv", engine="streaming")
 
 
 def save_to_postgres(df: pl.DataFrame, table_name: str):
