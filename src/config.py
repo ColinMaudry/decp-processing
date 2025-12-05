@@ -10,8 +10,6 @@ import httpx
 from dotenv import find_dotenv, load_dotenv
 from ijson import sendable_list
 
-from src.schemas import SCHEMA_MARCHE_2019, SCHEMA_MARCHE_2022
-
 dotenv_path = find_dotenv()
 if dotenv_path == "":
     print("Création du fichier .env à partir de template.env")
@@ -203,9 +201,5 @@ class DecpFormat:
     liste_marches_ijson: sendable_list | None = None
     coroutine_ijson: Coroutine | None = None
 
-
-DECP_FORMAT_2019 = DecpFormat("DECP 2019", SCHEMA_MARCHE_2019, "marches")
-DECP_FORMAT_2022 = DecpFormat("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
-DECP_FORMATS = [DECP_FORMAT_2019, DECP_FORMAT_2022]
 
 print("")
