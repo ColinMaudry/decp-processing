@@ -294,9 +294,21 @@
     "owner_org_name": "MINEF"
   },
   {
+    "id": "6932eab9f5ef60c27eba22ff",
+    "name": "Données essentielles PES marché avant 2024 (legacy)",
+    "code": "pes_marche_legacy",
+    "owner_org_name": "Colin Maudry"
+  },
+  {
     "id": "5c0a7845634f4139b2ee8883",
     "name": "Données essentielles des marchés publics - e-marchespublics.com",
     "code": "e-marchespublics.com_dematis",
     "owner_org_name": "Dematis"
+  },
+  {
+    "id": "6780e55f813a85efbd2c6557",
+    "name": "Les Personnes placées sous main de justice - IDF 2024",
+    "code": "ppsmj",
+    "owner_org_name": "Yael Siksik"
   }
 ]
