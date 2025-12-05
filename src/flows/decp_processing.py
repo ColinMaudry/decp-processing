@@ -48,8 +48,9 @@ def decp_processing(enable_cache_removal: bool = False):
 
     # Traitement parallèle des ressources
     for resource in resources:
-        future = get_clean.submit(resource, resources_artifact)
-        futures[future] = f"{resource['ori_filename']} ({resource['dataset_name']})"
+        if resource["filesize"] > 100:
+            future = get_clean.submit(resource, resources_artifact)
+            futures[future] = f"{resource['ori_filename']} ({resource['dataset_name']})"
 
     dfs = []
     for f in futures:

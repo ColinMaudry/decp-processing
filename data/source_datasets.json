@@ -292,5 +292,11 @@
     "name": "Données essentielles PES marché depuis 2024",
     "code": "pes_marche_2024",
     "owner_org_name": "MINEF"
+  },
+  {
+    "id": "5c0a7845634f4139b2ee8883",
+    "name": "Données essentielles des marchés publics - e-marchespublics.com",
+    "code": "e-marchespublics.com_dematis",
+    "owner_org_name": "Dematis"
   }
 ]
