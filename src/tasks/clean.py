@@ -48,6 +48,11 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     # TODO: à déplacer autre part, dans transform
     lf = lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
 
+    # Application des modifications
+    # le plus tôt possible pour que les fonctions suivantes clean les
+    # champs modifiés (dateNotification, datePublicationDonnnes, montant, titulaires, dureeMois)
+    lf = process_modifications(lf)
+
     # Montants
     # Certains marchés ont des montants qui posent problème, donc on les met à 12,311111111 milliards (pour les retrouver facilement)
     # ex : 221300015002472020F00075, 1.0E17
