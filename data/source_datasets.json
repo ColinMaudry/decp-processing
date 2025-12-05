@@ -280,5 +280,11 @@
     "name": "Données essentielles des marchés publics - Xmarchés",
     "code": "xmarches",
     "owner_org_name": "SPL-XDEMAT"
+  },
+  {
+    "id": "65cf3c55ec910b5a8e2fc084",
+    "name": "Données essentielles PES marché depuis 2024",
+    "code": "pes_marche_2024",
+    "owner_org_name": "MINEF"
   }
 ]
