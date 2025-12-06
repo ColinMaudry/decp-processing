@@ -38,8 +38,8 @@ from src.tasks.utils import generate_stats, remove_unused_cache
     log_prints=True,
     task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS),
 )
-@memory_profiler.profile
-def decp_processing(enable_cache_removal: bool = False):
+@memory_profiler.profile()
+def decp_processing(enable_cache_removal: bool = True):
     print(f"🚀  Début du flow decp-processing dans base dir {BASE_DIR} ")
 
     print("Liste de toutes les ressources des datasets...")
@@ -92,23 +92,23 @@ def decp_processing(enable_cache_removal: bool = False):
 
     lf: pl.LazyFrame = enrich_from_sirene(lf)
 
-    print("Ajout de la colonne 'dureeRestanteMois'...")
-    lf = add_duree_restante(lf)
-
     # Réinitialisation de DIST_DIR
     if os.path.exists(DIST_DIR):
         shutil.rmtree(DIST_DIR)
     os.makedirs(DIST_DIR)
 
-    sink_to_files(lf, DIST_DIR / "decp")
+    sink_to_files(lf, DIST_DIR / "decp", file_format="parquet")
     lf: pl.LazyFrame = pl.scan_parquet(DIST_DIR / "decp.parquet")
+
+    print("Ajout de la colonne 'dureeRestanteMois'...")
+    lf = add_duree_restante(lf)
 
     print("Génération des probabilités NAF/CPV...")
     calculate_naf_cpv_matching(lf)
     lf = lf.drop(cs.starts_with("activite"))
 
     print("Génération de l'artefact (statistiques) sur le base df...")
-    generate_stats(lf.collect(engine="streaming"))
+    generate_stats(lf)
 
     print("Génération du schéma et enregistrement des DECP aux formats CSV, Parquet...")
     lf: pl.LazyFrame = sort_columns(lf, BASE_DF_COLUMNS)
