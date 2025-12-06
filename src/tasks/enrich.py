@@ -59,11 +59,12 @@ def enrich_from_sirene(lf: pl.LazyFrame):
     # Récupération des données SIRET/SIREN préparées dans sirene-preprocess()
     lf_etablissements = pl.scan_parquet(SIRENE_DATA_DIR / "etablissements.parquet")
     lf_unites_legales = pl.scan_parquet(SIRENE_DATA_DIR / "unites_legales.parquet")
+    lf_base = lf.clone()
 
     # DONNÉES SIRENE ACHETEURS
 
     print("Extraction des SIRET des acheteurs...")
-    lf_sirets_acheteurs = extract_unique_acheteurs_siret(lf.clone())
+    lf_sirets_acheteurs = extract_unique_acheteurs_siret(lf_base)
 
     print("Ajout des données établissements (acheteurs)...")
     lf_sirets_acheteurs = add_etablissement_data(
@@ -78,17 +79,16 @@ def enrich_from_sirene(lf: pl.LazyFrame):
         type_siret="acheteur",
     )
 
-    lf = lf.join(lf_sirets_acheteurs, how="left", on="acheteur_id")
-
-    del lf_sirets_acheteurs
-
-    # print("Construction du champ acheteur_nom à partir des données SIRENE...")
-    # lf_sirets_acheteurs = make_acheteur_nom(lf_sirets_acheteurs)
+    # Matérialisation de sirets_acheteurs pour rompre
+    # le cercle de dépendances du lf
+    acheteurs_path = SIRENE_DATA_DIR / "temp_enrich_acheteurs.parquet"
+    lf_sirets_acheteurs.sink_parquet(acheteurs_path)
+    lf_sirets_acheteurs = pl.scan_parquet(acheteurs_path)
 
     # DONNÉES SIRENE TITULAIRES
 
     print("Extraction des SIRET des titulaires...")
-    lf_sirets_titulaires = extract_unique_titulaires_siret(lf.clone())
+    lf_sirets_titulaires = extract_unique_titulaires_siret(lf_base)
 
     print("Ajout des données établissements (titulaires)...")
     lf_sirets_titulaires = add_etablissement_data(
@@ -102,6 +102,16 @@ def enrich_from_sirene(lf: pl.LazyFrame):
         siret_column="titulaire_id",
         type_siret="titulaire",
     )
+
+    #  # Matérialisation de sirets_titulaires pour rompre
+    # le cercle de dépendances du lf
+    titulaires_path = SIRENE_DATA_DIR / "temp_enrich_titulaires.parquet"
+    lf_sirets_titulaires.sink_parquet(titulaires_path)
+    lf_sirets_titulaires = pl.scan_parquet(titulaires_path)
+
+    # JOINTURES
+
+    lf = lf.join(lf_sirets_acheteurs, how="left", on="acheteur_id")
 
     # En joignant en utilisant à la fois le SIRET et le typeIdentifiant, on s'assure qu'on ne joint pas sur
     # des id de titulaires non-SIRET
