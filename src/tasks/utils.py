@@ -119,10 +119,10 @@ def gen_artifact_row(
 
 
 # Statistiques pour toutes les données collectées ce jour
-def generate_stats(df: pl.DataFrame):
+def generate_stats(lf: pl.LazyFrame):
     now = datetime.now()
-    df_uid: pl.DataFrame = (
-        df.select(
+    lf_uid = (
+        lf.select(
             "uid",
             "acheteur_id",
             "dateNotification",
@@ -137,46 +137,108 @@ def generate_stats(df: pl.DataFrame):
     )
 
     # Statistiques sur les sources de données (statistiques.csv)
-    generate_public_source_stats(df_uid)
+    # generate_public_source_stats does aggregations. Let's make it lazy too.
+    generate_public_source_stats(lf_uid)
 
-    resources = df_uid["sourceFile"].unique().to_list()
+    # Collect only the necessary aggregates for the main stats
+    # We need to compute several things. It might be efficient to do one big aggregation or several small collects.
+
+    # 1. Resources and Sources
+    resources = (
+        lf_uid.select("sourceFile")
+        .unique()
+        .collect()
+        .get_column("sourceFile")
+        .to_list()
+    )
+    sources = (
+        lf_uid.select("sourceDataset")
+        .unique()
+        .collect()
+        .get_column("sourceDataset")
+        .to_list()
+    )
+
+    # 2. Counts
+    nb_lignes = lf.select(pl.len()).collect().item()
+    nb_marches = lf_uid.select(pl.len()).collect().item()
+
+    # 3. Unique counts (approximate or exact)
+    nb_acheteurs_uniques = (
+        lf_uid.select("acheteur_id").unique().select(pl.len()).collect().item() - 1
+    )
+    nb_titulaires_uniques = (
+        lf.select("titulaire_id", "titulaire_typeIdentifiant")
+        .unique()
+        .select(pl.len())
+        .collect()
+        .item()
+        - 1
+    )
+
+    # 4. Columns
+    columns = lf.collect_schema().names()
 
     stats = {
         "datetime": now.isoformat()[:-7],  # jusqu'aux secondes
         "date": DATE_NOW,
         "resources": resources,
         "nb_resources": len(resources),
-        "sources": df_uid["sourceDataset"].unique().to_list(),
-        "nb_lignes": df.height,
-        "colonnes_triées": sorted(df.columns),
-        "nb_colonnes": len(df.columns),
-        "nb_marches": df_uid.height,
-        "nb_acheteurs_uniques": df_uid.select("acheteur_id").unique().height
-        - 1,  # -1 pour ne pas compter la valeur "acheteur vide"
-        "nb_titulaires_uniques": df.select("titulaire_id", "titulaire_typeIdentifiant")
-        .unique()
-        .height
-        - 1,  # -1 pour ne pas compter la valeur "titulaire vide"
+        "sources": sources,
+        "nb_lignes": nb_lignes,
+        "colonnes_triées": sorted(columns),
+        "nb_colonnes": len(columns),
+        "nb_marches": nb_marches,
+        "nb_acheteurs_uniques": nb_acheteurs_uniques,
+        "nb_titulaires_uniques": nb_titulaires_uniques,
     }
 
-    for year in range(2018, int(DATE_NOW[0:4]) + 1):
-        stats[f"{str(year)}_nb_publications_marchés"] = df_uid.filter(
-            pl.col("datePublicationDonnees").dt.year() == year
-        ).height
+    # 5. Yearly stats
+    # We can do this with a group_by and then iterate over the result
 
-        df_date_notification = df_uid.filter(
-            pl.col("dateNotification").dt.year() == year
+    # Aggregations for publications per year
+    pub_stats = (
+        lf_uid.with_columns(pl.col("datePublicationDonnees").dt.year().alias("year"))
+        .group_by("year")
+        .agg(pl.len().alias("count"))
+        .collect()
+    )
+
+    # Aggregations for notifications per year (count, sum, median)
+    notif_stats = (
+        lf_uid.with_columns(pl.col("dateNotification").dt.year().alias("year"))
+        .group_by("year")
+        .agg(
+            pl.len().alias("count"),
+            pl.sum("montant").alias("sum_montant"),
+            pl.median("montant").alias("median_montant"),
         )
-        stats[f"{str(year)}_nb_notifications_marchés"] = df_date_notification.height
+        .collect()
+    )
 
-        if df_date_notification.height > 0:
+    for year in range(2018, int(DATE_NOW[0:4]) + 1):
+        # Publications
+        pub_count = (
+            pub_stats.filter(pl.col("year") == year).select("count").item()
+            if not pub_stats.filter(pl.col("year") == year).is_empty()
+            else 0
+        )
+        stats[f"{str(year)}_nb_publications_marchés"] = pub_count
+
+        # Notifications
+        year_stats = notif_stats.filter(pl.col("year") == year)
+        if not year_stats.is_empty():
+            stats[f"{str(year)}_nb_notifications_marchés"] = year_stats.select(
+                "count"
+            ).item()
             stats[f"{str(year)}_somme_montant_marchés_notifiés"] = int(
-                df_date_notification.select(pl.sum("montant")).item()
+                year_stats.select("sum_montant").item() or 0
             )
             stats[f"{str(year)}_médiane_montant_marchés_notifiés"] = int(
-                df_date_notification.select(pl.median("montant")).item()
+                year_stats.select("median_montant").item() or 0
             )
         else:
+            stats[f"{str(year)}_nb_notifications_marchés"] = 0
             stats[f"{str(year)}_somme_montant_marchés_notifiés"] = ""
             stats[f"{str(year)}_médiane_montant_marchés_notifiés"] = ""
 
@@ -188,23 +250,31 @@ def generate_stats(df: pl.DataFrame):
     )
 
 
-def generate_public_source_stats(df_uid: pl.DataFrame) -> None:
+def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
     print("Génération des statistiques sur les sources de données...")
-    df_uid = df_uid.select("uid", "acheteur_id", "sourceDataset")
+    lf_uid = lf_uid.select("uid", "acheteur_id", "sourceDataset")
 
+    # We need to collect these intermediate aggregations to join them with the sources dataframe (which is small)
     df_acheteurs = (
-        df_uid.select("acheteur_id", "sourceDataset")
+        lf_uid.select("acheteur_id", "sourceDataset")
         .unique()
         .group_by("sourceDataset")
         .len()
+        .collect()
     )
     df_acheteurs = df_acheteurs.rename({"len": "nb_acheteurs"})
 
     # group + count
-    df_uid = (
-        df_uid.select("uid", "sourceDataset").unique().group_by("sourceDataset").len()
+    df_uid_agg = (
+        lf_uid.select("uid", "sourceDataset")
+        .unique()
+        .group_by("sourceDataset")
+        .len()
+        .collect()
     )
-    df_uid = df_uid.rename({"len": "nb_marchés"}).sort(by="nb_marchés", descending=True)
+    df_uid_agg = df_uid_agg.rename({"len": "nb_marchés"}).sort(
+        by="nb_marchés", descending=True
+    )
 
     # lecture des sources en df
     df_sources: pl.DataFrame = pl.DataFrame(TRACKED_DATASETS)
@@ -229,7 +299,7 @@ def generate_public_source_stats(df_uid: pl.DataFrame) -> None:
         coalesce=True,
     )
     df_sources = df_sources.join(
-        df_uid, left_on="code", right_on="sourceDataset", how="full", coalesce=True
+        df_uid_agg, left_on="code", right_on="sourceDataset", how="full", coalesce=True
     )
 
     # ordre des colonnes
