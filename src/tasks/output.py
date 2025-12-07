@@ -35,8 +35,7 @@ def sink_to_files(
         lf.sink_parquet(tmp_path, compression=compression, engine="streaming")
         Path(tmp_path).rename(f"{path}.parquet")
 
-        # If CSV is also requested, use the generated Parquet file as source
-        # This avoids re-calculating the whole LazyFrame plan
+        # Utilisation du parquet plutôt que de relaculer le plan de requête du LazyFrame
         if "csv" in file_format:
             pl.scan_parquet(f"{path}.parquet").sink_csv(
                 f"{path}.csv", engine="streaming"

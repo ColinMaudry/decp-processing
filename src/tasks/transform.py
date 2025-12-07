@@ -174,7 +174,6 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
     )
 
     # Exemple de doublon : 20005584600014157140791205100
-    # On retire le sort() pour permettre le streaming
     lf_concat = lf_concat.unique(
         subset=["uid", "titulaire_id", "titulaire_typeIdentifiant", "modification_id"],
         maintain_order=False,
@@ -238,7 +237,12 @@ def sort_columns(lf: pl.LazyFrame, config_columns):
 
     print("Colonnes inattendues:", other_columns)
 
-    return lf.select(config_columns + other_columns)
+    lf = lf.select(config_columns + other_columns)
+    lf = lf.sort(
+        by=["dateNotification", "uid"], descending=[True, False], nulls_last=True
+    )
+
+    return lf
 
 
 def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
