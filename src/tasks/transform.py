@@ -142,8 +142,31 @@ def process_modifications(lf: pl.LazyFrame) -> pl.LazyFrame:
 
 
 def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
-    lfs = [pl.scan_parquet(file) for file in parquet_files]
+    # Concatenation par morceaux (chunks) pour éviter de charger trop de fichiers en mémoire
+    # et pour éviter "OSError: Too many open files"
+    chunk_size = 100
+    chunks = [
+        parquet_files[i : i + chunk_size]
+        for i in range(0, len(parquet_files), chunk_size)
+    ]
 
+    intermediate_files = []
+    for i, chunk in enumerate(chunks):
+        print(f"Concatenation du chunk {i + 1}/{len(chunks)}")
+        lfs = [pl.scan_parquet(file) for file in chunk]
+        lf_chunk = pl.concat(lfs, how="vertical")
+
+        # On sauvegarde chaque chunk concaténé
+        chunk_path = DATA_DIR / "get" / f"chunk_{i}.parquet"
+        chunk_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Utilisation de sink_parquet pour écrire sans tout charger en RAM
+        lf_chunk.sink_parquet(chunk_path)
+        intermediate_files.append(chunk_path)
+
+    # Concatenation finale des fichiers intermédiaires
+    print("Concatenation finale...")
+    lfs = [pl.scan_parquet(file) for file in intermediate_files]
     lf_concat: pl.LazyFrame = pl.concat(lfs, how="vertical")
 
     print(
@@ -151,10 +174,11 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
     )
 
     # Exemple de doublon : 20005584600014157140791205100
+    # On retire le sort() pour permettre le streaming
     lf_concat = lf_concat.unique(
         subset=["uid", "titulaire_id", "titulaire_typeIdentifiant", "modification_id"],
         maintain_order=False,
-    ).sort(by=["dateNotification", "uid"], descending=[True, False])
+    )
 
     return lf_concat
 

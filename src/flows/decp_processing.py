@@ -55,21 +55,38 @@ def decp_processing(enable_cache_removal: bool = True):
     os.makedirs(get_dir)
 
     # Traitement parallèle des ressources
-    for resource in resources:
-        if resource["filesize"] > 100:
+    # Traitement parallèle des ressources par lots pour éviter la surcharge mémoire
+    batch_size = 500
+    parquet_files = []
+
+    # Filtrer les ressources à traiter
+    resources_to_process = [r for r in resources if r["filesize"] > 100]
+
+    for i in range(0, len(resources_to_process), batch_size):
+        batch = resources_to_process[i : i + batch_size]
+        print(
+            f"Traitement du lot {i // batch_size + 1} / {len(resources_to_process) // batch_size + 1}"
+        )
+
+        futures = {}
+        for resource in batch:
             future = get_clean.submit(resource, resources_artifact)
             futures[future] = f"{resource['ori_filename']} ({resource['dataset_name']})"
 
-    parquet_files = []
-    for f in futures:
-        try:
-            result = f.result()
-            if result is not None:
-                parquet_files.append(result)
-        except Exception as e:
-            resource = futures[f]
-            print(f"❌ Erreur de traitement de {resource} ({type(e).__name__}):")
-            print(e)  # str(e) if using logging()
+        for f in futures:
+            try:
+                result = f.result()
+                if result is not None:
+                    parquet_files.append(result)
+            except Exception as e:
+                resource_name = futures[f]
+                print(
+                    f"❌ Erreur de traitement de {resource_name} ({type(e).__name__}):"
+                )
+                print(e)
+
+        # Nettoyage explicite
+        futures.clear()
 
     if DECP_PROCESSING_PUBLISH:
         create_table_artifact(
