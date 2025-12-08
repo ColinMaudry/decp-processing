@@ -58,6 +58,9 @@ def decp_processing(enable_cache_cleanup: bool = True):
     # Filtrer les ressources à traiter
     resources_to_process = [r for r in resources if r["filesize"] > 100]
 
+    # Afin d'être sûr que je ne publie pas par erreur un jeu de données de test
+    decp_publish = DECP_PROCESSING_PUBLISH and len(resources_to_process) > 5000
+
     for i in range(0, len(resources_to_process), batch_size):
         batch = resources_to_process[i : i + batch_size]
         print(
@@ -86,7 +89,7 @@ def decp_processing(enable_cache_cleanup: bool = True):
         # Nettoyage explicite
         futures.clear()
 
-    if DECP_PROCESSING_PUBLISH:
+    if decp_publish:
         create_table_artifact(
             table=resources_artifact,
             key="datagouvfr-json-resources",
@@ -134,7 +137,7 @@ def decp_processing(enable_cache_cleanup: bool = True):
     # Désactivé pour l'instant https://github.com/ColinMaudry/decp-processing/issues/124
     # make_data_tables()
 
-    if DECP_PROCESSING_PUBLISH:
+    if decp_publish:
         print("Publication sur data.gouv.fr...")
         publish_to_datagouv()
     else:
