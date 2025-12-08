@@ -1,5 +1,4 @@
 import concurrent.futures
-import datetime
 import tempfile
 from collections.abc import Iterator
 from functools import partial
@@ -16,12 +15,12 @@ from prefect import task
 from prefect.transactions import transaction
 
 from src.config import (
-    CACHE_EXPIRATION_TIME_HOURS,
-    DATA_DIR,
     DECP_PROCESSING_PUBLISH,
+    DECP_USE_CACHE,
     DIST_DIR,
     HTTP_CLIENT,
     HTTP_HEADERS,
+    RESOURCE_CACHE_DIR,
     DecpFormat,
 )
 from src.schemas import SCHEMA_MARCHE_2019, SCHEMA_MARCHE_2022
@@ -32,8 +31,8 @@ from src.tasks.clean import (
 )
 from src.tasks.output import sink_to_files
 from src.tasks.utils import (
+    full_resource_name,
     gen_artifact_row,
-    get_clean_cache_key,
     stream_replace_bytestring,
 )
 
@@ -62,7 +61,7 @@ def get_resource(
     r: dict, resources_artifact: list[dict] | list
 ) -> tuple[pl.LazyFrame | None, DecpFormat | None]:
     if DECP_PROCESSING_PUBLISH is False:
-        print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
+        print(f"➡️  {full_resource_name(r)}")
 
     output_path = DIST_DIR / "get" / r["filename"]
     output_path.parent.mkdir(exist_ok=True)
@@ -79,11 +78,9 @@ def get_resource(
             fields, decp_format = xml_stream_to_parquet(
                 url, output_path, fix_chars=True
             )
-            print(f"♻️  {r['ori_filename']} nettoyé et traité")
+            print(f"♻️  {full_resource_name(r)} nettoyé et traité")
     else:
-        print(
-            f"▶️  Format de fichier non supporté : {file_format} ({r['dataset_name']})"
-        )
+        print(f"▶️  Format de fichier non supporté : {full_resource_name(r)}")
         return None, None
 
     if decp_format is None:
@@ -124,7 +121,7 @@ def find_json_decp_format(chunk, decp_formats, resource: dict):
             # trouvé le bon format.
             return decp_format
     print(
-        f"⚠️  Pas de match trouvé parmis les schémas passés ({resource['ori_filename']} ({resource['dataset_name']}))"
+        f"⚠️  Pas de match trouvé parmis les schémas passés : {full_resource_name(resource)}"
     )
     return None
 
@@ -444,23 +441,36 @@ def get_insee_cog_data(url, schema_overrides, columns) -> pl.DataFrame:
 
 @task(
     log_prints=True,
-    persist_result=True,
-    cache_expiration=datetime.timedelta(hours=CACHE_EXPIRATION_TIME_HOURS),
-    cache_key_fn=get_clean_cache_key,
+    # persist_result=True,
+    # cache_expiration=datetime.timedelta(hours=CACHE_EXPIRATION_TIME_HOURS),
+    # cache_key_fn=get_clean_cache_key,
 )
-def get_clean(resource, resources_artifact: list) -> pl.DataFrame or None:
-    # Récupération des données source...
+def get_clean(
+    resource, resources_artifact: list, available_parquet_files: set
+) -> pl.DataFrame or None:
     with transaction():
-        lf, decp_format = get_resource(resource, resources_artifact)
+        checksum = resource["checksum"]
+        parquet_path = RESOURCE_CACHE_DIR / f"{checksum}"
 
-        # Nettoyage des données source et typage des colonnes...
-        # si la ressource est dans un format supporté
-        if lf is not None:
-            lf: pl.LazyFrame = clean_decp(lf, decp_format)
-            parquet_path = DATA_DIR / "get" / f"{resource['id']}"
-            sink_to_files(
-                lf, parquet_path, file_format="parquet", compression="uncompressed"
-            )
+        # Si la ressource n'est pas en cache ou que l'utilisation du cache est désactivée
+        if (
+            DECP_USE_CACHE is False
+            or f"{checksum}.parquet" not in available_parquet_files
+        ):
+            # Récupération des données source...
+            lf, decp_format = get_resource(resource, resources_artifact)
+
+            # Nettoyage des données source et typage des colonnes...
+            # si la ressource est dans un format supporté
+            if lf is not None:
+                lf: pl.LazyFrame = clean_decp(lf, decp_format)
+                sink_to_files(
+                    lf, parquet_path, file_format="parquet", compression="snappy"
+                )
+                return parquet_path.with_suffix(".parquet")
+            else:
+                return None
+        else:
+            # Le fichier parquet est déjà disponible pour ce checksum
+            print(f"👍 Ressource déjà en cache : {full_resource_name(resource)}")
             return parquet_path.with_suffix(".parquet")
-
-    return None

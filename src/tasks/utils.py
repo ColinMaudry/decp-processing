@@ -12,7 +12,7 @@ from src.config import (
     CACHE_EXPIRATION_TIME_HOURS,
     DATE_NOW,
     DIST_DIR,
-    PREFECT_LOCAL_STORAGE_PATH,
+    RESOURCE_CACHE_DIR,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
     DecpFormat,
@@ -69,17 +69,20 @@ def get_clean_cache_key(context, parameters) -> str:
 
 @task
 def remove_unused_cache(
-    cache_dir: Path = PREFECT_LOCAL_STORAGE_PATH,
+    cache_dir: Path = RESOURCE_CACHE_DIR,
     cache_expiration_time_hours: int = CACHE_EXPIRATION_TIME_HOURS,
 ):
     now = time.time()
     age_limit = cache_expiration_time_hours * 3600  # seconds
+    deleted_files = []
     if cache_dir.exists():
         for file in cache_dir.rglob("*"):
             if file.is_file():
                 if now - file.stat().st_atime > age_limit:
-                    print(f"Deleting cache file: {file}")
+                    print(f"Suppression du fichier de cache: {file}")
+                    deleted_files.append(file)
                     file.unlink()
+        print(f"{len(deleted_files)} fichiers supprimés")
 
 
 #
@@ -322,3 +325,8 @@ def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
 
     # dump CSV dans dist
     df_sources.write_csv(DIST_DIR / "statistiques.csv")
+
+
+def full_resource_name(r: dict):
+    """Retourne le nom du fichier de la ressource et le nom du dataset."""
+    return f"{r['ori_filename']} ({r['dataset_name']})"

@@ -11,11 +11,11 @@ from prefect.task_runners import ConcurrentTaskRunner
 from src.config import (
     BASE_DF_COLUMNS,
     BASE_DIR,
-    DATA_DIR,
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
     MAX_PREFECT_WORKERS,
+    RESOURCE_CACHE_DIR,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
 )
@@ -31,7 +31,7 @@ from src.tasks.transform import (
     concat_parquet_files,
     sort_columns,
 )
-from src.tasks.utils import generate_stats, remove_unused_cache
+from src.tasks.utils import full_resource_name, generate_stats, remove_unused_cache
 
 
 @flow(
@@ -39,7 +39,7 @@ from src.tasks.utils import generate_stats, remove_unused_cache
     task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS),
 )
 @memory_profiler.profile()
-def decp_processing(enable_cache_removal: bool = True):
+def decp_processing(enable_cache_cleanup: bool = True):
     print(f"🚀  Début du flow decp-processing dans base dir {BASE_DIR} ")
 
     print("Liste de toutes les ressources des datasets...")
@@ -47,14 +47,10 @@ def decp_processing(enable_cache_removal: bool = True):
 
     # Initialisation du tableau des artifacts de ressources
     resources_artifact = []
-    futures = {}
 
-    get_dir = DATA_DIR / "get"
-    if os.path.exists(get_dir):
-        shutil.rmtree(get_dir)
-    os.makedirs(get_dir)
+    # Liste des ressources en cache (checksums)
+    available_parquet_files = set(os.listdir(RESOURCE_CACHE_DIR))
 
-    # Traitement parallèle des ressources
     # Traitement parallèle des ressources par lots pour éviter la surcharge mémoire
     batch_size = 500
     parquet_files = []
@@ -65,13 +61,15 @@ def decp_processing(enable_cache_removal: bool = True):
     for i in range(0, len(resources_to_process), batch_size):
         batch = resources_to_process[i : i + batch_size]
         print(
-            f"Traitement du lot {i // batch_size + 1} / {len(resources_to_process) // batch_size + 1}"
+            f"🗃️ Traitement du lot {i // batch_size + 1} / {len(resources_to_process) // batch_size + 1}"
         )
 
         futures = {}
         for resource in batch:
-            future = get_clean.submit(resource, resources_artifact)
-            futures[future] = f"{resource['ori_filename']} ({resource['dataset_name']})"
+            future = get_clean.submit(
+                resource, resources_artifact, available_parquet_files
+            )
+            futures[future] = full_resource_name(resource)
 
         for f in futures:
             try:
@@ -143,9 +141,7 @@ def decp_processing(enable_cache_removal: bool = True):
         print("Publication sur data.gouv.fr désactivée.")
 
     # Suppression des fichiers de cache inutilisés
-    if enable_cache_removal:
+    if enable_cache_cleanup:
         remove_unused_cache()
-
-    shutil.rmtree(DATA_DIR / "get")
 
     print("☑️  Fin du flow principal decp_processing.")

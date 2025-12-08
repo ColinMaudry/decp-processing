@@ -78,6 +78,9 @@ DATA_DIR = make_path_from_env("DECP_DATA_DIR", BASE_DIR / "data")
 DATA_DIR.mkdir(exist_ok=True, parents=True)
 print(f"{'DATA_DIR':<40}", DATA_DIR)
 
+RESOURCE_CACHE_DIR = DATA_DIR / "resource_cache"
+RESOURCE_CACHE_DIR.mkdir(exist_ok=True, parents=True)
+
 DIST_DIR = make_path_from_env("DECP_DIST_DIR", BASE_DIR / "dist")
 DIST_DIR.mkdir(exist_ok=True, parents=True, mode=777)
 print(f"{'DIST_DIR':<40}", DIST_DIR)
@@ -111,6 +114,8 @@ print(f"{'SCRAPING_MODE':<40}", SCRAPING_MODE)
 SCRAPING_TARGET = os.getenv("SCRAPING_TARGET")
 print(f"{'SCRAPING_TARGET':<40}", SCRAPING_TARGET)
 
+# Lecture ou non des ressource en cache
+DECP_USE_CACHE = os.getenv("DECP_USE_CACHE", "false").lower() == "true"
 
 # Dossier de stockage des résultats de tâches et du cache
 # https://docs.prefect.io/v3/advanced/results#default-persistence-configuration

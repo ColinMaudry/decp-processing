@@ -157,11 +157,11 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
         lf_chunk = pl.concat(lfs, how="vertical")
 
         # On sauvegarde chaque chunk concaténé
-        chunk_path = DATA_DIR / "get" / f"chunk_{i}.parquet"
+        chunk_path = DATA_DIR / "temp" / f"chunk_{i}.parquet"
         chunk_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Utilisation de sink_parquet pour écrire sans tout charger en RAM
-        lf_chunk.sink_parquet(chunk_path)
+        lf_chunk.sink_parquet(chunk_path, engine="streaming")
         intermediate_files.append(chunk_path)
 
     # Concatenation finale des fichiers intermédiaires
