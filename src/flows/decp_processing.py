@@ -39,7 +39,7 @@ from src.tasks.utils import full_resource_name, generate_stats, remove_unused_ca
     task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS),
 )
 @memory_profiler.profile()
-def decp_processing(enable_cache_cleanup: bool = True):
+def decp_processing(enable_cache_removal: bool = True):
     print(f"🚀  Début du flow decp-processing dans base dir {BASE_DIR} ")
 
     print("Liste de toutes les ressources des datasets...")
@@ -144,7 +144,7 @@ def decp_processing(enable_cache_cleanup: bool = True):
         print("Publication sur data.gouv.fr désactivée.")
 
     # Suppression des fichiers de cache inutilisés
-    if enable_cache_cleanup:
+    if enable_cache_removal:
         remove_unused_cache()
 
     print("☑️  Fin du flow principal decp_processing.")
