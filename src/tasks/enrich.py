@@ -1,5 +1,6 @@
 import polars as pl
 import polars.selectors as cs
+from polars_ds import haversine
 from prefect import task
 
 from src.config import SIRENE_DATA_DIR
@@ -20,6 +21,27 @@ def add_etablissement_data(
     lf_sirets = lf_sirets.join(
         lf_etablissements, how="inner", left_on=siret_column, right_on="siret"
     )
+
+    # On ne prend pas l'activité des acheteurs
+    if type_siret == "acheteur":
+        lf_sirets = lf_sirets.drop(cs.starts_with("activite_"))
+
+    # Si il y a un etablissement_nom (Enseigne1Etablissement ou denominationUsuelleEtablissement),
+    # on l'ajoute au nom de l'organisme, entre parenthèses
+    lf_sirets = lf_sirets.with_columns(
+        pl.when(pl.col("etablissement_nom").is_not_null())
+        .then(
+            pl.concat_str(
+                pl.col(f"{type_siret}_nom"),
+                pl.lit(" ("),
+                pl.col("etablissement_nom"),
+                pl.lit(")"),
+            )
+        )
+        .otherwise(pl.col(f"{type_siret}_nom"))
+        .alias(f"{type_siret}_nom")
+    ).drop("etablissement_nom")
+
     lf_sirets = lf_sirets.rename(
         {
             "latitude": f"{type_siret}_latitude",
@@ -59,6 +81,7 @@ def enrich_from_sirene(lf: pl.LazyFrame):
     # Récupération des données SIRET/SIREN préparées dans sirene-preprocess()
     lf_etablissements = pl.scan_parquet(SIRENE_DATA_DIR / "etablissements.parquet")
     lf_unites_legales = pl.scan_parquet(SIRENE_DATA_DIR / "unites_legales.parquet")
+
     lf_base = lf.clone()
 
     # DONNÉES SIRENE ACHETEURS
@@ -133,29 +156,16 @@ def enrich_from_sirene(lf: pl.LazyFrame):
 
 
 def calculate_distance(lf: pl.LazyFrame) -> pl.LazyFrame:
-    # Implémentation native de la formule de Haversine
-    # R = 6371  # Rayon de la Terre en km
-
-    # Conversion en radians
-    lat1 = pl.col("acheteur_latitude").radians()
-    lon1 = pl.col("acheteur_longitude").radians()
-    lat2 = pl.col("titulaire_latitude").radians()
-    lon2 = pl.col("titulaire_longitude").radians()
-
-    # Différences
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-
-    # Formule de Haversine
-    a = (dlat / 2).sin().pow(2) + lat1.cos() * lat2.cos() * (dlon / 2).sin().pow(2)
-    c = 2 * a.sqrt().arcsin()
-
-    # Distance en km
-    distance = 6371 * c
-
+    # Utilisation de polars_ds.haversine
+    # https://polars-ds-extension.readthedocs.io/en/latest/num.html#polars_ds.exprs.num.haversine
     lf = lf.with_columns(
-        distance.round(1).alias(
-            "distance"
-        )  # Arrondi à 1 décimale comme avant (mode="half_away_from_zero" n'est pas dispo direct mais round standard est ok)
+        haversine(
+            pl.col("acheteur_latitude"),
+            pl.col("acheteur_longitude"),
+            pl.col("titulaire_latitude"),
+            pl.col("titulaire_longitude"),
+        )
+        .round(mode="half_away_from_zero")
+        .alias("distance")
     )
     return lf

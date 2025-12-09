@@ -3,8 +3,8 @@ from prefect.transactions import transaction
 
 from src.config import SIRENE_DATA_DIR
 from src.flows.get_cog import get_cog
-from src.tasks.get import get_etablissements
-from src.tasks.transform import get_prepare_unites_legales, prepare_etablissements
+from src.tasks.get import get_etablissements, get_unite_legales
+from src.tasks.transform import prepare_etablissements
 from src.tasks.utils import create_sirene_data_dir
 
 
@@ -26,7 +26,7 @@ def sirene_preprocess():
         processed_ul_parquet_path = SIRENE_DATA_DIR / "unites_legales.parquet"
         if not processed_ul_parquet_path.exists():
             print("Téléchargement et préparation des unités légales...")
-            get_prepare_unites_legales(processed_ul_parquet_path)
+            get_unite_legales(processed_ul_parquet_path)
         else:
             print(processed_ul_parquet_path, " existe, skipping.")
 
@@ -35,7 +35,7 @@ def sirene_preprocess():
         if not processed_etab_parquet_path.exists():
             print("Téléchargement et préparation des établissements...")
             lf = get_etablissements()
-            prepare_etablissements(lf, processed_etab_parquet_path)
+            prepare_etablissements(lf).sink_parquet(processed_etab_parquet_path)
         else:
             print(processed_etab_parquet_path, " existe, skipping.")
 

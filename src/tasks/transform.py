@@ -3,9 +3,8 @@ from pathlib import Path
 
 import polars as pl
 import polars.selectors as cs
-from prefect import task
 
-from src.config import DATA_DIR, DIST_DIR, SIRENE_UNITES_LEGALES_URL, DecpFormat
+from src.config import DATA_DIR, DIST_DIR, DecpFormat
 from src.tasks.output import save_to_files
 from src.tasks.utils import check_parquet_file
 
@@ -205,21 +204,70 @@ def extract_unique_titulaires_siret(lf: pl.LazyFrame):
     return lf
 
 
-@task
-def get_prepare_unites_legales(processed_parquet_path):
-    print("Téléchargement des données unité légales et sélection des colonnes...")
-    (
-        pl.scan_parquet(SIRENE_UNITES_LEGALES_URL)
-        .select(["siren", "denominationUniteLegale"])
-        .filter(pl.col("siren").is_not_null())
-        .filter(pl.col("denominationUniteLegale").is_not_null())
-        .unique()
-        .sink_parquet(processed_parquet_path, engine="streaming")
+def prepare_unites_legales(lf: pl.LazyFrame) -> pl.LazyFrame:
+    return (
+        lf.select(
+            [
+                "siren",
+                "denominationUniteLegale",
+                "prenomUsuelUniteLegale",
+                "nomUniteLegale",  # toujours rempli pour personnes physique
+                "nomUsageUniteLegale",  # parfois rempli, a la priorité sur nomUniteLegale
+                "statutDiffusionUniteLegale",  # P = non-diffusible
+            ]
+        )
+        .filter(
+            pl.col("siren").is_not_null()
+        )  # utilisation du fichier Stock, normalement pas de siren null
+        .unique()  # utilisation du fichier Stock, normalement pas de doublons
+        .with_columns(
+            pl.when(pl.col("nomUsageUniteLegale").is_not_null())
+            .then(pl.col("nomUsageUniteLegale"))
+            .otherwise(pl.col("nomUniteLegale"))
+            .alias("nomUniteLegale")
+        )
+        .with_columns(
+            pl.when(pl.col("nomUniteLegale").is_not_null())
+            .then(
+                pl.concat_str(
+                    pl.col("prenomUsuelUniteLegale"),
+                    pl.col("nomUniteLegale"),
+                    separator=" ",
+                )
+            )
+            .otherwise(pl.col("denominationUniteLegale"))
+            .alias("denominationUniteLegale")
+        )
+        .with_columns(
+            pl.when(pl.col("statutDiffusionUniteLegale") == "P")
+            .then(pl.lit("[Données personnelles non-diffusibles]"))
+            .otherwise(pl.col("denominationUniteLegale"))
+            .alias("denominationUniteLegale")
+        )
+        .drop(
+            [
+                "prenomUsuelUniteLegale",
+                "statutDiffusionUniteLegale",
+                "nomUniteLegale",
+                "nomUsageUniteLegale",
+            ]
+        )
     )
 
 
-def prepare_etablissements(lf: pl.LazyFrame, processed_parquet_path: Path) -> None:
-    lf = lf.rename(
+def prepare_etablissements(lff: pl.LazyFrame) -> pl.LazyFrame:
+    lff = lff.with_columns(
+        [
+            pl.col("codeCommuneEtablissement").str.pad_start(5, "0"),
+            pl.col("siret").str.pad_start(14, "0"),
+            # Si enseigne1Etablissement est null, on utilise denominationUsuelleEtablissement
+            pl.coalesce(
+                "enseigne1Etablissement", "denominationUsuelleEtablissement"
+            ).alias("etablissement_nom"),
+        ]
+    )
+    lff = lff.drop("denominationUsuelleEtablissement", "enseigne1Etablissement")
+    lff = lff.rename(
         {
             "codeCommuneEtablissement": "commune_code",
             "activitePrincipaleEtablissement": "activite_code",
@@ -227,11 +275,11 @@ def prepare_etablissements(lf: pl.LazyFrame, processed_parquet_path: Path) -> No
         }
     )
 
-    # Ajout des noms de départements, noms régions,
+    # Ajout des noms de commune, départements, régions
     lf_cog = pl.scan_parquet(DATA_DIR / "code_officiel_geographique.parquet")
-    lf = lf.join(lf_cog, on="commune_code", how="left")
+    lff = lff.join(lf_cog, on="commune_code", how="left")
 
-    lf.sink_parquet(processed_parquet_path, engine="streaming")
+    return lff
 
 
 def sort_columns(lf: pl.LazyFrame, config_columns):
