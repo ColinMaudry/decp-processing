@@ -143,8 +143,8 @@ def decp_processing(enable_cache_removal: bool = True):
     else:
         print("Publication sur data.gouv.fr désactivée.")
 
-    # Suppression des fichiers de cache inutilisés
     if enable_cache_removal:
+        print("Suppression des fichiers de cache inutilisés...")
         remove_unused_cache()
 
     print("☑️  Fin du flow principal decp_processing.")

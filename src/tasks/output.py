@@ -26,14 +26,18 @@ def save_to_files(df: pl.DataFrame, path: Path, file_format=None):
 def sink_to_files(
     lf: pl.LazyFrame, path: str | Path, file_format=None, compression: str = "zstd"
 ):
+    path = Path(path)
     if file_format is None:
         file_format = ["csv", "parquet"]
 
     if "parquet" in file_format:
         # Write to a temporary file first to avoid read-write conflicts
-        tmp_path = f"{path}.parquet.tmp"
+        tmp_path = path.with_suffix(".parquet.tmp")
+
         lf.sink_parquet(tmp_path, compression=compression, engine="streaming")
-        Path(tmp_path).rename(f"{path}.parquet")
+
+        if tmp_path.exists():
+            tmp_path.rename(path.with_suffix(".parquet"))
 
         # Utilisation du parquet plutôt que de relaculer le plan de requête du LazyFrame
         if "csv" in file_format:
@@ -44,6 +48,9 @@ def sink_to_files(
     elif "csv" in file_format:
         # Fallback if only CSV is requested
         lf.sink_csv(f"{path}.csv", engine="streaming")
+
+    # Si ça peut réduire un peu l'empreinte mémoire
+    del lf
 
 
 def save_to_postgres(df: pl.DataFrame, table_name: str):

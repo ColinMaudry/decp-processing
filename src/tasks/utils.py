@@ -330,3 +330,14 @@ def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
 def full_resource_name(r: dict):
     """Retourne le nom du fichier de la ressource et le nom du dataset."""
     return f"{r['ori_filename']} ({r['dataset_name']})"
+
+
+def check_parquet_file(path) -> bool:
+    try:
+        lf = pl.scan_parquet(path)
+        height = lf.select(pl.count()).collect().item()
+        result = height > 0
+        del lf
+        return result
+    except (FileNotFoundError, pl.exceptions.ComputeError):
+        return False

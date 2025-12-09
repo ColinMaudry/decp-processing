@@ -7,6 +7,7 @@ from prefect import task
 
 from src.config import DATA_DIR, DIST_DIR, SIRENE_UNITES_LEGALES_URL, DecpFormat
 from src.tasks.output import save_to_files
+from src.tasks.utils import check_parquet_file
 
 
 def explode_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat):
@@ -144,10 +145,16 @@ def process_modifications(lf: pl.LazyFrame) -> pl.LazyFrame:
 def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
     # Concatenation par morceaux (chunks) pour éviter de charger trop de fichiers en mémoire
     # et pour éviter "OSError: Too many open files"
-    chunk_size = 100
+
+    # Mise de côté des parquet
+    # - qui n'existent pas (s'il y a eu une erreur par exemple)
+    # - qui ont une hauteur de 0
+    checked_parquet_files = [file for file in parquet_files if check_parquet_file(file)]
+
+    chunk_size = 500
     chunks = [
-        parquet_files[i : i + chunk_size]
-        for i in range(0, len(parquet_files), chunk_size)
+        checked_parquet_files[i : i + chunk_size]
+        for i in range(0, len(checked_parquet_files), chunk_size)
     ]
 
     intermediate_files = []
@@ -166,7 +173,7 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
 
     # Concatenation finale des fichiers intermédiaires
     print("Concatenation finale...")
-    lfs = [pl.scan_parquet(file) for file in intermediate_files]
+    lfs = [pl.scan_parquet(file) for file in intermediate_files if Path(file).exists()]
     lf_concat: pl.LazyFrame = pl.concat(lfs, how="vertical")
 
     print(
@@ -405,7 +412,6 @@ def add_duree_restante(lff: pl.LazyFrame):
 #
 #     decp_acheteurs_df["acheteur_id"] = decp_acheteurs_df.apply(construct_nom, axis=1)
 #
-#     # TODO: ne garder que les colonnes acheteur_id et acheteur_id
 #
 #     return decp_acheteurs_df
 #

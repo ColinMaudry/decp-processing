@@ -462,15 +462,15 @@ def get_clean(
 
             # Nettoyage des données source et typage des colonnes...
             # si la ressource est dans un format supporté
-            if lf is not None:
+            if lf is not None and not Path(parquet_path).exists():
                 lf: pl.LazyFrame = clean_decp(lf, decp_format)
                 sink_to_files(
-                    lf, parquet_path, file_format="parquet", compression="snappy"
+                    lf, parquet_path, file_format="parquet", compression="zstd"
                 )
                 return parquet_path.with_suffix(".parquet")
             else:
                 return None
         else:
             # Le fichier parquet est déjà disponible pour ce checksum
-            print(f"👍 Ressource déjà en cache : {full_resource_name(resource)}")
+            print(f"👍 Ressource déjà en cache : {resource['dataset_code']}")
             return parquet_path.with_suffix(".parquet")
