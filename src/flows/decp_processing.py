@@ -48,8 +48,6 @@ def decp_processing(enable_cache_removal: bool = True):
     print("Liste de toutes les ressources des datasets...")
     resources: list[dict] = list_resources(TRACKED_DATASETS)
 
-    assert "a" == "b"
-
     # Initialisation du tableau des artifacts de ressources
     resources_artifact = []
 
