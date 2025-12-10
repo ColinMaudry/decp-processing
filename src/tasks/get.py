@@ -316,7 +316,7 @@ def yield_modifications(row: dict, separator="_") -> Iterator[dict] or None:
         raw_mods = raw_mods["modification"]
     # Couvre le (non-)format dans lequel "modifications" ou "modification" mène
     # directement à un dict contenant les métadonnées liées à une modification.
-    elif isinstance(raw_mods, dict):
+    if isinstance(raw_mods, dict):
         raw_mods = [raw_mods]
     elif isinstance(raw_mods, str) or raw_mods is None:
         raw_mods = []
@@ -395,13 +395,13 @@ def get_etablissements() -> pl.LazyFrame:
         print(_href.split("/")[-1])
         try:
             response = http_client.get(
-                _href, headers=HTTP_HEADERS, timeout=10
+                _href, headers=HTTP_HEADERS, timeout=20
             ).raise_for_status()
         except (HTTPStatusError, TimeoutException) as err:
             print(err)
             print("Nouvel essai...")
             response = http_client.get(
-                _href, headers=HTTP_HEADERS, timeout=10
+                _href, headers=HTTP_HEADERS, timeout=20
             ).raise_for_status()
 
         content = response.content
