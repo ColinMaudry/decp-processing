@@ -89,17 +89,17 @@ def enrich_from_sirene(lf: pl.LazyFrame):
     print("Extraction des SIRET des acheteurs...")
     lf_sirets_acheteurs = extract_unique_acheteurs_siret(lf_base)
 
-    print("Ajout des données établissements (acheteurs)...")
-    lf_sirets_acheteurs = add_etablissement_data(
-        lf_sirets_acheteurs, lf_etablissements, "acheteur_id", "acheteur"
-    )
-
     print("Ajout des données unités légales (acheteurs)...")
     lf_sirets_acheteurs = add_unite_legale_data(
         lf_sirets_acheteurs,
         lf_unites_legales,
         siret_column="acheteur_id",
         type_siret="acheteur",
+    )
+
+    print("Ajout des données établissements (acheteurs)...")
+    lf_sirets_acheteurs = add_etablissement_data(
+        lf_sirets_acheteurs, lf_etablissements, "acheteur_id", "acheteur"
     )
 
     # Matérialisation de sirets_acheteurs pour rompre
@@ -113,17 +113,17 @@ def enrich_from_sirene(lf: pl.LazyFrame):
     print("Extraction des SIRET des titulaires...")
     lf_sirets_titulaires = extract_unique_titulaires_siret(lf_base)
 
-    print("Ajout des données établissements (titulaires)...")
-    lf_sirets_titulaires = add_etablissement_data(
-        lf_sirets_titulaires, lf_etablissements, "titulaire_id", "titulaire"
-    )
-
     print("Ajout des données unités légales (titulaires)...")
     lf_sirets_titulaires = add_unite_legale_data(
         lf_sirets_titulaires,
         lf_unites_legales,
         siret_column="titulaire_id",
         type_siret="titulaire",
+    )
+
+    print("Ajout des données établissements (titulaires)...")
+    lf_sirets_titulaires = add_etablissement_data(
+        lf_sirets_titulaires, lf_etablissements, "titulaire_id", "titulaire"
     )
 
     #  # Matérialisation de sirets_titulaires pour rompre
