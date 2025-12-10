@@ -6,8 +6,11 @@ import polars as pl
 import polars.selectors as cs
 from prefect import flow
 from prefect.artifacts import create_table_artifact
+from prefect.context import get_run_context
 from prefect.task_runners import ConcurrentTaskRunner
+from prefect_email import EmailServerCredentials, email_send_message
 
+from config import PREFECT_API_URL
 from src.config import (
     BASE_DF_COLUMNS,
     BASE_DIR,
@@ -44,6 +47,8 @@ def decp_processing(enable_cache_removal: bool = True):
 
     print("Liste de toutes les ressources des datasets...")
     resources: list[dict] = list_resources(TRACKED_DATASETS)
+
+    assert "a" == "b"
 
     # Initialisation du tableau des artifacts de ressources
     resources_artifact = []
@@ -147,3 +152,25 @@ def decp_processing(enable_cache_removal: bool = True):
         remove_unused_cache()
 
     print("☑️  Fin du flow principal decp_processing.")
+
+
+@sirene_preprocess.on_failure
+@decp_processing.on_failure
+def notify_exception_by_email(flow, flow_run, state):
+    if PREFECT_API_URL:
+        context = get_run_context()
+        flow_run_name = context.flow_run.name
+        email_server_credentials = EmailServerCredentials.load("email-notifier")
+        message = (
+            f"Your job {flow_run.name} entered {state.name} "
+            f"with message:\n\n"
+            f"See <https://{PREFECT_API_URL}/flow-runs/flow-run/{flow_run.id}>\n\n"
+            f"Scheduled start: {flow_run.expected_start_time}"
+        )
+
+        email_send_message(
+            email_server_credentials=email_server_credentials,
+            subject=f"Flow run {flow_run_name!r} failed",
+            msg=message,
+            email_to=email_server_credentials.username,
+        )

@@ -14,6 +14,7 @@ dependencies = [
     "frictionless",
     "ipykernel",
     "prefect==3.4.17",
+    "prefect[email]==3.4.17",
     "orjson",
     "ijson==3.4.0",
     "lxml",

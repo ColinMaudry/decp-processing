@@ -69,6 +69,9 @@ DATAGOUVFR_API = "https://www.data.gouv.fr/api/1"
 # Clé d'API data.gouv.fr
 DATAGOUVFR_API_KEY = os.getenv("DATAGOUVFR_API_KEY", "")
 
+# URL API Prefect
+PREFECT_API_URL = os.getenv("PREFECT_API_URL")
+
 # Dossier racine
 BASE_DIR = make_path_from_env("DECP_BASE_DIR", Path(__file__).absolute().parent.parent)
 print(f"{'BASE_DIR':<40}", BASE_DIR)
