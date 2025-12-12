@@ -9,11 +9,12 @@ authors = [
 dependencies = [
     "python-dotenv",
     "pandas", # nécessaire pour l'écriture en base de données
-    "polars==1.33.1",
+    "polars==1.35.2",
     "pyarrow",
     "frictionless",
     "ipykernel",
-    "prefect==3.4.17",
+    "prefect==3.6.6",
+    "prefect[email]==3.6.6",
     "orjson",
     "ijson==3.4.0",
     "lxml",
@@ -29,6 +30,7 @@ dev = [
     "pre-commit",
     "pytest-env",
     "pytest",
+    "pytest-cov"
 ]
 
 [tool.pytest.ini_options]
@@ -40,9 +42,10 @@ testpaths = [
 ]
 env = [
     "DATASETS_REFERENCE_FILEPATH=tests/data/source_datasets_test.json",
+    "SIRENE_DATA_DIR=tests/data/sirene",
     "PREFECT_API_URL=",
     "DECP_PROCESSING_PUBLISH=",
-    "PREFECT_TASKS_REFRESH_CACHE=true"
+    "DECP_USE_CACHE=false"
 ]
 addopts = "-p no:warnings"
 

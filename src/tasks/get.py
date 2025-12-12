@@ -1,5 +1,4 @@
 import concurrent.futures
-import datetime
 import tempfile
 from collections.abc import Iterator
 from functools import partial
@@ -15,16 +14,17 @@ from lxml import etree, html
 from prefect import task
 from prefect.transactions import transaction
 
+from config import SIRENE_UNITES_LEGALES_URL
 from src.config import (
-    CACHE_EXPIRATION_TIME_HOURS,
-    DECP_FORMAT_2022,
-    DECP_FORMATS,
+    DATA_DIR,
     DECP_PROCESSING_PUBLISH,
-    DIST_DIR,
+    DECP_USE_CACHE,
     HTTP_CLIENT,
     HTTP_HEADERS,
+    RESOURCE_CACHE_DIR,
     DecpFormat,
 )
+from src.schemas import SCHEMA_MARCHE_2019, SCHEMA_MARCHE_2022
 from src.tasks.clean import (
     clean_decp,
     clean_invalid_characters,
@@ -32,10 +32,11 @@ from src.tasks.clean import (
 )
 from src.tasks.output import sink_to_files
 from src.tasks.utils import (
+    full_resource_name,
     gen_artifact_row,
-    get_clean_cache_key,
     stream_replace_bytestring,
 )
+from tasks.transform import prepare_unites_legales
 
 
 @task(retries=3, retry_delay_seconds=3)
@@ -61,16 +62,15 @@ def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par 
 def get_resource(
     r: dict, resources_artifact: list[dict] | list
 ) -> tuple[pl.LazyFrame | None, DecpFormat | None]:
-    decp_formats: list[DecpFormat] = DECP_FORMATS
+    if DECP_PROCESSING_PUBLISH is False:
+        print(f"➡️  {full_resource_name(r)}")
 
-    print(f"➡️  {r['ori_filename']} ({r['dataset_name']})")
-
-    output_path = DIST_DIR / "get" / r["filename"]
-    output_path.parent.mkdir(exist_ok=True)
+    output_path = DATA_DIR / "get" / r["filename"]
+    output_path.parent.mkdir(exist_ok=True, parents=True)
     url = r["url"]
     file_format = r["format"]
     if file_format == "json":
-        fields, decp_format = json_stream_to_parquet(url, output_path, decp_formats)
+        fields, decp_format = json_stream_to_parquet(url, output_path, r)
     elif file_format == "xml":
         try:
             fields, decp_format = xml_stream_to_parquet(
@@ -80,11 +80,9 @@ def get_resource(
             fields, decp_format = xml_stream_to_parquet(
                 url, output_path, fix_chars=True
             )
-            print(f"♻️  {r['ori_filename']} nettoyé et traité")
+            print(f"♻️  {full_resource_name(r)} nettoyé et traité")
     else:
-        print(
-            f"▶️  Format de fichier non supporté : {file_format} ({r['dataset_name']})"
-        )
+        print(f"▶️  Format de fichier non supporté : {full_resource_name(r)}")
         return None, None
 
     if decp_format is None:
@@ -117,23 +115,26 @@ def get_resource(
     return lf, decp_format
 
 
-def find_json_decp_format(chunk, decp_formats):
+def find_json_decp_format(chunk, decp_formats, resource: dict):
     for decp_format in decp_formats:
         decp_format.coroutine_ijson.send(chunk)
         if len(decp_format.liste_marches_ijson) > 0:
             # Le parser a trouvé au moins un marché correspondant à ce format, donc on a
             # trouvé le bon format.
             return decp_format
-    print("⚠️  Pas de match trouvé parmis les schémas passés")
+    print(
+        f"⚠️  Pas de match trouvé parmis les schémas passés : {full_resource_name(resource)}"
+    )
     return None
 
 
 @task(persist_result=False, log_prints=True)
 def json_stream_to_parquet(
-    url: str, output_path: Path, decp_formats: list[DecpFormat] | None = None
+    url: str, output_path: Path, resource: dict
 ) -> tuple[set, DecpFormat or None]:
-    if decp_formats is None:
-        decp_formats: list[DecpFormat] = DECP_FORMATS
+    decp_format_2019 = DecpFormat("DECP 2019", SCHEMA_MARCHE_2019, "marches")
+    decp_format_2022 = DecpFormat("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
+    decp_formats = [decp_format_2019, decp_format_2022]
 
     fields = set()
     for decp_format in decp_formats:
@@ -172,7 +173,7 @@ def json_stream_to_parquet(
         print(f"⚠️  Flux vide pour {url}")
         return set(), None
 
-    decp_format = find_json_decp_format(chunk, decp_formats)
+    decp_format = find_json_decp_format(chunk, decp_formats, resource)
     if decp_format is None:
         return set(), None
 
@@ -207,6 +208,8 @@ def xml_stream_to_parquet(
 ) -> tuple[set, DecpFormat]:
     """Uniquement utilisé pour les données publiées par l'AIFE."""
 
+    decp_format_2022 = DecpFormat("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
+
     fields = set()
     parser = etree.XMLPullParser(tag="marche", recover=True)
     with tempfile.NamedTemporaryFile(
@@ -218,11 +221,11 @@ def xml_stream_to_parquet(
             parser.feed(chunk)
             for _, elem in parser.read_events():
                 marche = parse_element(elem)
-                new_fields = write_marche_rows(marche, tmp_file, DECP_FORMAT_2022)
+                new_fields = write_marche_rows(marche, tmp_file, decp_format_2022)
                 fields = fields.union(new_fields)
-        lf = pl.scan_ndjson(tmp_file.name, schema=DECP_FORMAT_2022.schema)
+        lf = pl.scan_ndjson(tmp_file.name, schema=decp_format_2022.schema)
         sink_to_files(lf, output_path, file_format="parquet")
-    return fields, DECP_FORMAT_2022
+    return fields, decp_format_2022
 
 
 # Générée par la LLM Euria, développée par Infomaniak
@@ -315,8 +318,8 @@ def yield_modifications(row: dict, separator="_") -> Iterator[dict] or None:
     # directement à un dict contenant les métadonnées liées à une modification.
     if isinstance(raw_mods, dict):
         raw_mods = [raw_mods]
-
-    raw_mods = [] if raw_mods is None else raw_mods
+    elif isinstance(raw_mods, str) or raw_mods is None:
+        raw_mods = []
 
     mods = [{}] + raw_mods
     for i, mod in enumerate(mods):
@@ -368,6 +371,8 @@ def get_etablissements() -> pl.LazyFrame:
         "longitude": pl.Float64,
         "activitePrincipaleEtablissement": pl.String,
         "nomenclatureActivitePrincipaleEtablissement": pl.String,
+        "enseigne1Etablissement": pl.String,
+        "denominationUsuelleEtablissement": pl.String,
     }
 
     columns = list(schema.keys())
@@ -386,34 +391,28 @@ def get_etablissements() -> pl.LazyFrame:
             hrefs.append(base_url + href)
 
     # Fonction de traitement pour un fichier
-    def process_file(_href: str):
+    def get_process_file(_href: str):
         print(_href.split("/")[-1])
         try:
             response = http_client.get(
-                _href, headers=HTTP_HEADERS, timeout=10
+                _href, headers=HTTP_HEADERS, timeout=20
             ).raise_for_status()
         except (HTTPStatusError, TimeoutException) as err:
             print(err)
             print("Nouvel essai...")
             response = http_client.get(
-                _href, headers=HTTP_HEADERS, timeout=10
+                _href, headers=HTTP_HEADERS, timeout=20
             ).raise_for_status()
 
         content = response.content
         lff = pl.scan_csv(content, schema_overrides=schema)
         lff = lff.select(columns)
-        lff = lff.with_columns(
-            [
-                pl.col("codeCommuneEtablissement").str.pad_start(5, "0"),
-                pl.col("siret").str.pad_start(14, "0"),
-            ]
-        )
         return lff
 
     # Traitement en parrallèle avec 8 threads
     lfs = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-        futures = [executor.submit(process_file, href) for href in hrefs]
+        futures = [executor.submit(get_process_file, href) for href in hrefs]
         for future in concurrent.futures.as_completed(futures):
             try:
                 lf = future.result()
@@ -440,21 +439,46 @@ def get_insee_cog_data(url, schema_overrides, columns) -> pl.DataFrame:
 
 @task(
     log_prints=True,
-    persist_result=True,
-    cache_expiration=datetime.timedelta(hours=CACHE_EXPIRATION_TIME_HOURS),
-    cache_key_fn=get_clean_cache_key,
+    # persist_result=True,
+    # cache_expiration=datetime.timedelta(hours=CACHE_EXPIRATION_TIME_HOURS),
+    # cache_key_fn=get_clean_cache_key,
 )
-def get_clean(resource, resources_artifact: list) -> pl.DataFrame or None:
-    # Récupération des données source...
+def get_clean(
+    resource, resources_artifact: list, available_parquet_files: set
+) -> pl.DataFrame or None:
     with transaction():
-        lf, decp_format = get_resource(resource, resources_artifact)
+        checksum = resource["checksum"]
+        parquet_path = RESOURCE_CACHE_DIR / f"{checksum}"
 
-        # Nettoyage des données source et typage des colonnes...
-        # si la ressource est dans un format supporté
-        if lf is not None:
-            lf = clean_decp(lf, decp_format)
-            df = lf.collect(engine="streaming")
+        # Si la ressource n'est pas en cache ou que l'utilisation du cache est désactivée
+        if (
+            DECP_USE_CACHE is False
+            or f"{checksum}.parquet" not in available_parquet_files
+        ):
+            # Récupération des données source...
+            lf, decp_format = get_resource(resource, resources_artifact)
+
+            # Nettoyage des données source et typage des colonnes...
+            # si la ressource est dans un format supporté
+            if lf is not None and not Path(parquet_path).exists():
+                lf: pl.LazyFrame = clean_decp(lf, decp_format)
+                sink_to_files(
+                    lf, parquet_path, file_format="parquet", compression="zstd"
+                )
+                return parquet_path.with_suffix(".parquet")
+            else:
+                return None
         else:
-            df = None
+            # Le fichier parquet est déjà disponible pour ce checksum
+            print(f"👍 Ressource déjà en cache : {resource['dataset_code']}")
+            return parquet_path.with_suffix(".parquet")
 
-    return df
+
+@task
+def get_unite_legales(processed_parquet_path):
+    print("Téléchargement des données unité légales et sélection des colonnes...")
+    (
+        pl.scan_parquet(SIRENE_UNITES_LEGALES_URL)
+        .pipe(prepare_unites_legales)
+        .sink_parquet(processed_parquet_path)
+    )

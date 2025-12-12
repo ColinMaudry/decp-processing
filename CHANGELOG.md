@@ -1,6 +1,23 @@
+### 2.6.0 2025-12-12
+
+- Abandon des données consolidées par le MINEF, récupération des données à la source ([#151](https://github.com/ColinMaudry/decp-processing/issues/151))
+  - Xmarchés
+  - AWS (officiel et legacy)
+  - PES marché (avant et après 2024)
+  - Dematis / e-marchespublics
+- Ajout du champ `dureeRestanteMois` ([#135](https://github.com/ColinMaudry/decp-processing/issues/135))
+- Amélioration des noms des titulaires (personnes physiques et non-diffusibles) ([#145](https://github.com/ColinMaudry/decp-processing/issues/145))
+- Ajout de nombreux tests unitaires
+- Amélioration de la gestion des modifications ([#148](https://github.com/ColinMaudry/decp-processing/issues/148))
+- Traitement des ressources en parallèle ([#113](https://github.com/ColinMaudry/decp-processing/issues/113))
+- Optimisation de la consommation de mémoire (matérialisation en parquet) ([#153](https://github.com/ColinMaudry/decp-processing/issues/153))
+- Résilience contre les erreurs pendant get_clean (seule la ressource échoue, pas tout le process)
+- Mise en place d'un système de cache custom (parquet)
+- Protection contre la publication par erreur sur data.gouv.fr ([ffaf0535](https://github.com/ColinMaudry/decp-processing/commit/ffaf0535))
+- Utilisation de polars 1.35.2 plutôt que 1.36.1 qui semble ne pas marcher avec polars-ds
+
 ### 2.5.0 2025-11-21
 
-- Ajout de la durée restante dans le marché en mois ([#35](https://github.com/ColinMaudry/decp-processing/issues/135))
 - Amélioration de la conso mémoire de la correction des titulaires ([#146](https://github.com/ColinMaudry/decp-processing/issues/146))
 - Vérfication de la structude des données scrapées (AWS)
 - Gestion propre des erreurs 429 Too Many Redirects ([6fbd71e0](https://github.com/ColinMaudry/decp-processing/commit/6fbd71e0bca0534ee360dc172f3565607dac5bef))

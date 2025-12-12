@@ -10,8 +10,6 @@ import httpx
 from dotenv import find_dotenv, load_dotenv
 from ijson import sendable_list
 
-from src.schemas import SCHEMA_MARCHE_2019, SCHEMA_MARCHE_2022
-
 dotenv_path = find_dotenv()
 if dotenv_path == "":
     print("Création du fichier .env à partir de template.env")
@@ -71,6 +69,9 @@ DATAGOUVFR_API = "https://www.data.gouv.fr/api/1"
 # Clé d'API data.gouv.fr
 DATAGOUVFR_API_KEY = os.getenv("DATAGOUVFR_API_KEY", "")
 
+# URL API Prefect
+PREFECT_API_URL = os.getenv("PREFECT_API_URL")
+
 # Dossier racine
 BASE_DIR = make_path_from_env("DECP_BASE_DIR", Path(__file__).absolute().parent.parent)
 print(f"{'BASE_DIR':<40}", BASE_DIR)
@@ -79,6 +80,9 @@ print(f"{'BASE_DIR':<40}", BASE_DIR)
 DATA_DIR = make_path_from_env("DECP_DATA_DIR", BASE_DIR / "data")
 DATA_DIR.mkdir(exist_ok=True, parents=True)
 print(f"{'DATA_DIR':<40}", DATA_DIR)
+
+RESOURCE_CACHE_DIR = DATA_DIR / "resource_cache"
+RESOURCE_CACHE_DIR.mkdir(exist_ok=True, parents=True)
 
 DIST_DIR = make_path_from_env("DECP_DIST_DIR", BASE_DIR / "dist")
 DIST_DIR.mkdir(exist_ok=True, parents=True, mode=777)
@@ -97,7 +101,15 @@ def make_sirene_data_dir(sirene_data_parent_dir) -> Path:
 
 
 SIRENE_DATA_PARENT_DIR = make_path_from_env("SIRENE_DATA_PARENT_DIR", DATA_DIR)
-SIRENE_DATA_DIR = make_sirene_data_dir(SIRENE_DATA_PARENT_DIR)
+
+# SIRENE_DATA_DIR ne doit être spécifié que pour les tests. Laisser vide dans .env et laisser make_sirene_data_dir
+# le déterminer
+SIRENE_DATA_DIR = os.getenv(
+    "SIRENE_DATA_DIR", make_sirene_data_dir(SIRENE_DATA_PARENT_DIR)
+)
+if isinstance(SIRENE_DATA_DIR, str):
+    SIRENE_DATA_DIR = Path(os.path.join(BASE_DIR, SIRENE_DATA_DIR))
+
 # SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
 print(f"{'SIRENE_DATA_PARENT_DIR':<40}", SIRENE_DATA_PARENT_DIR)
 print(f"{'SIRENE_DATA_DIR':<40}", SIRENE_DATA_DIR)
@@ -113,6 +125,8 @@ print(f"{'SCRAPING_MODE':<40}", SCRAPING_MODE)
 SCRAPING_TARGET = os.getenv("SCRAPING_TARGET")
 print(f"{'SCRAPING_TARGET':<40}", SCRAPING_TARGET)
 
+# Lecture ou non des ressource en cache
+DECP_USE_CACHE = os.getenv("DECP_USE_CACHE", "false").lower() == "true"
 
 # Dossier de stockage des résultats de tâches et du cache
 # https://docs.prefect.io/v3/advanced/results#default-persistence-configuration
@@ -203,9 +217,5 @@ class DecpFormat:
     liste_marches_ijson: sendable_list | None = None
     coroutine_ijson: Coroutine | None = None
 
-
-DECP_FORMAT_2019 = DecpFormat("DECP 2019", SCHEMA_MARCHE_2019, "marches")
-DECP_FORMAT_2022 = DecpFormat("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
-DECP_FORMATS = [DECP_FORMAT_2019, DECP_FORMAT_2022]
 
 print("")

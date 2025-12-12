@@ -2,16 +2,23 @@ import datetime
 import re
 
 import polars as pl
+from polars import selectors as cs
 
 from src.config import DecpFormat
 from src.tasks.transform import (
     explode_titulaires,
     process_modifications,
-    process_string_lists,
 )
 
 
 def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
+    """
+    The bulk of Polars data cleaning is grouped here, with the exception of process_modifications and explode_titulaires that are not
+    cleaning tasks.
+    :param lf:
+    :param decp_format:
+    :return:
+    """
     #
     # CLEAN DATA
     #
@@ -41,11 +48,16 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     # TODO: à déplacer autre part, dans transform
     lf = lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
 
+    # Application des modifications
+    # le plus tôt possible pour que les fonctions suivantes clean les
+    # champs modifiés (dateNotification, datePublicationDonnnes, montant, titulaires, dureeMois)
+    lf = process_modifications(lf)
+
     # Montants
     # Certains marchés ont des montants qui posent problème, donc on les met à 12,311111111 milliards (pour les retrouver facilement)
     # ex : 221300015002472020F00075, 1.0E17
     lf = lf.with_columns(
-        pl.when(pl.col("montant").str.len_chars() > 11)
+        pl.when(pl.col("montant").str.split(".").list.get(0).str.len_chars() > 11)
         .then(pl.lit("12311111111"))
         .otherwise(pl.col("montant"))
         .alias("montant")
@@ -72,13 +84,22 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
         pl.col(["datePublicationDonnees", "dateNotification"])
         .str.replace_many(date_replacements)
         .cast(pl.Utf8)
+        .name.keep()
+    )
+
+    # suppression des suffixes de fuseau horaire
+    lf = lf.with_columns(
+        pl.col(["datePublicationDonnees", "dateNotification"])
+        .str.split("+")
+        .list[0]
+        .name.keep()
     )
 
     # Nature
     lf = lf.with_columns(
-        pl.col("nature").str.replace_many(
-            {"Marche": "Marché", "subsequent": "subséquent"}
-        )
+        pl.col("nature")
+        .str.replace_many({"Marche": "Marché", "subsequent": "subséquent"})
+        .alias("nature")
     )
 
     # Codes CPV, suppression du caractères de contrôle ("-[0-9]$")
@@ -92,9 +113,6 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
 
     # Normalisation des titulaires
     lf = clean_titulaires(lf, decp_format)
-
-    # Application des modifications
-    lf = process_modifications(lf)
 
     # Explosion des titulaires
     lf = explode_titulaires(lf, decp_format)
@@ -195,9 +213,11 @@ def clean_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
             titulaire_typeIdentifiant=pl.element().struct.field("typeIdentifiant"),
         )
 
-    for col in ["titulaires", "modification_titulaires"]:
+    # Skip processing if column dtype is Null (all values are null)
+    # This happens when modification_titulaires has no actual data
+    if lf.collect_schema()["titulaires"] != pl.Null:
         lf = lf.with_columns(
-            pl.col(col)
+            pl.col("titulaires")
             .list.eval(expr_titulaire)
             .list.eval(
                 # Filtrer les éléments où id ET typeIdentifiant sont null
@@ -208,24 +228,32 @@ def clean_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
                     .is_not_null()
                 )
             )
-            .alias(col)
+            .alias("titulaires")
         )
 
     # Remplacer les listes de titulaires vides par null
-    lf = lf.with_columns(
-        [
-            pl.when(pl.col(col).list.len() == 0)
-            .then(None)
-            .otherwise(pl.col(col))
-            .alias(col)
-            for col in ["titulaires", "modification_titulaires"]
-        ]
-    )
+    # Only process columns that have List dtype
+
+    if lf.collect_schema()["titulaires"] != pl.Null:
+        lf = lf.with_columns(
+            [
+                pl.when(pl.col("titulaires").list.len() == 0)
+                .then(None)
+                .otherwise(pl.col("titulaires"))
+                .alias("titulaires")
+            ]
+        )
 
     return lf
 
 
 def fix_data_types(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """
+    To enable easier data ingestion, everything is initially cast as strings... until here. This
+    function casts the right datatype for each column.
+    :param lf:
+    :return:
+    """
     numeric_dtypes = {
         "dureeMois": pl.Int16,
         # "dureeMoisActeSousTraitance": pl.Int16,
@@ -234,10 +262,10 @@ def fix_data_types(lf: pl.LazyFrame) -> pl.LazyFrame:
         "montant": pl.Float64,
         # "montantActeSousTraitance": pl.Float64,
         # "montantModificationActeSousTraitance": pl.Float64,
-        "tauxAvance": pl.Float64,
+        "tauxAvance": pl.Float32,
         # "variationPrixActeSousTraitance": pl.Float64,
-        "origineFrance": pl.Float64,
-        "origineUE": pl.Float64,
+        "origineFrance": pl.Float32,
+        "origineUE": pl.Float32,
         "modification_id": pl.Int16,
     }
 
@@ -286,4 +314,34 @@ def fix_data_types(lf: pl.LazyFrame) -> pl.LazyFrame:
             for col in cols
         ]
     )
+    return lf
+
+
+def process_string_lists(lf: pl.LazyFrame):
+    string_lists_col_to_rename = [
+        "considerationsSociales_considerationSociale",
+        "considerationsEnvironnementales_considerationEnvironnementale",
+        "techniques_technique",
+        "typesPrix_typePrix",
+        "modalitesExecution_modaliteExecution",
+    ]
+    columns = lf.collect_schema().names()
+
+    # Pour s'assurer qu'on renomme pas une colonne si le bon nom de colonne existe déjà
+    for bad_col in string_lists_col_to_rename:
+        new_col = bad_col.split("_")[0]
+        if new_col in columns and bad_col in columns:
+            lf = lf.with_columns(
+                pl.when(pl.col(new_col).list.len() == 0)
+                .then(pl.col(bad_col))
+                .otherwise(pl.col(new_col))
+                .alias(new_col)
+            )
+            lf = lf.drop(bad_col)
+        elif new_col not in columns and bad_col in columns:
+            lf = lf.rename({bad_col: new_col})
+
+    # Et on remplace la liste Python par une liste séparée par des virgules
+    lf = lf.with_columns(cs.by_dtype(pl.List(pl.String)).list.join(", ").name.keep())
+
     return lf

@@ -5,8 +5,11 @@ import polars as pl
 import polars.selectors as cs
 from prefect import flow
 from prefect.artifacts import create_table_artifact
+from prefect.context import get_run_context
 from prefect.task_runners import ConcurrentTaskRunner
+from prefect_email import EmailServerCredentials, email_send_message
 
+from config import PREFECT_API_URL
 from src.config import (
     BASE_DF_COLUMNS,
     BASE_DIR,
@@ -14,6 +17,7 @@ from src.config import (
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
     MAX_PREFECT_WORKERS,
+    RESOURCE_CACHE_DIR,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
 )
@@ -21,22 +25,22 @@ from src.flows.sirene_preprocess import sirene_preprocess
 from src.tasks.dataset_utils import list_resources
 from src.tasks.enrich import enrich_from_sirene
 from src.tasks.get import get_clean
-from src.tasks.output import generate_final_schema, save_to_files
+from src.tasks.output import generate_final_schema, sink_to_files
 from src.tasks.publish import publish_to_datagouv
 from src.tasks.transform import (
     add_duree_restante,
     calculate_naf_cpv_matching,
-    concat_decp_json,
+    concat_parquet_files,
     sort_columns,
 )
-from src.tasks.utils import generate_stats, remove_unused_cache
+from src.tasks.utils import full_resource_name, generate_stats, remove_unused_cache
 
 
 @flow(
     log_prints=True,
     task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS),
 )
-def decp_processing(enable_cache_removal: bool = False):
+def decp_processing(enable_cache_removal: bool = True):
     print(f"🚀  Début du flow decp-processing dans base dir {BASE_DIR} ")
 
     print("Liste de toutes les ressources des datasets...")
@@ -45,15 +49,48 @@ def decp_processing(enable_cache_removal: bool = False):
     # Initialisation du tableau des artifacts de ressources
     resources_artifact = []
 
-    # Traitement parallèle des ressources
-    futures = [
-        get_clean.submit(resource, resources_artifact)
-        for resource in resources
-        if resource["filesize"] > 100
-    ]
-    dfs: list[pl.DataFrame] = [f.result() for f in futures if f.result() is not None]
+    # Liste des ressources en cache (checksums)
+    available_parquet_files = set(os.listdir(RESOURCE_CACHE_DIR))
 
-    if DECP_PROCESSING_PUBLISH:
+    # Traitement parallèle des ressources par lots pour éviter la surcharge mémoire
+    batch_size = 500
+    parquet_files = []
+
+    # Filtrer les ressources à traiter
+    resources_to_process = [r for r in resources if r["filesize"] > 100]
+
+    # Afin d'être sûr que je ne publie pas par erreur un jeu de données de test
+    decp_publish = DECP_PROCESSING_PUBLISH and len(resources_to_process) > 5000
+
+    for i in range(0, len(resources_to_process), batch_size):
+        batch = resources_to_process[i : i + batch_size]
+        print(
+            f"🗃️ Traitement du lot {i // batch_size + 1} / {len(resources_to_process) // batch_size + 1}"
+        )
+
+        futures = {}
+        for resource in batch:
+            future = get_clean.submit(
+                resource, resources_artifact, available_parquet_files
+            )
+            futures[future] = full_resource_name(resource)
+
+        for f in futures:
+            try:
+                result = f.result()
+                if result is not None:
+                    parquet_files.append(result)
+            except Exception as e:
+                resource_name = futures[f]
+                print(
+                    f"❌ Erreur de traitement de {resource_name} ({type(e).__name__}):"
+                )
+                print(e)
+
+        # Nettoyage explicite
+        futures.clear()
+
+    if decp_publish:
         create_table_artifact(
             table=resources_artifact,
             key="datagouvfr-json-resources",
@@ -62,54 +99,74 @@ def decp_processing(enable_cache_removal: bool = False):
         del resources_artifact
 
     print("Fusion des dataframes...")
-    df: pl.DataFrame = concat_decp_json(dfs)
-    del dfs
+    lf: pl.LazyFrame = concat_parquet_files(parquet_files)
 
     print("Ajout des données SIRENE...")
     # Preprocessing des données SIRENE si :
     # - le dossier n'existe pas encore (= les données n'ont pas déjà été preprocessed ce mois-ci)
     # - on est au moins le 5 du mois (pour être sûr que les données SIRENE ont été mises à jour sur data.gouv.fr)
-    print(SIRENE_DATA_DIR)
     if not SIRENE_DATA_DIR.exists():
         sirene_preprocess()
 
-    lf: pl.LazyFrame = enrich_from_sirene(df.lazy())
-
-    print("Ajout de la colonne 'dureeRestanteMois'...")
-    lf = add_duree_restante(lf)
-
-    df: pl.DataFrame = lf.collect(engine="streaming")
+    lf: pl.LazyFrame = enrich_from_sirene(lf)
 
     # Réinitialisation de DIST_DIR
     if os.path.exists(DIST_DIR):
         shutil.rmtree(DIST_DIR)
     os.makedirs(DIST_DIR)
 
+    sink_to_files(lf, DIST_DIR / "decp", file_format="parquet")
+    lf: pl.LazyFrame = pl.scan_parquet(DIST_DIR / "decp.parquet")
+
+    print("Ajout de la colonne 'dureeRestanteMois'...")
+    lf = add_duree_restante(lf)
+
     print("Génération des probabilités NAF/CPV...")
-    calculate_naf_cpv_matching(df)
-    df = df.drop(cs.starts_with("activite"))
+    calculate_naf_cpv_matching(lf)
+    lf = lf.drop(cs.starts_with("activite"))
 
     print("Génération de l'artefact (statistiques) sur le base df...")
-    generate_stats(df)
+    generate_stats(lf)
 
     print("Génération du schéma et enregistrement des DECP aux formats CSV, Parquet...")
-    df: pl.DataFrame = sort_columns(df, BASE_DF_COLUMNS)
-    generate_final_schema(df)
-    save_to_files(df, DIST_DIR / "decp")
-    del df
+    lf: pl.LazyFrame = sort_columns(lf, BASE_DF_COLUMNS)
+    generate_final_schema(lf)
+    sink_to_files(lf, DIST_DIR / "decp")
 
     # Base de données SQLite dédiée aux activités du Datalab d'Anticor
     # Désactivé pour l'instant https://github.com/ColinMaudry/decp-processing/issues/124
     # make_data_tables()
 
-    if DECP_PROCESSING_PUBLISH:
+    if decp_publish:
         print("Publication sur data.gouv.fr...")
         publish_to_datagouv()
     else:
         print("Publication sur data.gouv.fr désactivée.")
 
-    # Suppression des fichiers de cache inutilisés
     if enable_cache_removal:
+        print("Suppression des fichiers de cache inutilisés...")
         remove_unused_cache()
 
     print("☑️  Fin du flow principal decp_processing.")
+
+
+@sirene_preprocess.on_failure
+@decp_processing.on_failure
+def notify_exception_by_email(flow, flow_run, state):
+    if PREFECT_API_URL:
+        context = get_run_context()
+        flow_run_name = context.flow_run.name
+        email_server_credentials = EmailServerCredentials.load("email-notifier")
+        message = (
+            f"Your job {flow_run.name} entered {state.name} "
+            f"with message:\n\n"
+            f"See <https://{PREFECT_API_URL}/flow-runs/flow-run/{flow_run.id}>\n\n"
+            f"Scheduled start: {flow_run.expected_start_time}"
+        )
+
+        email_send_message(
+            email_server_credentials=email_server_credentials,
+            subject=f"Flow run {flow_run_name!r} failed",
+            msg=message,
+            email_to=email_server_credentials.username,
+        )

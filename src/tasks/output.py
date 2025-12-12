@@ -23,13 +23,34 @@ def save_to_files(df: pl.DataFrame, path: Path, file_format=None):
         df.write_csv(f"{path}.csv")
 
 
-def sink_to_files(lf: pl.LazyFrame, path: str | Path, file_format=None):
+def sink_to_files(
+    lf: pl.LazyFrame, path: str | Path, file_format=None, compression: str = "zstd"
+):
+    path = Path(path)
     if file_format is None:
         file_format = ["csv", "parquet"]
+
     if "parquet" in file_format:
-        lf.sink_parquet(f"{path}.parquet")
-    if "csv" in file_format:
-        lf.sink_csv(f"{path}.csv")
+        # Write to a temporary file first to avoid read-write conflicts
+        tmp_path = path.with_suffix(".parquet.tmp")
+
+        lf.sink_parquet(tmp_path, compression=compression, engine="streaming")
+
+        if tmp_path.exists():
+            tmp_path.rename(path.with_suffix(".parquet"))
+
+        # Utilisation du parquet plutôt que de relaculer le plan de requête du LazyFrame
+        if "csv" in file_format:
+            pl.scan_parquet(f"{path}.parquet").sink_csv(
+                f"{path}.csv", engine="streaming"
+            )
+
+    elif "csv" in file_format:
+        # Fallback if only CSV is requested
+        lf.sink_csv(f"{path}.csv", engine="streaming")
+
+    # Si ça peut réduire un peu l'empreinte mémoire
+    del lf
 
 
 def save_to_postgres(df: pl.DataFrame, table_name: str):
@@ -108,12 +129,15 @@ def save_to_databases(
     #     save_to_postgres(df, table_name)
 
 
-def generate_final_schema(df):
+def generate_final_schema(lf):
     """Création d'un TableSchema pour décrire les données publiées"""
-    df_schema = []
+
+    schema = lf.collect_schema()
+    frictonless_schema = []
 
     polars_frictionless_mapping = {
         "String": "string",
+        "Float32": "number",
         "Float64": "number",
         "Int16": "integer",
         "Boolean": "boolean",
@@ -121,9 +145,9 @@ def generate_final_schema(df):
     }
 
     # conversion en dict sérialisable en JSON
-    for col in df.columns:
-        polars_type = df.schema[col].__str__()
-        df_schema.append(
+    for col in schema.keys():
+        polars_type = schema[col].__str__()
+        frictonless_schema.append(
             {"name": col, "type": polars_frictionless_mapping[polars_type]}
         )
 
@@ -134,7 +158,7 @@ def generate_final_schema(df):
     # fusion des deux
     # https://www.paigeniedringhaus.com/blog/filter-merge-and-update-python-lists-based-on-object-attributes#merge-two-lists-together-by-matching-object-keys
     merged_fields = groupby(
-        sorted(base_json["fields"] + df_schema, key=itemgetter("name")),
+        sorted(base_json["fields"] + frictonless_schema, key=itemgetter("name")),
         itemgetter("name"),
     )
     merged_schema = {"fields": [dict(ChainMap(*g)) for k, g in merged_fields]}

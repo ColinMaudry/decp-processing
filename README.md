@@ -1,6 +1,6 @@
 # DECP processing
 
-> version 2.5.0 ([notes de version](https://github.com/ColinMaudry/decp-processing/blob/main/CHANGELOG.md))
+> version 2.6.0 ([notes de version](https://github.com/ColinMaudry/decp-processing/blob/main/CHANGELOG.md))
 
 Projet de traitement et de publication de meilleures données sur les marchés publics attribués en France. Vous pouvez consulter, filtrer et télécharger
 ces données sur le site [decp.info](https://decp.info). Enfin la section [À propos](https://decp.info/a-propos) décrit les objectifs du projet et regroupe toutes les informations clés.
@@ -59,7 +59,7 @@ source .venv/bin/activate
 Installez les dépendances :
 
 ```bash
-pip install .
+pip install -e .
 ```
 
 Pour les contributeurices, installez les dépendances de développement et l'auto-formatage au moment des commits :
@@ -110,7 +110,7 @@ Déploiement des flows (exécution programmée de main ou ponctuelle de dev) :
 Le pré-traitement des données SIRENE doit être fait une fois pour que le traitement principal soit fonctionnel.
 
 ```bash
-pytest tests/test_sirene_preprocess.py
+python run_flow.py sirene_preprocess
 ```
 
 Lancement du traitement principal (data_tables + decp.info) via un serveur prefect à usage unique
