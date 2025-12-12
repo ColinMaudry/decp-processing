@@ -9,12 +9,12 @@ authors = [
 dependencies = [
     "python-dotenv",
     "pandas", # nécessaire pour l'écriture en base de données
-    "polars==1.33.1",
+    "polars==1.35.2",
     "pyarrow",
     "frictionless",
     "ipykernel",
-    "prefect==3.4.17",
-    "prefect[email]==3.4.17",
+    "prefect==3.6.6",
+    "prefect[email]==3.6.6",
     "orjson",
     "ijson==3.4.0",
     "lxml",
