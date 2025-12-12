@@ -1,7 +1,6 @@
 import os
 import shutil
 
-import memory_profiler
 import polars as pl
 import polars.selectors as cs
 from prefect import flow
@@ -41,7 +40,6 @@ from src.tasks.utils import full_resource_name, generate_stats, remove_unused_ca
     log_prints=True,
     task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS),
 )
-@memory_profiler.profile()
 def decp_processing(enable_cache_removal: bool = True):
     print(f"🚀  Début du flow decp-processing dans base dir {BASE_DIR} ")
 
