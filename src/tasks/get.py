@@ -16,9 +16,9 @@ from prefect.transactions import transaction
 
 from config import SIRENE_UNITES_LEGALES_URL
 from src.config import (
+    DATA_DIR,
     DECP_PROCESSING_PUBLISH,
     DECP_USE_CACHE,
-    DIST_DIR,
     HTTP_CLIENT,
     HTTP_HEADERS,
     RESOURCE_CACHE_DIR,
@@ -65,8 +65,8 @@ def get_resource(
     if DECP_PROCESSING_PUBLISH is False:
         print(f"➡️  {full_resource_name(r)}")
 
-    output_path = DIST_DIR / "get" / r["filename"]
-    output_path.parent.mkdir(exist_ok=True)
+    output_path = DATA_DIR / "get" / r["filename"]
+    output_path.parent.mkdir(exist_ok=True, parents=True)
     url = r["url"]
     file_format = r["format"]
     if file_format == "json":
