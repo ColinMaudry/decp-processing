@@ -1,3 +1,9 @@
+### 2.6.1 2025-12-14
+
+- Séparation des fichiers de référence et des fichiers de données
+- Réorganisation des variables d'environnement
+- Correction de certains imports de modules
+
 ### 2.6.0 2025-12-12
 
 - Abandon des données consolidées par le MINEF, récupération des données à la source ([#151](https://github.com/ColinMaudry/decp-processing/issues/151))
