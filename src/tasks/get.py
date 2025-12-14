@@ -31,12 +31,12 @@ from src.tasks.clean import (
     extract_innermost_struct,
 )
 from src.tasks.output import sink_to_files
+from src.tasks.transform import prepare_unites_legales
 from src.tasks.utils import (
     full_resource_name,
     gen_artifact_row,
     stream_replace_bytestring,
 )
-from tasks.transform import prepare_unites_legales
 
 
 @task(retries=3, retry_delay_seconds=3)

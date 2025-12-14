@@ -1,4 +1,4 @@
-from flows.decp_processing import decp_processing
+from src.flows.decp_processing import decp_processing
 from tests.fixtures import prefect_test_harness
 
 
