@@ -14,7 +14,6 @@ from lxml import etree, html
 from prefect import task
 from prefect.transactions import transaction
 
-from config import SIRENE_UNITES_LEGALES_URL
 from src.config import (
     DATA_DIR,
     DECP_PROCESSING_PUBLISH,
@@ -22,6 +21,7 @@ from src.config import (
     HTTP_CLIENT,
     HTTP_HEADERS,
     RESOURCE_CACHE_DIR,
+    SIRENE_UNITES_LEGALES_URL,
     DecpFormat,
 )
 from src.schemas import SCHEMA_MARCHE_2019, SCHEMA_MARCHE_2022
