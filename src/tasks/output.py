@@ -9,7 +9,7 @@ import polars as pl
 from polars import selectors as cs
 from prefect import task
 
-from src.config import DATA_DIR, DIST_DIR, POSTGRESQL_DB_URI
+from src.config import DIST_DIR, POSTGRESQL_DB_URI, REFERENCE_DIR
 
 
 def save_to_files(df: pl.DataFrame, path: Path, file_format=None):
@@ -152,7 +152,7 @@ def generate_final_schema(lf):
         )
 
     # récupération de data/data_fields.json
-    with open(DATA_DIR / "schema_base.json", "r", encoding="utf-8") as file:
+    with open(REFERENCE_DIR / "schema_base.json", "r", encoding="utf-8") as file:
         base_json = json.load(file)
 
     # fusion des deux

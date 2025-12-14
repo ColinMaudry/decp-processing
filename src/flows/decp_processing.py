@@ -9,7 +9,6 @@ from prefect.context import get_run_context
 from prefect.task_runners import ConcurrentTaskRunner
 from prefect_email import EmailServerCredentials, email_send_message
 
-from config import PREFECT_API_URL
 from src.config import (
     BASE_DF_COLUMNS,
     BASE_DIR,
@@ -17,6 +16,7 @@ from src.config import (
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
     MAX_PREFECT_WORKERS,
+    PREFECT_API_URL,
     RESOURCE_CACHE_DIR,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
