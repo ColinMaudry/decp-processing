@@ -9,6 +9,7 @@ from pathlib import Path
 import httpx
 from dotenv import find_dotenv, load_dotenv
 from ijson import sendable_list
+from prefect.variables import Variable
 
 dotenv_path = find_dotenv()
 if dotenv_path == "":
@@ -33,7 +34,7 @@ print("""
 
 
 # Nombre maximal de workers utilisables par Prefect. Défaut : 16
-MAX_PREFECT_WORKERS = int(os.getenv("MAX_PREFECT_WORKERS", 16))
+MAX_PREFECT_WORKERS = int(os.getenv("MAX_PREFECT_WORKERS", 4))
 print(f"{'MAX_PREFECT_WORKERS':<40}", MAX_PREFECT_WORKERS)
 
 # Durée avant l'expiration du cache des ressources (en heure). Défaut : 168 (7 jours)
@@ -67,7 +68,9 @@ else:
 DATAGOUVFR_API = "https://www.data.gouv.fr/api/1"
 
 # Clé d'API data.gouv.fr
-DATAGOUVFR_API_KEY = os.getenv("DATAGOUVFR_API_KEY", "")
+DATAGOUVFR_API_KEY = (
+    Variable.get("datagouvfr_api_key") or os.getenv("DATAGOUVFR_API_KEY") or None
+)
 
 # URL API Prefect
 PREFECT_API_URL = os.getenv("PREFECT_API_URL")
@@ -81,7 +84,9 @@ DATA_DIR = make_path_from_env("DECP_DATA_DIR", BASE_DIR / "data")
 DATA_DIR.mkdir(exist_ok=True, parents=True)
 print(f"{'DATA_DIR':<40}", DATA_DIR)
 
-RESOURCE_CACHE_DIR = DATA_DIR / "resource_cache"
+RESOURCE_CACHE_DIR = make_path_from_env(
+    "RESOURCE_CACHE_DIR", DATA_DIR / "resource_cache"
+)
 RESOURCE_CACHE_DIR.mkdir(exist_ok=True, parents=True)
 
 DIST_DIR = make_path_from_env("DECP_DIST_DIR", BASE_DIR / "dist")
@@ -128,21 +133,15 @@ print(f"{'SCRAPING_TARGET':<40}", SCRAPING_TARGET)
 # Lecture ou non des ressource en cache
 DECP_USE_CACHE = os.getenv("DECP_USE_CACHE", "false").lower() == "true"
 
-# Dossier de stockage des résultats de tâches et du cache
-# https://docs.prefect.io/v3/advanced/results#default-persistence-configuration
-PREFECT_LOCAL_STORAGE_PATH = make_path_from_env(
-    "PREFECT_LOCAL_STORAGE_PATH", DATA_DIR / "prefect_storage"
-)
-print(f"{'PREFECT_LOCAL_STORAGE_PATH':<40}", PREFECT_LOCAL_STORAGE_PATH)
-
-PREFECT_LOCAL_STORAGE_PATH.mkdir(exist_ok=True, parents=True)
-
 # POSTGRESQL
 POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI")
 
+# Données de référence
+REFERENCE_DIR = BASE_DIR / "reference"
+
 # Liste et ordre des colonnes pour le mono dataframe de base (avant normalisation et spécialisation)
 # Sert aussi à vérifier qu'au moins ces colonnes sont présentes (d'autres peuvent être présentes en plus, les colonnes "innatendues")
-schema_fields = json.load(open(DATA_DIR / "schema_base.json", "r"))["fields"]
+schema_fields = json.load(open(REFERENCE_DIR / "schema_base.json", "r"))["fields"]
 BASE_DF_COLUMNS = [field["name"] for field in schema_fields]
 
 COLUMNS_TO_DROP = [
@@ -196,7 +195,7 @@ print(f"{'SOLO_DATASET':<40}", SOLO_DATASET)
 
 with open(
     make_path_from_env(
-        "DATASETS_REFERENCE_FILEPATH", DATA_DIR / "source_datasets.json"
+        "DATASETS_REFERENCE_FILEPATH", REFERENCE_DIR / "source_datasets.json"
     ),
     "r",
 ) as f:
@@ -204,9 +203,6 @@ with open(
 for dataset in TRACKED_DATASETS:
     if dataset["id"] == SOLO_DATASET:
         TRACKED_DATASETS = [dataset]
-
-# Ces marchés ont des montants invalides, donc on les met à 1 euro.
-MARCHES_BAD_MONTANT = ["221300015002472020F00075"]
 
 
 @dataclass

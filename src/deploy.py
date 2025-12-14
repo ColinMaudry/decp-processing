@@ -15,13 +15,15 @@ if __name__ == "__main__":
         description="Tous les jours du lundi au vendredi à 6h00",
         work_pool_name="local",
         ignore_warnings=True,
-        cron="0 6 * * 1-5",
+        cron="0 5 * * 1-5",
         job_variables={
             "env": {
                 "DECP_PROCESSING_PUBLISH": "True",
                 "DECP_DIST_DIR": "/srv/shared/decp/prod/dist",
-                "PREFECT_TASKS_REFRESH_CACHE": "False",
-                "EXCLUDED_RESOURCES": "501b5201-bc83-4b59-b335-449b34043446,bd33e98f-f8e3-49ba-9f26-51c95fe57234",
+                # "MAX_PREFECT_WORKERS": "4",
+                # "EXCLUDED_RESOURCES": None,
+                "DECP_DATA_DIR": "/home/yunohost.app/prefect",
+                "DECP_USE_CACHE": "True",
             }
         },
     )
@@ -41,7 +43,8 @@ if __name__ == "__main__":
             "env": {
                 "DECP_PROCESSING_PUBLISH": "False",
                 "DECP_DIST_DIR": "/srv/shared/decp/dev/dist",
-                "PREFECT_TASKS_REFRESH_CACHE": "True",
+                "DECP_DATA_DIR": "/home/yunohost.app/prefect",
+                "DECP_USE_CACHE": "False",
             }
         },
     )
