@@ -1,3 +1,9 @@
+### 2.6.2 2025-12-15
+
+- Réduction du nombre de tâches prefect pour réduire la charge sur la BDD et la latence
+- Utilisation du multithreading standard de Python plutôt que celui de Prefect
+- Le nom d'établissement n'est ajouté entre parenthèses que s'il est différent de celui de l'unité légale
+
 ### 2.6.1 2025-12-14
 
 - Séparation des fichiers de référence et des fichiers de données
