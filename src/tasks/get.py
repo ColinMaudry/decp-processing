@@ -11,8 +11,13 @@ import orjson
 import polars as pl
 from httpx import Client, HTTPStatusError, TimeoutException, get
 from lxml import etree, html
-from prefect import task
 from prefect.transactions import transaction
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from src.config import (
     DATA_DIR,
@@ -39,7 +44,11 @@ from src.tasks.utils import (
 )
 
 
-@task(retries=3, retry_delay_seconds=3)
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=1, max=10),
+    retry=retry_if_exception_type(httpx.HTTPError),  # On ne retry que sur erreur http
+)
 def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par défaut)
     if url.startswith("http"):
         try:
@@ -58,7 +67,6 @@ def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par 
                 yield chunk
 
 
-@task(persist_result=False)
 def get_resource(
     r: dict, resources_artifact: list[dict] | list
 ) -> tuple[pl.LazyFrame | None, DecpFormat | None]:
@@ -128,7 +136,6 @@ def find_json_decp_format(chunk, decp_formats, resource: dict):
     return None
 
 
-@task(persist_result=False, log_prints=True)
 def json_stream_to_parquet(
     url: str, output_path: Path, resource: dict
 ) -> tuple[set, DecpFormat or None]:
@@ -202,7 +209,6 @@ def json_stream_to_parquet(
     return fields, decp_format
 
 
-@task(persist_result=False)
 def xml_stream_to_parquet(
     url: str, output_path: Path, fix_chars=False
 ) -> tuple[set, DecpFormat]:
@@ -437,12 +443,6 @@ def get_insee_cog_data(url, schema_overrides, columns) -> pl.DataFrame:
     return df_insee
 
 
-@task(
-    log_prints=True,
-    # persist_result=True,
-    # cache_expiration=datetime.timedelta(hours=CACHE_EXPIRATION_TIME_HOURS),
-    # cache_key_fn=get_clean_cache_key,
-)
 def get_clean(
     resource, resources_artifact: list, available_parquet_files: set
 ) -> pl.DataFrame or None:
@@ -474,7 +474,6 @@ def get_clean(
             return parquet_path.with_suffix(".parquet")
 
 
-@task
 def get_unite_legales(processed_parquet_path):
     print("Téléchargement des données unité légales et sélection des colonnes...")
     (

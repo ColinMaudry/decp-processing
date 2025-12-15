@@ -60,14 +60,6 @@ def remove_sirene_data_dir(transaction):
 #
 
 
-def get_clean_cache_key(context, parameters) -> str:
-    resource = parameters["resource"]
-
-    # On utilise le hash sha1 de la ressource, généré par data.gouv.fr, comme clé de cache
-    return resource["checksum"]
-
-
-@task
 def remove_unused_cache(
     cache_dir: Path = RESOURCE_CACHE_DIR,
     cache_expiration_time_hours: int = CACHE_EXPIRATION_TIME_HOURS,
@@ -82,7 +74,7 @@ def remove_unused_cache(
                     print(f"Suppression du fichier de cache: {file}")
                     deleted_files.append(file)
                     file.unlink()
-        print(f"{len(deleted_files)} fichiers supprimés")
+        print(f"-> {len(deleted_files)} fichiers supprimés")
 
 
 #
@@ -341,3 +333,10 @@ def check_parquet_file(path) -> bool:
         return result
     except (FileNotFoundError, pl.exceptions.ComputeError):
         return False
+
+
+def print_all_config(all_config):
+    msg = ""
+    for k, v in sorted(all_config.items()):
+        msg += f"\n{k}: {v}"
+    print(msg)

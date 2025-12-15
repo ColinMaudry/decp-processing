@@ -1,7 +1,6 @@
 import polars as pl
 import polars.selectors as cs
 from polars_ds import haversine
-from prefect import task
 
 from src.config import SIRENE_DATA_DIR
 from src.tasks.transform import (
@@ -29,7 +28,10 @@ def add_etablissement_data(
     # Si il y a un etablissement_nom (Enseigne1Etablissement ou denominationUsuelleEtablissement),
     # on l'ajoute au nom de l'organisme, entre parenthèses
     lf_sirets = lf_sirets.with_columns(
-        pl.when(pl.col("etablissement_nom").is_not_null())
+        pl.when(
+            pl.col("etablissement_nom").is_not_null()
+            & (pl.col("etablissement_nom") != pl.col(f"{type_siret}_nom"))
+        )
         .then(
             pl.concat_str(
                 pl.col(f"{type_siret}_nom"),
@@ -76,7 +78,6 @@ def add_unite_legale_data(
     return lf_sirets
 
 
-@task(log_prints=True)
 def enrich_from_sirene(lf: pl.LazyFrame):
     # Récupération des données SIRET/SIREN préparées dans sirene-preprocess()
     lf_etablissements = pl.scan_parquet(SIRENE_DATA_DIR / "etablissements.parquet")

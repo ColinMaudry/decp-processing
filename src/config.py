@@ -26,20 +26,15 @@ def make_path_from_env(env: str, alternative_path: Path) -> Path:
     return Path(os.getenv(env) or alternative_path)
 
 
-print("""
-##########
-# Config #
-##########
-""")
-
+ALL_CONFIG = {}
 
 # Nombre maximal de workers utilisables par Prefect. Défaut : 16
 MAX_PREFECT_WORKERS = int(os.getenv("MAX_PREFECT_WORKERS", 4))
-print(f"{'MAX_PREFECT_WORKERS':<40}", MAX_PREFECT_WORKERS)
+ALL_CONFIG["MAX_PREFECT_WORKERS"] = MAX_PREFECT_WORKERS
 
 # Durée avant l'expiration du cache des ressources (en heure). Défaut : 168 (7 jours)
 CACHE_EXPIRATION_TIME_HOURS = int(os.getenv("CACHE_EXPIRATION_TIME_HOURS", 168))
-print(f"{'CACHE_EXPIRATION_TIME_HOURS':<40}", CACHE_EXPIRATION_TIME_HOURS)
+ALL_CONFIG["CACHE_EXPIRATION_TIME_HOURS"] = CACHE_EXPIRATION_TIME_HOURS
 
 
 DATE_NOW = datetime.now().isoformat()[0:10]  # YYYY-MM-DD
@@ -47,14 +42,14 @@ MONTH_NOW = DATE_NOW[:7]  # YYYY-MM
 
 # Publication ou non des fichiers produits sur data.gouv.fr
 DECP_PROCESSING_PUBLISH = os.getenv("DECP_PROCESSING_PUBLISH", "").lower() == "true"
-print(f"{'DECP_PROCESSING_PUBLISH':<40}", DECP_PROCESSING_PUBLISH)
+ALL_CONFIG["DECP_PROCESSING_PUBLISH"] = DECP_PROCESSING_PUBLISH
 
 
 # Client HTTP
 HTTP_CLIENT = httpx.Client()
 HTTP_HEADERS = {
     "Connection": "keep-alive",
-    "User-agent": "Projet : https://decp.info/a-propos | Client HTTP : https://pypi.org/project/httpx/",
+    "User-agent": "decp.info",
 }
 
 # Timeout pour la publication de chaque ressource sur data.gouv.fr
@@ -77,21 +72,22 @@ PREFECT_API_URL = os.getenv("PREFECT_API_URL")
 
 # Dossier racine
 BASE_DIR = make_path_from_env("DECP_BASE_DIR", Path(__file__).absolute().parent.parent)
-print(f"{'BASE_DIR':<40}", BASE_DIR)
+ALL_CONFIG["BASE_DIR"] = BASE_DIR
 
 # Les variables configurées sur le serveur doivent avoir la priorité
 DATA_DIR = make_path_from_env("DECP_DATA_DIR", BASE_DIR / "data")
 DATA_DIR.mkdir(exist_ok=True, parents=True)
-print(f"{'DATA_DIR':<40}", DATA_DIR)
+ALL_CONFIG["DATA_DIR"] = DATA_DIR
 
 RESOURCE_CACHE_DIR = make_path_from_env(
     "RESOURCE_CACHE_DIR", DATA_DIR / "resource_cache"
 )
 RESOURCE_CACHE_DIR.mkdir(exist_ok=True, parents=True)
+ALL_CONFIG["RESOURCE_CACHE_DIR"] = RESOURCE_CACHE_DIR
 
 DIST_DIR = make_path_from_env("DECP_DIST_DIR", BASE_DIR / "dist")
 DIST_DIR.mkdir(exist_ok=True, parents=True, mode=777)
-print(f"{'DIST_DIR':<40}", DIST_DIR)
+ALL_CONFIG["DIST_DIR"] = DIST_DIR
 
 
 def make_sirene_data_dir(sirene_data_parent_dir) -> Path:
@@ -116,19 +112,19 @@ if isinstance(SIRENE_DATA_DIR, str):
     SIRENE_DATA_DIR = Path(os.path.join(BASE_DIR, SIRENE_DATA_DIR))
 
 # SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
-print(f"{'SIRENE_DATA_PARENT_DIR':<40}", SIRENE_DATA_PARENT_DIR)
-print(f"{'SIRENE_DATA_DIR':<40}", SIRENE_DATA_DIR)
+ALL_CONFIG["SIRENE_DATA_PARENT_DIR"] = SIRENE_DATA_PARENT_DIR
+ALL_CONFIG["SIRENE_DATA_DIR"] = SIRENE_DATA_DIR
 
 
 SIRENE_UNITES_LEGALES_URL = os.getenv("SIRENE_UNITES_LEGALES_URL", "")
 
 # Mode de scraping
 SCRAPING_MODE = os.getenv("SCRAPING_MODE", "month")
-print(f"{'SCRAPING_MODE':<40}", SCRAPING_MODE)
+ALL_CONFIG["SCRAPING_MODE"] = SCRAPING_MODE
 
 # Target (plateforme cible pour le scraping)
 SCRAPING_TARGET = os.getenv("SCRAPING_TARGET")
-print(f"{'SCRAPING_TARGET':<40}", SCRAPING_TARGET)
+ALL_CONFIG["SCRAPING_TARGET"] = SCRAPING_TARGET
 
 # Lecture ou non des ressource en cache
 DECP_USE_CACHE = os.getenv("DECP_USE_CACHE", "false").lower() == "true"
@@ -138,6 +134,7 @@ POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI")
 
 # Données de référence
 REFERENCE_DIR = BASE_DIR / "reference"
+ALL_CONFIG["REFERENCE_DIR"] = REFERENCE_DIR
 
 # Liste et ordre des colonnes pour le mono dataframe de base (avant normalisation et spécialisation)
 # Sert aussi à vérifier qu'au moins ces colonnes sont présentes (d'autres peuvent être présentes en plus, les colonnes "innatendues")
@@ -169,7 +166,7 @@ COLUMNS_TO_DROP = [
 
 # Liste des ID de ressources présentes dans un dataset à traiter, au format JSON ou XML, mais exclues du traitement
 EXCLUDED_RESOURCES = os.getenv("EXCLUDED_RESOURCES", "").replace(" ", "")
-print(f"{'EXCLUDED_RESOURCES':<40}", EXCLUDED_RESOURCES)
+ALL_CONFIG["EXCLUDED_RESOURCES"] = EXCLUDED_RESOURCES
 
 EXCLUDED_RESOURCES = EXCLUDED_RESOURCES.split(",")
 EXCLUDED_RESOURCES = (
@@ -191,7 +188,7 @@ EXCLUDED_RESOURCES = (
 
 # Ne traiter qu'un seul dataset identifier par son ID
 SOLO_DATASET = os.getenv("SOLO_DATASET", "")
-print(f"{'SOLO_DATASET':<40}", SOLO_DATASET)
+ALL_CONFIG["SOLO_DATASET"] = SOLO_DATASET
 
 with open(
     make_path_from_env(
@@ -212,6 +209,3 @@ class DecpFormat:
     prefixe_json_marches: str
     liste_marches_ijson: sendable_list | None = None
     coroutine_ijson: Coroutine | None = None
-
-
-print("")
