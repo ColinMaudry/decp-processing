@@ -39,7 +39,6 @@ from src.tasks.utils import (
 )
 
 
-@task(retries=3, retry_delay_seconds=3)
 def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par défaut)
     if url.startswith("http"):
         try:
@@ -58,7 +57,6 @@ def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par 
                 yield chunk
 
 
-@task(persist_result=False)
 def get_resource(
     r: dict, resources_artifact: list[dict] | list
 ) -> tuple[pl.LazyFrame | None, DecpFormat | None]:
@@ -128,7 +126,6 @@ def find_json_decp_format(chunk, decp_formats, resource: dict):
     return None
 
 
-@task(persist_result=False, log_prints=True)
 def json_stream_to_parquet(
     url: str, output_path: Path, resource: dict
 ) -> tuple[set, DecpFormat or None]:
@@ -202,7 +199,6 @@ def json_stream_to_parquet(
     return fields, decp_format
 
 
-@task(persist_result=False)
 def xml_stream_to_parquet(
     url: str, output_path: Path, fix_chars=False
 ) -> tuple[set, DecpFormat]:
@@ -439,7 +435,9 @@ def get_insee_cog_data(url, schema_overrides, columns) -> pl.DataFrame:
 
 @task(
     log_prints=True,
-    # persist_result=True,
+    persist_result=False,
+    retries=3,
+    retry_delay_seconds=3,
     # cache_expiration=datetime.timedelta(hours=CACHE_EXPIRATION_TIME_HOURS),
     # cache_key_fn=get_clean_cache_key,
 )
@@ -474,7 +472,6 @@ def get_clean(
             return parquet_path.with_suffix(".parquet")
 
 
-@task
 def get_unite_legales(processed_parquet_path):
     print("Téléchargement des données unité légales et sélection des colonnes...")
     (
