@@ -54,7 +54,7 @@ print(f"{'DECP_PROCESSING_PUBLISH':<40}", DECP_PROCESSING_PUBLISH)
 HTTP_CLIENT = httpx.Client()
 HTTP_HEADERS = {
     "Connection": "keep-alive",
-    "User-agent": "Projet : https://decp.info/a-propos | Client HTTP : https://pypi.org/project/httpx/",
+    "User-agent": "decp.info",
 }
 
 # Timeout pour la publication de chaque ressource sur data.gouv.fr
