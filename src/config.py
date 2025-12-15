@@ -88,6 +88,7 @@ RESOURCE_CACHE_DIR = make_path_from_env(
     "RESOURCE_CACHE_DIR", DATA_DIR / "resource_cache"
 )
 RESOURCE_CACHE_DIR.mkdir(exist_ok=True, parents=True)
+print(f"{'RESOURCE_CACHE_DIR':<40}", RESOURCE_CACHE_DIR)
 
 DIST_DIR = make_path_from_env("DECP_DIST_DIR", BASE_DIR / "dist")
 DIST_DIR.mkdir(exist_ok=True, parents=True, mode=777)
@@ -138,6 +139,7 @@ POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI")
 
 # Données de référence
 REFERENCE_DIR = BASE_DIR / "reference"
+print(f"{'REFERENCE_DIR':<40}", REFERENCE_DIR)
 
 # Liste et ordre des colonnes pour le mono dataframe de base (avant normalisation et spécialisation)
 # Sert aussi à vérifier qu'au moins ces colonnes sont présentes (d'autres peuvent être présentes en plus, les colonnes "innatendues")

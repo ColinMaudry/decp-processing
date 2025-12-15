@@ -3,7 +3,7 @@ import shutil
 
 import polars as pl
 import polars.selectors as cs
-from prefect import flow
+from prefect import flow, task
 from prefect.artifacts import create_table_artifact
 from prefect.context import get_run_context
 from prefect.task_runners import ConcurrentTaskRunner
@@ -53,42 +53,24 @@ def decp_processing(enable_cache_removal: bool = True):
     available_parquet_files = set(os.listdir(RESOURCE_CACHE_DIR))
 
     # Traitement parallèle des ressources par lots pour éviter la surcharge mémoire
-    batch_size = 500
+    batch_size = 100
     parquet_files = []
 
-    # Filtrer les ressources à traiter
+    # Filtrer les ressources à traiter, en ne gardant que les fichiers > 100 octets
     resources_to_process = [r for r in resources if r["filesize"] > 100]
+
+    for i in range(0, len(resources_to_process), batch_size):
+        process_batch(
+            available_parquet_files,
+            batch_size,
+            i,
+            parquet_files,
+            resources_artifact,
+            resources_to_process,
+        )
 
     # Afin d'être sûr que je ne publie pas par erreur un jeu de données de test
     decp_publish = DECP_PROCESSING_PUBLISH and len(resources_to_process) > 5000
-
-    for i in range(0, len(resources_to_process), batch_size):
-        batch = resources_to_process[i : i + batch_size]
-        print(
-            f"🗃️ Traitement du lot {i // batch_size + 1} / {len(resources_to_process) // batch_size + 1}"
-        )
-
-        futures = {}
-        for resource in batch:
-            future = get_clean.submit(
-                resource, resources_artifact, available_parquet_files
-            )
-            futures[future] = full_resource_name(resource)
-
-        for f in futures:
-            try:
-                result = f.result()
-                if result is not None:
-                    parquet_files.append(result)
-            except Exception as e:
-                resource_name = futures[f]
-                print(
-                    f"❌ Erreur de traitement de {resource_name} ({type(e).__name__}):"
-                )
-                print(e)
-
-        # Nettoyage explicite
-        futures.clear()
 
     if decp_publish:
         create_table_artifact(
@@ -148,6 +130,36 @@ def decp_processing(enable_cache_removal: bool = True):
         remove_unused_cache()
 
     print("☑️  Fin du flow principal decp_processing.")
+
+
+@task(retries=2)
+def process_batch(
+    available_parquet_files,
+    batch_size,
+    i,
+    parquet_files,
+    resources_artifact,
+    resources_to_process,
+):
+    batch = resources_to_process[i : i + batch_size]
+    print(
+        f"🗃️ Traitement du lot {i // batch_size + 1} / {len(resources_to_process) // batch_size + 1}"
+    )
+    futures = {}
+    for resource in batch:
+        future = get_clean.submit(resource, resources_artifact, available_parquet_files)
+        futures[future] = full_resource_name(resource)
+    for f in futures:
+        try:
+            result = f.result()
+            if result is not None:
+                parquet_files.append(result)
+        except Exception as e:
+            resource_name = futures[f]
+            print(f"❌ Erreur de traitement de {resource_name} ({type(e).__name__}):")
+            print(e)
+    # Nettoyage explicite
+    futures.clear()
 
 
 @sirene_preprocess.on_failure
