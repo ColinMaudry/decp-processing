@@ -11,7 +11,6 @@ import orjson
 import polars as pl
 from httpx import Client, HTTPStatusError, TimeoutException, get
 from lxml import etree, html
-from prefect import task
 from prefect.transactions import transaction
 from tenacity import (
     retry,
@@ -444,14 +443,6 @@ def get_insee_cog_data(url, schema_overrides, columns) -> pl.DataFrame:
     return df_insee
 
 
-@task(
-    log_prints=True,
-    persist_result=False,
-    retries=3,
-    retry_delay_seconds=3,
-    # cache_expiration=datetime.timedelta(hours=CACHE_EXPIRATION_TIME_HOURS),
-    # cache_key_fn=get_clean_cache_key,
-)
 def get_clean(
     resource, resources_artifact: list, available_parquet_files: set
 ) -> pl.DataFrame or None:

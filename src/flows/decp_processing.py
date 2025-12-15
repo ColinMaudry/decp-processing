@@ -1,12 +1,12 @@
 import os
 import shutil
+from concurrent.futures import ThreadPoolExecutor
 
 import polars as pl
 import polars.selectors as cs
 from prefect import flow, task
 from prefect.artifacts import create_table_artifact
 from prefect.context import get_run_context
-from prefect.task_runners import ConcurrentTaskRunner
 from prefect_email import EmailServerCredentials, email_send_message
 
 from src.config import (
@@ -41,10 +41,7 @@ from src.tasks.utils import (
 )
 
 
-@flow(
-    log_prints=True,
-    task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS),
-)
+@flow(log_prints=True)
 def decp_processing(enable_cache_removal: bool = True):
     print("🚀  Début du flow decp-processing")
 
@@ -153,16 +150,20 @@ def process_batch(
         f"🗃️ Traitement du lot {i // batch_size + 1} / {len(resources_to_process) // batch_size + 1}"
     )
     futures = {}
-    for resource in batch:
-        future = get_clean.submit(resource, resources_artifact, available_parquet_files)
-        futures[future] = full_resource_name(resource)
-    for f in futures:
+    with ThreadPoolExecutor(max_workers=MAX_PREFECT_WORKERS) as executor:
+        for resource in batch:
+            future = executor.submit(
+                get_clean, resource, resources_artifact, available_parquet_files
+            )
+            futures[future] = full_resource_name(resource)
+
+    for future in futures:
         try:
-            result = f.result()
+            result = future.result()
             if result is not None:
                 parquet_files.append(result)
         except Exception as e:
-            resource_name = futures[f]
+            resource_name = futures[future]
             print(f"❌ Erreur de traitement de {resource_name} ({type(e).__name__}):")
             print(e)
     # Nettoyage explicite
