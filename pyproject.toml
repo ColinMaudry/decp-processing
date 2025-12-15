@@ -22,7 +22,8 @@ dependencies = [
     "bs4",
     "selenium",
     "polars_ds",
-    "scikit-learn"
+    "scikit-learn",
+    "tenacity"
 ]
 
 [project.optional-dependencies]
