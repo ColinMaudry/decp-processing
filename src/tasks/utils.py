@@ -333,3 +333,10 @@ def check_parquet_file(path) -> bool:
         return result
     except (FileNotFoundError, pl.exceptions.ComputeError):
         return False
+
+
+def print_all_config(all_config):
+    msg = ""
+    for k, v in sorted(all_config.items()):
+        msg += f"\n{k}: {v}"
+    print(msg)

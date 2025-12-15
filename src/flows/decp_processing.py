@@ -10,8 +10,8 @@ from prefect.task_runners import ConcurrentTaskRunner
 from prefect_email import EmailServerCredentials, email_send_message
 
 from src.config import (
+    ALL_CONFIG,
     BASE_DF_COLUMNS,
-    BASE_DIR,
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
@@ -33,7 +33,12 @@ from src.tasks.transform import (
     concat_parquet_files,
     sort_columns,
 )
-from src.tasks.utils import full_resource_name, generate_stats, remove_unused_cache
+from src.tasks.utils import (
+    full_resource_name,
+    generate_stats,
+    print_all_config,
+    remove_unused_cache,
+)
 
 
 @flow(
@@ -41,7 +46,9 @@ from src.tasks.utils import full_resource_name, generate_stats, remove_unused_ca
     task_runner=ConcurrentTaskRunner(max_workers=MAX_PREFECT_WORKERS),
 )
 def decp_processing(enable_cache_removal: bool = True):
-    print(f"🚀  Début du flow decp-processing dans base dir {BASE_DIR} ")
+    print("🚀  Début du flow decp-processing")
+
+    print_all_config(ALL_CONFIG)
 
     print("Liste de toutes les ressources des datasets...")
     resources: list[dict] = list_resources(TRACKED_DATASETS)
