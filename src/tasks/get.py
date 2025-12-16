@@ -9,7 +9,7 @@ import httpx
 import ijson
 import orjson
 import polars as pl
-from httpx import Client, HTTPStatusError, TimeoutException, get
+from httpx import Client, get
 from lxml import etree, html
 from prefect.transactions import transaction
 from tenacity import (
@@ -397,22 +397,19 @@ def get_etablissements() -> pl.LazyFrame:
             hrefs.append(base_url + href)
 
     # Fonction de traitement pour un fichier
+    @retry(
+        stop=stop_after_attempt(4), wait=wait_exponential(multiplier=1, min=1, max=20)
+    )
     def get_process_file(_href: str):
-        print(_href.split("/")[-1])
-        try:
-            response = http_client.get(
-                _href, headers=HTTP_HEADERS, timeout=20
-            ).raise_for_status()
-        except (HTTPStatusError, TimeoutException) as err:
-            print(err)
-            print("Nouvel essai...")
-            response = http_client.get(
-                _href, headers=HTTP_HEADERS, timeout=20
-            ).raise_for_status()
+        response = http_client.get(
+            _href, headers=HTTP_HEADERS, timeout=30
+        ).raise_for_status()
 
         content = response.content
         lff = pl.scan_csv(content, schema_overrides=schema)
         lff = lff.select(columns)
+        print(_href.split("/")[-1], "OK")
+
         return lff
 
     # Traitement en parrallèle avec 8 threads
