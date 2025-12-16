@@ -1,3 +1,8 @@
+### 2.6.3 2025-12-16
+
+- Téléchargement des ressources plus résilient aux erreurs ([tenacity](https://tenacity.readthedocs.io/en/latest/))
+- Téléchargement des données établissements plus résilient aux erreurs ([tenacity](https://tenacity.readthedocs.io/en/latest/))
+
 ### 2.6.2 2025-12-15
 
 - Réduction du nombre de tâches prefect pour réduire la charge sur la BDD et la latence
