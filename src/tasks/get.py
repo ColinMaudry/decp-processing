@@ -14,7 +14,6 @@ from lxml import etree, html
 from prefect.transactions import transaction
 from tenacity import (
     retry,
-    retry_if_exception_type,
     stop_after_attempt,
     wait_exponential,
 )
@@ -44,16 +43,12 @@ from src.tasks.utils import (
 )
 
 
-@retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=1, max=10),
-    retry=retry_if_exception_type(httpx.HTTPError),  # On ne retry que sur erreur http
-)
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=20))
 def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par défaut)
     if url.startswith("http"):
         try:
             with HTTP_CLIENT.stream(
-                "GET", url, headers=HTTP_HEADERS, follow_redirects=True
+                "GET", url, headers=HTTP_HEADERS, follow_redirects=True, timeout=20
             ) as response:
                 yield from response.iter_bytes(chunk_size)
         except httpx.TooManyRedirects:
