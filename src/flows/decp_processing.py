@@ -136,7 +136,7 @@ def decp_processing(enable_cache_removal: bool = True):
     print("☑️  Fin du flow principal decp_processing.")
 
 
-@task(retries=2)
+@task(retries=2, timeout_seconds=1800)
 def process_batch(
     available_parquet_files,
     batch_size,
