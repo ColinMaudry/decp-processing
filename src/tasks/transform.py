@@ -77,8 +77,6 @@ def apply_modifications(lff: pl.LazyFrame):
         how="left",
     )
 
-    print(lf_final.collect_schema().names())
-
     return lf_final
 
 
