@@ -1,6 +1,5 @@
 import polars as pl
 import polars.selectors as cs
-from polars_ds import haversine
 
 from src.config import SIRENE_DATA_DIR
 from src.tasks.transform import (
@@ -167,6 +166,33 @@ def calculate_distance(lf: pl.LazyFrame) -> pl.LazyFrame:
             pl.col("titulaire_longitude"),
         )
         .round(mode="half_away_from_zero")
+        .cast(pl.Int16)
         .alias("distance")
     )
     return lf
+
+
+def haversine(
+    lat1: pl.Expr, lon1: pl.Expr, lat2: pl.Expr, lon2: pl.Expr, R: float = 6371.0
+) -> pl.Expr:
+    """
+    Calcule la distance haversine entre deux points (lat1, lon1) et (lat2, lon2)     en km.
+    Utilise des opérations vectorisées Polars.
+    Généré par la LLM Euria, développée et hébergée en Suisse par Infomaniak.
+    """
+    # Convertir en radians
+    lat1 = pl.col("acheteur_latitude").radians()
+    lon1 = pl.col("acheteur_longitude").radians()
+    lat2 = pl.col("titulaire_latitude").radians()
+    lon2 = pl.col("titulaire_longitude").radians()
+
+    # Différences
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    # Formule haversine
+    a = (dlat / 2.0).sin().pow(2) + lat1.cos() * lat2.cos() * (dlon / 2.0).sin().pow(2)
+    c = 2.0 * a.sqrt().arcsin()
+
+    # Distance
+    return R * c
