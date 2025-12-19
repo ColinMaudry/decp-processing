@@ -77,6 +77,13 @@ def apply_modifications(lff: pl.LazyFrame):
         how="left",
     )
 
+    if "modification_id" in columns:
+        print("modification_id")
+        lf_final = lf_final.drop("modification_id")
+    if "donneesActuelles" in columns:
+        print("donneesActuelles")
+        lf_final = lf_final.drop("donneesActuelles")
+
     return lf_final
 
 
