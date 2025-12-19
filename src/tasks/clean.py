@@ -6,8 +6,7 @@ from polars import selectors as cs
 
 from src.config import DecpFormat
 from src.tasks.transform import (
-    explode_titulaires,
-    process_modifications,
+    apply_modifications,
 )
 
 
@@ -51,7 +50,7 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     # Application des modifications
     # le plus tôt possible pour que les fonctions suivantes clean les
     # champs modifiés (dateNotification, datePublicationDonnnes, montant, titulaires, dureeMois)
-    lf = process_modifications(lf)
+    lf = apply_modifications(lf)
 
     # Montants
     # Certains marchés ont des montants qui posent problème, donc on les met à 12,311111111 milliards (pour les retrouver facilement)
@@ -115,7 +114,7 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     lf = clean_titulaires(lf, decp_format)
 
     # Explosion des titulaires
-    lf = explode_titulaires(lf, decp_format)
+    lf = lf.explode("titulaires").unnest("titulaires")
 
     # Remplacement des "" par null
     lf = lf.with_columns(
@@ -266,7 +265,6 @@ def fix_data_types(lf: pl.LazyFrame) -> pl.LazyFrame:
         # "variationPrixActeSousTraitance": pl.Float64,
         "origineFrance": pl.Float32,
         "origineUE": pl.Float32,
-        "modification_id": pl.Int16,
     }
 
     # Champs numériques

@@ -2,9 +2,10 @@ import polars as pl
 from polars.testing import assert_frame_equal
 
 from src.tasks.transform import (
+    apply_modifications,
     prepare_etablissements,
     prepare_unites_legales,
-    replace_with_modification_data,
+    sort_modifications,
 )
 
 
@@ -193,8 +194,6 @@ class TestHandleModificationsMarche:
                         {"titulaire": {"typeIdentifiant": "SIRET", "id": "00011"}},
                         {"titulaire": {"typeIdentifiant": "SIRET", "id": "00012"}},
                     ],
-                    "modification_id": 1,
-                    "donneesActuelles": True,
                     "acheteur_id": "12345",
                 },
                 {
@@ -206,8 +205,6 @@ class TestHandleModificationsMarche:
                     "titulaires": [
                         {"titulaire": {"typeIdentifiant": "SIRET", "id": "00013"}},
                     ],
-                    "modification_id": 0,
-                    "donneesActuelles": False,
                     "acheteur_id": "12345",
                 },
                 # uid=2: 1 row (no modifications)
@@ -220,28 +217,79 @@ class TestHandleModificationsMarche:
                     "titulaires": [
                         {"titulaire": {"typeIdentifiant": "SIRET", "id": "0003"}}
                     ],
-                    "modification_id": 0,
-                    "donneesActuelles": True,
                     "acheteur_id": "99999",
                 },
             ]
-        )
+        ).sort(by="dateNotification")
 
         # Call the function
-        result_df = replace_with_modification_data(lf).collect()
+        result_df = apply_modifications(lf).sort(by="dateNotification").collect()
 
-        # print(
-        #     expected_df["uid", "dateNotification", "montant", "modification_id"]
-        #     .to_pandas()
-        #     .to_string()
-        # )
-
-        # print(
-        #     result_df["uid", "dateNotification", "montant", "modification_id"]
-        #     .to_pandas()
-        #     .to_string()
-        # )
         # Assert the result matches the expected DataFrame
         assert_frame_equal(
             result_df, expected_df, check_column_order=False, check_dtypes=False
+        )
+
+    def test_sort_modifications(self):
+        """
+        Générée par la LLM Euria, développée et hébergée en Suisse par Infomaniak. Vérifié par l'auteur.
+        """
+        df_input = pl.DataFrame(
+            {
+                "uid": ["A", "A", "A", "B", "B"],
+                "dateNotification": [
+                    "2023-01-01",
+                    "2023-01-03",
+                    "2023-01-02",
+                    "2023-02-01",
+                    "2023-02-02",
+                ],
+                "montant": [100.0, None, 300.0, 500.0, None],
+                "dureeMois": [12, None, 24, 12, 36],
+                "titulaire_id": ["T1", None, "T3", "T5", None],
+                "titulaire_typeIdentifiant": ["ID", None, "ID", "ID", None],
+                "data": ["x", "x", "x", "p", "p"],
+            }
+        ).with_columns(
+            pl.col("dateNotification").str.strptime(
+                pl.Date, format="%Y-%m-%d", strict=False
+            )
+        )
+
+        # Appliquer la fonction
+        result = sort_modifications(df_input.lazy()).collect()
+
+        # DataFrame attendu (après transformation)
+        expected = pl.DataFrame(
+            {
+                "uid": ["A", "A", "A", "B", "B"],
+                "dateNotification": [
+                    "2023-01-03",
+                    "2023-01-02",
+                    "2023-01-01",
+                    "2023-02-02",
+                    "2023-02-01",
+                ],
+                "montant": [300.0, 300.0, 100.0, 500.0, 500.0],
+                "dureeMois": [24, 24, 12, 36, 12],
+                "titulaire_id": ["T3", "T3", "T1", "T5", "T5"],
+                "titulaire_typeIdentifiant": ["ID", "ID", "ID", "ID", "ID"],
+                "data": ["x", "x", "x", "p", "p"],
+                "modification_id": [2, 1, 0, 1, 0],
+                "donneesActuelles": [True, False, False, True, False],
+            }
+        ).with_columns(
+            pl.col("dateNotification").str.strptime(
+                pl.Date, format="%Y-%m-%d", strict=False
+            )
+        )
+
+        # Comparaison stricte (ordre des colonnes, types, valeurs)
+        assert_frame_equal(
+            result,
+            expected,
+            check_dtype=False,
+            check_exact=True,
+            check_column_order=False,
+            check_row_order=True,
         )

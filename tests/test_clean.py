@@ -256,7 +256,7 @@ def test_clean_decp():
 
     # Test with DECP 2019
     decp_format_2019 = DecpFormat("DECP 2019", SCHEMA_MARCHE_2019, "marches")
-    df_result: pl.DataFrame = clean_decp(lf, decp_format_2019).collect()
+    df_result: pl.DataFrame = clean_decp(lf, decp_format_2019).sort("id").collect()
 
     # Check id cleaning
     assert df_result.filter(pl.col("id") == "id_1").height > 0

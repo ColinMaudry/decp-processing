@@ -32,6 +32,7 @@ from src.tasks.transform import (
     calculate_naf_cpv_matching,
     concat_parquet_files,
     sort_columns,
+    sort_modifications,
 )
 from src.tasks.utils import (
     full_resource_name,
@@ -86,6 +87,9 @@ def decp_processing(enable_cache_removal: bool = True):
 
     print("Fusion des dataframes...")
     lf: pl.LazyFrame = concat_parquet_files(parquet_files)
+
+    print("Tri des modifications...")
+    lf = sort_modifications(lf)
 
     print("Ajout des données SIRENE...")
     # Preprocessing des données SIRENE si :
