@@ -11,6 +11,7 @@ import orjson
 import polars as pl
 from httpx import Client, get
 from lxml import etree, html
+from prefect.logging import get_run_logger
 from prefect.transactions import transaction
 from tenacity import (
     retry,
@@ -45,6 +46,8 @@ from src.tasks.utils import (
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=20))
 def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par défaut)
+    logger = get_run_logger()
+
     if url.startswith("http"):
         try:
             with HTTP_CLIENT.stream(
@@ -52,7 +55,7 @@ def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par 
             ) as response:
                 yield from response.iter_bytes(chunk_size)
         except httpx.TooManyRedirects:
-            print(f"⛔️ Erreur 429 Too Many Requests pour {url}")
+            logger.error(f"⛔️ Erreur 429 Too Many Requests pour {url}")
             return
 
     else:
@@ -65,8 +68,10 @@ def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par 
 def get_resource(
     r: dict, resources_artifact: list[dict] | list
 ) -> tuple[pl.LazyFrame | None, DecpFormat | None]:
+    logger = get_run_logger()
+
     if DECP_PROCESSING_PUBLISH is False:
-        print(f"➡️  {full_resource_name(r)}")
+        logger.info(f"➡️  {full_resource_name(r)}")
 
     output_path = DATA_DIR / "get" / r["filename"]
     output_path.parent.mkdir(exist_ok=True, parents=True)
@@ -83,9 +88,9 @@ def get_resource(
             fields, decp_format = xml_stream_to_parquet(
                 url, output_path, fix_chars=True
             )
-            print(f"♻️  {full_resource_name(r)} nettoyé et traité")
+            logger.info(f"♻️  {full_resource_name(r)} nettoyé et traité")
     else:
-        print(f"▶️  Format de fichier non supporté : {full_resource_name(r)}")
+        logger.warning(f"▶️  Format de fichier non supporté : {full_resource_name(r)}")
         return None, None
 
     if decp_format is None:
@@ -119,13 +124,15 @@ def get_resource(
 
 
 def find_json_decp_format(chunk, decp_formats, resource: dict):
+    logger = get_run_logger()
+
     for decp_format in decp_formats:
         decp_format.coroutine_ijson.send(chunk)
         if len(decp_format.liste_marches_ijson) > 0:
             # Le parser a trouvé au moins un marché correspondant à ce format, donc on a
             # trouvé le bon format.
             return decp_format
-    print(
+    logger.warning(
         f"⚠️  Pas de match trouvé parmis les schémas passés : {full_resource_name(resource)}"
     )
     return None
@@ -134,6 +141,8 @@ def find_json_decp_format(chunk, decp_formats, resource: dict):
 def json_stream_to_parquet(
     url: str, output_path: Path, resource: dict
 ) -> tuple[set, DecpFormat or None]:
+    logger = get_run_logger()
+
     decp_format_2019 = DecpFormat("DECP 2019", SCHEMA_MARCHE_2019, "marches")
     decp_format_2022 = DecpFormat("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
     decp_formats = [decp_format_2019, decp_format_2022]
@@ -157,7 +166,6 @@ def json_stream_to_parquet(
 
     # Le dataset AWS scraping a pas mal de bugs de backslash
     if "/68caf6b135f19236a4f37a32/" in url or "/aws/" in url:
-        print("Remplacements spécifiques pour AWS...")
         stream_replace_iter = stream_replace_bytestring(
             stream_replace_bytestring(
                 stream_replace_bytestring(stream_replace_iter, rb"(\\\\\\)", rb"\\"),
@@ -172,7 +180,7 @@ def json_stream_to_parquet(
     try:
         chunk = next(stream_replace_iter)
     except StopIteration:
-        print(f"⚠️  Flux vide pour {url}")
+        logger.error(f"⚠️  Flux vide pour {url}")
         return set(), None
 
     decp_format = find_json_decp_format(chunk, decp_formats, resource)
@@ -365,6 +373,8 @@ def norm_titulaire(titulaire: dict):
 
 
 def get_etablissements() -> pl.LazyFrame:
+    logger = get_run_logger()
+
     schema = {
         "siret": pl.String,
         "codeCommuneEtablissement": pl.String,
@@ -377,7 +387,6 @@ def get_etablissements() -> pl.LazyFrame:
     }
 
     columns = list(schema.keys())
-    print(columns)
 
     base_url = "https://files.data.gouv.fr/geo-sirene/last/dep/"
     htmlpage: str = get(base_url).text
@@ -403,7 +412,7 @@ def get_etablissements() -> pl.LazyFrame:
         content = response.content
         lff = pl.scan_csv(content, schema_overrides=schema)
         lff = lff.select(columns)
-        print(_href.split("/")[-1], "OK")
+        logger.info(_href.split("/")[-1], "OK")
 
         return lff
 
@@ -416,18 +425,20 @@ def get_etablissements() -> pl.LazyFrame:
                 lf = future.result()
                 lfs.append(lf)
             except Exception as e:
-                print(f"Error processing file: {e}")
+                logger.info(f"Error processing file: {e}")
 
-    print("Concaténation...")
+    logger.info("Concaténation...")
     lf_etablissements: pl.LazyFrame = pl.concat(lfs)
     return lf_etablissements
 
 
 def get_insee_cog_data(url, schema_overrides, columns) -> pl.DataFrame:
+    logger = get_run_logger()
+
     try:
         df_insee = pl.read_csv(url, schema_overrides=schema_overrides, columns=columns)
     except ConnectionResetError:
-        print("Connection error, retrying in 2 seconds...")
+        logger.error("Connection error, retrying in 2 seconds...")
         sleep(2)
         df_insee = get_insee_cog_data(
             url, schema_overrides=schema_overrides, columns=columns
@@ -438,6 +449,8 @@ def get_insee_cog_data(url, schema_overrides, columns) -> pl.DataFrame:
 def get_clean(
     resource, resources_artifact: list, available_parquet_files: set
 ) -> pl.DataFrame or None:
+    logger = get_run_logger()
+
     with transaction():
         checksum = resource["checksum"]
         parquet_path = RESOURCE_CACHE_DIR / f"{checksum}"
@@ -462,12 +475,14 @@ def get_clean(
                 return None
         else:
             # Le fichier parquet est déjà disponible pour ce checksum
-            print(f"👍 Ressource déjà en cache : {resource['dataset_code']}")
+            logger.debug(f"👍 Ressource déjà en cache : {resource['dataset_code']}")
             return parquet_path.with_suffix(".parquet")
 
 
 def get_unite_legales(processed_parquet_path):
-    print("Téléchargement des données unité légales et sélection des colonnes...")
+    logger = get_run_logger()
+
+    logger.info("Téléchargement des données unité légales et sélection des colonnes...")
     (
         pl.scan_parquet(SIRENE_UNITES_LEGALES_URL)
         .pipe(prepare_unites_legales)

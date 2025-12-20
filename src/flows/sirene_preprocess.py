@@ -1,4 +1,5 @@
 from prefect import flow
+from prefect.logging import get_run_logger
 from prefect.transactions import transaction
 
 from src.config import SIRENE_DATA_DIR
@@ -14,7 +15,9 @@ def sirene_preprocess():
     Pour chaque ressource (unités légales, établissements), un fichier parquet est produit.
     """
 
-    print("🚀  Pré-traitement des données SIRENE")
+    logger = get_run_logger()
+
+    logger.info("🚀  Pré-traitement des données SIRENE")
     # Soit les tâches de ce flow vont au bout (success), soit le dossier SIRENE_DATA_DIR est supprimé (voir remove_sirene_data_dir())
     with transaction():
         create_sirene_data_dir()
@@ -25,18 +28,18 @@ def sirene_preprocess():
         # préparer les données unités légales
         processed_ul_parquet_path = SIRENE_DATA_DIR / "unites_legales.parquet"
         if not processed_ul_parquet_path.exists():
-            print("Téléchargement et préparation des unités légales...")
+            logger.info("Téléchargement et préparation des unités légales...")
             get_unite_legales(processed_ul_parquet_path)
         else:
-            print(processed_ul_parquet_path, " existe, skipping.")
+            logger.info(processed_ul_parquet_path, " existe, skipping.")
 
         # préparer les données établissements
         processed_etab_parquet_path = SIRENE_DATA_DIR / "etablissements.parquet"
         if not processed_etab_parquet_path.exists():
-            print("Téléchargement et préparation des établissements...")
+            logger.info("Téléchargement et préparation des établissements...")
             lf = get_etablissements()
             prepare_etablissements(lf).sink_parquet(processed_etab_parquet_path)
         else:
-            print(processed_etab_parquet_path, " existe, skipping.")
+            logger.info(processed_etab_parquet_path, " existe, skipping.")
 
-    print("☑️  Fin du flow sirene_preprocess.")
+    logger.info("☑️  Fin du flow sirene_preprocess.")

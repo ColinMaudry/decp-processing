@@ -7,6 +7,7 @@ from pathlib import Path
 import polars as pl
 from prefect import task
 from prefect.artifacts import create_table_artifact
+from prefect.logging import get_run_logger
 
 from src.config import (
     CACHE_EXPIRATION_TIME_HOURS,
@@ -64,6 +65,8 @@ def remove_unused_cache(
     cache_dir: Path = RESOURCE_CACHE_DIR,
     cache_expiration_time_hours: int = CACHE_EXPIRATION_TIME_HOURS,
 ):
+    logger = get_run_logger()
+
     now = time.time()
     age_limit = cache_expiration_time_hours * 3600  # seconds
     deleted_files = []
@@ -71,10 +74,10 @@ def remove_unused_cache(
         for file in cache_dir.rglob("*"):
             if file.is_file():
                 if now - file.stat().st_atime > age_limit:
-                    print(f"Suppression du fichier de cache: {file}")
+                    logger.info(f"Suppression du fichier de cache: {file}")
                     deleted_files.append(file)
                     file.unlink()
-        print(f"-> {len(deleted_files)} fichiers supprimés")
+        logger.info(f"-> {len(deleted_files)} fichiers supprimés")
 
 
 #
@@ -246,7 +249,9 @@ def generate_stats(lf: pl.LazyFrame):
 
 
 def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
-    print("Génération des statistiques sur les sources de données...")
+    logger = get_run_logger()
+
+    logger.info("Génération des statistiques sur les sources de données...")
     lf_uid = lf_uid.select("uid", "acheteur_id", "sourceDataset")
 
     # We need to collect these intermediate aggregations to join them with the sources dataframe (which is small)
@@ -336,7 +341,9 @@ def check_parquet_file(path) -> bool:
 
 
 def print_all_config(all_config):
+    logger = get_run_logger()
+
     msg = ""
     for k, v in sorted(all_config.items()):
         msg += f"\n{k}: {v}"
-    print(msg)
+    logger.info(msg)

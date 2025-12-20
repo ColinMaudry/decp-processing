@@ -3,6 +3,7 @@ import datetime
 from httpx import get
 from prefect import task
 from prefect.cache_policies import INPUTS
+from prefect.logging import get_run_logger
 
 from src.config import DATAGOUVFR_API_KEY, EXCLUDED_RESOURCES
 
@@ -60,6 +61,7 @@ def list_resources(
     celles au format JSON, en excluant les fichiers dont le titre contient ".ocds".
     """
 
+    logger = get_run_logger()
     if not isinstance(datasets, list) or not all(isinstance(d, dict) for d in datasets):
         raise ValueError("dataset_ids must be a list of dictionaries")
 
@@ -70,6 +72,7 @@ def list_resources(
     all_resources = []
 
     for dataset in datasets:
+        logger.info(f"- {dataset['name']}")
         # Données de test .tests/data/datasets_reference_test.json
         if dataset["id"].startswith("test_"):
             all_resources += dataset["resources"]
@@ -113,6 +116,5 @@ def list_resources(
                     "views": resource["metrics"].get("views", None),
                 }
                 resources.append(resource)
-        print(f"- {dataset['name']}")
 
     return resources

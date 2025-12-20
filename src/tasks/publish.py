@@ -1,4 +1,5 @@
 from httpx import get, post, put
+from prefect.logging import get_run_logger
 
 from src.config import (
     DATAGOUVFR_API,
@@ -19,6 +20,8 @@ def update_resource(dataset_id, resource_id, file_path, api_key):
 
 
 def publish_to_datagouv():
+    logger = get_run_logger()
+
     dataset_id = "608c055b35eb4e6ee20eb325"
 
     uploads = [
@@ -50,12 +53,12 @@ def publish_to_datagouv():
     ]
 
     for upload in uploads:
-        print(f"Mise à jour de {upload['file']}...")
+        logger.info(f"Mise à jour de {upload['file']}...")
         result = update_resource(
             dataset_id, upload["resource_id"], upload["file"], DATAGOUVFR_API_KEY
         )
         if result["success"] is True:
-            print("OK")
+            logger.info("OK")
 
 
 def get_resource_id(dataset_id, filepath) -> str or None:
@@ -103,15 +106,17 @@ def publish_scrap_to_datagouv(year: str, month: str, file_path, target):
         "aws": "68caf6b135f19236a4f37a32",
         "marches-securises.fr": "68ebb48dd708fdb2d7c15bff",
     }
+    logger = get_run_logger()
+
     dataset_id = dataset_ids[target]
     resource_id, description = get_resource_id(dataset_id, file_path)
     if resource_id is None:
-        print(f"Publication des données {target} de {year}-{month}...")
+        logger.info(f"Publication des données {target} de {year}-{month}...")
         result = publish_new_resource(dataset_id, file_path, description)
         if result:
-            print("OK (nouvelle ressource)")
+            logger.info("OK (nouvelle ressource)")
     else:
-        print(f"Mise à jour des données {target} de {year}-{month}...")
+        logger.info(f"Mise à jour des données {target} de {year}-{month}...")
         result = update_resource(dataset_id, resource_id, file_path, DATAGOUVFR_API_KEY)
         if result["success"] is True:
-            print("OK (mise à jour)")
+            logger.info("OK (mise à jour)")

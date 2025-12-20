@@ -3,6 +3,7 @@ from pathlib import Path
 
 import polars as pl
 import polars.selectors as cs
+from prefect.logging import get_run_logger
 
 from src.config import DATA_DIR, DIST_DIR
 from src.tasks.output import save_to_files
@@ -77,13 +78,6 @@ def apply_modifications(lff: pl.LazyFrame):
         how="left",
     )
 
-    if "modification_id" in columns:
-        print("modification_id")
-        lf_final = lf_final.drop("modification_id")
-    if "donneesActuelles" in columns:
-        print("donneesActuelles")
-        lf_final = lf_final.drop("donneesActuelles")
-
     return lf_final
 
 
@@ -118,12 +112,14 @@ def sort_modifications(lff: pl.LazyFrame) -> pl.LazyFrame:
 
 
 def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
-    # Concatenation par morceaux (chunks) pour éviter de charger trop de fichiers en mémoire
+    """Concatenation par morceaux (chunks) pour éviter de charger trop de fichiers en mémoire
     # et pour éviter "OSError: Too many open files"
 
     # Mise de côté des parquet
     # - qui n'existent pas (s'il y a eu une erreur par exemple)
-    # - qui ont une hauteur de 0
+    # - qui ont une hauteur de 0"""
+    logger = get_run_logger()
+
     checked_parquet_files = [file for file in parquet_files if check_parquet_file(file)]
 
     chunk_size = 500
@@ -134,7 +130,7 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
 
     intermediate_files = []
     for i, chunk in enumerate(chunks):
-        print(f"Concatenation du chunk {i + 1}/{len(chunks)}")
+        logger.info(f"Concatenation du chunk {i + 1}/{len(chunks)}")
         lfs = [pl.scan_parquet(file) for file in chunk]
         lf_chunk = pl.concat(lfs, how="vertical")
 
@@ -147,11 +143,11 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
         intermediate_files.append(chunk_path)
 
     # Concatenation finale des fichiers intermédiaires
-    print("Concatenation finale...")
+    logger.info("Concatenation finale...")
     lfs = [pl.scan_parquet(file) for file in intermediate_files if Path(file).exists()]
     lf_concat: pl.LazyFrame = pl.concat(lfs, how="vertical")
 
-    print(
+    logger.debug(
         "Suppression des lignes en doublon par UID + titulaire ID + titulaire type ID + dateNotification"
     )
 
@@ -259,6 +255,8 @@ def prepare_etablissements(lff: pl.LazyFrame) -> pl.LazyFrame:
 
 
 def sort_columns(lf: pl.LazyFrame, config_columns):
+    logger = get_run_logger()
+
     # Les colonnes présentes mais absentes des colonnes attendues sont mises à la fin de la liste
     schema = lf.collect_schema()
     other_columns = []
@@ -266,7 +264,7 @@ def sort_columns(lf: pl.LazyFrame, config_columns):
         if col not in config_columns:
             other_columns.append(col)
 
-    print("Colonnes inattendues:", other_columns)
+    logger.warning("Colonnes inattendues:", other_columns)
 
     lf = lf.select(config_columns + other_columns)
     lf = lf.sort(

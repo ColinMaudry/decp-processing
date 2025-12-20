@@ -9,6 +9,7 @@ from time import sleep
 import httpx
 from bs4 import BeautifulSoup
 from prefect import task
+from prefect.logging import get_run_logger
 from selenium import webdriver
 from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
@@ -24,6 +25,7 @@ def get_html(url: str, client: httpx.Client) -> str or None:
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8",
         "Connection": "keep-alive",
     }
+    logger = get_run_logger()
 
     def get_response() -> httpx.Response:
         return client.get(url, timeout=timeout, headers=headers).raise_for_status()
@@ -32,12 +34,12 @@ def get_html(url: str, client: httpx.Client) -> str or None:
     try:
         response = get_response()
     except (httpx.ConnectError, httpx.ReadTimeout, httpx.HTTPStatusError):
-        print("3s break and retrying...")
+        logger.debug("3s break and retrying...")
         sleep(3)
         try:
             response = get_response()
         except (httpx.ConnectError, httpx.ReadTimeout, httpx.HTTPStatusError):
-            print("Skipped")
+            logger.error("Skipped")
             return None
     html = response.text
     return html
@@ -50,26 +52,30 @@ def get_html(url: str, client: httpx.Client) -> str or None:
 # )
 def get_json_marches_securises(url: str, client: httpx.Client) -> dict or None:
     json_html_page = get_html(url, client)
+    logger = get_run_logger()
+
     sleep(0.1)
     if json_html_page:
         json_html_page = (
             json_html_page.replace("</head>", "</head><body>") + "</body></html>"
         )
     else:
-        print("json_html_page is None, skipping...")
+        logger.warning("json_html_page is None, skipping...")
         return None
     json_html_page_soup = BeautifulSoup(json_html_page, "html.parser")
     try:
         decp_json = json.loads(json_html_page_soup.find("body").string)
     except Exception as e:
-        print(json_html_page)
-        print(e)
+        logger.info(json_html_page)
+        logger.info(e)
         return None
     return decp_json
 
 
 @task(log_prints=True)
 def scrap_marches_securises_month(year: str, month: str, dist_dir: Path):
+    logger = get_run_logger()
+
     marches = []
     page = 1
     with httpx.Client() as client:
@@ -85,7 +91,7 @@ def scrap_marches_securises_month(year: str, month: str, dist_dir: Path):
                     return []
                 soup = BeautifulSoup(html_result_page, "html.parser")
                 result_div = soup.find("div", attrs={"id": "liste_consultations"})
-                print("Year: ", year, "Month: ", month, "Page: ", str(page))
+                logger.info("Year: ", year, "Month: ", month, "Page: ", str(page))
                 return result_div.find_all(
                     "a", attrs={"title": "Télécharger au format Json"}
                 )
@@ -94,7 +100,7 @@ def scrap_marches_securises_month(year: str, month: str, dist_dir: Path):
                 json_links = parse_result_page()
             except AttributeError:
                 sleep(3)
-                "Retrying result page download and parsing..."
+                logger.info("Retrying result page download and parsing...")
                 json_links = parse_result_page()
 
             if not json_links:
@@ -115,6 +121,8 @@ def scrap_marches_securises_month(year: str, month: str, dist_dir: Path):
 
 @task(log_prints=True)
 def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
+    logger = get_run_logger()
+
     options = Options()
     options.add_argument("--headless")
     options.set_preference("browser.download.folderList", 2)
@@ -154,7 +162,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
         def search_form(end_date_: date) -> tuple[date, str, int]:
             end_date_str_ = end_date_.isoformat()
             sleep(1)
-            print(f"➡️  {start_date_str} -> {end_date_str_}")
+            logger.info(f"➡️  {start_date_str} -> {end_date_str_}")
 
             # Formulaire recherche données essentielles
             form = driver.find_element(By.ID, "formRech")
@@ -184,15 +192,15 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
         if result_code == "too_many":
             # On réessaie avec moins de résultats
             if end_date != start_date:
-                "💥  Trop de résultats, on réessaie avec un jour de moins"
+                logger.info("💥  Trop de résultats, on réessaie avec un jour de moins")
                 end_date = search_form(end_date - timedelta(days=1))
                 continue
             else:
-                print("start_date == end_date et trop de résultats, on skip !")
+                logger.info("start_date == end_date et trop de résultats, on skip !")
                 start_date = end_date + timedelta(days=1)
                 continue
         elif result_code == "no_result":
-            print("👻  Aucun résultat, on skip.")
+            logger.info("👻  Aucun résultat, on skip.")
             start_date = end_date + timedelta(days=1)
             continue
         elif result_code == "timeout":
@@ -201,7 +209,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             retry_count += 1
             continue
         elif result_code is None:
-            print("❓  Pas de téléchargement, on skip.")
+            logger.info("❓  Pas de téléchargement, on skip.")
             start_date = end_date + timedelta(days=1)
             continue
 
@@ -231,7 +239,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             try:
                 marches = json.loads(json_text)["marches"]
             except json.decoder.JSONDecodeError:
-                print("Le décodage JSON a échoué, tentative de correction...")
+                logger.debug("Le décodage JSON a échoué, tentative de correction...")
 
                 def fix_unescaped_quotes_in_objet(text):
                     """Générée avec l'aide de ChatGPT (GPT-4o)"""
@@ -255,7 +263,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             nb_marches_month = len(marches_month)
             if nb_marches == nb_results:
                 marches_month.extend(marches)
-                print(
+                logger.debug(
                     f"✅ Téléchargement valide, longueur marchés {nb_marches} (mois : {nb_marches_month})"
                 )
 
@@ -264,12 +272,14 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
                 continue
             else:
                 # On reste sur les mêmes jours
-                print(f"{nb_results} résultats != {nb_marches} marchés téléchargés")
+                logger.debug(
+                    f"{nb_results} résultats != {nb_marches} marchés téléchargés"
+                )
                 retry_count += 1
                 continue
 
         else:
-            print("Pas de JSON téléchargé")
+            logger.warning("Pas de JSON téléchargé")
             # On reste sur les mêmes jours
             retry_count += 1
             continue
@@ -292,6 +302,8 @@ def wait_for_either_element(driver, timeout=10) -> tuple[str or None, int]:
     Attend de voir si le bouton de téléchargement apparaît ou bien le message d'erreur.
     Fonction générée en grande partie avec la LLM Euria, développée par Infomaniak
     """
+    logger = get_run_logger()
+
     download_button_id = "downloadDonnees"
 
     try:
@@ -310,7 +322,7 @@ def wait_for_either_element(driver, timeout=10) -> tuple[str or None, int]:
             )
         )
         if result.text:
-            print(result.text)
+            logger.debug(result.text)
 
         # Determine which one appeared
         if result.get_attribute("id") == download_button_id:
@@ -327,18 +339,18 @@ def wait_for_either_element(driver, timeout=10) -> tuple[str or None, int]:
             sleep(2)
             return "download", nb_results
         elif "préciser" in result:
-            print("too many results")
+            logger.info("too many results")
             return "too_many", 0
         elif "Aucun" in result:
-            print("no result")
+            logger.info("no result")
             return "no_result", 0
         else:
-            print("Ni téléchargement, ni erreur...")
+            logger.info("Ni téléchargement, ni erreur...")
             return None, 0  # Should not happen
 
     except TimeoutException:
-        print("[Timeout] Ni bouton ni erreur dans le temps imparti...")
+        logger.error("[Timeout] Ni bouton ni erreur dans le temps imparti...")
         return "timeout", 0
     except Exception as e:
-        print(f"[Error] Unexpected error while waiting: {e}")
+        logger.error(f"[Error] Unexpected error while waiting: {e}")
         return None, 0

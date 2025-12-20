@@ -9,11 +9,14 @@ from pathlib import Path
 import httpx
 from dotenv import find_dotenv, load_dotenv
 from ijson import sendable_list
+from prefect.logging import get_logger
 from prefect.variables import Variable
+
+logger = get_logger()
 
 dotenv_path = find_dotenv()
 if dotenv_path == "":
-    print("Création du fichier .env à partir de template.env")
+    logger.info("Création du fichier .env à partir de template.env")
     template_dotenv_path = Path(find_dotenv("template.env"))
     dotenv_path = template_dotenv_path.with_name(".env")
     shutil.copyfile(template_dotenv_path, dotenv_path)
