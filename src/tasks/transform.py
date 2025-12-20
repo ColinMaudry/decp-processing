@@ -5,7 +5,7 @@ import polars as pl
 import polars.selectors as cs
 from prefect.logging import get_run_logger
 
-from src.config import DATA_DIR, DIST_DIR
+from src.config import DATA_DIR, DIST_DIR, LOG_LEVEL
 from src.tasks.output import save_to_files
 from src.tasks.utils import check_parquet_file
 
@@ -118,7 +118,7 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
     # Mise de côté des parquet
     # - qui n'existent pas (s'il y a eu une erreur par exemple)
     # - qui ont une hauteur de 0"""
-    logger = get_run_logger()
+    logger = get_run_logger(level=LOG_LEVEL)
 
     checked_parquet_files = [file for file in parquet_files if check_parquet_file(file)]
 
@@ -255,7 +255,7 @@ def prepare_etablissements(lff: pl.LazyFrame) -> pl.LazyFrame:
 
 
 def sort_columns(lf: pl.LazyFrame, config_columns):
-    logger = get_run_logger()
+    logger = get_run_logger(level=LOG_LEVEL)
 
     # Les colonnes présentes mais absentes des colonnes attendues sont mises à la fin de la liste
     schema = lf.collect_schema()

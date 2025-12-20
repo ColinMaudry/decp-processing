@@ -2,7 +2,7 @@ import polars as pl
 from prefect import flow
 from prefect.logging import get_run_logger
 
-from src.config import DATA_DIR
+from src.config import DATA_DIR, LOG_LEVEL
 from src.tasks.get import get_insee_cog_data
 
 
@@ -10,7 +10,7 @@ from src.tasks.get import get_insee_cog_data
 def get_cog():
     """Téléchargement et préparation des données du Code Officiel Géographique"""
 
-    logger = get_run_logger()
+    logger = get_run_logger(level=LOG_LEVEL)
     logger.info(
         "Téléchargement et préparation des données du Code Officiel Géographique..."
     )

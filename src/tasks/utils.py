@@ -13,6 +13,7 @@ from src.config import (
     CACHE_EXPIRATION_TIME_HOURS,
     DATE_NOW,
     DIST_DIR,
+    LOG_LEVEL,
     RESOURCE_CACHE_DIR,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
@@ -65,7 +66,7 @@ def remove_unused_cache(
     cache_dir: Path = RESOURCE_CACHE_DIR,
     cache_expiration_time_hours: int = CACHE_EXPIRATION_TIME_HOURS,
 ):
-    logger = get_run_logger()
+    logger = get_run_logger(level=LOG_LEVEL)
 
     now = time.time()
     age_limit = cache_expiration_time_hours * 3600  # seconds
@@ -249,7 +250,7 @@ def generate_stats(lf: pl.LazyFrame):
 
 
 def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
-    logger = get_run_logger()
+    logger = get_run_logger(level=LOG_LEVEL)
 
     logger.info("Génération des statistiques sur les sources de données...")
     lf_uid = lf_uid.select("uid", "acheteur_id", "sourceDataset")
@@ -341,7 +342,7 @@ def check_parquet_file(path) -> bool:
 
 
 def print_all_config(all_config):
-    logger = get_run_logger()
+    logger = get_run_logger(level=LOG_LEVEL)
 
     msg = ""
     for k, v in sorted(all_config.items()):

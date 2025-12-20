@@ -5,7 +5,7 @@ from prefect import task
 from prefect.cache_policies import INPUTS
 from prefect.logging import get_run_logger
 
-from src.config import DATAGOUVFR_API_KEY, EXCLUDED_RESOURCES
+from src.config import DATAGOUVFR_API_KEY, EXCLUDED_RESOURCES, LOG_LEVEL
 
 
 def handle_paginated_calls(url: str) -> list[dict]:
@@ -61,7 +61,7 @@ def list_resources(
     celles au format JSON, en excluant les fichiers dont le titre contient ".ocds".
     """
 
-    logger = get_run_logger()
+    logger = get_run_logger(level=LOG_LEVEL)
     if not isinstance(datasets, list) or not all(isinstance(d, dict) for d in datasets):
         raise ValueError("dataset_ids must be a list of dictionaries")
 

@@ -6,6 +6,7 @@ from src.config import (
     DATAGOUVFR_API_KEY,
     DECP_PROCESSING_PUBLISH_TIMEOUT,
     DIST_DIR,
+    LOG_LEVEL,
 )
 
 
@@ -20,7 +21,7 @@ def update_resource(dataset_id, resource_id, file_path, api_key):
 
 
 def publish_to_datagouv():
-    logger = get_run_logger()
+    logger = get_run_logger(level=LOG_LEVEL)
 
     dataset_id = "608c055b35eb4e6ee20eb325"
 
@@ -106,7 +107,7 @@ def publish_scrap_to_datagouv(year: str, month: str, file_path, target):
         "aws": "68caf6b135f19236a4f37a32",
         "marches-securises.fr": "68ebb48dd708fdb2d7c15bff",
     }
-    logger = get_run_logger()
+    logger = get_run_logger(level=LOG_LEVEL)
 
     dataset_id = dataset_ids[target]
     resource_id, description = get_resource_id(dataset_id, file_path)

@@ -16,6 +16,7 @@ from src.config import (
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
+    LOG_LEVEL,
     MAX_PREFECT_WORKERS,
     PREFECT_API_URL,
     RESOURCE_CACHE_DIR,
@@ -45,7 +46,7 @@ from src.tasks.utils import (
 
 @flow(log_prints=True)
 def decp_processing(enable_cache_removal: bool = True):
-    logger = get_run_logger()
+    logger = get_run_logger(level=LOG_LEVEL)
 
     logger.info("🚀  Début du flow decp-processing")
 
@@ -154,7 +155,7 @@ def process_batch(
     resources_artifact,
     resources_to_process,
 ):
-    logger = get_run_logger()
+    logger = get_run_logger(level=LOG_LEVEL)
     batch = resources_to_process[i : i + batch_size]
     logger.info(
         f"🗃️ Traitement du lot {i // batch_size + 1} / {len(resources_to_process) // batch_size + 1}"

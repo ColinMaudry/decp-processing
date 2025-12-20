@@ -2,7 +2,7 @@ from prefect import flow
 from prefect.logging import get_run_logger
 from prefect.transactions import transaction
 
-from src.config import SIRENE_DATA_DIR
+from src.config import LOG_LEVEL, SIRENE_DATA_DIR
 from src.flows.get_cog import get_cog
 from src.tasks.get import get_etablissements, get_unite_legales
 from src.tasks.transform import prepare_etablissements
@@ -15,7 +15,7 @@ def sirene_preprocess():
     Pour chaque ressource (unités légales, établissements), un fichier parquet est produit.
     """
 
-    logger = get_run_logger()
+    logger = get_run_logger(level=LOG_LEVEL)
 
     logger.info("🚀  Pré-traitement des données SIRENE")
     # Soit les tâches de ce flow vont au bout (success), soit le dossier SIRENE_DATA_DIR est supprimé (voir remove_sirene_data_dir())

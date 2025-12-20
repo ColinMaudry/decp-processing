@@ -4,13 +4,20 @@ from shutil import rmtree
 from prefect import flow
 from prefect.logging import get_run_logger
 
-from src.config import DATE_NOW, DIST_DIR, MONTH_NOW, SCRAPING_MODE, SCRAPING_TARGET
+from src.config import (
+    DATE_NOW,
+    DIST_DIR,
+    LOG_LEVEL,
+    MONTH_NOW,
+    SCRAPING_MODE,
+    SCRAPING_TARGET,
+)
 from src.tasks.scrap import scrap_aws_month, scrap_marches_securises_month
 
 
 @flow(log_prints=True)
 def scrap(target: str = None, mode: str = None, month=None, year=None):
-    logger = get_run_logger()
+    logger = get_run_logger(level=LOG_LEVEL)
     # Remise à zéro du dossier dist
     dist_dir: Path = DIST_DIR / target
     if dist_dir.exists():

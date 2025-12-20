@@ -12,7 +12,7 @@ from ijson import sendable_list
 from prefect.logging import get_logger
 from prefect.variables import Variable
 
-logger = get_logger()
+logger = get_logger(__name__)
 
 dotenv_path = find_dotenv()
 if dotenv_path == "":
@@ -30,6 +30,9 @@ def make_path_from_env(env: str, alternative_path: Path) -> Path:
 
 
 ALL_CONFIG = {}
+
+# Niveau des logs
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
 # Nombre maximal de workers utilisables par Prefect. Défaut : 16
 MAX_PREFECT_WORKERS = int(os.getenv("MAX_PREFECT_WORKERS", 4))
