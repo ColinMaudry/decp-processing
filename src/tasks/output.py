@@ -8,9 +8,9 @@ from pathlib import Path
 import polars as pl
 from polars import selectors as cs
 from prefect import task
-from prefect.logging import get_run_logger
 
 from src.config import DIST_DIR, LOG_LEVEL, POSTGRESQL_DB_URI, REFERENCE_DIR
+from src.tasks.utils import get_logger
 
 
 def save_to_files(df: pl.DataFrame, path: Path, file_format=None):
@@ -172,7 +172,7 @@ def generate_final_schema(lf):
 @task(log_prints=True)
 def make_data_tables():
     """Tâches consacrées à la transformation des données dans un format relationnel (SQL)."""
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     logger.info("Création de la base données au format relationnel...")
     lf: pl.LazyFrame = pl.scan_parquet(DIST_DIR / "decp.parquet")

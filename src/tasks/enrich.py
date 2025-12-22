@@ -1,12 +1,12 @@
 import polars as pl
 import polars.selectors as cs
-from prefect.logging import get_run_logger
 
 from src.config import LOG_LEVEL, SIRENE_DATA_DIR
 from src.tasks.transform import (
     extract_unique_acheteurs_siret,
     extract_unique_titulaires_siret,
 )
+from src.tasks.utils import get_logger
 
 
 def add_etablissement_data(
@@ -79,7 +79,7 @@ def add_unite_legale_data(
 
 
 def enrich_from_sirene(lf: pl.LazyFrame):
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     # Récupération des données SIRET/SIREN préparées dans sirene-preprocess()
     lf_etablissements = pl.scan_parquet(SIRENE_DATA_DIR / "etablissements.parquet")

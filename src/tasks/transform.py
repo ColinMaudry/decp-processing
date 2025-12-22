@@ -3,11 +3,10 @@ from pathlib import Path
 
 import polars as pl
 import polars.selectors as cs
-from prefect.logging import get_run_logger
 
 from src.config import DATA_DIR, DIST_DIR, LOG_LEVEL
 from src.tasks.output import save_to_files
-from src.tasks.utils import check_parquet_file
+from src.tasks.utils import check_parquet_file, get_logger
 
 
 def apply_modifications(lff: pl.LazyFrame):
@@ -82,6 +81,15 @@ def apply_modifications(lff: pl.LazyFrame):
 
 
 def sort_modifications(lff: pl.LazyFrame) -> pl.LazyFrame:
+    logger = get_logger(level=LOG_LEVEL)
+
+    logger.info(
+        lff.collect()
+        .filter(pl.col("uid") == "219740222000192022VI2022_242")
+        .select("uid", "titulaire_id", "dateNotification")
+        .sort(["uid", "dateNotification"])
+    )
+
     lff = lff.with_columns(
         pl.col("dateNotification")
         .rank(method="ordinal")
@@ -118,7 +126,7 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
     # Mise de côté des parquet
     # - qui n'existent pas (s'il y a eu une erreur par exemple)
     # - qui ont une hauteur de 0"""
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     checked_parquet_files = [file for file in parquet_files if check_parquet_file(file)]
 
@@ -152,6 +160,7 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
     )
 
     # Exemple de doublon : 20005584600014157140791205100
+
     lf_concat = lf_concat.unique(
         subset=["uid", "titulaire_id", "titulaire_typeIdentifiant", "dateNotification"],
         maintain_order=False,
@@ -255,7 +264,7 @@ def prepare_etablissements(lff: pl.LazyFrame) -> pl.LazyFrame:
 
 
 def sort_columns(lf: pl.LazyFrame, config_columns):
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     # Les colonnes présentes mais absentes des colonnes attendues sont mises à la fin de la liste
     schema = lf.collect_schema()

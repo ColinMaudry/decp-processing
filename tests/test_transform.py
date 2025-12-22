@@ -120,7 +120,7 @@ class TestPrepareEtablissements:
 
 
 class TestHandleModificationsMarche:
-    def test_replace_with_modification_data(self):
+    def test_apply_modifications(self):
         # Input LazyFrame - 3 test cases covering key scenarios
         lf = pl.LazyFrame(
             [
@@ -160,6 +160,22 @@ class TestHandleModificationsMarche:
                         {"titulaire": {"typeIdentifiant": "SIRET", "id": "00012"}},
                     ],
                 },
+                {
+                    "uid": "1",
+                    "montant": 1000,
+                    "dureeMois": 12,
+                    "acheteur_id": "12345",
+                    "titulaires": [
+                        {"titulaire": {"typeIdentifiant": "SIRET", "id": "00013"}}
+                    ],
+                    "dateNotification": "2023-01-01",
+                    "datePublicationDonnees": "2023-01-02",
+                    "modification_dateNotificationModification": "2023-03-04",
+                    "modification_datePublicationDonneesModification": "2023-03-05",
+                    "modification_montant": None,
+                    "modification_dureeMois": None,
+                    "modification_titulaires": None,
+                },
                 # Case 2: uid=2 with no modifications (all modification fields are None)
                 {
                     "uid": "2",
@@ -184,6 +200,15 @@ class TestHandleModificationsMarche:
         expected_df = pl.DataFrame(
             [
                 # uid=1: 2 rows (original + 1 modification)
+                {
+                    "uid": "1",
+                    "dateNotification": "2023-03-04",
+                    "datePublicationDonnees": "2023-03-05",
+                    "montant": None,
+                    "dureeMois": None,
+                    "titulaires": None,
+                    "acheteur_id": "12345",
+                },
                 {
                     "uid": "1",
                     "dateNotification": "2023-02-04",
@@ -220,14 +245,19 @@ class TestHandleModificationsMarche:
                     "acheteur_id": "99999",
                 },
             ]
-        ).sort(by="dateNotification")
+        )
 
         # Call the function
-        result_df = apply_modifications(lf).sort(by="dateNotification").collect()
+        result_df = apply_modifications(lf).collect()
+
+        sort_by = ["uid", "dateNotification"]
 
         # Assert the result matches the expected DataFrame
         assert_frame_equal(
-            result_df, expected_df, check_column_order=False, check_dtypes=False
+            result_df.sort(by=sort_by),
+            expected_df.sort(by=sort_by),
+            check_column_order=False,
+            check_dtypes=False,
         )
 
     def test_sort_modifications(self):

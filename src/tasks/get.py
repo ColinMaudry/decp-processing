@@ -11,7 +11,6 @@ import orjson
 import polars as pl
 from httpx import Client, get
 from lxml import etree, html
-from prefect.logging import get_run_logger
 from prefect.transactions import transaction
 from tenacity import (
     retry,
@@ -41,13 +40,14 @@ from src.tasks.transform import prepare_unites_legales
 from src.tasks.utils import (
     full_resource_name,
     gen_artifact_row,
+    get_logger,
     stream_replace_bytestring,
 )
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=20))
 def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par défaut)
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     if url.startswith("http"):
         try:
@@ -69,7 +69,7 @@ def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par 
 def get_resource(
     r: dict, resources_artifact: list[dict] | list
 ) -> tuple[pl.LazyFrame | None, DecpFormat | None]:
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     if DECP_PROCESSING_PUBLISH is False:
         logger.info(f"➡️  {full_resource_name(r)}")
@@ -125,7 +125,7 @@ def get_resource(
 
 
 def find_json_decp_format(chunk, decp_formats, resource: dict):
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     for decp_format in decp_formats:
         decp_format.coroutine_ijson.send(chunk)
@@ -142,7 +142,7 @@ def find_json_decp_format(chunk, decp_formats, resource: dict):
 def json_stream_to_parquet(
     url: str, output_path: Path, resource: dict
 ) -> tuple[set, DecpFormat or None]:
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     decp_format_2019 = DecpFormat("DECP 2019", SCHEMA_MARCHE_2019, "marches")
     decp_format_2022 = DecpFormat("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
@@ -374,7 +374,7 @@ def norm_titulaire(titulaire: dict):
 
 
 def get_etablissements() -> pl.LazyFrame:
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     schema = {
         "siret": pl.String,
@@ -434,7 +434,7 @@ def get_etablissements() -> pl.LazyFrame:
 
 
 def get_insee_cog_data(url, schema_overrides, columns) -> pl.DataFrame:
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     try:
         df_insee = pl.read_csv(url, schema_overrides=schema_overrides, columns=columns)
@@ -450,7 +450,7 @@ def get_insee_cog_data(url, schema_overrides, columns) -> pl.DataFrame:
 def get_clean(
     resource, resources_artifact: list, available_parquet_files: set
 ) -> pl.DataFrame or None:
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     with transaction():
         checksum = resource["checksum"]
@@ -481,7 +481,7 @@ def get_clean(
 
 
 def get_unite_legales(processed_parquet_path):
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     logger.info("Téléchargement des données unité légales et sélection des colonnes...")
     (

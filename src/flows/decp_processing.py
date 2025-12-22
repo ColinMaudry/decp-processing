@@ -7,7 +7,6 @@ import polars.selectors as cs
 from prefect import flow, task
 from prefect.artifacts import create_table_artifact
 from prefect.context import get_run_context
-from prefect.logging import get_run_logger
 from prefect_email import EmailServerCredentials, email_send_message
 
 from src.config import (
@@ -39,6 +38,7 @@ from src.tasks.transform import (
 from src.tasks.utils import (
     full_resource_name,
     generate_stats,
+    get_logger,
     print_all_config,
     remove_unused_cache,
 )
@@ -46,7 +46,7 @@ from src.tasks.utils import (
 
 @flow(log_prints=True)
 def decp_processing(enable_cache_removal: bool = True):
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     logger.info("🚀  Début du flow decp-processing")
 
@@ -155,7 +155,7 @@ def process_batch(
     resources_artifact,
     resources_to_process,
 ):
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
     batch = resources_to_process[i : i + batch_size]
     logger.info(
         f"🗃️ Traitement du lot {i // batch_size + 1} / {len(resources_to_process) // batch_size + 1}"

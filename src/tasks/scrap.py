@@ -9,7 +9,6 @@ from time import sleep
 import httpx
 from bs4 import BeautifulSoup
 from prefect import task
-from prefect.logging import get_run_logger
 from selenium import webdriver
 from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
@@ -18,6 +17,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from src.config import LOG_LEVEL
 from src.tasks.publish import publish_scrap_to_datagouv
+from src.tasks.utils import get_logger
 
 
 def get_html(url: str, client: httpx.Client) -> str or None:
@@ -26,7 +26,7 @@ def get_html(url: str, client: httpx.Client) -> str or None:
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8",
         "Connection": "keep-alive",
     }
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     def get_response() -> httpx.Response:
         return client.get(url, timeout=timeout, headers=headers).raise_for_status()
@@ -53,7 +53,7 @@ def get_html(url: str, client: httpx.Client) -> str or None:
 # )
 def get_json_marches_securises(url: str, client: httpx.Client) -> dict or None:
     json_html_page = get_html(url, client)
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     sleep(0.1)
     if json_html_page:
@@ -75,7 +75,7 @@ def get_json_marches_securises(url: str, client: httpx.Client) -> dict or None:
 
 @task(log_prints=True)
 def scrap_marches_securises_month(year: str, month: str, dist_dir: Path):
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     marches = []
     page = 1
@@ -122,7 +122,7 @@ def scrap_marches_securises_month(year: str, month: str, dist_dir: Path):
 
 @task(log_prints=True)
 def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     options = Options()
     options.add_argument("--headless")
@@ -303,7 +303,7 @@ def wait_for_either_element(driver, timeout=10) -> tuple[str or None, int]:
     Attend de voir si le bouton de téléchargement apparaît ou bien le message d'erreur.
     Fonction générée en grande partie avec la LLM Euria, développée par Infomaniak
     """
-    logger = get_run_logger(level=LOG_LEVEL)
+    logger = get_logger(level=LOG_LEVEL)
 
     download_button_id = "downloadDonnees"
 
