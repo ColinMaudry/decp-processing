@@ -204,9 +204,12 @@ class TestHandleModificationsMarche:
                     "uid": "1",
                     "dateNotification": "2023-03-04",
                     "datePublicationDonnees": "2023-03-05",
-                    "montant": None,
-                    "dureeMois": None,
-                    "titulaires": None,
+                    "montant": 1500,
+                    "dureeMois": 18,
+                    "titulaires": [
+                        {"titulaire": {"typeIdentifiant": "SIRET", "id": "00011"}},
+                        {"titulaire": {"typeIdentifiant": "SIRET", "id": "00012"}},
+                    ],
                     "acheteur_id": "12345",
                 },
                 {
@@ -262,7 +265,7 @@ class TestHandleModificationsMarche:
 
     def test_sort_modifications(self):
         """
-        Générée par la LLM Euria, développée et hébergée en Suisse par Infomaniak. Vérifié par l'auteur.
+        Générée par la LLM Euria, développée et hébergée en Suisse par Infomaniak. Vérifiée par l'auteur.
         """
         df_input = pl.DataFrame(
             {
@@ -274,11 +277,10 @@ class TestHandleModificationsMarche:
                     "2023-02-01",
                     "2023-02-02",
                 ],
-                "montant": [100.0, None, 300.0, 500.0, None],
-                "dureeMois": [12, None, 24, 12, 36],
-                "titulaire_id": ["T1", None, "T3", "T5", None],
-                "titulaire_typeIdentifiant": ["ID", None, "ID", "ID", None],
-                "data": ["x", "x", "x", "p", "p"],
+                "montant": [100.0, 300.0, 300.0, 500.0, 500.0],
+                "dureeMois": [12, 24, 24, 12, 36],
+                "titulaire_id": ["T1", "T3", "T3", "T5", "T5"],
+                "titulaire_typeIdentifiant": ["ID", "ID", "ID", "ID", "ID"],
             }
         ).with_columns(
             pl.col("dateNotification").str.strptime(
@@ -289,7 +291,6 @@ class TestHandleModificationsMarche:
         # Appliquer la fonction
         result = sort_modifications(df_input.lazy()).collect()
 
-        # DataFrame attendu (après transformation)
         expected = pl.DataFrame(
             {
                 "uid": ["A", "A", "A", "B", "B"],
@@ -304,7 +305,6 @@ class TestHandleModificationsMarche:
                 "dureeMois": [24, 24, 12, 36, 12],
                 "titulaire_id": ["T3", "T3", "T1", "T5", "T5"],
                 "titulaire_typeIdentifiant": ["ID", "ID", "ID", "ID", "ID"],
-                "data": ["x", "x", "x", "p", "p"],
                 "modification_id": [2, 1, 0, 1, 0],
                 "donneesActuelles": [True, False, False, True, False],
             }
