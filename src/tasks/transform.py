@@ -92,18 +92,9 @@ def apply_modifications(lff: pl.LazyFrame):
 
 
 def sort_modifications(lff: pl.LazyFrame) -> pl.LazyFrame:
-    logger = get_logger(level=LOG_LEVEL)
-
-    logger.info(
-        lff.collect()
-        .filter(pl.col("uid") == "219740222000192022VI2022_242")
-        .select("uid", "titulaire_id", "dateNotification")
-        .sort(["uid", "dateNotification"])
-    )
-
     lff = lff.with_columns(
         pl.col("dateNotification")
-        .rank(method="ordinal")
+        .rank(method="dense")
         .over("uid")
         .cast(pl.Int16)
         .sub(1)
@@ -116,17 +107,8 @@ def sort_modifications(lff: pl.LazyFrame) -> pl.LazyFrame:
         ).alias("donneesActuelles")
     )
 
-    lff = lff.sort(
-        ["uid", "dateNotification", "modification_id"],
-        descending=[False, True, True],
-    )
+    lff = lff.sort(["uid", "dateNotification"], descending=[False, True])
 
-    # Étape 4: Remplir les valeurs nulles en utilisant les dernières valeurs non-nulles pour chaque id
-    lff = lff.with_columns(
-        pl.col("montant", "dureeMois", "titulaire_id", "titulaire_typeIdentifiant")
-        .fill_null(strategy="backward")
-        .over("uid")
-    )
     return lff
 
 
