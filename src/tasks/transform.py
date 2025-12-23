@@ -77,6 +77,17 @@ def apply_modifications(lff: pl.LazyFrame):
         how="left",
     )
 
+    # Étape 5: Remplir les valeurs nulles en utilisant les dernières valeurs non-nulles pour chaque id
+    lf_final = lf_final.sort(
+        ["uid", "dateNotification"],
+        descending=[False, False],
+    )
+    lf_final = lf_final.with_columns(
+        pl.col("montant", "dureeMois", "titulaires")
+        .fill_null(strategy="forward")
+        .over("uid")
+    )
+
     return lf_final
 
 
