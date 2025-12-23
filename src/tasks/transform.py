@@ -4,39 +4,23 @@ from pathlib import Path
 import polars as pl
 import polars.selectors as cs
 
-from src.config import DATA_DIR, DIST_DIR, DecpFormat
+from src.config import DATA_DIR, DIST_DIR, LOG_LEVEL
 from src.tasks.output import save_to_files
-from src.tasks.utils import check_parquet_file
+from src.tasks.utils import check_parquet_file, get_logger
 
 
-def explode_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat):
-    # Explosion des champs titulaires sur plusieurs lignes (un titulaire de marché par ligne)
-    # et une colonne par champ
-
-    # Structure originale 2022
-    # [{"titulaire": {"id": "abc", "typeIdentifiant": "SIRET"}}]
-    # mais simpliée dans filter_titulaires() (équivalent format 2019)
-    # [{"id": "abc", "typeIdentifiant": "SIRET"}]
-
-    # Explosion de la liste de titulaires en autant de nouvelles lignes
-    lf = lf.explode("titulaires").unnest("titulaires")
-
-    # Cast l'identifiant en string
-    # lf = lf.with_columns(pl.col("titulaire_id").cast(pl.String))
-
-    return lf
-
-
-def replace_with_modification_data(lff: pl.LazyFrame):
+def apply_modifications(lff: pl.LazyFrame):
     """
     Gère les modifications dans le DataFrame des DECP.
     À ce stade les modifications ont été exploded dans write_marche_rows().
     Cette fonction récupère les informations des modifications (ex : modification_montant) et les insère dans les champs de base (ex : montant).
     (chaque ligne contient les informations complètes à jour à la date de notification)
-    Elle ajoute également la colonne "donneesActuelles" pour indiquer si la modification est la plus récente.
+    donneesActuelles et modification_id sont ajoutées après concaténation de toutes les ressources.
     """
     # Étape 1: Extraire les données des modifications en renommant les colonnes
-    schema = lff.collect_schema().names()
+    columns = lff.collect_schema().names()
+    columns_no_modif = [col for col in columns if not (col.startswith("modification_"))]
+
     lf_mods = (
         lff.select(cs.by_name("uid") | cs.starts_with("modification_"))
         .rename(
@@ -44,7 +28,7 @@ def replace_with_modification_data(lff: pl.LazyFrame):
                 column: column.removeprefix("modification_").removesuffix(
                     "Modification"
                 )
-                for column in schema
+                for column in columns
                 if column.startswith("modification_") and column != "modification_id"
             }
         )
@@ -56,12 +40,13 @@ def replace_with_modification_data(lff: pl.LazyFrame):
     # uid, c'est les données de modifs
     lff = lff.unique("uid")
 
-    # Garder TOUTES les colonnes sauf les colonnes modification_*
+    # Garder toutes les colonnes sauf les colonnes modification_*
     lf_base = lff.drop(cs.starts_with("modification_"))
 
-    # Étape 3: Ajouter le modification_id et la colonne données actuelles pour chaque modif
+    # Étape 3 : concaténation des données modifiées et des colonnes normales (pas modification_)
+
     # Colonnes qui peuvent changer avec les modifications
-    modification_columns = [
+    modified_columns = [
         "uid",
         "dateNotification",
         "datePublicationDonnees",
@@ -72,15 +57,44 @@ def replace_with_modification_data(lff: pl.LazyFrame):
 
     lff = pl.concat(
         [
-            lf_base.select(modification_columns),
+            lf_base.select(modified_columns),
             lf_mods,
         ],
         how="diagonal",
     )
 
+    # Étape 4: Réintroduire le tout avec les colonnes fixes (qui ne changent pas avec les modifications)
+    # Sélectionner uniquement les colonnes qui ne sont pas dans modification_columns
+    columns_to_keep = [col for col in columns_no_modif if col not in modified_columns]
+
+    # Créer un DataFrame avec uniquement les colonnes fixes, dédupliqué par uid
+    lf_fixed_columns = lf_base.select(["uid"] + columns_to_keep).unique("uid")
+
+    # Joindre pour réintroduire les colonnes fixes
+    lf_final = lff.join(
+        lf_fixed_columns,
+        on="uid",
+        how="left",
+    )
+
+    # Étape 5: Remplir les valeurs nulles en utilisant les dernières valeurs non-nulles pour chaque id
+    lf_final = lf_final.sort(
+        ["uid", "dateNotification"],
+        descending=[False, False],
+    )
+    lf_final = lf_final.with_columns(
+        pl.col("montant", "dureeMois", "titulaires")
+        .fill_null(strategy="forward")
+        .over("uid")
+    )
+
+    return lf_final
+
+
+def sort_modifications(lff: pl.LazyFrame) -> pl.LazyFrame:
     lff = lff.with_columns(
         pl.col("dateNotification")
-        .rank(method="ordinal")
+        .rank(method="dense")
         .over("uid")
         .cast(pl.Int16)
         .sub(1)
@@ -93,61 +107,20 @@ def replace_with_modification_data(lff: pl.LazyFrame):
         ).alias("donneesActuelles")
     )
 
-    lff = lff.sort(
-        ["uid", "dateNotification", "modification_id"],
-        descending=[False, True, True],
-    )
+    lff = lff.sort(["uid", "dateNotification"], descending=[False, True])
 
-    # Étape 4: Remplir les valeurs nulles en utilisant les dernières valeurs non-nulles pour chaque id
-    lff = lff.with_columns(
-        pl.col("montant", "dureeMois", "titulaires")
-        .fill_null(strategy="backward")
-        .over("uid")
-    )
-
-    # Étape 5: Réintroduire les colonnes fixes (qui ne changent pas avec les modifications)
-    # Sélectionner uniquement les colonnes qui ne sont pas dans modification_columns
-    columns_to_keep = [
-        col
-        for col in lf_base.collect_schema().names()
-        if col not in modification_columns
-    ]
-
-    # Créer un DataFrame avec uniquement les colonnes fixes, dédupliqué par uid
-    lf_fixed_columns = lf_base.select(["uid"] + columns_to_keep).unique("uid")
-
-    # Joindre pour réintroduire les colonnes fixes
-    lf_final = lff.join(
-        lf_fixed_columns,
-        on="uid",
-        how="left",
-    )
-
-    return lf_final
-
-
-def process_modifications(lf: pl.LazyFrame) -> pl.LazyFrame:
-    # Pas encore au point, risque de trop gros effets de bord
-    # lf = remove_modifications_duplicates(lf)
-
-    lf = replace_with_modification_data(lf)
-
-    # Si il n'y avait aucun modifications dans le fichier, il faut ajouter les colonnes
-    if "donneesActuelles" not in lf.collect_schema():
-        lf = lf.with_columns(
-            pl.lit(0).alias("modification_id"), pl.lit(True).alias("donneesActuelles")
-        )
-
-    return lf
+    return lff
 
 
 def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
-    # Concatenation par morceaux (chunks) pour éviter de charger trop de fichiers en mémoire
+    """Concatenation par morceaux (chunks) pour éviter de charger trop de fichiers en mémoire
     # et pour éviter "OSError: Too many open files"
 
     # Mise de côté des parquet
     # - qui n'existent pas (s'il y a eu une erreur par exemple)
-    # - qui ont une hauteur de 0
+    # - qui ont une hauteur de 0"""
+    logger = get_logger(level=LOG_LEVEL)
+
     checked_parquet_files = [file for file in parquet_files if check_parquet_file(file)]
 
     chunk_size = 500
@@ -158,7 +131,7 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
 
     intermediate_files = []
     for i, chunk in enumerate(chunks):
-        print(f"Concatenation du chunk {i + 1}/{len(chunks)}")
+        logger.info(f"Concatenation du chunk {i + 1}/{len(chunks)}")
         lfs = [pl.scan_parquet(file) for file in chunk]
         lf_chunk = pl.concat(lfs, how="vertical")
 
@@ -171,17 +144,18 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
         intermediate_files.append(chunk_path)
 
     # Concatenation finale des fichiers intermédiaires
-    print("Concatenation finale...")
+    logger.info("Concatenation finale...")
     lfs = [pl.scan_parquet(file) for file in intermediate_files if Path(file).exists()]
     lf_concat: pl.LazyFrame = pl.concat(lfs, how="vertical")
 
-    print(
-        "Suppression des lignes en doublon par UID + titulaire ID + titulaire type ID + modification_id"
+    logger.debug(
+        "Suppression des lignes en doublon par UID + titulaire ID + titulaire type ID + dateNotification"
     )
 
     # Exemple de doublon : 20005584600014157140791205100
+
     lf_concat = lf_concat.unique(
-        subset=["uid", "titulaire_id", "titulaire_typeIdentifiant", "modification_id"],
+        subset=["uid", "titulaire_id", "titulaire_typeIdentifiant", "dateNotification"],
         maintain_order=False,
     )
 
@@ -283,6 +257,8 @@ def prepare_etablissements(lff: pl.LazyFrame) -> pl.LazyFrame:
 
 
 def sort_columns(lf: pl.LazyFrame, config_columns):
+    logger = get_logger(level=LOG_LEVEL)
+
     # Les colonnes présentes mais absentes des colonnes attendues sont mises à la fin de la liste
     schema = lf.collect_schema()
     other_columns = []
@@ -290,7 +266,8 @@ def sort_columns(lf: pl.LazyFrame, config_columns):
         if col not in config_columns:
             other_columns.append(col)
 
-    print("Colonnes inattendues:", other_columns)
+    if other_columns:
+        logger.warning("Colonnes inattendues: " + str(other_columns))
 
     lf = lf.select(config_columns + other_columns)
     lf = lf.sort(

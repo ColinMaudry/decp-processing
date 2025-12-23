@@ -1,10 +1,19 @@
-### 2.6.2 2025-12-15
+#### 2.6.4 2025-12-19
+
+- Tri et numérotation des modifications après la concaténation plutôt que par ressource, pour réduire le nombre de doublons ([#156](https://github.com/ColinMaudry/decp-processing/issues/156))
+
+#### 2.6.3 2025-12-16
+
+- Téléchargement des ressources plus résilient aux erreurs ([tenacity](https://tenacity.readthedocs.io/en/latest/))
+- Téléchargement des données établissements plus résilient aux erreurs ([tenacity](https://tenacity.readthedocs.io/en/latest/))
+
+#### 2.6.2 2025-12-15
 
 - Réduction du nombre de tâches prefect pour réduire la charge sur la BDD et la latence
 - Utilisation du multithreading standard de Python plutôt que celui de Prefect
 - Le nom d'établissement n'est ajouté entre parenthèses que s'il est différent de celui de l'unité légale
 
-### 2.6.1 2025-12-14
+#### 2.6.1 2025-12-14
 
 - Séparation des fichiers de référence et des fichiers de données
 - Réorganisation des variables d'environnement

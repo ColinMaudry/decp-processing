@@ -15,6 +15,7 @@ from src.config import (
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
+    LOG_LEVEL,
     MAX_PREFECT_WORKERS,
     PREFECT_API_URL,
     RESOURCE_CACHE_DIR,
@@ -32,10 +33,12 @@ from src.tasks.transform import (
     calculate_naf_cpv_matching,
     concat_parquet_files,
     sort_columns,
+    sort_modifications,
 )
 from src.tasks.utils import (
     full_resource_name,
     generate_stats,
+    get_logger,
     print_all_config,
     remove_unused_cache,
 )
@@ -43,11 +46,13 @@ from src.tasks.utils import (
 
 @flow(log_prints=True)
 def decp_processing(enable_cache_removal: bool = True):
-    print("🚀  Début du flow decp-processing")
+    logger = get_logger(level=LOG_LEVEL)
+
+    logger.info("🚀  Début du flow decp-processing")
 
     print_all_config(ALL_CONFIG)
 
-    print("Liste de toutes les ressources des datasets...")
+    logger.info("Liste de toutes les ressources des datasets...")
     resources: list[dict] = list_resources(TRACKED_DATASETS)
 
     # Initialisation du tableau des artifacts de ressources
@@ -84,10 +89,13 @@ def decp_processing(enable_cache_removal: bool = True):
         )
         del resources_artifact
 
-    print("Fusion des dataframes...")
+    logger.info("Concaténation des dataframes...")
     lf: pl.LazyFrame = concat_parquet_files(parquet_files)
 
-    print("Ajout des données SIRENE...")
+    logger.info("Tri des modifications...")
+    lf = sort_modifications(lf)
+
+    logger.info("Ajout des données SIRENE...")
     # Preprocessing des données SIRENE si :
     # - le dossier n'existe pas encore (= les données n'ont pas déjà été preprocessed ce mois-ci)
     # - on est au moins le 5 du mois (pour être sûr que les données SIRENE ont été mises à jour sur data.gouv.fr)
@@ -104,17 +112,19 @@ def decp_processing(enable_cache_removal: bool = True):
     sink_to_files(lf, DIST_DIR / "decp", file_format="parquet")
     lf: pl.LazyFrame = pl.scan_parquet(DIST_DIR / "decp.parquet")
 
-    print("Ajout de la colonne 'dureeRestanteMois'...")
+    logger.info("Ajout de la colonne 'dureeRestanteMois'...")
     lf = add_duree_restante(lf)
 
-    print("Génération des probabilités NAF/CPV...")
+    logger.info("Génération des probabilités NAF/CPV...")
     calculate_naf_cpv_matching(lf)
     lf = lf.drop(cs.starts_with("activite"))
 
-    print("Génération de l'artefact (statistiques) sur le base df...")
+    logger.info("Génération de l'artefact (statistiques) sur le base df...")
     generate_stats(lf)
 
-    print("Génération du schéma et enregistrement des DECP aux formats CSV, Parquet...")
+    logger.info(
+        "Génération du schéma et enregistrement des DECP aux formats CSV, Parquet..."
+    )
     lf: pl.LazyFrame = sort_columns(lf, BASE_DF_COLUMNS)
     generate_final_schema(lf)
     sink_to_files(lf, DIST_DIR / "decp")
@@ -124,16 +134,16 @@ def decp_processing(enable_cache_removal: bool = True):
     # make_data_tables()
 
     if decp_publish:
-        print("Publication sur data.gouv.fr...")
+        logger.info("Publication sur data.gouv.fr...")
         publish_to_datagouv()
     else:
-        print("Publication sur data.gouv.fr désactivée.")
+        logger.info("Publication sur data.gouv.fr désactivée.")
 
     if enable_cache_removal:
-        print("Suppression des fichiers de cache inutilisés...")
+        logger.info("Suppression des fichiers de cache inutilisés...")
         remove_unused_cache()
 
-    print("☑️  Fin du flow principal decp_processing.")
+    logger.info("☑️  Fin du flow principal decp_processing.")
 
 
 @task(retries=2, timeout_seconds=1800)
@@ -145,8 +155,9 @@ def process_batch(
     resources_artifact,
     resources_to_process,
 ):
+    logger = get_logger(level=LOG_LEVEL)
     batch = resources_to_process[i : i + batch_size]
-    print(
+    logger.info(
         f"🗃️ Traitement du lot {i // batch_size + 1} / {len(resources_to_process) // batch_size + 1}"
     )
     futures = {}
@@ -164,8 +175,10 @@ def process_batch(
                 parquet_files.append(result)
         except Exception as e:
             resource_name = futures[future]
-            print(f"❌ Erreur de traitement de {resource_name} ({type(e).__name__}):")
-            print(e)
+            logger.error(
+                f"❌ Erreur de traitement de {resource_name} ({type(e).__name__}):"
+            )
+            logger.info(e)
     # Nettoyage explicite
     futures.clear()
 

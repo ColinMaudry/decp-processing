@@ -3,16 +3,25 @@ from shutil import rmtree
 
 from prefect import flow
 
-from src.config import DATE_NOW, DIST_DIR, MONTH_NOW, SCRAPING_MODE, SCRAPING_TARGET
+from src.config import (
+    DATE_NOW,
+    DIST_DIR,
+    LOG_LEVEL,
+    MONTH_NOW,
+    SCRAPING_MODE,
+    SCRAPING_TARGET,
+)
 from src.tasks.scrap import scrap_aws_month, scrap_marches_securises_month
+from src.tasks.utils import get_logger
 
 
 @flow(log_prints=True)
 def scrap(target: str = None, mode: str = None, month=None, year=None):
+    logger = get_logger(level=LOG_LEVEL)
     # Remise à zéro du dossier dist
     dist_dir: Path = DIST_DIR / target
     if dist_dir.exists():
-        print(f"Suppression de {dist_dir}...")
+        logger.debug(f"Suppression de {dist_dir}...")
         rmtree(dist_dir)
     else:
         dist_dir.mkdir(parents=True)
@@ -26,7 +35,7 @@ def scrap(target: str = None, mode: str = None, month=None, year=None):
     elif target == "marches-securises.fr":
         scrap_target_month = scrap_marches_securises_month
     else:
-        print("Quel target ?")
+        logger.error("Quel target ?")
         raise ValueError
 
     current_year = DATE_NOW[:4]
@@ -52,4 +61,4 @@ def scrap(target: str = None, mode: str = None, month=None, year=None):
             scrap(target=target, mode="year", year=str(year))
 
     else:
-        print("Mauvaise configuration")
+        logger.error("Mauvaise configuration")
