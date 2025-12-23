@@ -6,8 +6,7 @@ from polars import selectors as cs
 
 from src.config import DecpFormat
 from src.tasks.transform import (
-    explode_titulaires,
-    process_modifications,
+    apply_modifications,
 )
 
 
@@ -48,10 +47,18 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     # TODO: à déplacer autre part, dans transform
     lf = lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
 
+    # Normalisation des titulaires
+    # Cela permet de s'assurer que les titulaires mal formés ne vont pas être appliqués à d'autres marchés
+    for column in ["titulaires", "modification_titulaires"]:
+        lf = clean_titulaires(lf, decp_format, column)
+
     # Application des modifications
     # le plus tôt possible pour que les fonctions suivantes clean les
     # champs modifiés (dateNotification, datePublicationDonnnes, montant, titulaires, dureeMois)
-    lf = process_modifications(lf)
+    lf = apply_modifications(lf)
+
+    # Explosion des titulaires
+    lf = lf.explode("titulaires").unnest("titulaires")
 
     # Montants
     # Certains marchés ont des montants qui posent problème, donc on les met à 12,311111111 milliards (pour les retrouver facilement)
@@ -110,12 +117,6 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
 
     # Valeurs équivalentes à null transformées en null
     lf = clean_null_equivalent(lf)
-
-    # Normalisation des titulaires
-    lf = clean_titulaires(lf, decp_format)
-
-    # Explosion des titulaires
-    lf = explode_titulaires(lf, decp_format)
 
     # Remplacement des "" par null
     lf = lf.with_columns(
@@ -189,9 +190,10 @@ def clean_null_equivalent(lf: pl.LazyFrame) -> pl.LazyFrame:
     return lf
 
 
-def clean_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
+def clean_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat, column) -> pl.LazyFrame:
     """
     Normalise les listes de titulaires en utilisant des expressions Polars natives.
+    `column` peut être titulaires ou modification_titulaires
     Codée avec l'assistance du LLM Gemini 3 Pro et révisée par le développeur.
     """
     # Définition des expressions de nettoyage selon le format
@@ -215,9 +217,9 @@ def clean_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
 
     # Skip processing if column dtype is Null (all values are null)
     # This happens when modification_titulaires has no actual data
-    if lf.collect_schema()["titulaires"] != pl.Null:
+    if lf.collect_schema()[column] != pl.Null:
         lf = lf.with_columns(
-            pl.col("titulaires")
+            pl.col(column)
             .list.eval(expr_titulaire)
             .list.eval(
                 # Filtrer les éléments où id ET typeIdentifiant sont null
@@ -228,19 +230,19 @@ def clean_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
                     .is_not_null()
                 )
             )
-            .alias("titulaires")
+            .alias(column)
         )
 
     # Remplacer les listes de titulaires vides par null
     # Only process columns that have List dtype
 
-    if lf.collect_schema()["titulaires"] != pl.Null:
+    if lf.collect_schema()[column] != pl.Null:
         lf = lf.with_columns(
             [
-                pl.when(pl.col("titulaires").list.len() == 0)
+                pl.when(pl.col(column).list.len() == 0)
                 .then(None)
-                .otherwise(pl.col("titulaires"))
-                .alias("titulaires")
+                .otherwise(pl.col(column))
+                .alias(column)
             ]
         )
 
@@ -266,7 +268,6 @@ def fix_data_types(lf: pl.LazyFrame) -> pl.LazyFrame:
         # "variationPrixActeSousTraitance": pl.Float64,
         "origineFrance": pl.Float32,
         "origineUE": pl.Float32,
-        "modification_id": pl.Int16,
     }
 
     # Champs numériques

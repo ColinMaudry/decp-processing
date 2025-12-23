@@ -9,7 +9,8 @@ import polars as pl
 from polars import selectors as cs
 from prefect import task
 
-from src.config import DIST_DIR, POSTGRESQL_DB_URI, REFERENCE_DIR
+from src.config import DIST_DIR, LOG_LEVEL, POSTGRESQL_DB_URI, REFERENCE_DIR
+from src.tasks.utils import get_logger
 
 
 def save_to_files(df: pl.DataFrame, path: Path, file_format=None):
@@ -171,13 +172,13 @@ def generate_final_schema(lf):
 @task(log_prints=True)
 def make_data_tables():
     """Tâches consacrées à la transformation des données dans un format relationnel (SQL)."""
+    logger = get_logger(level=LOG_LEVEL)
 
-    print("Création de la base données au format relationnel...")
-
+    logger.info("Création de la base données au format relationnel...")
     lf: pl.LazyFrame = pl.scan_parquet(DIST_DIR / "decp.parquet")
 
-    print("Enregistrement des DECP (base DataFrame) dans les bases de données...")
-    print(DIST_DIR / "decp.parquet")
+    logger.info("Enregistrement des DECP (base DataFrame) dans les bases de données...")
+    logger.info(DIST_DIR / "decp.parquet")
     save_to_databases(
         lf,
         "decp",
@@ -185,7 +186,7 @@ def make_data_tables():
         "uid, titulaire_id, titulaire_typeIdentifiant, modification_id",
     )
 
-    print("Normalisation des tables...")
+    logger.info("Normalisation des tables...")
     normalize_tables(lf)
 
 
@@ -239,5 +240,3 @@ def normalize_tables(lf: pl.LazyFrame):
         "marches_acheteurs",
         '"uid", "modification_id", "acheteur_id"',
     )
-
-    # TODO ajouter les sous-traitants quand ils seront ajoutés aux données

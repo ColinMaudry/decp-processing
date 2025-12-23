@@ -434,14 +434,6 @@
           },
           {
             "modification": {
-              "id": 5,
-              "dateNotificationModification": "2023-06-23",
-              "datePublicationDonneesModification": "2023-06-26",
-              "dureeMois": 58
-            }
-          },
-          {
-            "modification": {
               "id": 6,
               "dateNotificationModification": "2023-07-24",
               "datePublicationDonneesModification": "2023-07-31",
@@ -454,13 +446,6 @@
               "id": 7,
               "dateNotificationModification": "2023-08-10",
               "datePublicationDonneesModification": "2023-08-10"
-            }
-          },
-          {
-            "modification": {
-              "id": 8,
-              "dateNotificationModification": "2025-04-14",
-              "datePublicationDonneesModification": "2025-04-14"
             }
           }
         ],
