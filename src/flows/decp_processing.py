@@ -89,7 +89,7 @@ def decp_processing(enable_cache_removal: bool = True):
         )
         del resources_artifact
 
-    logger.info("Fusion des dataframes...")
+    logger.info("Concaténation des dataframes...")
     lf: pl.LazyFrame = concat_parquet_files(parquet_files)
 
     logger.info("Tri des modifications...")

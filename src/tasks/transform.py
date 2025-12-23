@@ -266,7 +266,8 @@ def sort_columns(lf: pl.LazyFrame, config_columns):
         if col not in config_columns:
             other_columns.append(col)
 
-    logger.warning("Colonnes inattendues:", other_columns)
+    if other_columns:
+        logger.warning("Colonnes inattendues: " + str(other_columns))
 
     lf = lf.select(config_columns + other_columns)
     lf = lf.sort(
