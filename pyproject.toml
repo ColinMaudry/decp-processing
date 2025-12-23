@@ -42,11 +42,13 @@ testpaths = [
     "tests",
 ]
 env = [
+    "LOG_LEVEL=DEBUG",
     "DATASETS_REFERENCE_FILEPATH=tests/data/source_datasets_test.json",
     "SIRENE_DATA_DIR=tests/data/sirene",
     "PREFECT_API_URL=",
     "DECP_PROCESSING_PUBLISH=",
-    "DECP_USE_CACHE=false"
+    "DECP_USE_CACHE=false",
+    "MAX_PREFECT_WORKERS=1"
 ]
 addopts = "-p no:warnings"
 
