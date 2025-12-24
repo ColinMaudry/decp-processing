@@ -143,6 +143,9 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     # NC
     lf = lf.with_columns(pl.col(pl.Utf8).replace("NC", None))
 
+    # Remplacement des single quotes qui servent d'apostrophes
+    lf = lf.with_columns(pl.col("objet").str.replace_all(r"(\w)'(\w)", "$1’$2"))
+
     # Correction des datatypes
     lf = fix_data_types(lf)
 
