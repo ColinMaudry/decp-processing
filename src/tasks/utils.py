@@ -80,7 +80,7 @@ def remove_unused_cache(
                     logger.info(f"Suppression du fichier de cache: {file}")
                     deleted_files.append(file)
                     file.unlink()
-        logger.info(f"-> {len(deleted_files)} fichiers supprimés")
+        logger.info(f"-> {len(deleted_files)} fichiers de cache supprimés")
 
 
 #
