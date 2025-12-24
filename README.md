@@ -163,3 +163,4 @@ pytest tests/test_main.py
 - [FranckMaseo](https://github.com/frankmaseo)
 - [Thomas Louf](https://github.com/tlouf)
 - [vico4445](https://github.com/vico4445)
+- [imanuch](https://github.com/imanuch)
