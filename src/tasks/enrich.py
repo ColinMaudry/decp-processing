@@ -1,7 +1,7 @@
 import polars as pl
 import polars.selectors as cs
 
-from src.config import LOG_LEVEL, SIRENE_DATA_DIR
+from src.config import LOG_LEVEL, SIRENE_DATA_DIR, ACHETEURS_NON_SIRENE
 from src.tasks.transform import (
     extract_unique_acheteurs_siret,
     extract_unique_titulaires_siret,
@@ -139,6 +139,9 @@ def enrich_from_sirene(lf: pl.LazyFrame):
 
     lf = lf.join(lf_sirets_acheteurs, how="left", on="acheteur_id")
 
+    # Fallback pour les acheteurs absents de SIRENE (ex: Ministère des Armées)
+    lf = apply_acheteurs_non_sirene_fallback(lf)
+
     # En joignant en utilisant à la fois le SIRET et le typeIdentifiant, on s'assure qu'on ne joint pas sur
     # des id de titulaires non-SIRET
     lf = lf.join(
@@ -154,6 +157,32 @@ def enrich_from_sirene(lf: pl.LazyFrame):
     lf = calculate_distance(lf)
 
     lf = lf.drop(cs.ends_with("_siren"))
+
+    return lf
+
+
+def apply_acheteurs_non_sirene_fallback(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """Applique les données d'acheteurs non présents dans SIRENE en fallback.
+
+    Les acheteurs absents de SIRENE ET du fallback conservent acheteur_nom = NULL.
+    """
+    if not ACHETEURS_NON_SIRENE:
+        return lf
+
+    # Créer un DataFrame de fallback à partir du dictionnaire
+    fallback_data = [
+        {"acheteur_id": siret, "acheteur_nom_fallback": data["nom"]}
+        for siret, data in ACHETEURS_NON_SIRENE.items()
+    ]
+    lf_fallback = pl.LazyFrame(fallback_data)
+
+    # Joindre avec les données de fallback
+    lf = lf.join(lf_fallback, on="acheteur_id", how="left")
+
+    # Remplacer acheteur_nom NULL par la valeur de fallback (si disponible)
+    lf = lf.with_columns(
+        pl.coalesce("acheteur_nom", "acheteur_nom_fallback").alias("acheteur_nom")
+    ).drop("acheteur_nom_fallback")
 
     return lf
 

@@ -1,6 +1,7 @@
 #### 2.6.4 2025-12-19
 
 - Tri et numérotation des modifications après la concaténation plutôt que par ressource, pour réduire le nombre de doublons ([#156](https://github.com/ColinMaudry/decp-processing/issues/156))
+- Utilisation du logger de prefect plûtot que `log_prints=True`
 
 #### 2.6.3 2025-12-16
 

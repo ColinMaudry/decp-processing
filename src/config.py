@@ -196,6 +196,13 @@ EXCLUDED_RESOURCES = (
 SOLO_DATASET = os.getenv("SOLO_DATASET", "")
 ALL_CONFIG["SOLO_DATASET"] = SOLO_DATASET
 
+# Acheteurs absents de la base SIRENE (pour raisons de sécurité ou autre)
+# Format: SIRET -> {"nom": "...", ...}
+# Ces données sont utilisées en fallback si l'acheteur n'est pas trouvé dans SIRENE
+ACHETEURS_NON_SIRENE = {
+    "13001536500013": {"nom": "Ministère des Armées"},
+}
+
 with open(
     make_path_from_env(
         "DATASETS_REFERENCE_FILEPATH", REFERENCE_DIR / "source_datasets.json"

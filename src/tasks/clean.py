@@ -126,6 +126,9 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
         .name.keep()
     )
 
+    # Nettoyage des espaces dans titulaire_id (ex: "   33487372600239")
+    lf = lf.with_columns(pl.col("titulaire_id").str.strip_chars())
+
     # Type identifiant = SIRET si vide (marches-securises.fr)
     lf = lf.with_columns(
         pl.when(
