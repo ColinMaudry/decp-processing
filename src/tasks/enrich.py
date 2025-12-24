@@ -1,13 +1,12 @@
 import polars as pl
 import polars.selectors as cs
-from polars_ds import haversine
-from prefect import task
 
-from src.config import ACHETEURS_NON_SIRENE, SIRENE_DATA_DIR
+from src.config import LOG_LEVEL, SIRENE_DATA_DIR, ACHETEURS_NON_SIRENE
 from src.tasks.transform import (
     extract_unique_acheteurs_siret,
     extract_unique_titulaires_siret,
 )
+from src.tasks.utils import get_logger
 
 
 def add_etablissement_data(
@@ -29,7 +28,10 @@ def add_etablissement_data(
     # Si il y a un etablissement_nom (Enseigne1Etablissement ou denominationUsuelleEtablissement),
     # on l'ajoute au nom de l'organisme, entre parenthèses
     lf_sirets = lf_sirets.with_columns(
-        pl.when(pl.col("etablissement_nom").is_not_null())
+        pl.when(
+            pl.col("etablissement_nom").is_not_null()
+            & (pl.col("etablissement_nom") != pl.col(f"{type_siret}_nom"))
+        )
         .then(
             pl.concat_str(
                 pl.col(f"{type_siret}_nom"),
@@ -76,8 +78,9 @@ def add_unite_legale_data(
     return lf_sirets
 
 
-@task(log_prints=True)
 def enrich_from_sirene(lf: pl.LazyFrame):
+    logger = get_logger(level=LOG_LEVEL)
+
     # Récupération des données SIRET/SIREN préparées dans sirene-preprocess()
     lf_etablissements = pl.scan_parquet(SIRENE_DATA_DIR / "etablissements.parquet")
     lf_unites_legales = pl.scan_parquet(SIRENE_DATA_DIR / "unites_legales.parquet")
@@ -86,10 +89,10 @@ def enrich_from_sirene(lf: pl.LazyFrame):
 
     # DONNÉES SIRENE ACHETEURS
 
-    print("Extraction des SIRET des acheteurs...")
+    logger.info("Extraction des SIRET des acheteurs...")
     lf_sirets_acheteurs = extract_unique_acheteurs_siret(lf_base)
 
-    print("Ajout des données unités légales (acheteurs)...")
+    logger.info("Ajout des données unités légales (acheteurs)...")
     lf_sirets_acheteurs = add_unite_legale_data(
         lf_sirets_acheteurs,
         lf_unites_legales,
@@ -97,7 +100,7 @@ def enrich_from_sirene(lf: pl.LazyFrame):
         type_siret="acheteur",
     )
 
-    print("Ajout des données établissements (acheteurs)...")
+    logger.info("Ajout des données établissements (acheteurs)...")
     lf_sirets_acheteurs = add_etablissement_data(
         lf_sirets_acheteurs, lf_etablissements, "acheteur_id", "acheteur"
     )
@@ -110,10 +113,10 @@ def enrich_from_sirene(lf: pl.LazyFrame):
 
     # DONNÉES SIRENE TITULAIRES
 
-    print("Extraction des SIRET des titulaires...")
+    logger.info("Extraction des SIRET des titulaires...")
     lf_sirets_titulaires = extract_unique_titulaires_siret(lf_base)
 
-    print("Ajout des données unités légales (titulaires)...")
+    logger.info("Ajout des données unités légales (titulaires)...")
     lf_sirets_titulaires = add_unite_legale_data(
         lf_sirets_titulaires,
         lf_unites_legales,
@@ -121,7 +124,7 @@ def enrich_from_sirene(lf: pl.LazyFrame):
         type_siret="titulaire",
     )
 
-    print("Ajout des données établissements (titulaires)...")
+    logger.info("Ajout des données établissements (titulaires)...")
     lf_sirets_titulaires = add_etablissement_data(
         lf_sirets_titulaires, lf_etablissements, "titulaire_id", "titulaire"
     )
@@ -148,7 +151,7 @@ def enrich_from_sirene(lf: pl.LazyFrame):
     )
 
     del lf_sirets_titulaires
-    # print("Amélioration des données unités légales des titulaires...")
+    # logger.info("Amélioration des données unités légales des titulaires...")
     # lf_sirets_titulaires = improve_titulaire_unite_legale_data(lf_sirets_titulaires)
 
     lf = calculate_distance(lf)
@@ -195,6 +198,33 @@ def calculate_distance(lf: pl.LazyFrame) -> pl.LazyFrame:
             pl.col("titulaire_longitude"),
         )
         .round(mode="half_away_from_zero")
+        .cast(pl.Int16)
         .alias("distance")
     )
     return lf
+
+
+def haversine(
+    lat1: pl.Expr, lon1: pl.Expr, lat2: pl.Expr, lon2: pl.Expr, R: float = 6371.0
+) -> pl.Expr:
+    """
+    Calcule la distance haversine entre deux points (lat1, lon1) et (lat2, lon2)     en km.
+    Utilise des opérations vectorisées Polars.
+    Généré par la LLM Euria, développée et hébergée en Suisse par Infomaniak.
+    """
+    # Convertir en radians
+    lat1 = pl.col("acheteur_latitude").radians()
+    lon1 = pl.col("acheteur_longitude").radians()
+    lat2 = pl.col("titulaire_latitude").radians()
+    lon2 = pl.col("titulaire_longitude").radians()
+
+    # Différences
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    # Formule haversine
+    a = (dlat / 2.0).sin().pow(2) + lat1.cos() * lat2.cos() * (dlon / 2.0).sin().pow(2)
+    c = 2.0 * a.sqrt().arcsin()
+
+    # Distance
+    return R * c

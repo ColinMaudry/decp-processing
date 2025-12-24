@@ -1,3 +1,4 @@
+import logging
 import re
 import shutil
 import time
@@ -7,11 +8,14 @@ from pathlib import Path
 import polars as pl
 from prefect import task
 from prefect.artifacts import create_table_artifact
+from prefect.exceptions import MissingContextError
+from prefect.logging import get_run_logger
 
 from src.config import (
     CACHE_EXPIRATION_TIME_HOURS,
     DATE_NOW,
     DIST_DIR,
+    LOG_LEVEL,
     RESOURCE_CACHE_DIR,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
@@ -60,18 +64,12 @@ def remove_sirene_data_dir(transaction):
 #
 
 
-def get_clean_cache_key(context, parameters) -> str:
-    resource = parameters["resource"]
-
-    # On utilise le hash sha1 de la ressource, généré par data.gouv.fr, comme clé de cache
-    return resource["checksum"]
-
-
-@task
 def remove_unused_cache(
     cache_dir: Path = RESOURCE_CACHE_DIR,
     cache_expiration_time_hours: int = CACHE_EXPIRATION_TIME_HOURS,
 ):
+    logger = get_logger(level=LOG_LEVEL)
+
     now = time.time()
     age_limit = cache_expiration_time_hours * 3600  # seconds
     deleted_files = []
@@ -79,10 +77,10 @@ def remove_unused_cache(
         for file in cache_dir.rglob("*"):
             if file.is_file():
                 if now - file.stat().st_atime > age_limit:
-                    print(f"Suppression du fichier de cache: {file}")
+                    logger.info(f"Suppression du fichier de cache: {file}")
                     deleted_files.append(file)
                     file.unlink()
-        print(f"{len(deleted_files)} fichiers supprimés")
+        logger.info(f"-> {len(deleted_files)} fichiers supprimés")
 
 
 #
@@ -254,7 +252,9 @@ def generate_stats(lf: pl.LazyFrame):
 
 
 def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
-    print("Génération des statistiques sur les sources de données...")
+    logger = get_logger(level=LOG_LEVEL)
+
+    logger.info("Génération des statistiques sur les sources de données...")
     lf_uid = lf_uid.select("uid", "acheteur_id", "sourceDataset")
 
     # We need to collect these intermediate aggregations to join them with the sources dataframe (which is small)
@@ -341,3 +341,19 @@ def check_parquet_file(path) -> bool:
         return result
     except (FileNotFoundError, pl.exceptions.ComputeError):
         return False
+
+
+def print_all_config(all_config):
+    logger = get_logger(level=LOG_LEVEL)
+
+    msg = ""
+    for k, v in sorted(all_config.items()):
+        msg += f"\n{k}: {v}"
+    logger.info(msg)
+
+
+def get_logger(level: str) -> logging.Logger:
+    try:
+        return get_run_logger(level=level)
+    except MissingContextError:
+        return logging.Logger(name="Fallback logger", level=level)
