@@ -402,6 +402,7 @@ def dume_to_decp(rows):
                 {"titulaire": titulaire} for titulaire in d.get("titulaires")
             ],
             "modifications": r.get("modifications"),
+            "source": "scrap_aife_dume",
         }
         new_rows.append(new_row)
 

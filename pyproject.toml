@@ -23,7 +23,8 @@ dependencies = [
     "selenium",
     "polars_ds",
     "scikit-learn",
-    "tenacity"
+    "tenacity",
+    "dume_api"
 ]
 
 [project.optional-dependencies]
