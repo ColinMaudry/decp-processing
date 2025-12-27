@@ -360,6 +360,12 @@ def scrap_dume_month(year: str = None, month: str = None, dist_dir: Path = None)
 
 def dume_to_decp(rows):
     new_rows = []
+
+    def get_titulaires(titulaires):
+        if isinstance(titulaires, list) and len(titulaires) > 0:
+            return [{"titulaire": titulaire} for titulaire in d.get("titulaires")]
+        return []
+
     for r in rows:
         d = r.get("donneesMP")
         new_row = {
@@ -398,9 +404,7 @@ def dume_to_decp(rows):
             "typesPrix": {"typePrix": [d.get("typePrix")]},
             "typeGroupementOperateurs": d.get("typeGroupementOperateurs"),
             "sousTraitanceDeclaree": d.get("sousTraitanceDeclaree"),
-            "titulaires": [
-                {"titulaire": titulaire} for titulaire in d.get("titulaires")
-            ],
+            "titulaires": get_titulaires(d.get("titulaires")),
             "modifications": r.get("modifications"),
             "source": "scrap_aife_dume",
         }

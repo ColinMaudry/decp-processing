@@ -53,8 +53,8 @@ def scrap(target: str, mode: str, month=None, year=None):
     logger.info(f"""
     Target: {target} (env {SCRAPING_TARGET})
     Mode: {mode} (env {SCRAPING_MODE})
-    Year: {year})
-    Month: {month})""")
+    Year: {year}
+    Month: {month}""")
 
     # Sélection de la plage temporelle
     if mode == "month":
@@ -67,7 +67,7 @@ def scrap(target: str, mode: str, month=None, year=None):
 
     elif mode == "all":
         current_year = int(current_year)
-        for year in reversed(range(2018, current_year + 2)):
+        for year in reversed(range(2018, current_year + 1)):
             scrap(target=target, mode="year", year=str(year))
 
     else:
