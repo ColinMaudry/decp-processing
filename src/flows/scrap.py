@@ -16,7 +16,7 @@ from src.tasks.utils import get_logger
 
 
 @flow(log_prints=True)
-def scrap(target: str = None, mode: str = None, month=None, year=None):
+def scrap(target: str, mode: str, month=None, year=None):
     logger = get_logger(level=LOG_LEVEL)
     # Remise à zéro du dossier dist
     dist_dir: Path = DIST_DIR / target
@@ -25,9 +25,6 @@ def scrap(target: str = None, mode: str = None, month=None, year=None):
         rmtree(dist_dir)
     else:
         dist_dir.mkdir(parents=True)
-
-    # Sélection du target
-    target = target or SCRAPING_TARGET
 
     # Sélection de la fonction de scraping en fonction de target
     if target == "aws":
@@ -43,8 +40,15 @@ def scrap(target: str = None, mode: str = None, month=None, year=None):
     month = month or current_month
     year = year or current_year
 
-    # Sélection du mode
-    mode = mode or SCRAPING_MODE
+    # Récapitulatif de la config
+    # mode et target doivent être passés en paramètre
+    # les éventuelles env sont injectées via /run_flow.py
+    # en prod les paramètres sont spécifiées dans le deployment Prefect
+    logger.info(f"""
+    Target: {target} (env {SCRAPING_TARGET})
+    Mode: {mode} (env {SCRAPING_MODE})
+    Year: {year})
+    Month: {month})""")
 
     # Sélection de la plage temporelle
     if mode == "month":

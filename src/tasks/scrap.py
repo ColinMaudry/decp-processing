@@ -100,7 +100,7 @@ def scrap_marches_securises_month(year: str, month: str, dist_dir: Path):
             try:
                 json_links = parse_result_page()
             except AttributeError:
-                sleep(3)
+                sleep(1)
                 logger.info("Retrying result page download and parsing...")
                 json_links = parse_result_page()
 
@@ -206,7 +206,7 @@ def scrap_aws_month(year: str = None, month: str = None, dist_dir: Path = None):
             continue
         elif result_code == "timeout":
             # On réessaie après 10 secondes
-            sleep(10)
+            sleep(3)
             retry_count += 1
             continue
         elif result_code is None:

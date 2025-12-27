@@ -1,5 +1,6 @@
 import sys
 
+from src.config import SCRAPING_MODE, SCRAPING_TARGET
 from src.flows.decp_processing import decp_processing
 from src.flows.get_cog import get_cog
 from src.flows.scrap import scrap
@@ -28,4 +29,4 @@ if __name__ == "__main__":
     if func_name != "scrap":
         FUNCTIONS[func_name]()
     else:
-        scrap(target="aws", mode="all")
+        scrap(mode=SCRAPING_MODE, target=SCRAPING_TARGET)
