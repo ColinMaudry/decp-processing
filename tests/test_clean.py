@@ -285,7 +285,7 @@ def test_clean_decp():
     assert df_result["considerationsEnvironnementales"][0] == "Sans objet"
     assert df_result["ccag"][0] == "Sans objet"
     assert df_result["typeGroupement"][0] == "Sans objet"
-    assert df_result["objet"][1] == "Avec des 'apo’strophe’s"
+    assert df_result["objet"][0] == "Avec des 'apo’strophe’s"
 
     # Check nature replacement
     assert df_result["nature"][0] == "Marché subséquent"
