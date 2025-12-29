@@ -11,12 +11,10 @@ from src.config import (
     SCRAPING_MODE,
     SCRAPING_TARGET,
 )
-from src.tasks.scrap import (
-    scrap_aws_month,
-    scrap_dume_month,
-    scrap_marches_securises_month,
-)
 from src.tasks.utils import get_logger
+from tasks.scrap.aws import scrap_aws_month
+from tasks.scrap.dume import scrap_dume_month
+from tasks.scrap.marches_securises import scrap_marches_securises_month
 
 
 @flow(log_prints=True)
