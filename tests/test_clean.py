@@ -213,6 +213,7 @@ def test_clean_decp():
         "id": ["id.1", "id/2", ""],
         "acheteur_id": ["ach1", "ach2", ""],
         "acheteur.id": ["", "ach2", ""],
+        "objet": "Avec des 'apo'strophe's",
         "montant": ["1000", "1000000000000.00", "2000"],
         "datePublicationDonnees": ["2023-01-01", "0002-11-30", "2023-01-02"],
         "dateNotification": ["2023-01-01", "2023-01-01", "2023-01-01"],
@@ -284,6 +285,7 @@ def test_clean_decp():
     assert df_result["considerationsEnvironnementales"][0] == "Sans objet"
     assert df_result["ccag"][0] == "Sans objet"
     assert df_result["typeGroupement"][0] == "Sans objet"
+    assert df_result["objet"][0] == "Avec des 'apo’strophe’s"
 
     # Check nature replacement
     assert df_result["nature"][0] == "Marché subséquent"

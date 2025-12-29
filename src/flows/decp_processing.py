@@ -10,7 +10,6 @@ from prefect.context import get_run_context
 from prefect_email import EmailServerCredentials, email_send_message
 
 from src.config import (
-    ALL_CONFIG,
     BASE_DF_COLUMNS,
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
@@ -20,6 +19,7 @@ from src.config import (
     PREFECT_API_URL,
     RESOURCE_CACHE_DIR,
     SIRENE_DATA_DIR,
+    SOLO_DATASET,
     TRACKED_DATASETS,
 )
 from src.flows.sirene_preprocess import sirene_preprocess
@@ -50,7 +50,7 @@ def decp_processing(enable_cache_removal: bool = True):
 
     logger.info("🚀  Début du flow decp-processing")
 
-    print_all_config(ALL_CONFIG)
+    print_all_config()
 
     logger.info("Liste de toutes les ressources des datasets...")
     resources: list[dict] = list_resources(TRACKED_DATASETS)
@@ -79,7 +79,11 @@ def decp_processing(enable_cache_removal: bool = True):
         )
 
     # Afin d'être sûr que je ne publie pas par erreur un jeu de données de test
-    decp_publish = DECP_PROCESSING_PUBLISH and len(resources_to_process) > 5000
+    decp_publish = (
+        DECP_PROCESSING_PUBLISH
+        and len(resources_to_process) > 5000
+        and SOLO_DATASET in ["", None]
+    )
 
     if decp_publish:
         create_table_artifact(
@@ -146,7 +150,7 @@ def decp_processing(enable_cache_removal: bool = True):
     logger.info("☑️  Fin du flow principal decp_processing.")
 
 
-@task(retries=2)
+@task(retries=2, timeout_seconds=1800)
 def process_batch(
     available_parquet_files,
     batch_size,

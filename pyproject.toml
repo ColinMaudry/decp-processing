@@ -1,7 +1,7 @@
 [project]
 name = "decp-processing"
 description = "Traitement des données des marchés publics français."
-version = "2.6.3"
+version = "2.7.0"
 requires-python = ">= 3.9"
 authors = [
     { name = "Colin Maudry", email = "colin+decp@maudry.com" }
@@ -9,7 +9,7 @@ authors = [
 dependencies = [
     "python-dotenv",
     "pandas", # nécessaire pour l'écriture en base de données
-    "polars==1.35.2",
+    "polars==1.36.1",
     "pyarrow",
     "frictionless",
     "ipykernel",
@@ -23,7 +23,8 @@ dependencies = [
     "selenium",
     "polars_ds",
     "scikit-learn",
-    "tenacity"
+    "tenacity",
+    "dume_api"
 ]
 
 [project.optional-dependencies]

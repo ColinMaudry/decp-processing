@@ -1,6 +1,6 @@
 # DECP processing
 
-> version 2.6.3 ([notes de version](https://github.com/ColinMaudry/decp-processing/blob/main/CHANGELOG.md))
+> version 2.7.0 ([notes de version](https://github.com/ColinMaudry/decp-processing/blob/main/CHANGELOG.md))
 
 Projet de traitement et de publication de meilleures données sur les marchés publics attribués en France. Vous pouvez consulter, filtrer et télécharger
 ces données sur le site [decp.info](https://decp.info). Enfin la section [À propos](https://decp.info/a-propos) décrit les objectifs du projet et regroupe toutes les informations clés.
@@ -163,3 +163,4 @@ pytest tests/test_main.py
 - [FranckMaseo](https://github.com/frankmaseo)
 - [Thomas Louf](https://github.com/tlouf)
 - [vico4445](https://github.com/vico4445)
+- [imanuch](https://github.com/imanuch)

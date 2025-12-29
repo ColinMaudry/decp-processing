@@ -11,29 +11,39 @@ from src.config import (
     SCRAPING_MODE,
     SCRAPING_TARGET,
 )
-from src.tasks.scrap import scrap_aws_month, scrap_marches_securises_month
-from src.tasks.utils import get_logger
+from src.tasks.utils import get_logger, print_all_config
+from tasks.scrap.aws import scrap_aws_month
+from tasks.scrap.dume import scrap_dume_month
+from tasks.scrap.klekoon import scrap_klekoon
+from tasks.scrap.marches_securises import scrap_marches_securises_month
 
 
 @flow(log_prints=True)
-def scrap(target: str = None, mode: str = None, month=None, year=None):
+def scrap(target: str, mode: str, month=None, year=None):
     logger = get_logger(level=LOG_LEVEL)
+
+    print_all_config()
+
     # Remise à zéro du dossier dist
     dist_dir: Path = DIST_DIR / target
     if dist_dir.exists():
-        logger.debug(f"Suppression de {dist_dir}...")
+        logger.info(f"Suppression de {dist_dir}...")
         rmtree(dist_dir)
-    else:
-        dist_dir.mkdir(parents=True)
 
-    # Sélection du target
-    target = target or SCRAPING_TARGET
+    dist_dir.mkdir(parents=True, exist_ok=True)
 
     # Sélection de la fonction de scraping en fonction de target
     if target == "aws":
         scrap_target_month = scrap_aws_month
     elif target == "marches-securises.fr":
         scrap_target_month = scrap_marches_securises_month
+    elif target == "dume":
+        scrap_target_month = scrap_dume_month
+    elif target == "klekoon":
+        # Klekoon présent ses données par acheteur et non de manière temporelle
+        # donc on télécharge tout à chaque fois
+        scrap_klekoon(dist_dir)
+        return
     else:
         logger.error("Quel target ?")
         raise ValueError
@@ -43,8 +53,15 @@ def scrap(target: str = None, mode: str = None, month=None, year=None):
     month = month or current_month
     year = year or current_year
 
-    # Sélection du mode
-    mode = mode or SCRAPING_MODE
+    # Récapitulatif de la config
+    # mode et target doivent être passés en paramètre
+    # les éventuelles env sont injectées via /run_flow.py
+    # en prod les paramètres sont spécifiées dans le deployment Prefect
+    logger.info(f"""
+    Target: {target} (env {SCRAPING_TARGET})
+    Mode: {mode} (env {SCRAPING_MODE})
+    Year: {year}
+    Month: {month}""")
 
     # Sélection de la plage temporelle
     if mode == "month":
@@ -57,7 +74,7 @@ def scrap(target: str = None, mode: str = None, month=None, year=None):
 
     elif mode == "all":
         current_year = int(current_year)
-        for year in reversed(range(2018, current_year + 2)):
+        for year in reversed(range(2018, current_year + 1)):
             scrap(target=target, mode="year", year=str(year))
 
     else:
