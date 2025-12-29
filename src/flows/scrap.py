@@ -11,22 +11,26 @@ from src.config import (
     SCRAPING_MODE,
     SCRAPING_TARGET,
 )
-from src.tasks.utils import get_logger
+from src.tasks.utils import get_logger, print_all_config
 from tasks.scrap.aws import scrap_aws_month
 from tasks.scrap.dume import scrap_dume_month
+from tasks.scrap.klekoon import scrap_klekoon
 from tasks.scrap.marches_securises import scrap_marches_securises_month
 
 
 @flow(log_prints=True)
 def scrap(target: str, mode: str, month=None, year=None):
     logger = get_logger(level=LOG_LEVEL)
+
+    print_all_config()
+
     # Remise à zéro du dossier dist
     dist_dir: Path = DIST_DIR / target
     if dist_dir.exists():
-        logger.debug(f"Suppression de {dist_dir}...")
+        logger.info(f"Suppression de {dist_dir}...")
         rmtree(dist_dir)
 
-    dist_dir.mkdir(parents=True)
+    dist_dir.mkdir(parents=True, exist_ok=True)
 
     # Sélection de la fonction de scraping en fonction de target
     if target == "aws":
@@ -35,6 +39,11 @@ def scrap(target: str, mode: str, month=None, year=None):
         scrap_target_month = scrap_marches_securises_month
     elif target == "dume":
         scrap_target_month = scrap_dume_month
+    elif target == "klekoon":
+        # Klekoon présent ses données par acheteur et non de manière temporelle
+        # donc on télécharge tout à chaque fois
+        scrap_klekoon(dist_dir)
+        return
     else:
         logger.error("Quel target ?")
         raise ValueError

@@ -107,6 +107,7 @@ def publish_scrap_to_datagouv(year: str, month: str, file_path, target):
         "aws": "68caf6b135f19236a4f37a32",
         "marches-securises.fr": "68ebb48dd708fdb2d7c15bff",
         "dume": "694ff7a98210456475f98aca",
+        "klekoon": "6952899077f982c9a2373ede",
     }
     logger = get_logger(level=LOG_LEVEL)
 
