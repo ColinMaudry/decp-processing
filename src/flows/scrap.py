@@ -11,7 +11,11 @@ from src.config import (
     SCRAPING_MODE,
     SCRAPING_TARGET,
 )
-from src.tasks.scrap import scrap_aws_month, scrap_marches_securises_month
+from src.tasks.scrap import (
+    scrap_aws_month,
+    scrap_dume_month,
+    scrap_marches_securises_month,
+)
 from src.tasks.utils import get_logger
 
 
@@ -23,14 +27,16 @@ def scrap(target: str, mode: str, month=None, year=None):
     if dist_dir.exists():
         logger.debug(f"Suppression de {dist_dir}...")
         rmtree(dist_dir)
-    else:
-        dist_dir.mkdir(parents=True)
+
+    dist_dir.mkdir(parents=True)
 
     # Sélection de la fonction de scraping en fonction de target
     if target == "aws":
         scrap_target_month = scrap_aws_month
     elif target == "marches-securises.fr":
         scrap_target_month = scrap_marches_securises_month
+    elif target == "dume":
+        scrap_target_month = scrap_dume_month
     else:
         logger.error("Quel target ?")
         raise ValueError
@@ -47,8 +53,8 @@ def scrap(target: str, mode: str, month=None, year=None):
     logger.info(f"""
     Target: {target} (env {SCRAPING_TARGET})
     Mode: {mode} (env {SCRAPING_MODE})
-    Year: {year})
-    Month: {month})""")
+    Year: {year}
+    Month: {month}""")
 
     # Sélection de la plage temporelle
     if mode == "month":
@@ -61,7 +67,7 @@ def scrap(target: str, mode: str, month=None, year=None):
 
     elif mode == "all":
         current_year = int(current_year)
-        for year in reversed(range(2018, current_year + 2)):
+        for year in reversed(range(2018, current_year + 1)):
             scrap(target=target, mode="year", year=str(year))
 
     else:

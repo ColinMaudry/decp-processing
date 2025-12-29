@@ -106,6 +106,7 @@ def publish_scrap_to_datagouv(year: str, month: str, file_path, target):
     dataset_ids = {
         "aws": "68caf6b135f19236a4f37a32",
         "marches-securises.fr": "68ebb48dd708fdb2d7c15bff",
+        "dume": "694ff7a98210456475f98aca",
     }
     logger = get_logger(level=LOG_LEVEL)
 

@@ -81,7 +81,7 @@
       "type": "string",
       "name": "procedure",
       "title": "Procédure",
-      "description": "Le type de procédure utilisé pour le marché public. Prodcédure négociée ouverte, Procédure non négociée ouverte, Procédure négociée restreinte, Procédure non négociée restreinte.",
+      "description": "Le type de procédure utilisé pour le marché public. Procédure négociée ouverte, Procédure non négociée ouverte, Procédure négociée restreinte, Procédure non négociée restreinte.",
       "short_title": null
     },
     {

@@ -258,6 +258,12 @@
     "code": "aife_dume"
   },
   {
+    "id": "694ff7a98210456475f98aca",
+    "name": "Données essentielles de la commande publique (DECP) de l'API DUME (AIFE)",
+    "owner_org_name": "Colin Maudry",
+    "code": "scrap_aife_dume"
+  },
+  {
     "id": "68ebb48dd708fdb2d7c15bff",
     "name": "Données des marchés publics de marches-securises.fr",
     "code": "scrap_marches-securises.fr",

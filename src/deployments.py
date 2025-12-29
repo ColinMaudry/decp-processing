@@ -136,6 +136,28 @@ if __name__ == "__main__":
         ),
         entrypoint="src/flows/scrap.py:scrap",
     ).deploy(
+        name="scrap-dume",
+        description="Scraping des données de l'API DUME.",
+        ignore_warnings=True,
+        work_pool_name="local",
+        cron="0 0 * * 2",
+        job_variables={
+            "env": {
+                "DECP_PROCESSING_PUBLISH": "True",
+                "DECP_DIST_DIR": "/srv/shared/decp/prod/dist",
+                "PREFECT_TASKS_REFRESH_CACHE": "False",
+                "SCRAPING_MODE": "month",
+                "SCRAPING_TARGET": "dume",
+            }
+        },
+    )
+
+    flow.from_source(
+        source=GitRepository(
+            url="https://github.com/ColinMaudry/decp-processing.git", branch="main"
+        ),
+        entrypoint="src/flows/scrap.py:scrap",
+    ).deploy(
         name="scrap",
         description="Scraping des données.",
         ignore_warnings=True,

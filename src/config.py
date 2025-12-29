@@ -132,6 +132,14 @@ ALL_CONFIG["SCRAPING_MODE"] = SCRAPING_MODE
 SCRAPING_TARGET = os.getenv("SCRAPING_TARGET")
 ALL_CONFIG["SCRAPING_TARGET"] = SCRAPING_TARGET
 
+# Year (année cible pour le scraping)
+SCRAPING_YEAR = os.getenv("SCRAPING_YEAR")
+ALL_CONFIG["SCRAPING_YEAR"] = SCRAPING_YEAR
+
+# Month (mois cible pour le scraping)
+SCRAPING_MONTH = os.getenv("SCRAPING_MONTH")
+ALL_CONFIG["SCRAPING_MONTH"] = SCRAPING_MONTH
+
 # Lecture ou non des ressource en cache
 DECP_USE_CACHE = os.getenv("DECP_USE_CACHE", "false").lower() == "true"
 
