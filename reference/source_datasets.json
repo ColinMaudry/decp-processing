@@ -316,5 +316,11 @@
     "name": "Les Personnes placées sous main de justice - IDF 2024",
     "code": "ppsmj",
     "owner_org_name": "Yael Siksik"
+  },
+  {
+    "id": "6952899077f982c9a2373ede",
+    "name": "Données essentielles de la commande publique (DECP) de Klekoon",
+    "code": "scrap_klekoon",
+    "owner_org_name": "Colin Maudry"
   }
 ]
