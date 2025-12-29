@@ -1,7 +1,8 @@
 ### 2.7.0
 
 - Remplacement des guillemets simples par des apostrophes dans "objet"
-- Ajout des données de l'API DUME (code source `scrap_aife_dume`)
+- Ajout des données de l'API DUME (code source `scrap_aife_dume`) ([#144](https://github.com/ColinMaudry/decp-processing/issues/144))
+- Ajout des données du profil d'acheteur Klekoon (code source `scrap_klekoon`) ([#71](https://github.com/ColinMaudry/decp-processing/issues/71))
 
 #### 2.6.4 2025-12-19
 
