@@ -33,6 +33,7 @@ ALL_CONFIG = {}
 
 # Niveau des logs
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+ALL_CONFIG["LOG_LEVEL"] = LOG_LEVEL
 
 # Nombre maximal de workers utilisables par Prefect. Défaut : 16
 MAX_PREFECT_WORKERS = int(os.getenv("MAX_PREFECT_WORKERS", 4))
@@ -132,6 +133,14 @@ ALL_CONFIG["SCRAPING_MODE"] = SCRAPING_MODE
 SCRAPING_TARGET = os.getenv("SCRAPING_TARGET")
 ALL_CONFIG["SCRAPING_TARGET"] = SCRAPING_TARGET
 
+# Year (année cible pour le scraping)
+SCRAPING_YEAR = os.getenv("SCRAPING_YEAR")
+ALL_CONFIG["SCRAPING_YEAR"] = SCRAPING_YEAR
+
+# Month (mois cible pour le scraping)
+SCRAPING_MONTH = os.getenv("SCRAPING_MONTH")
+ALL_CONFIG["SCRAPING_MONTH"] = SCRAPING_MONTH
+
 # Lecture ou non des ressource en cache
 DECP_USE_CACHE = os.getenv("DECP_USE_CACHE", "false").lower() == "true"
 
@@ -195,6 +204,13 @@ EXCLUDED_RESOURCES = (
 # Ne traiter qu'un seul dataset identifier par son ID
 SOLO_DATASET = os.getenv("SOLO_DATASET", "")
 ALL_CONFIG["SOLO_DATASET"] = SOLO_DATASET
+
+# Acheteurs absents de la base SIRENE (pour raisons de sécurité ou autre)
+# Format: SIRET -> {"nom": "...", ...}
+# Ces données sont utilisées en fallback si l'acheteur n'est pas trouvé dans SIRENE
+ACHETEURS_NON_SIRENE = {
+    "13001536500013": {"nom": "Ministère des Armées"},
+}
 
 with open(
     make_path_from_env(
