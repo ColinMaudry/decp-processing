@@ -12,6 +12,7 @@ from prefect.exceptions import MissingContextError
 from prefect.logging import get_run_logger
 
 from src.config import (
+    ALL_CONFIG,
     CACHE_EXPIRATION_TIME_HOURS,
     DATE_NOW,
     DIST_DIR,
@@ -343,8 +344,9 @@ def check_parquet_file(path) -> bool:
         return False
 
 
-def print_all_config(all_config):
+def print_all_config():
     logger = get_logger(level=LOG_LEVEL)
+    all_config = ALL_CONFIG
 
     msg = ""
     for k, v in sorted(all_config.items()):
@@ -354,6 +356,8 @@ def print_all_config(all_config):
 
 def get_logger(level: str) -> logging.Logger:
     try:
-        return get_run_logger(level=level)
+        logger = get_run_logger()
+        logger.setLevel(level)
+        return logger
     except MissingContextError:
         return logging.Logger(name="Fallback logger", level=level)

@@ -33,6 +33,7 @@ ALL_CONFIG = {}
 
 # Niveau des logs
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+ALL_CONFIG["LOG_LEVEL"] = LOG_LEVEL
 
 # Nombre maximal de workers utilisables par Prefect. Défaut : 16
 MAX_PREFECT_WORKERS = int(os.getenv("MAX_PREFECT_WORKERS", 4))

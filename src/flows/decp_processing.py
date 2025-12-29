@@ -10,7 +10,6 @@ from prefect.context import get_run_context
 from prefect_email import EmailServerCredentials, email_send_message
 
 from src.config import (
-    ALL_CONFIG,
     BASE_DF_COLUMNS,
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
@@ -51,7 +50,7 @@ def decp_processing(enable_cache_removal: bool = True):
 
     logger.info("🚀  Début du flow decp-processing")
 
-    print_all_config(ALL_CONFIG)
+    print_all_config()
 
     logger.info("Liste de toutes les ressources des datasets...")
     resources: list[dict] = list_resources(TRACKED_DATASETS)
