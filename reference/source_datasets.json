@@ -171,7 +171,8 @@
     "id": "6727210202eee145031c05da",
     "name": "Données essentielles du profil acheteur GIP Recia",
     "owner_org_name": "ATEXO - DECP",
-    "code": "atexo_recia"
+    "code": "atexo_recia",
+    "deleted_date": "2026-01-06"
   },
   {
     "id": "6727210a3b056f39537f23a0",
