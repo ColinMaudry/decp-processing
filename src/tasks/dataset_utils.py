@@ -82,9 +82,9 @@ def list_resources(
         # Données de test .tests/data/datasets_reference_test.json
         if dataset["id"].startswith("test_"):
             all_resources += dataset["resources"]
-        # elif dataset.get("deleted_date"):
-        #     continue
         # Données de production ./data/datasets_reference.json
+        elif dataset.get("deleted_date"):
+            continue
         else:
             try:
                 all_resources = list_resources_by_dataset(dataset["id"])
