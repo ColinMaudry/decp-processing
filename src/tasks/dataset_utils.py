@@ -82,17 +82,18 @@ def list_resources(
         # Données de test .tests/data/datasets_reference_test.json
         if dataset["id"].startswith("test_"):
             all_resources += dataset["resources"]
-        # elif dataset.get("deleted_date"):
-        #     continue
         # Données de production ./data/datasets_reference.json
+        elif dataset.get("deleted_date"):
+            continue
         else:
             try:
                 all_resources = list_resources_by_dataset(dataset["id"])
             except (HTTPError, RuntimeError) as e:
+                # Si problème dans la récupération des données, on arrête tout : le dataset a peut-être été dépublié il faut s'assurer qu'on le sauvegarde avant d'écraser les données de prod.
                 logger.error(
                     f"Erreur lors de la récupération des ressources du dataset '{dataset['name']}' ({dataset['id']}) : {e}"
                 )
-                continue
+                raise RuntimeError
         for resource in all_resources:
             # On ne garde que les ressources au format JSON ou XML et celles qui ne sont pas
             # - des fichiers OCDS
