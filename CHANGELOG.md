@@ -1,3 +1,7 @@
+#### 2.7.1
+
+- Gestion des datasets dépubliés par leur propriétaire (arrêt du workflow pour ne pas écraser les données de prod et pouvoir en extraire les données à présent indisponibles)
+
 ### 2.7.0
 
 - Remplacement des guillemets simples par des apostrophes dans "objet"
