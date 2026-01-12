@@ -1,6 +1,6 @@
 import datetime
 
-from httpx import get
+from httpx import HTTPError, get
 from prefect import task
 from prefect.cache_policies import INPUTS
 
@@ -22,13 +22,27 @@ def handle_paginated_calls(url: str) -> list[dict]:
     list of dict
         Liste de dictionnaires représentant toutes les ressources récupérées.
     """
+    logger = get_logger(level=LOG_LEVEL)
     data = []
     while url:
-        response = get(
-            url, follow_redirects=True, headers={"X-API-KEY": DATAGOUVFR_API_KEY}
-        ).json()
-        data.extend(response["data"])
-        url = response.get("next_page")
+        try:
+            response = (
+                get(
+                    url,
+                    follow_redirects=True,
+                    headers={"X-API-KEY": DATAGOUVFR_API_KEY},
+                )
+                .raise_for_status()
+                .json()
+            )
+            data.extend(response["data"])
+            url = response.get("next_page")
+        except (HTTPError, RuntimeError) as e:
+            logger.error(
+                f"Erreur lors de la récupération de la liste des ressources du dataset ({url}).",
+                exc_info=e,
+            )
+            break
     return data
 
 
