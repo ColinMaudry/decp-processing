@@ -22,27 +22,19 @@ def handle_paginated_calls(url: str) -> list[dict]:
     list of dict
         Liste de dictionnaires représentant toutes les ressources récupérées.
     """
-    logger = get_logger(level=LOG_LEVEL)
     data = []
     while url:
-        try:
-            response = (
-                get(
-                    url,
-                    follow_redirects=True,
-                    headers={"X-API-KEY": DATAGOUVFR_API_KEY},
-                )
-                .raise_for_status()
-                .json()
+        response = (
+            get(
+                url,
+                follow_redirects=True,
+                headers={"X-API-KEY": DATAGOUVFR_API_KEY},
             )
-            data.extend(response["data"])
-            url = response.get("next_page")
-        except (HTTPError, RuntimeError) as e:
-            logger.error(
-                f"Erreur lors de la récupération de la liste des ressources du dataset ({url}).",
-                exc_info=e,
-            )
-            break
+            .raise_for_status()
+            .json()
+        )
+        data.extend(response["data"])
+        url = response.get("next_page")
     return data
 
 
@@ -90,15 +82,17 @@ def list_resources(
         # Données de test .tests/data/datasets_reference_test.json
         if dataset["id"].startswith("test_"):
             all_resources += dataset["resources"]
-
+        # elif dataset.get("deleted_date"):
+        #     continue
         # Données de production ./data/datasets_reference.json
         else:
             try:
                 all_resources = list_resources_by_dataset(dataset["id"])
-            except Exception as e:
-                raise RuntimeError(
-                    f"Erreur lors de la récupération des ressources du dataset '{dataset['id']}': {e}"
+            except (HTTPError, RuntimeError) as e:
+                logger.error(
+                    f"Erreur lors de la récupération des ressources du dataset '{dataset['name']}' ({dataset['id']}) : {e}"
                 )
+                continue
         for resource in all_resources:
             # On ne garde que les ressources au format JSON ou XML et celles qui ne sont pas
             # - des fichiers OCDS
