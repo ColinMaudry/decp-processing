@@ -6,9 +6,9 @@ import httpx
 from bs4 import BeautifulSoup
 from prefect import task
 
-from config import LOG_LEVEL
-from tasks.publish import publish_scrap_to_datagouv
-from tasks.utils import get_logger
+from src.config import LOG_LEVEL
+from src.tasks.publish import publish_scrap_to_datagouv
+from src.tasks.utils import get_logger
 
 
 def get_html(url: str, client: httpx.Client) -> str or None:

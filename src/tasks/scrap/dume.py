@@ -7,9 +7,9 @@ from time import sleep
 import dume_api
 import polars as pl
 
-from config import DIST_DIR, LOG_LEVEL
-from tasks.publish import publish_scrap_to_datagouv
-from tasks.utils import get_logger
+from src.config import DIST_DIR, LOG_LEVEL
+from src.tasks.publish import publish_scrap_to_datagouv
+from src.tasks.utils import get_logger
 
 
 def scrap_dume_month(year: str = None, month: str = None, dist_dir: Path = None):
