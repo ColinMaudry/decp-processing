@@ -65,8 +65,8 @@ def decp_processing(enable_cache_removal: bool = True):
     batch_size = 100
     parquet_files = []
 
-    # Filtrer les ressources à traiter, en ne gardant que les fichiers > 150 octets
-    resources_to_process = [r for r in resources if r["filesize"] > 150]
+    # Filtrer les ressources à traiter, en ne gardant que les fichiers > 180 octets
+    resources_to_process = [r for r in resources if r["filesize"] > 180]
 
     for i in range(0, len(resources_to_process), batch_size):
         process_batch(
