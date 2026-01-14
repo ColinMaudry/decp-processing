@@ -413,7 +413,7 @@ def get_etablissements() -> pl.LazyFrame:
         content = response.content
         lff = pl.scan_csv(content, schema_overrides=schema)
         lff = lff.select(columns)
-        logger.info(_href.split("/")[-1], "OK")
+        logger.info(_href.split("/")[-1] + " OK")
 
         return lff
 
