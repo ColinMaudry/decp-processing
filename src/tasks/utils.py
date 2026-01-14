@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 import shutil
@@ -78,7 +79,7 @@ def remove_unused_cache(
         for file in cache_dir.rglob("*"):
             if file.is_file():
                 if now - file.stat().st_atime > age_limit:
-                    logger.info(f"Suppression du fichier de cache: {file}")
+                    logger.debug(f"Suppression du fichier de cache: {file}")
                     deleted_files.append(file)
                     file.unlink()
         logger.info(f"-> {len(deleted_files)} fichiers de cache supprimés")
@@ -184,11 +185,10 @@ def generate_stats(lf: pl.LazyFrame):
     stats = {
         "datetime": now.isoformat()[:-7],  # jusqu'aux secondes
         "date": DATE_NOW,
-        "resources": resources,
         "nb_resources": len(resources),
         "sources": sources,
         "nb_lignes": nb_lignes,
-        "colonnes_triées": sorted(columns),
+        "colonnes_triees": sorted(columns),
         "nb_colonnes": len(columns),
         "nb_marches": nb_marches,
         "nb_acheteurs_uniques": nb_acheteurs_uniques,
@@ -219,30 +219,32 @@ def generate_stats(lf: pl.LazyFrame):
     )
 
     for year in range(2018, int(DATE_NOW[0:4]) + 1):
+        stats[str(year)] = stats_year = {}
+
         # Publications
         pub_count = (
             pub_stats.filter(pl.col("year") == year).select("count").item()
             if not pub_stats.filter(pl.col("year") == year).is_empty()
             else 0
         )
-        stats[f"{str(year)}_nb_publications_marchés"] = pub_count
+        stats_year["nb_publications_marches"] = pub_count
 
         # Notifications
-        year_stats = notif_stats.filter(pl.col("year") == year)
-        if not year_stats.is_empty():
-            stats[f"{str(year)}_nb_notifications_marchés"] = year_stats.select(
+        df_year_stats = notif_stats.filter(pl.col("year") == year)
+        if not df_year_stats.is_empty():
+            stats_year["nb_notifications_marches"] = df_year_stats.select(
                 "count"
             ).item()
-            stats[f"{str(year)}_somme_montant_marchés_notifiés"] = int(
-                year_stats.select("sum_montant").item() or 0
+            stats_year["somme_montant_marches_notifies"] = int(
+                df_year_stats.select("sum_montant").item() or 0
             )
-            stats[f"{str(year)}_médiane_montant_marchés_notifiés"] = int(
-                year_stats.select("median_montant").item() or 0
+            stats_year["mediane_montant_marches_notifies"] = int(
+                df_year_stats.select("median_montant").item() or 0
             )
         else:
-            stats[f"{str(year)}_nb_notifications_marchés"] = 0
-            stats[f"{str(year)}_somme_montant_marchés_notifiés"] = ""
-            stats[f"{str(year)}_médiane_montant_marchés_notifiés"] = ""
+            stats_year["nb_notifications_marches"] = 0
+            stats_year["somme_montant_marchés_notifies"] = ""
+            stats_year["mediane_montant_marchés_notifies"] = ""
 
     # Stock les statistiques dans prefect
     create_table_artifact(
@@ -250,6 +252,10 @@ def generate_stats(lf: pl.LazyFrame):
         key="stats-marches-publics",
         description=f"Statistiques sur les marchés publics agrégés ({DATE_NOW})",
     )
+
+    # Création d'un JSON pour publication sur data.gouv.fr
+    with open(DIST_DIR / "statistiques_marches.json", "w") as f:
+        json.dump(stats, f, indent=4)
 
 
 def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
@@ -325,7 +331,7 @@ def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
     df_sources = df_sources.sort(by="nb_marchés", descending=True, nulls_last=True)
 
     # dump CSV dans dist
-    df_sources.write_csv(DIST_DIR / "statistiques.csv")
+    df_sources.write_csv(DIST_DIR / "statistiques_sources.csv")
 
 
 def full_resource_name(r: dict):
