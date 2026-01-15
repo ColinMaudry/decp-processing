@@ -109,16 +109,9 @@ def make_sirene_data_dir(sirene_data_parent_dir) -> Path:
 
 
 SIRENE_DATA_PARENT_DIR = make_path_from_env("SIRENE_DATA_PARENT_DIR", DATA_DIR)
+SIRENE_DATA_DIR = make_sirene_data_dir(SIRENE_DATA_PARENT_DIR)
 
-# SIRENE_DATA_DIR ne doit être spécifié que pour les tests. Laisser vide dans .env et laisser make_sirene_data_dir
-# le déterminer
-SIRENE_DATA_DIR = os.getenv(
-    "SIRENE_DATA_DIR", make_sirene_data_dir(SIRENE_DATA_PARENT_DIR)
-)
-if isinstance(SIRENE_DATA_DIR, str):
-    SIRENE_DATA_DIR = Path(os.path.join(BASE_DIR, SIRENE_DATA_DIR))
-
-# SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
+# SIRENE_DATA_DIR on ne le crée que si nécessaire, dans sirene_preprocess.py
 ALL_CONFIG["SIRENE_DATA_PARENT_DIR"] = SIRENE_DATA_PARENT_DIR
 ALL_CONFIG["SIRENE_DATA_DIR"] = SIRENE_DATA_DIR
 
