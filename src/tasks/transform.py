@@ -188,6 +188,8 @@ def prepare_unites_legales(lf: pl.LazyFrame) -> pl.LazyFrame:
                 "nomUniteLegale",  # toujours rempli pour personnes physique
                 "nomUsageUniteLegale",  # parfois rempli, a la priorité sur nomUniteLegale
                 "statutDiffusionUniteLegale",  # P = non-diffusible
+                "categorieEntreprise",  # PME, ETI, GE
+                # "categorieJuridiqueUniteLegale" # 1000, etc.
             ]
         )
         .filter(

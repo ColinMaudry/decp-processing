@@ -1,7 +1,7 @@
 import polars as pl
 import polars.selectors as cs
 
-from src.config import LOG_LEVEL, SIRENE_DATA_DIR, ACHETEURS_NON_SIRENE
+from src.config import ACHETEURS_NON_SIRENE, LOG_LEVEL, SIRENE_DATA_DIR
 from src.tasks.transform import (
     extract_unique_acheteurs_siret,
     extract_unique_titulaires_siret,
@@ -72,8 +72,15 @@ def add_unite_legale_data(
     # merge in fine avec le reste des données
     lf_sirets = lf_sirets.join(unites_legales_lf, how="inner", on="siren")
     lf_sirets = lf_sirets.rename(
-        {"denominationUniteLegale": f"{type_siret}_nom", "siren": f"{type_siret}_siren"}
+        {
+            "denominationUniteLegale": f"{type_siret}_nom",
+            "siren": f"{type_siret}_siren",
+            "categorieEntreprise": f"{type_siret}_categorie",
+        }
     )
+
+    if type_siret == "acheteur":
+        lf_sirets = lf_sirets.drop(f"{type_siret}_categorie")
 
     return lf_sirets
 

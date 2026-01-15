@@ -419,7 +419,7 @@ def get_etablissements() -> pl.LazyFrame:
 
     # Traitement en parrallèle avec 8 threads
     lfs = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=15) as executor:
         futures = [executor.submit(get_process_file, href) for href in hrefs]
         for future in concurrent.futures.as_completed(futures):
             try:
