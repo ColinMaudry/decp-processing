@@ -39,6 +39,6 @@ def sirene_preprocess():
             lf = get_etablissements()
             prepare_etablissements(lf).sink_parquet(processed_etab_parquet_path)
         else:
-            logger.info(processed_etab_parquet_path + " existe, skipping.")
+            logger.info(str(processed_etab_parquet_path) + " existe, skipping.")
 
     logger.info("☑️  Fin du flow sirene_preprocess.")
