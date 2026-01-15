@@ -6,7 +6,11 @@ import polars.selectors as cs
 
 from src.config import DATA_DIR, DIST_DIR, LOG_LEVEL
 from src.tasks.output import save_to_files
-from src.tasks.utils import check_parquet_file, get_logger
+from src.tasks.utils import (
+    calculate_duplicates_across_source,
+    check_parquet_file,
+    get_logger,
+)
 
 
 def apply_modifications(lff: pl.LazyFrame):
@@ -148,9 +152,10 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
     lfs = [pl.scan_parquet(file) for file in intermediate_files if Path(file).exists()]
     lf_concat: pl.LazyFrame = pl.concat(lfs, how="vertical")
 
-    logger.debug(
-        "Suppression des lignes en doublon par UID + titulaire ID + titulaire type ID + dateNotification"
-    )
+    logger.info("Calcul des % de doublons entre sources...")
+    calculate_duplicates_across_source(lf_concat)
+
+    logger.info("Suppression des lignes en doublon...")
 
     # Exemple de doublon : 20005584600014157140791205100
 

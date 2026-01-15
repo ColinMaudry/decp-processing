@@ -48,6 +48,10 @@ def publish_to_datagouv():
             "resource_id": "8ded94de-3b80-4840-a5bb-7faad1c9c234",
         },
         {
+            "file": str(DIST_DIR / "statistiques_doublons_sources.parquet"),
+            "resource_id": "a545bf6c-8b24-46ed-b49f-a32bf02eaffa",
+        },
+        {
             "file": str(DIST_DIR / "statistiques_marches.json"),
             "resource_id": "0ccf4a75-f3aa-4b46-8b6a-18aeb63e36df",
         },

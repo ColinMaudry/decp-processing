@@ -93,6 +93,11 @@ def decp_processing(enable_cache_removal: bool = True):
         )
         del resources_artifact
 
+    # Réinitialisation de DIST_DIR
+    if os.path.exists(DIST_DIR):
+        shutil.rmtree(DIST_DIR)
+    os.makedirs(DIST_DIR)
+
     logger.info("Concaténation des dataframes...")
     lf: pl.LazyFrame = concat_parquet_files(parquet_files)
 
@@ -107,11 +112,6 @@ def decp_processing(enable_cache_removal: bool = True):
         sirene_preprocess()
 
     lf: pl.LazyFrame = enrich_from_sirene(lf)
-
-    # Réinitialisation de DIST_DIR
-    if os.path.exists(DIST_DIR):
-        shutil.rmtree(DIST_DIR)
-    os.makedirs(DIST_DIR)
 
     sink_to_files(lf, DIST_DIR / "decp", file_format="parquet")
     lf: pl.LazyFrame = pl.scan_parquet(DIST_DIR / "decp.parquet")

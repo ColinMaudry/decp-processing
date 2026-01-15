@@ -343,6 +343,13 @@ def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
         "nom", "organisation", "url", "nb_marchés", "nb_acheteurs", "code"
     )
 
+    # jointure avec la matrice de présence
+    df_matrice = pl.read_parquet(
+        DIST_DIR / "statistiques_doublons_sources.parquet",
+        columns=["sourceDataset", "unique"],
+    )
+    df_sources = df_sources.join(df_matrice, left_on="code", right_on="sourceDataset")
+
     # application des métadonnées decp_minef aux codes decp_minef_*
     df_sources = (
         df_sources.sort(by="code").with_columns(
@@ -393,3 +400,73 @@ def get_logger(level: str) -> logging.Logger:
         return logger
     except MissingContextError:
         return logging.Logger(name="Fallback logger", level=level)
+
+
+def calculate_duplicates_across_source(lf: pl.LazyFrame) -> pl.DataFrame:
+    """
+    Cette fonction crée une matrice qui indique, pour chaque code de source
+    (exemples : pes_marche_2024, xmarches) le pourcentage d'uids qui lui sont uniques
+    (présentes dans aucune autre source) et le pourcentage d'uids présentes également
+    dans chaque autre source.
+
+    Fonction générée par la LLM Geminio 3 pro et testée par un humain.
+    :param lf:
+    :return:
+    """
+
+    # 1. Start Lazy and deduplicate (UID + Source must be unique)
+    lf = lf.unique(["uid", "sourceDataset"])
+
+    # 2. Create the Membership Matrix
+    # This creates a table: uid | dataset1 (bool) | dataset2 (bool) | ...
+    membership = (
+        lf.with_columns(pl.lit(True).alias("exists"))
+        .collect()  # Pivot is not yet fully streaming in Lazy, so we collect here
+        .pivot(on="sourceDataset", index="uid", values="exists")
+        .fill_null(False)
+    )
+
+    # Get the names of all dataset columns
+    source_cols = [c for c in membership.columns if c != "uid"]
+
+    # 3. Calculate "Row Sum" to find purely unique UIDs
+    # (A UID is unique if it appears in exactly 1 column)
+    membership = membership.with_columns(
+        pl.sum_horizontal(pl.col(source_cols).cast(pl.Int8)).alias("appearance_count")
+    )
+
+    results = []
+    for source in source_cols:
+        # 1. Total UIDs in this source
+        # (Summing a boolean column treats True as 1)
+        total_in_source = membership.select(pl.col(source).sum()).item()
+
+        if total_in_source == 0:
+            continue
+
+        # 2. Unique count
+        # We use a logical AND then sum the result
+        unique_count = membership.select(
+            (pl.col(source) & (pl.col("appearance_count") == 1)).sum()
+        ).item()
+
+        row_stats = {"sourceDataset": source, "unique": unique_count / total_in_source}
+
+        # 3. Intersections
+        for other in source_cols:
+            if source == other:
+                continue
+
+            # Intersection: where both columns are True
+            intersect_count = membership.select(
+                (pl.col(source) & pl.col(other)).sum()
+            ).item()
+
+            row_stats[other] = intersect_count / total_in_source
+
+        results.append(row_stats)
+
+    result = pl.DataFrame(results)
+    result.write_parquet(DIST_DIR / "statistiques_doublons_sources.parquet")
+    # Le return est pour tester la fonction
+    return result
