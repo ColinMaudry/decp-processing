@@ -124,6 +124,13 @@ def gen_artifact_row(
 # Statistiques pour toutes les données collectées ce jour
 def generate_stats(lf: pl.LazyFrame):
     now = datetime.now()
+
+    lf = lf.with_columns(
+        pl.col("dateNotification").dt.year().alias("anneeNotification")
+    )
+    lf = lf.with_columns(
+        pl.col("datePublicationDonnees").dt.year().alias("anneePublicationDonnees")
+    )
     lf_uid = (
         lf.select(
             "uid",
@@ -134,6 +141,8 @@ def generate_stats(lf: pl.LazyFrame):
             "donneesActuelles",
             "sourceDataset",
             "sourceFile",
+            "anneeNotification",
+            "anneePublicationDonnees",
         )
         .filter(pl.col("donneesActuelles"))
         .unique(subset=["uid"])
@@ -200,16 +209,14 @@ def generate_stats(lf: pl.LazyFrame):
 
     # Aggregations for publications per year
     pub_stats = (
-        lf_uid.with_columns(pl.col("datePublicationDonnees").dt.year().alias("year"))
-        .group_by("year")
+        lf_uid.group_by("anneePublicationDonnees")
         .agg(pl.len().alias("count"))
         .collect()
     )
 
     # Aggregations for notifications per year (count, sum, median)
     notif_stats = (
-        lf_uid.with_columns(pl.col("dateNotification").dt.year().alias("year"))
-        .group_by("year")
+        lf_uid.group_by("anneeNotification")
         .agg(
             pl.len().alias("count"),
             pl.sum("montant").alias("sum_montant"),
@@ -223,14 +230,18 @@ def generate_stats(lf: pl.LazyFrame):
 
         # Publications
         pub_count = (
-            pub_stats.filter(pl.col("year") == year).select("count").item()
-            if not pub_stats.filter(pl.col("year") == year).is_empty()
+            pub_stats.filter(pl.col("anneePublicationDonnees") == year)
+            .select("count")
+            .item()
+            if not pub_stats.filter(
+                pl.col("anneePublicationDonnees") == year
+            ).is_empty()
             else 0
         )
         stats_year["nb_publications_marches"] = pub_count
 
         # Notifications
-        df_year_stats = notif_stats.filter(pl.col("year") == year)
+        df_year_stats = notif_stats.filter(pl.col("anneeNotification") == year)
         if not df_year_stats.is_empty():
             stats_year["nb_notifications_marches"] = df_year_stats.select(
                 "count"
@@ -241,6 +252,21 @@ def generate_stats(lf: pl.LazyFrame):
             stats_year["mediane_montant_marches_notifies"] = int(
                 df_year_stats.select("median_montant").item() or 0
             )
+            stats_year["nb_acheteurs_uniques"] = (
+                lf_uid.filter(pl.col("anneeNotification") == year)
+                .select("acheteur_id")
+                .unique()
+                .collect(engine="streaming")
+                .height
+            )
+            stats_year["nb_titulaires_uniques"] = (
+                lf.filter(pl.col("anneeNotification") == year)
+                .select("titulaire_id")
+                .unique()
+                .collect(engine="streaming")
+                .height
+            )
+
         else:
             stats_year["nb_notifications_marches"] = 0
             stats_year["somme_montant_marchés_notifies"] = ""
