@@ -195,8 +195,12 @@ EXCLUDED_RESOURCES = (
 # Liste des datasets à traiter
 
 # Ne traiter qu'un seul dataset identifier par son ID
-SOLO_DATASET = os.getenv("SOLO_DATASET", "")
-ALL_CONFIG["SOLO_DATASET"] = SOLO_DATASET
+SOLO_DATASETS = os.getenv("SOLO_DATASETS", "")
+if len(SOLO_DATASETS) > 0:
+    SOLO_DATASETS = SOLO_DATASETS.strip().split(",")
+else:
+    SOLO_DATASETS = []
+ALL_CONFIG["SOLO_DATASETS"] = SOLO_DATASETS
 
 # Acheteurs absents de la base SIRENE (pour raisons de sécurité ou autre)
 # Format: SIRET -> {"nom": "...", ...}
@@ -211,10 +215,11 @@ with open(
     ),
     "r",
 ) as f:
-    TRACKED_DATASETS = json.load(f)
-for dataset in TRACKED_DATASETS:
-    if dataset["id"] == SOLO_DATASET:
-        TRACKED_DATASETS = [dataset]
+    tracked_datasets_complete = json.load(f)
+TRACKED_DATASETS = []
+for dataset in tracked_datasets_complete:
+    if len(SOLO_DATASETS) == 0 or dataset["id"] in SOLO_DATASETS:
+        TRACKED_DATASETS.append(dataset)
 
 
 @dataclass

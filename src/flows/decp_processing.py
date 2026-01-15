@@ -19,7 +19,7 @@ from src.config import (
     PREFECT_API_URL,
     RESOURCE_CACHE_DIR,
     SIRENE_DATA_DIR,
-    SOLO_DATASET,
+    SOLO_DATASETS,
     TRACKED_DATASETS,
 )
 from src.flows.sirene_preprocess import sirene_preprocess
@@ -82,7 +82,7 @@ def decp_processing(enable_cache_removal: bool = True):
     decp_publish = (
         DECP_PROCESSING_PUBLISH
         and len(resources_to_process) > 5000
-        and SOLO_DATASET in ["", None]
+        and SOLO_DATASETS in [[""], None]
     )
 
     if decp_publish:

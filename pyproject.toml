@@ -48,7 +48,9 @@ env = [
     "PREFECT_API_URL=",
     "DECP_PROCESSING_PUBLISH=",
     "DECP_USE_CACHE=false",
-    "MAX_PREFECT_WORKERS=1"
+    "MAX_PREFECT_WORKERS=1",
+    "SOLO_DATASETS=",
+    "PREFECT_TASKS_DISABLE_CACHE=True"
 ]
 addopts = "-p no:warnings"
 
