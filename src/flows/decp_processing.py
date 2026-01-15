@@ -82,7 +82,7 @@ def decp_processing(enable_cache_removal: bool = True):
     decp_publish = (
         DECP_PROCESSING_PUBLISH
         and len(resources_to_process) > 5000
-        and SOLO_DATASETS in [[""], None]
+        and SOLO_DATASETS == []
     )
 
     if decp_publish:
