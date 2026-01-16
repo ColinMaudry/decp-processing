@@ -301,7 +301,10 @@ def write_marche_rows(marche: dict, file, decp_format: DecpFormat) -> set[str]:
     """Ajout d'une ligne ndjson pour chaque modification/version du marché."""
     fields = set()
     if marche:  # marche peut être null (marches-securises.fr)
-        for mod in yield_modifications(marche):
+        # Déterminer le format cible pour les titulaires
+        target_format = "2022" if decp_format.label == "DECP 2022" else "2019"
+
+        for mod in yield_modifications(marche, target_format=target_format):
             if mod is None:
                 continue
             # Pour decp-2019.json : désimbrication des données des titulaires
@@ -318,7 +321,9 @@ def write_marche_rows(marche: dict, file, decp_format: DecpFormat) -> set[str]:
     return fields
 
 
-def yield_modifications(row: dict, separator="_") -> Iterator[dict] or None:
+def yield_modifications(
+    row: dict, separator="_", target_format: str = "2022"
+) -> Iterator[dict] or None:
     """Pour chaque modification, génère un objet/dict marché aplati."""
     raw_mods = row.pop("modifications", [])
     # Couvre le format 2022:
@@ -331,12 +336,16 @@ def yield_modifications(row: dict, separator="_") -> Iterator[dict] or None:
     elif isinstance(raw_mods, str) or raw_mods is None:
         raw_mods = []
 
+    # Normaliser les titulaires du marché principal vers le format cible
+    if "titulaires" in row and row["titulaires"]:
+        row["titulaires"] = norm_titulaires(row["titulaires"], target_format)
+
     mods = [{}] + raw_mods
     for i, mod in enumerate(mods):
         mod["id"] = i
         if "modification" in mod:
             mod = mod["modification"]
-        titulaires = norm_titulaires(mod)
+        titulaires = norm_titulaires(mod.get("titulaires"), target_format)
         if titulaires is not None:
             mod["titulaires"] = titulaires
         row["modification"] = mod
@@ -345,32 +354,52 @@ def yield_modifications(row: dict, separator="_") -> Iterator[dict] or None:
         )
 
 
-def norm_titulaires(titulaires):
+def norm_titulaires(titulaires, target_format: str = "2022"):
     """
-    Corrige les blocs titulaires imbriqués dans n niveaux de listes.
+    Corrige les blocs titulaires imbriqués dans n niveaux de listes et normalise
+    vers le format cible (2019 ou 2022).
 
-    :param titulaires:
-    :return: titulaires:
+    :param titulaires: liste de titulaires
+    :param target_format: "2019" ou "2022"
+    :return: titulaires normalisés
     """
     if isinstance(titulaires, list):
         titulaires_clean = []
         for t in titulaires:
             if isinstance(t, dict):
-                titulaires_clean.append(norm_titulaire(t))
+                titulaires_clean.append(norm_titulaire(t, target_format))
             elif isinstance(t, list):
                 # Traite les listes de titulaires écrites en listes de listes.
                 for inner_t in t:
                     if isinstance(inner_t, dict):
-                        titulaires_clean.append(norm_titulaire(inner_t))
+                        titulaires_clean.append(norm_titulaire(inner_t, target_format))
         return titulaires_clean
     return None
 
 
+def norm_titulaire(titulaire: dict, target_format: str = "2022"):
+    """
+    Normalise un titulaire vers le format cible.
+
+    Format 2019 : {"id": ..., "typeIdentifiant": ...}
+    Format 2022 : {"titulaire": {"id": ..., "typeIdentifiant": ...}}
+
+    Note: Les données AWS (marches-publics.info) utilisent une enveloppe format 2022
+    mais avec des titulaires au format 2019. On normalise donc tout vers le format cible.
+    """
+    if target_format == "2022":
+        if "titulaire" not in titulaire:
+            # Format 2019 ou AWS hybride - convertir en format 2022
+            return {"titulaire": titulaire}
+        return titulaire
+    else:
+        # Format 2019
+        if "titulaire" in titulaire:
+            return titulaire["titulaire"]
+        return titulaire
+
+
 # Récupération des données des établissements
-def norm_titulaire(titulaire: dict):
-    if "titulaire" in titulaire:
-        titulaire = titulaire["titulaire"]
-    return titulaire
 
 
 def get_etablissements() -> pl.LazyFrame:
