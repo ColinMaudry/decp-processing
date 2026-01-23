@@ -467,6 +467,7 @@ def calculate_duplicates_across_source(lf: pl.LazyFrame) -> pl.DataFrame:
         results.append(row_stats)
 
     result = pl.DataFrame(results)
+    del results, membership, source_cols, row_stats
     result.write_parquet(DIST_DIR / "statistiques_doublons_sources.parquet")
     # Le return est pour tester la fonction
     return result
