@@ -413,13 +413,13 @@ def get_etablissements() -> pl.LazyFrame:
         content = response.content
         lff = pl.scan_csv(content, schema_overrides=schema)
         lff = lff.select(columns)
-        logger.info(_href.split("/")[-1], "OK")
+        logger.info(_href.split("/")[-1] + " OK")
 
         return lff
 
     # Traitement en parrallèle avec 8 threads
     lfs = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=15) as executor:
         futures = [executor.submit(get_process_file, href) for href in hrefs]
         for future in concurrent.futures.as_completed(futures):
             try:

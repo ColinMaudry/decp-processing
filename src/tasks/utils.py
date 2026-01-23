@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 import shutil
@@ -78,7 +79,7 @@ def remove_unused_cache(
         for file in cache_dir.rglob("*"):
             if file.is_file():
                 if now - file.stat().st_atime > age_limit:
-                    logger.info(f"Suppression du fichier de cache: {file}")
+                    logger.debug(f"Suppression du fichier de cache: {file}")
                     deleted_files.append(file)
                     file.unlink()
         logger.info(f"-> {len(deleted_files)} fichiers de cache supprimés")
@@ -123,6 +124,13 @@ def gen_artifact_row(
 # Statistiques pour toutes les données collectées ce jour
 def generate_stats(lf: pl.LazyFrame):
     now = datetime.now()
+
+    lf = lf.with_columns(
+        pl.col("dateNotification").dt.year().alias("anneeNotification")
+    )
+    lf = lf.with_columns(
+        pl.col("datePublicationDonnees").dt.year().alias("anneePublicationDonnees")
+    )
     lf_uid = (
         lf.select(
             "uid",
@@ -133,6 +141,8 @@ def generate_stats(lf: pl.LazyFrame):
             "donneesActuelles",
             "sourceDataset",
             "sourceFile",
+            "anneeNotification",
+            "anneePublicationDonnees",
         )
         .filter(pl.col("donneesActuelles"))
         .unique(subset=["uid"])
@@ -184,11 +194,10 @@ def generate_stats(lf: pl.LazyFrame):
     stats = {
         "datetime": now.isoformat()[:-7],  # jusqu'aux secondes
         "date": DATE_NOW,
-        "resources": resources,
         "nb_resources": len(resources),
         "sources": sources,
         "nb_lignes": nb_lignes,
-        "colonnes_triées": sorted(columns),
+        "colonnes_triees": sorted(columns),
         "nb_colonnes": len(columns),
         "nb_marches": nb_marches,
         "nb_acheteurs_uniques": nb_acheteurs_uniques,
@@ -200,16 +209,14 @@ def generate_stats(lf: pl.LazyFrame):
 
     # Aggregations for publications per year
     pub_stats = (
-        lf_uid.with_columns(pl.col("datePublicationDonnees").dt.year().alias("year"))
-        .group_by("year")
+        lf_uid.group_by("anneePublicationDonnees")
         .agg(pl.len().alias("count"))
         .collect()
     )
 
     # Aggregations for notifications per year (count, sum, median)
     notif_stats = (
-        lf_uid.with_columns(pl.col("dateNotification").dt.year().alias("year"))
-        .group_by("year")
+        lf_uid.group_by("anneeNotification")
         .agg(
             pl.len().alias("count"),
             pl.sum("montant").alias("sum_montant"),
@@ -219,30 +226,51 @@ def generate_stats(lf: pl.LazyFrame):
     )
 
     for year in range(2018, int(DATE_NOW[0:4]) + 1):
+        stats[str(year)] = stats_year = {}
+
         # Publications
         pub_count = (
-            pub_stats.filter(pl.col("year") == year).select("count").item()
-            if not pub_stats.filter(pl.col("year") == year).is_empty()
+            pub_stats.filter(pl.col("anneePublicationDonnees") == year)
+            .select("count")
+            .item()
+            if not pub_stats.filter(
+                pl.col("anneePublicationDonnees") == year
+            ).is_empty()
             else 0
         )
-        stats[f"{str(year)}_nb_publications_marchés"] = pub_count
+        stats_year["nb_publications_marches"] = pub_count
 
         # Notifications
-        year_stats = notif_stats.filter(pl.col("year") == year)
-        if not year_stats.is_empty():
-            stats[f"{str(year)}_nb_notifications_marchés"] = year_stats.select(
+        df_year_stats = notif_stats.filter(pl.col("anneeNotification") == year)
+        if not df_year_stats.is_empty():
+            stats_year["nb_notifications_marches"] = df_year_stats.select(
                 "count"
             ).item()
-            stats[f"{str(year)}_somme_montant_marchés_notifiés"] = int(
-                year_stats.select("sum_montant").item() or 0
+            stats_year["somme_montant_marches_notifies"] = int(
+                df_year_stats.select("sum_montant").item() or 0
             )
-            stats[f"{str(year)}_médiane_montant_marchés_notifiés"] = int(
-                year_stats.select("median_montant").item() or 0
+            stats_year["mediane_montant_marches_notifies"] = int(
+                df_year_stats.select("median_montant").item() or 0
             )
+            stats_year["nb_acheteurs_uniques"] = (
+                lf_uid.filter(pl.col("anneeNotification") == year)
+                .select("acheteur_id")
+                .unique()
+                .collect(engine="streaming")
+                .height
+            )
+            stats_year["nb_titulaires_uniques"] = (
+                lf.filter(pl.col("anneeNotification") == year)
+                .select("titulaire_id")
+                .unique()
+                .collect(engine="streaming")
+                .height
+            )
+
         else:
-            stats[f"{str(year)}_nb_notifications_marchés"] = 0
-            stats[f"{str(year)}_somme_montant_marchés_notifiés"] = ""
-            stats[f"{str(year)}_médiane_montant_marchés_notifiés"] = ""
+            stats_year["nb_notifications_marches"] = 0
+            stats_year["somme_montant_marchés_notifies"] = ""
+            stats_year["mediane_montant_marchés_notifies"] = ""
 
     # Stock les statistiques dans prefect
     create_table_artifact(
@@ -250,6 +278,10 @@ def generate_stats(lf: pl.LazyFrame):
         key="stats-marches-publics",
         description=f"Statistiques sur les marchés publics agrégés ({DATE_NOW})",
     )
+
+    # Création d'un JSON pour publication sur data.gouv.fr
+    with open(DIST_DIR / "statistiques_marches.json", "w") as f:
+        json.dump(stats, f, indent=4)
 
 
 def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
@@ -311,6 +343,13 @@ def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
         "nom", "organisation", "url", "nb_marchés", "nb_acheteurs", "code"
     )
 
+    # jointure avec la matrice de présence
+    df_matrice = pl.read_parquet(
+        DIST_DIR / "statistiques_doublons_sources.parquet",
+        columns=["sourceDataset", "unique"],
+    )
+    df_sources = df_sources.join(df_matrice, left_on="code", right_on="sourceDataset")
+
     # application des métadonnées decp_minef aux codes decp_minef_*
     df_sources = (
         df_sources.sort(by="code").with_columns(
@@ -325,7 +364,7 @@ def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
     df_sources = df_sources.sort(by="nb_marchés", descending=True, nulls_last=True)
 
     # dump CSV dans dist
-    df_sources.write_csv(DIST_DIR / "statistiques.csv")
+    df_sources.write_csv(DIST_DIR / "statistiques_sources.csv")
 
 
 def full_resource_name(r: dict):
@@ -361,3 +400,74 @@ def get_logger(level: str) -> logging.Logger:
         return logger
     except MissingContextError:
         return logging.Logger(name="Fallback logger", level=level)
+
+
+def calculate_duplicates_across_source(lf: pl.LazyFrame) -> pl.DataFrame:
+    """
+    Cette fonction crée une matrice qui indique, pour chaque code de source
+    (exemples : pes_marche_2024, xmarches) le pourcentage d'uids qui lui sont uniques
+    (présentes dans aucune autre source) et le pourcentage d'uids présentes également
+    dans chaque autre source.
+
+    Fonction générée par la LLM Geminio 3 pro et testée par un humain.
+    :param lf:
+    :return:
+    """
+
+    # 1. Start Lazy and deduplicate (UID + Source must be unique)
+    lf = lf.unique(["uid", "sourceDataset"])
+
+    # 2. Create the Membership Matrix
+    # This creates a table: uid | dataset1 (bool) | dataset2 (bool) | ...
+    membership = (
+        lf.with_columns(pl.lit(True).alias("exists"))
+        .collect()  # Pivot is not yet fully streaming in Lazy, so we collect here
+        .pivot(on="sourceDataset", index="uid", values="exists")
+        .fill_null(False)
+    )
+
+    # Get the names of all dataset columns
+    source_cols = [c for c in membership.columns if c != "uid"]
+
+    # 3. Calculate "Row Sum" to find purely unique UIDs
+    # (A UID is unique if it appears in exactly 1 column)
+    membership = membership.with_columns(
+        pl.sum_horizontal(pl.col(source_cols).cast(pl.Int8)).alias("appearance_count")
+    )
+
+    results = []
+    for source in source_cols:
+        # 1. Total UIDs in this source
+        # (Summing a boolean column treats True as 1)
+        total_in_source = membership.select(pl.col(source).sum()).item()
+
+        if total_in_source == 0:
+            continue
+
+        # 2. Unique count
+        # We use a logical AND then sum the result
+        unique_count = membership.select(
+            (pl.col(source) & (pl.col("appearance_count") == 1)).sum()
+        ).item()
+
+        row_stats = {"sourceDataset": source, "unique": unique_count / total_in_source}
+
+        # 3. Intersections
+        for other in source_cols:
+            if source == other:
+                continue
+
+            # Intersection: where both columns are True
+            intersect_count = membership.select(
+                (pl.col(source) & pl.col(other)).sum()
+            ).item()
+
+            row_stats[other] = intersect_count / total_in_source
+
+        results.append(row_stats)
+
+    result = pl.DataFrame(results)
+    del results, membership, source_cols, row_stats
+    result.write_parquet(DIST_DIR / "statistiques_doublons_sources.parquet")
+    # Le return est pour tester la fonction
+    return result

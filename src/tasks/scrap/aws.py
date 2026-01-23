@@ -14,9 +14,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 
-from config import LOG_LEVEL
-from tasks.publish import publish_scrap_to_datagouv
-from tasks.utils import get_logger
+from src.config import LOG_LEVEL
+from src.tasks.publish import publish_scrap_to_datagouv
+from src.tasks.utils import get_logger
 
 
 @task()

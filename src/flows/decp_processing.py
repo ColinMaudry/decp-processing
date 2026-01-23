@@ -19,7 +19,7 @@ from src.config import (
     PREFECT_API_URL,
     RESOURCE_CACHE_DIR,
     SIRENE_DATA_DIR,
-    SOLO_DATASET,
+    SOLO_DATASETS,
     TRACKED_DATASETS,
 )
 from src.flows.sirene_preprocess import sirene_preprocess
@@ -65,8 +65,8 @@ def decp_processing(enable_cache_removal: bool = True):
     batch_size = 100
     parquet_files = []
 
-    # Filtrer les ressources à traiter, en ne gardant que les fichiers > 100 octets
-    resources_to_process = [r for r in resources if r["filesize"] > 100]
+    # Filtrer les ressources à traiter, en ne gardant que les fichiers > 180 octets
+    resources_to_process = [r for r in resources if r["filesize"] > 180]
 
     for i in range(0, len(resources_to_process), batch_size):
         process_batch(
@@ -82,7 +82,7 @@ def decp_processing(enable_cache_removal: bool = True):
     decp_publish = (
         DECP_PROCESSING_PUBLISH
         and len(resources_to_process) > 5000
-        and SOLO_DATASET in ["", None]
+        and SOLO_DATASETS == []
     )
 
     if decp_publish:
@@ -92,6 +92,11 @@ def decp_processing(enable_cache_removal: bool = True):
             description=f"Les ressources utilisées comme source ({DATE_NOW})",
         )
         del resources_artifact
+
+    # Réinitialisation de DIST_DIR
+    if os.path.exists(DIST_DIR):
+        shutil.rmtree(DIST_DIR)
+    os.makedirs(DIST_DIR)
 
     logger.info("Concaténation des dataframes...")
     lf: pl.LazyFrame = concat_parquet_files(parquet_files)
@@ -107,11 +112,6 @@ def decp_processing(enable_cache_removal: bool = True):
         sirene_preprocess()
 
     lf: pl.LazyFrame = enrich_from_sirene(lf)
-
-    # Réinitialisation de DIST_DIR
-    if os.path.exists(DIST_DIR):
-        shutil.rmtree(DIST_DIR)
-    os.makedirs(DIST_DIR)
 
     sink_to_files(lf, DIST_DIR / "decp", file_format="parquet")
     lf: pl.LazyFrame = pl.scan_parquet(DIST_DIR / "decp.parquet")

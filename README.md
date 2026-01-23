@@ -1,6 +1,6 @@
 # DECP processing
 
-> version 2.7.0 ([notes de version](https://github.com/ColinMaudry/decp-processing/blob/main/CHANGELOG.md))
+> version 2.8.0 ([notes de version](https://github.com/ColinMaudry/decp-processing/blob/main/CHANGELOG.md))
 
 Projet de traitement et de publication de meilleures données sur les marchés publics attribués en France. Vous pouvez consulter, filtrer et télécharger
 ces données sur le site [decp.info](https://decp.info). Enfin la section [À propos](https://decp.info/a-propos) décrit les objectifs du projet et regroupe toutes les informations clés.
@@ -31,7 +31,7 @@ Les données consolidées proviennent intégralement de sources ouvertes. Les d�
 
 ## Pré-requis
 
-- Python 3.9 ou plus récent
+- Python 3.10 ou plus récent
 - cargo ([installation rapide](https://rustup.rs))
 - si sauvegarde dans PostgreSQL :
   - sur Debian/Ubuntu : `sudo apt install libpq-dev` (pour builder le module `psycopg2`)
@@ -41,7 +41,7 @@ Les données consolidées proviennent intégralement de sources ouvertes. Les d�
 
 Cet outil repose grandement sur trois logiciels libres :
 
-- [prefect](https://docs.prefect.io/v3/get-started) pour l'orchestration, le monitoring, la gestion du cache
+- [prefect](https://docs.prefect.io/v3/get-started) pour l'orchestration, le monitoring
 - [polars](https://docs.pola.rs) pour la manipulation de données tabulaires en flux
 - [ijson](https://pypi.org/project/ijson/) pour la manipulation de données JSON en flux
 
@@ -107,13 +107,13 @@ Déploiement des flows (exécution programmée de main ou ponctuelle de dev) :
 
 ## Lancer le traitement des données (pour le développement en local)
 
-Le pré-traitement des données SIRENE doit être fait une fois pour que le traitement principal soit fonctionnel.
+Le pré-traitement des données SIRENE doit être fait une fois pour que les tests et le traitement principal soient fonctionnels.
 
 ```bash
 python run_flow.py sirene_preprocess
 ```
 
-Lancement du traitement principal (data_tables + decp.info) via un serveur prefect à usage unique
+Lancement du traitement principal via un serveur prefect à usage unique.
 
 ```bash
 python -m src.run_flow decp_processing
@@ -123,14 +123,14 @@ python -m src.run_flow decp_processing
 
 Le déploiement sur le serveur déploie à la fois un run quotidien de traitement des données et un run activable à la demande.
 
-Attention, la version de prefect du client utilisé pour le déploiement et celle utilisée pour le serveur doivent être identiques. Cela est normalement garanti par la version configurée dans `pyproject.toml`.
+Attention, la version de prefect du client utilisé pour le déploiement et celle utilisée pour le serveur doivent être identiques. Cela est normalement garanti par la version configurée dans les dépendances (`pyproject.toml`).
 
 1. Suivre les instructions de la section "Installation sur le serveur pour les déploiements"
-2. Vérifier que le `.env` est bien configuré, ce sont ces variables qui seront utilisées par les run du serveur.
+2. Vérifier que le `.env` est bien configuré (URL de l'API Prefect et le mot de passe), ce sont ces variables qui seront utilisées par les run du serveur.
 3. Déployer sur le serveur :
 
 ```bash
-python src/deploy.py
+python src/deployments.py
 ```
 
 4. Le run se lancera tous les jours selon la configuration cron. Si tu souhaites exécuter le run maintenant :
@@ -148,13 +148,19 @@ Pour lancer les tests unitaires :
 Ce traitement doit être fait une fois pour que le test du traitement principal soit fonctionnel.
 
 ```bash
-pytest tests/test_sirene_preprocess.py
+python run_flow.py sirene_preprocess
 ```
 
-### Du traitement principal (data tables + decp.info) (les autres tests de /tests sont moins maintenus)
+### Du traitement principal
 
 ```bash
 pytest tests/test_main.py
+```
+
+### Tous les tests
+
+```bash
+pytest
 ```
 
 # Contributeurs ❤️

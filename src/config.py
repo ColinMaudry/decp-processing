@@ -109,16 +109,9 @@ def make_sirene_data_dir(sirene_data_parent_dir) -> Path:
 
 
 SIRENE_DATA_PARENT_DIR = make_path_from_env("SIRENE_DATA_PARENT_DIR", DATA_DIR)
+SIRENE_DATA_DIR = make_sirene_data_dir(SIRENE_DATA_PARENT_DIR)
 
-# SIRENE_DATA_DIR ne doit être spécifié que pour les tests. Laisser vide dans .env et laisser make_sirene_data_dir
-# le déterminer
-SIRENE_DATA_DIR = os.getenv(
-    "SIRENE_DATA_DIR", make_sirene_data_dir(SIRENE_DATA_PARENT_DIR)
-)
-if isinstance(SIRENE_DATA_DIR, str):
-    SIRENE_DATA_DIR = Path(os.path.join(BASE_DIR, SIRENE_DATA_DIR))
-
-# SIRENE_DATA_DIR on ne le crée que si nécessaire, dans flows.py
+# SIRENE_DATA_DIR on ne le crée que si nécessaire, dans sirene_preprocess.py
 ALL_CONFIG["SIRENE_DATA_PARENT_DIR"] = SIRENE_DATA_PARENT_DIR
 ALL_CONFIG["SIRENE_DATA_DIR"] = SIRENE_DATA_DIR
 
@@ -202,8 +195,12 @@ EXCLUDED_RESOURCES = (
 # Liste des datasets à traiter
 
 # Ne traiter qu'un seul dataset identifier par son ID
-SOLO_DATASET = os.getenv("SOLO_DATASET", "")
-ALL_CONFIG["SOLO_DATASET"] = SOLO_DATASET
+SOLO_DATASETS = os.getenv("SOLO_DATASETS", "")
+if len(SOLO_DATASETS) > 0:
+    SOLO_DATASETS = SOLO_DATASETS.strip().split(",")
+else:
+    SOLO_DATASETS = []
+ALL_CONFIG["SOLO_DATASETS"] = SOLO_DATASETS
 
 # Acheteurs absents de la base SIRENE (pour raisons de sécurité ou autre)
 # Format: SIRET -> {"nom": "...", ...}
@@ -218,10 +215,11 @@ with open(
     ),
     "r",
 ) as f:
-    TRACKED_DATASETS = json.load(f)
-for dataset in TRACKED_DATASETS:
-    if dataset["id"] == SOLO_DATASET:
-        TRACKED_DATASETS = [dataset]
+    tracked_datasets_complete = json.load(f)
+TRACKED_DATASETS = []
+for dataset in tracked_datasets_complete:
+    if len(SOLO_DATASETS) == 0 or dataset["id"] in SOLO_DATASETS:
+        TRACKED_DATASETS.append(dataset)
 
 
 @dataclass

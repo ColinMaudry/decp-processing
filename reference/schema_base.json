@@ -305,6 +305,13 @@
     },
     {
       "type": "string",
+      "name": "titulaire_categorie",
+      "title": "Catégorie du titulaire",
+      "description": "Catégorie de l'entreprise titulaire selon la classification de l'INSEE : PME, ETI ou GE.",
+      "short_title": "Catégorie titulaire"
+    },
+    {
+      "type": "string",
       "name": "titulaire_commune_code",
       "title": "Commune du titulaire (code)",
       "description": "Code de la commune où se trouve le titulaire.",

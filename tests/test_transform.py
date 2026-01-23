@@ -21,6 +21,7 @@ class TestPrepareUnitesLegales:
                     "nomUniteLegale": None,
                     "nomUsageUniteLegale": None,
                     "statutDiffusionUniteLegale": "O",
+                    "categorieEntreprise": "ETI",
                 },
                 # Cas 2: Personne physique avec nom d'usage
                 {
@@ -30,6 +31,7 @@ class TestPrepareUnitesLegales:
                     "nomUniteLegale": "Croizat",
                     "nomUsageUniteLegale": "Zacroit",  # a la priorité
                     "statutDiffusionUniteLegale": "O",
+                    "categorieEntreprise": "PME",
                 },
                 # Cas 3: Personne physique sans nom d'usage
                 {
@@ -39,6 +41,7 @@ class TestPrepareUnitesLegales:
                     "nomUniteLegale": "Croizat",
                     "nomUsageUniteLegale": None,
                     "statutDiffusionUniteLegale": "O",
+                    "categorieEntreprise": "PME",
                 },
                 # Cas 4: Nom non-diffusible
                 {
@@ -48,6 +51,7 @@ class TestPrepareUnitesLegales:
                     "nomUniteLegale": "Croizat",
                     "nomUsageUniteLegale": None,
                     "statutDiffusionUniteLegale": "P",
+                    "categorieEntreprise": "PME",
                 },
             ]
         )
@@ -56,15 +60,28 @@ class TestPrepareUnitesLegales:
         expected_df = pl.DataFrame(
             [
                 # Cas 1: denominationUniteLegale est préservé
-                {"siren": "111111111", "denominationUniteLegale": "Org 1"},
+                {
+                    "siren": "111111111",
+                    "denominationUniteLegale": "Org 1",
+                    "categorieEntreprise": "ETI",
+                },
                 # Cas 2: denominationUniteLegale = prenom + nomUsage (Zacroit)
-                {"siren": "222222222", "denominationUniteLegale": "Ambroise Zacroit"},
+                {
+                    "siren": "222222222",
+                    "denominationUniteLegale": "Ambroise Zacroit",
+                    "categorieEntreprise": "PME",
+                },
                 # Cas 3: denominationUniteLegale = prenom + nom (Croizat)
-                {"siren": "333333333", "denominationUniteLegale": "Ambroise Croizat"},
+                {
+                    "siren": "333333333",
+                    "denominationUniteLegale": "Ambroise Croizat",
+                    "categorieEntreprise": "PME",
+                },
                 # Cas 4: denominationUniteLegale = non-diffusible
                 {
                     "siren": "44444444",
                     "denominationUniteLegale": "[Données personnelles non-diffusibles]",
+                    "categorieEntreprise": "PME",
                 },
             ]
         )
