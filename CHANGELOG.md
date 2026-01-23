@@ -1,3 +1,10 @@
+### 2.8.0 2026-01-23
+
+- Ajout du champ `titulaire_categorie` (PME, ETI, GE)
+- Publication de statistiques sur les marchés publics ([statistiques_marches.json](https://www.data.gouv.fr/datasets/donnees-essentielles-de-la-commande-publique-consolidees-format-tabulaire?resource_id=0ccf4a75-f3aa-4b46-8b6a-18aeb63e36df))
+- Publication de statistiques sur les doublons entre sources de données ([statistiques-doublons-sources.parquet](https://www.data.gouv.fr/datasets/donnees-essentielles-de-la-commande-publique-consolidees-format-tabulaire?resource_id=a545bf6c-8b24-46ed-b49f-a32bf02eaffa))
+- Ignorer les petits fichiers vides (< 180 octets)
+
 #### 2.7.1
 
 - Gestion des datasets dépubliés par leur propriétaire (arrêt du workflow pour ne pas écraser les données de prod et pouvoir en extraire les données à présent indisponibles)
