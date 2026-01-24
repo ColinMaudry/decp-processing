@@ -1,3 +1,9 @@
+### 2.9.0
+
+(prévenir Odialis avant la prochain mise en prod)
+
+- `distance` renommé `titulaire_distance` par cohérence, cette donnée étant liée au titulaire, et un marché peut avoir plusieurs titulaires
+
 ### 2.8.0 2026-01-23
 
 - Ajout du champ `titulaire_categorie` (PME, ETI, GE)

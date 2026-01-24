@@ -206,7 +206,7 @@ def calculate_distance(lf: pl.LazyFrame) -> pl.LazyFrame:
         )
         .round(mode="half_away_from_zero")
         .cast(pl.Int16)
-        .alias("distance")
+        .alias("titulaire_distance")
     )
     return lf
 
@@ -215,7 +215,7 @@ def haversine(
     lat1: pl.Expr, lon1: pl.Expr, lat2: pl.Expr, lon2: pl.Expr, R: float = 6371.0
 ) -> pl.Expr:
     """
-    Calcule la distance haversine entre deux points (lat1, lon1) et (lat2, lon2)     en km.
+    Calcule la distance haversine entre deux points (lat1, lon1) et (lat2, lon2) en km.
     Utilise des opérations vectorisées Polars.
     Généré par la LLM Euria, développée et hébergée en Suisse par Infomaniak.
     """
