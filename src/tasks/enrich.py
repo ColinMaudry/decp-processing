@@ -235,3 +235,20 @@ def haversine(
 
     # Distance
     return R * c
+
+
+def get_cpv_category(cpv_column: pl.Expr) -> pl.Expr:
+    # df_with_category = df.with_columns(
+    #        get_cpv_category_expr(pl.col("code_cpv")).alias("categorie")
+    #    )
+    cpv_division = cpv_column.str.slice(0, 2).cast(pl.Int32, strict=False)
+    return (
+        pl.when(cpv_division == 45)
+        .then(pl.lit("Travaux"))
+        .when(cpv_division.is_in(range(1, 45)) | (cpv_division == 48))
+        .then(pl.lit("Fournitures"))
+        .when(cpv_division.is_in(range(50, 99)))
+        .then(pl.lit("Services"))
+        .otherwise(pl.lit("Non catégorisé"))
+        .fill_null(pl.lit("Code CPV invalide"))
+    )
