@@ -9,9 +9,10 @@ class TestEnrich:
     def test_add_unites_legales_data_titulaires(self):
         lf_sirets = pl.LazyFrame({"titulaire_id": ["12345678900022", "12345679000023"]})
 
-        lf_unites_legales = pl.scan_parquet(
-            BASE_DIR / "tests/data/sirene/unites_legales.parquet"
-        )
+        lf_unites_legales = pl.DataFrame(
+            open(BASE_DIR / "tests/data/sirene/unites_legales.json", "rb").read(),
+            orient="row",
+        ).lazy()
 
         lf_output = pl.LazyFrame(
             {
@@ -33,9 +34,10 @@ class TestEnrich:
     def test_add_unites_legales_data_acheteurs(self):
         lf_sirets = pl.LazyFrame({"acheteur_id": ["12345678900022", "12345679000023"]})
 
-        lf_unites_legales = pl.scan_parquet(
-            BASE_DIR / "tests/data/sirene/unites_legales.parquet"
-        )
+        lf_unites_legales = pl.DataFrame(
+            open(BASE_DIR / "tests/data/sirene/unites_legales.json", "rb").read(),
+            orient="row",
+        ).lazy()
 
         lf_output = pl.LazyFrame(
             {
@@ -58,9 +60,10 @@ class TestEnrich:
             {"org_id": ["12345678900022", "12345678900023"], "org_nom": ["Org", "Org"]}
         )
 
-        lf_etablissement = pl.scan_parquet(
-            BASE_DIR / "tests/data/sirene/etablissements.parquet"
-        )
+        lf_etablissements = pl.DataFrame(
+            open(BASE_DIR / "tests/data/sirene/etablissements.json", "rb").read(),
+            orient="row",
+        ).lazy()
 
         lf_output = pl.LazyFrame(
             {
@@ -81,7 +84,7 @@ class TestEnrich:
 
         assert_frame_equal(
             add_etablissement_data(
-                lf_sirets, lf_etablissement, "org_id", "org"
+                lf_sirets, lf_etablissements, "org_id", "org"
             ).collect(),
             lf_output.collect(),
             check_column_order=False,

@@ -1,0 +1,30 @@
+[
+  {
+    "siret": "12345678900022",
+    "latitude": 11.12,
+    "longitude": 12.13,
+    "commune_code": "12345",
+    "departement_code": "12",
+    "region_code": "01",
+    "commune_nom": "Commune",
+    "departement_nom": "D\u00e9partement",
+    "region_nom": "R\u00e9gion",
+    "etablissement_nom": "\u00c9tablissement nom",
+    "activite_code": "11.11A",
+    "activite_nomenclature": "NAFRev2"
+  },
+  {
+    "siret": "12345678900023",
+    "latitude": 11.12,
+    "longitude": 12.13,
+    "commune_code": "12345",
+    "departement_code": "12",
+    "region_code": "01",
+    "commune_nom": "Commune",
+    "departement_nom": "D\u00e9partement",
+    "region_nom": "R\u00e9gion",
+    "etablissement_nom": null,
+    "activite_code": "11.11B",
+    "activite_nomenclature": "NAFRev2"
+  }
+]

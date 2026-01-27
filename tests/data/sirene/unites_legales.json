@@ -1,0 +1,14 @@
+[
+  {
+    "siren": "123456789",
+    "denominationUniteLegale": "Org 1",
+    "categorieEntreprise": "ETI",
+    "categorieJuridiqueUniteLegale": "1000"
+  },
+  {
+    "siren": "123456790",
+    "denominationUniteLegale": "Org 2",
+    "categorieEntreprise": null,
+    "categorieJuridiqueUniteLegale": "7500"
+  }
+]
