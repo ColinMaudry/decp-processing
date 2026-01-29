@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import polars as pl
 import polars.selectors as cs
 
@@ -237,12 +239,10 @@ def haversine(
     return R * c
 
 
-def get_cpv_category(cpv_column: pl.Expr) -> pl.Expr:
-    # df_with_category = df.with_columns(
-    #        get_cpv_category_expr(pl.col("code_cpv")).alias("categorie")
-    #    )
-    cpv_division = cpv_column.str.slice(0, 2).cast(pl.Int32, strict=False)
-    return (
+def add_type_marche(lf: pl.LazyFrame) -> pl.LazyFrame:
+    cpv_division = pl.col("codeCPV").str.slice(0, 2).cast(pl.Int8, strict=False)
+
+    lf = lf.with_columns(
         pl.when(cpv_division == 45)
         .then(pl.lit("Travaux"))
         .when(cpv_division.is_in(range(1, 45)) | (cpv_division == 48))
@@ -251,4 +251,30 @@ def get_cpv_category(cpv_column: pl.Expr) -> pl.Expr:
         .then(pl.lit("Services"))
         .otherwise(pl.lit("Non catégorisé"))
         .fill_null(pl.lit("Code CPV invalide"))
+        .alias("type")
     )
+    return lf
+
+
+def add_duree_restante(lff: pl.LazyFrame):
+    today = datetime.now().date()
+    duree_mois_days_int = pl.col("dureeMois") * 30.5
+    end_date = pl.col("dateNotification") + pl.duration(days=duree_mois_days_int)
+    duree_restante_mois = ((end_date - today).dt.total_days() / 30).round(1)
+
+    # Pas de valeurs négatives.
+    lff = lff.with_columns(
+        pl.when(duree_restante_mois < 0)
+        .then(pl.lit(0))
+        .otherwise(duree_restante_mois)
+        .alias("dureeRestanteMois")
+    )
+
+    # Si dureeRestanteMois > dureeMois, dureeRestanteMois = dureeMois
+    lff = lff.with_columns(
+        pl.when(pl.col("dureeRestanteMois") > pl.col("dureeMois"))
+        .then(pl.col("dureeMois").cast(pl.Float32))
+        .otherwise(pl.col("dureeRestanteMois"))
+        .alias("dureeRestanteMois")
+    )
+    return lff

@@ -1,4 +1,3 @@
-from datetime import datetime
 from pathlib import Path
 
 import polars as pl
@@ -194,7 +193,7 @@ def prepare_unites_legales(lf: pl.LazyFrame) -> pl.LazyFrame:
                 "nomUsageUniteLegale",  # parfois rempli, a la priorité sur nomUniteLegale
                 "statutDiffusionUniteLegale",  # P = non-diffusible
                 "categorieEntreprise",  # PME, ETI, GE
-                "categorieJuridiqueUniteLegale",  # 1000, etc.
+                # "categorieJuridiqueUniteLegale",  # 1000, etc.
             ]
         )
         .filter(
@@ -400,30 +399,6 @@ def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
     )
 
     save_to_files(df_results, DIST_DIR / "probabilites_naf_cpv", "csv")
-
-
-def add_duree_restante(lff: pl.LazyFrame):
-    today = datetime.now().date()
-    duree_mois_days_int = pl.col("dureeMois") * 30.5
-    end_date = pl.col("dateNotification") + pl.duration(days=duree_mois_days_int)
-    duree_restante_mois = ((end_date - today).dt.total_days() / 30).round(1)
-
-    # Pas de valeurs négatives.
-    lff = lff.with_columns(
-        pl.when(duree_restante_mois < 0)
-        .then(pl.lit(0))
-        .otherwise(duree_restante_mois)
-        .alias("dureeRestanteMois")
-    )
-
-    # Si dureeRestanteMois > dureeMois, dureeRestanteMois = dureeMois
-    lff = lff.with_columns(
-        pl.when(pl.col("dureeRestanteMois") > pl.col("dureeMois"))
-        .then(pl.col("dureeMois").cast(pl.Float32))
-        .otherwise(pl.col("dureeRestanteMois"))
-        .alias("dureeRestanteMois")
-    )
-    return lff
 
 
 #

@@ -24,12 +24,11 @@ from src.config import (
 )
 from src.flows.sirene_preprocess import sirene_preprocess
 from src.tasks.dataset_utils import list_resources
-from src.tasks.enrich import enrich_from_sirene
+from src.tasks.enrich import add_type_marche, enrich_from_sirene
 from src.tasks.get import get_clean
 from src.tasks.output import generate_final_schema, sink_to_files
 from src.tasks.publish import publish_to_datagouv
 from src.tasks.transform import (
-    add_duree_restante,
     calculate_naf_cpv_matching,
     concat_parquet_files,
     sort_columns,
@@ -42,6 +41,7 @@ from src.tasks.utils import (
     print_all_config,
     remove_unused_cache,
 )
+from tasks.enrich import add_duree_restante
 
 
 @flow(log_prints=True)
@@ -118,6 +118,9 @@ def decp_processing(enable_cache_removal: bool = True):
 
     logger.info("Ajout de la colonne 'dureeRestanteMois'...")
     lf = add_duree_restante(lf)
+
+    logger.info("Ajout du type de marché...")
+    lf = add_type_marche(lf)
 
     logger.info("Génération des probabilités NAF/CPV...")
     calculate_naf_cpv_matching(lf)
