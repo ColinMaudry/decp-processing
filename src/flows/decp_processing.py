@@ -24,7 +24,7 @@ from src.config import (
 )
 from src.flows.sirene_preprocess import sirene_preprocess
 from src.tasks.dataset_utils import list_resources
-from src.tasks.enrich import add_type_marche, enrich_from_sirene
+from src.tasks.enrich import add_duree_restante, add_type_marche, enrich_from_sirene
 from src.tasks.get import get_clean
 from src.tasks.output import generate_final_schema, sink_to_files
 from src.tasks.publish import publish_to_datagouv
@@ -41,7 +41,6 @@ from src.tasks.utils import (
     print_all_config,
     remove_unused_cache,
 )
-from tasks.enrich import add_duree_restante
 
 
 @flow(log_prints=True)
