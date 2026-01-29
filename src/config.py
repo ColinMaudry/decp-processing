@@ -218,7 +218,10 @@ with open(
     tracked_datasets_complete = json.load(f)
 TRACKED_DATASETS = []
 for dataset in tracked_datasets_complete:
-    if len(SOLO_DATASETS) == 0 or dataset["id"] in SOLO_DATASETS:
+    if (len(SOLO_DATASETS) == 0 and not (dataset.get("skip"))) or dataset[
+        "id"
+    ] in SOLO_DATASETS:
+        logger.debug(f"{dataset['name']} added.")
         TRACKED_DATASETS.append(dataset)
 
 
