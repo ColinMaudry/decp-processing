@@ -71,6 +71,13 @@
       "short_title": "Montant"
     },
     {
+      "name": "type",
+      "type": "string",
+      "title": "Type",
+      "description": "Type de marché public : fournitures, services ou travaux (dérivé du code CPV).",
+      "short_title": "Type"
+    },
+    {
       "type": "string",
       "name": "codeCPV",
       "title": "Code CPV",
@@ -241,8 +248,8 @@
       "short_title": "Id. accord-cadre"
     },
     {
-      "type": "string",
-      "name": "distance",
+      "type": "integer",
+      "name": "titulaire_distance",
       "title": "Distance acheteur-titulaire",
       "description": "Distance en kilomètres entre l'adresse de l'acheteur et celle du titulaire.",
       "short_title": "Distance"

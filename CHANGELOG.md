@@ -1,3 +1,8 @@
+### 2.9.0 2026-01-29
+
+- Ajout du champ `type` qui indique le type de marché : fournitures, services ou travaux (dérivé du code CPV)
+- `distance` renommé `titulaire_distance` par cohérence, cette donnée étant liée au titulaire, et un marché peut avoir plusieurs titulaires
+
 ### 2.8.0 2026-01-23
 
 - Ajout du champ `titulaire_categorie` (PME, ETI, GE)

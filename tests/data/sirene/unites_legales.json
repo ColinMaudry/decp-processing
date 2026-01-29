@@ -1,0 +1,5 @@
+{
+  "siren": ["123456789", "123456790"],
+  "denominationUniteLegale": ["Org 1", "Org 2"],
+  "categorieEntreprise": ["ETI", null]
+}

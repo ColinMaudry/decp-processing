@@ -1,17 +1,23 @@
+import json
+
 import polars as pl
 from polars.testing import assert_frame_equal
 
 from src.config import BASE_DIR
-from src.tasks.enrich import add_etablissement_data, add_unite_legale_data
+from src.tasks.enrich import (
+    add_etablissement_data,
+    add_type_marche,
+    add_unite_legale_data,
+)
 
 
 class TestEnrich:
     def test_add_unites_legales_data_titulaires(self):
         lf_sirets = pl.LazyFrame({"titulaire_id": ["12345678900022", "12345679000023"]})
 
-        lf_unites_legales = pl.scan_parquet(
-            BASE_DIR / "tests/data/sirene/unites_legales.parquet"
-        )
+        lf_unites_legales = pl.DataFrame(
+            json.load(open(BASE_DIR / "tests/data/sirene/unites_legales.json", "r"))
+        ).lazy()
 
         lf_output = pl.LazyFrame(
             {
@@ -33,9 +39,9 @@ class TestEnrich:
     def test_add_unites_legales_data_acheteurs(self):
         lf_sirets = pl.LazyFrame({"acheteur_id": ["12345678900022", "12345679000023"]})
 
-        lf_unites_legales = pl.scan_parquet(
-            BASE_DIR / "tests/data/sirene/unites_legales.parquet"
-        )
+        lf_unites_legales = pl.DataFrame(
+            json.load(open(BASE_DIR / "tests/data/sirene/unites_legales.json", "r"))
+        ).lazy()
 
         lf_output = pl.LazyFrame(
             {
@@ -58,9 +64,9 @@ class TestEnrich:
             {"org_id": ["12345678900022", "12345678900023"], "org_nom": ["Org", "Org"]}
         )
 
-        lf_etablissement = pl.scan_parquet(
-            BASE_DIR / "tests/data/sirene/etablissements.parquet"
-        )
+        lf_etablissements = pl.DataFrame(
+            json.load(open(BASE_DIR / "tests/data/sirene/etablissements.json", "r"))
+        ).lazy()
 
         lf_output = pl.LazyFrame(
             {
@@ -81,8 +87,28 @@ class TestEnrich:
 
         assert_frame_equal(
             add_etablissement_data(
-                lf_sirets, lf_etablissement, "org_id", "org"
+                lf_sirets, lf_etablissements, "org_id", "org"
             ).collect(),
             lf_output.collect(),
             check_column_order=False,
+        )
+
+    def test_add_type_marche(self):
+        lf = pl.LazyFrame(
+            {
+                "uid": ["1", "2", "3", "4"],
+                "codeCPV": ["1581791-1", "4587554-2", "4876655-5", "618765-3"],
+            }
+        )
+
+        df_cible = pl.DataFrame(
+            {
+                "uid": ["1", "2", "3", "4"],
+                "codeCPV": ["1581791-1", "4587554-2", "4876655-5", "618765-3"],
+                "type": ["Fournitures", "Travaux", "Fournitures", "Services"],
+            }
+        )
+
+        assert_frame_equal(
+            add_type_marche(lf).collect(), df_cible, check_column_order=False
         )
