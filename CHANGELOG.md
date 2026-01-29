@@ -1,7 +1,6 @@
-### 2.9.0
+### 2.9.0 2026-01-29
 
-(prévenir Odialis avant la prochain mise en prod)
-
+- Ajout du champ `type` qui indique le type de marché : fournitures, services ou travaux (dérivé du code CPV)
 - `distance` renommé `titulaire_distance` par cohérence, cette donnée étant liée au titulaire, et un marché peut avoir plusieurs titulaires
 
 ### 2.8.0 2026-01-23

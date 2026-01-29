@@ -1,10 +1,10 @@
 [project]
 name = "decp-processing"
 description = "Traitement des données des marchés publics français."
-version = "2.8.0"
+version = "2.9.0"
 requires-python = ">= 3.10"
 authors = [
-    { name = "Colin Maudry", email = "colin+decp@maudry.com" }
+    { name = "Colin Maudry", email = "colin@colmo.tech" }
 ]
 dependencies = [
     "python-dotenv",
