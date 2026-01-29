@@ -323,5 +323,12 @@
     "name": "Données essentielles de la commande publique (DECP) de Klekoon",
     "code": "scrap_klekoon",
     "owner_org_name": "Colin Maudry"
+  },
+  {
+    "id": "5cd57bf68b4c4179299eb0e9",
+    "name": "Données essentielles de la commande publique - fichiers consolidés (MINEF)",
+    "code": "minef",
+    "owner_org_name": "MINEF",
+    "skip": true
   }
 ]
