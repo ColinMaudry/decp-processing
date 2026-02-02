@@ -6,7 +6,7 @@ from prefect.testing.utilities import prefect_test_harness
 from src.flows.decp_processing import decp_processing
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(autouse=False, scope="function")
 def prefect_test_fixture(tmp_path_factory):
     os.environ["PREFECT_SERVER_EPHEMERAL_STARTUP_TIMEOUT_SECONDS"] = "90"
 
