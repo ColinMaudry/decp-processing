@@ -218,7 +218,7 @@ def test_clean_decp():
         "datePublicationDonnees": ["2023-01-01", "0002-11-30", "2023-01-02"],
         "dateNotification": ["2023-01-01", "2023-01-01", "2023-01-01"],
         "nature": ["Marche subsequent", "", "Autre"],
-        "codeCPV": ["12345678-1", "87654321", "11111111"],
+        "codeCPV": ["123456780-1", "876541", "11111111111"],
         "titulaires": [
             [{"id": "t1", "typeIdentifiant": "SIRET"}],
             [{"id": "t2", "typeIdentifiant": "SIRET"}],
@@ -286,9 +286,10 @@ def test_clean_decp():
     assert df_result["ccag"][0] == "Sans objet"
     assert df_result["typeGroupement"][0] == "Sans objet"
     assert df_result["objet"][0] == "Avec des 'apo’strophe’s"
+    assert df_result["objet"][0] == "Avec des 'apo’strophe’s"
 
     # Check nature replacement
     assert df_result["nature"][0] == "Marché subséquent"
 
     # Check codeCPV
-    assert df_result["codeCPV"][0] == "12345678"
+    assert df_result["codeCPV"].to_list() == ["12345678", "87654100"]

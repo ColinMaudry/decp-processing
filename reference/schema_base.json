@@ -139,7 +139,7 @@
       "type": "string",
       "name": "formePrix",
       "title": "Forme prix",
-      "description": "La forme du prix du marché public. Unitaire, forfaitaire ou mixte.",
+      "description": "La forme du prix du marché public. Unitaire, Forfaitaire ou Mixte.",
       "short_title": null
     },
     {
@@ -160,7 +160,7 @@
       "type": "number",
       "name": "tauxAvance",
       "title": "Taux avance",
-      "description": "Taux de l'avance attribuée au titulaire principal du marché public par rapport au montant du marché (O.1 = 10 % du montant du marché). En fonction de la valeur de attributionAvance, une valeur égale à 0 signifie qu'il y a une avance  mais que le taux n'est pas connu (attributionAvance=true).",
+      "description": "Taux de l'avance attribuée au titulaire principal du marché public par rapport au montant du marché (O.1 = 10 % du montant du marché). En fonction de la valeur de attributionAvance, une valeur égale à 0 signifie qu'il y a une avance mais que le taux n'est pas connu (attributionAvance=true).",
       "short_title": null
     },
     {
@@ -195,7 +195,7 @@
       "type": "string",
       "name": "ccag",
       "title": "CCAG",
-      "description": "Cahier des clauses administratives générales et techniques (CCAG) utilisé pour le marchés publics.",
+      "description": "Cahier des clauses administratives générales et techniques (CCAG) utilisé pour le marché public.",
       "short_title": null
     },
     {
@@ -286,7 +286,7 @@
       "type": "string",
       "name": "acheteur_region_code",
       "title": "Région de l'acheteur (code)",
-      "description": "Code de la réguion où se trouve l'acheteur.",
+      "description": "Code de la région où se trouve l'acheteur.",
       "short_title": "Région ach. (code)"
     },
     {
@@ -401,7 +401,7 @@
       "type": "string",
       "name": "sourceFile",
       "title": "Source fichier",
-      "description": "Lien vers le fichier Open Data dont proviennent les données de ce marché public.",
+      "description": "Lien vers le fichier de données ouvertes dont proviennent les données de ce marché public.",
       "short_title": null,
       "format": "uri"
     }
