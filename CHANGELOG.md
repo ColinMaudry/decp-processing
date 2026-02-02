@@ -1,3 +1,7 @@
+### 2.9.1 2026-01-02
+
+- Normalisation des codes CPV (`codeCPV`) : les codes de moins de 8 caractères sont terminés par des "0", les codes de plus de 8 caractères sont raccourcis. Le numéro de contrôle à la fin des code était déjà supprimé.
+
 ### 2.9.0 2026-01-29
 
 - Ajout du champ `type` qui indique le type de marché : fournitures, services ou travaux (dérivé du code CPV)
