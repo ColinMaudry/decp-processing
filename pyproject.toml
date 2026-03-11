@@ -32,7 +32,7 @@ dev = [
     "pre-commit",
     "pytest-env",
     "pytest",
-    "pytest-cov"
+    "pytest-cov",
 ]
 
 [tool.pytest.ini_options]

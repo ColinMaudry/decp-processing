@@ -22,6 +22,7 @@ class TestPrepareUnitesLegales:
                     "nomUsageUniteLegale": None,
                     "statutDiffusionUniteLegale": "O",
                     "categorieEntreprise": "ETI",
+                    "categorieJuridiqueUniteLegale": "1234",
                 },
                 # Cas 2: Personne physique avec nom d'usage
                 {
@@ -32,6 +33,7 @@ class TestPrepareUnitesLegales:
                     "nomUsageUniteLegale": "Zacroit",  # a la priorité
                     "statutDiffusionUniteLegale": "O",
                     "categorieEntreprise": "PME",
+                    "categorieJuridiqueUniteLegale": "1234",
                 },
                 # Cas 3: Personne physique sans nom d'usage
                 {
@@ -64,12 +66,14 @@ class TestPrepareUnitesLegales:
                     "siren": "111111111",
                     "denominationUniteLegale": "Org 1",
                     "categorieEntreprise": "ETI",
+                    "categorieJuridiqueUniteLegale": "1234",
                 },
                 # Cas 2: denominationUniteLegale = prenom + nomUsage (Zacroit)
                 {
                     "siren": "222222222",
                     "denominationUniteLegale": "Ambroise Zacroit",
                     "categorieEntreprise": "PME",
+                    "categorieJuridiqueUniteLegale": "1234",
                 },
                 # Cas 3: denominationUniteLegale = prenom + nom (Croizat)
                 {

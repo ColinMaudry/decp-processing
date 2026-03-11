@@ -48,6 +48,7 @@ class TestEnrich:
                 "acheteur_id": ["12345678900022", "12345679000023"],
                 "acheteur_nom": ["Org 1", "Org 2"],
                 "acheteur_siren": ["123456789", "123456790"],
+                "acheteur_categorie": [None, "Région"],
             }
         )
 
