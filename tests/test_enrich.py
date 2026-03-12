@@ -37,7 +37,9 @@ class TestEnrich:
         )
 
     def test_add_unites_legales_data_acheteurs(self):
-        lf_sirets = pl.LazyFrame({"acheteur_id": ["12345678900022", "12345679000023"]})
+        lf_sirets = pl.LazyFrame(
+            {"acheteur_id": ["12345678900022", "12345679000023", "20007695800011"]}
+        )
 
         lf_unites_legales = pl.DataFrame(
             json.load(open(BASE_DIR / "tests/data/sirene/unites_legales.json", "r"))
@@ -45,10 +47,10 @@ class TestEnrich:
 
         lf_output = pl.LazyFrame(
             {
-                "acheteur_id": ["12345678900022", "12345679000023"],
-                "acheteur_nom": ["Org 1", "Org 2"],
-                "acheteur_siren": ["123456789", "123456790"],
-                "acheteur_categorie": [None, "Région"],
+                "acheteur_id": ["12345678900022", "12345679000023", "20007695800011"],
+                "acheteur_nom": ["Org 1", "Org 2", "Collectivité de Corse"],
+                "acheteur_siren": ["123456789", "123456790", "200076958"],
+                "acheteur_categorie": [None, "Région", "Région"],
             }
         )
 
