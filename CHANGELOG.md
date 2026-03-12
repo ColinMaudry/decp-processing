@@ -1,3 +1,7 @@
+#### 2.10.1 2026-03-12
+
+- Support de plus d'acheteurs pour `acheteur_categorie`
+
 ### 2.10.0 2026-03-12
 
 - Ajout du champ `acheteur_categorie` qui indique la catégorie d'acheteur : Commune, Comm. de communes, Département, Département outre-mer, Région, État, Établissement hospitalier.
