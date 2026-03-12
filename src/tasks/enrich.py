@@ -82,7 +82,30 @@ def add_unite_legale_data(
     )
 
     if type_siret == "acheteur":
-        lf_sirets = lf_sirets.drop(f"{type_siret}_categorie")
+        lf_sirets = lf_sirets.with_columns(
+            pl.col("categorieJuridiqueUniteLegale")
+            .cast(pl.String)
+            .alias("categorieJuridiqueUniteLegale")
+        )
+
+        categories_acheteurs = {
+            "État": pl.col("categorieJuridiqueUniteLegale").str.starts_with("71"),
+            "Commune": pl.col("categorieJuridiqueUniteLegale").is_in(["7210", "7312"]),
+            "Comm. de communes": pl.col("categorieJuridiqueUniteLegale") == "7348",
+            "Département": pl.col("categorieJuridiqueUniteLegale") == "7220",
+            "Département outre-mer": pl.col("categorieJuridiqueUniteLegale") == "7225",
+            "Région": pl.col("categorieJuridiqueUniteLegale") == "7230",
+            "Établissement hospitalier": pl.col("categorieJuridiqueUniteLegale")
+            == "7364",
+        }
+        lf_sirets = lf_sirets.with_columns(
+            acheteur_categorie=pl.coalesce(
+                pl.when(condition).then(pl.lit(value)).otherwise(None)
+                for value, condition in categories_acheteurs.items()
+            )
+        )
+
+    lf_sirets = lf_sirets.drop("categorieJuridiqueUniteLegale")
 
     return lf_sirets
 

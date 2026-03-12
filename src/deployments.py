@@ -12,10 +12,10 @@ if __name__ == "__main__":
         entrypoint="src/flows/decp_processing.py:decp_processing",
     ).deploy(
         name="decp-processing",
-        description="Tous les jours du lundi au vendredi à 6h00",
+        description="Tous les jours à 6h00",
         work_pool_name="local",
         ignore_warnings=True,
-        cron="0 5 * * 1-5",
+        cron="0 5 * * *",
         job_variables={
             "env": {
                 "DECP_PROCESSING_PUBLISH": "True",

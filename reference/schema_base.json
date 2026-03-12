@@ -256,6 +256,13 @@
     },
     {
       "type": "string",
+      "name": "acheteur_categorie",
+      "title": "Catégorie de l'acheteur",
+      "description": "Catégorie de l'acheteur selon son code juridique INSEE : Commune, Comm. de communes, Département, Département outre-mer, Région, État, Établissement hospitalier.",
+      "short_title": "Catégorie acheteur"
+    },
+    {
+      "type": "string",
       "name": "acheteur_commune_code",
       "title": "Commune de l'acheteur (code)",
       "description": "Code de la commune où se trouve l'acheteur.",
