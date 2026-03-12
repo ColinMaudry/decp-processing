@@ -1,4 +1,8 @@
-### 2.9.1 2026-01-02
+### 2.10.0 2026-03-12
+
+- Ajout du champ `acheteur_categorie` qui indique la catégorie d'acheteur : Commune, Comm. de communes, Département, Département outre-mer, Région, État, Établissement hospitalier.
+
+#### 2.9.1 2026-01-02
 
 - Normalisation des codes CPV (`codeCPV`) : les codes de moins de 8 caractères sont terminés par des "0", les codes de plus de 8 caractères sont raccourcis. Le numéro de contrôle à la fin des code était déjà supprimé.
 
