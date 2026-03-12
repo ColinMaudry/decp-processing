@@ -90,8 +90,16 @@ def add_unite_legale_data(
 
         categories_acheteurs = {
             "État": pl.col("categorieJuridiqueUniteLegale").str.starts_with("71"),
+            "EPIC": pl.col("categorieJuridiqueUniteLegale").is_in(
+                ["4140", "4110", "4120"]
+            ),
             "Commune": pl.col("categorieJuridiqueUniteLegale").is_in(["7210", "7312"]),
-            "Comm. de communes": pl.col("categorieJuridiqueUniteLegale") == "7348",
+            "Groupement de communes": pl.col(
+                "categorieJuridiqueUniteLegale"
+            ).str.starts_with("734"),
+            "Syndicat mixte": pl.col("categorieJuridiqueUniteLegale").is_in(
+                ["7354", "7355"]
+            ),
             "Département": pl.col("categorieJuridiqueUniteLegale") == "7220",
             "Département outre-mer": pl.col("categorieJuridiqueUniteLegale") == "7225",
             "Région": pl.col("categorieJuridiqueUniteLegale") == "7230",
@@ -102,6 +110,35 @@ def add_unite_legale_data(
             acheteur_categorie=pl.coalesce(
                 pl.when(condition).then(pl.lit(value)).otherwise(None)
                 for value, condition in categories_acheteurs.items()
+            )
+        )
+
+        # Les acheteurs suivants ne rentrent officiellement dans aucune des *
+        # catégorie ci-dessus ((Autre) Collectivité territoriale selon l'INSEE). Nous
+        # devons donc les catégoriser manuellement :
+        # - Ville de Paris (217500016) : Commune
+        # - Métropole de Lyon (200046977) : Groupement de communes
+        # - Collectivité de Corse (200076958) : Région
+        # - Collectivité territoriale de Guyane (200052678) : Département outre-mer
+        # - Collectivité territoriale de Martinique (200055507) : Département outre-mer
+        # - Département-région de Mayotte (229850003) : Département outre-mer
+        # - Territoires de terres australes et antarctiques françaises (229840004) : Département outre-mer
+        special_acheteurs_siren = {
+            "217500016": "Commune",
+            "200046977": "Groupement de communes",
+            "200076958": "Région",
+            "200052678": "Département outre-mer",
+            "200055507": "Département outre-mer",
+            "229850003": "Département outre-mer",
+            "229840004": "Département outre-mer",
+        }
+
+        lf_sirets = lf_sirets.with_columns(
+            acheteur_categorie=pl.coalesce(
+                pl.when(pl.col("acheteur_id").str.starts_with(siren))
+                .then(pl.lit(category))
+                .otherwise(pl.col("acheteur_categorie"))
+                for siren, category in special_acheteurs_siren.items()
             )
         )
 
