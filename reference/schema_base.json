@@ -46,8 +46,9 @@
       "type": "string",
       "name": "titulaire_typeIdentifiant",
       "title": "Type identifiant",
-      "description": "Référentiel utilisé pour l'identifiant du titulaire : SIRET (établissement INSEE), TVA, TAHITI, RIDET, FRWF, IREP, HORS-UE",
-      "short_title": "Type id."
+      "description": "Référentiel utilisé pour l'identifiant du titulaire.",
+      "short_title": "Type id.",
+      "enum": ["SIRET", "TVA", "TAHITI", "RIDET", "FRWF", "IREP", "HORS-UE"]
     },
     {
       "type": "string",
@@ -88,15 +89,29 @@
       "type": "string",
       "name": "procedure",
       "title": "Procédure",
-      "description": "Le type de procédure utilisé pour le marché public. Procédure négociée ouverte, Procédure non négociée ouverte, Procédure négociée restreinte, Procédure non négociée restreinte.",
-      "short_title": null
+      "description": "Le type de procédure utilisé pour le marché public.",
+      "short_title": null,
+      "enum": [
+        "Procédure négociée ouverte",
+        "Procédure non négociée ouverte",
+        "Procédure négociée restreinte",
+        "Procédure non négociée restreinte"
+      ]
     },
     {
       "type": "string",
       "name": "techniques",
       "title": "Techniques",
-      "description": "Les techniques d'achat utilisées pour le marché public. Accord-cadre, Concours, Système de qualification, Système d'acquisition dynamique, Catalogue électronique, Enchère électronique, Sans objet.",
-      "short_title": null
+      "description": "Les techniques d'achat utilisées pour le marché public.",
+      "short_title": null,
+      "enum": [
+        "Accord-cadre",
+        "Concours",
+        "Système de qualification",
+        "Système d'acquisition dynamique",
+        "Catalogue électronique",
+        "Enchère électronique"
+      ]
     },
     {
       "type": "integer",
@@ -146,8 +161,14 @@
       "type": "string",
       "name": "typesPrix",
       "title": "Types prix",
-      "description": "Les types de prix du marché public. Définitif ferme, Définitif actualisable, Définitif révisable, Provisoire",
-      "short_title": null
+      "description": "Les types de prix du marché public.",
+      "short_title": null,
+      "enum": [
+        "Définitif ferme",
+        "Définitif actualisable",
+        "Définitif révisable",
+        "Provisoire"
+      ]
     },
     {
       "type": "boolean",
@@ -174,29 +195,40 @@
       "type": "string",
       "name": "modalitesExecution",
       "title": "Modalités exécution",
-      "description": "Les modalités d'exécution du marché public. Tranches, Bons de commande, Marchés subséquents, Sans objet.",
-      "short_title": null
+      "description": "Les modalités d'exécution du marché public.",
+      "short_title": null,
+      "enum": ["Tranches", "Bons de commande", "Marchés subséquents"]
     },
     {
       "type": "string",
       "name": "considerationsSociales",
       "title": "Considérations sociales",
-      "description": "Les considérations sociales prévues dans le marché public. Clause sociale, Critère social, Marché réservé, Sans objet.",
-      "short_title": "Cons. sociales"
+      "description": "Les considérations sociales prévues dans le marché public.",
+      "short_title": "Cons. sociales",
+      "enum": ["Clause sociale", "Critère social", "Marché réservé"]
     },
     {
       "type": "string",
       "name": "considerationsEnvironnementales",
       "title": "Considérations environnementales",
-      "description": "Les considérations environnementales prévues dans le marché public. Clause environnementale, Critère environnemental, Sans objet.",
-      "short_title": "Cons. environnementales"
+      "description": "Les considérations environnementales prévues dans le marché public.",
+      "short_title": "Cons. environnementales",
+      "enum": ["Clause environnementale", "Critère environnemental"]
     },
     {
       "type": "string",
       "name": "ccag",
       "title": "CCAG",
       "description": "Cahier des clauses administratives générales et techniques (CCAG) utilisé pour le marché public.",
-      "short_title": null
+      "short_title": null,
+      "enum": [
+        "Travaux",
+        "Maitrise d'œuvre",
+        "Fournitures courantes et services",
+        "Marchés industriels",
+        "Prestations intellectuelles",
+        "Techniques de l'information et de la communication"
+      ]
     },
     {
       "type": "boolean",
@@ -210,7 +242,8 @@
       "name": "typeGroupementOperateurs",
       "title": "Type groupement",
       "description": "Le type de groupement d'entreprises ou d'opérateurs économiques.",
-      "short_title": "Groupement"
+      "short_title": "Groupement",
+      "enum": ["Conjoint", "Solidaire"]
     },
     {
       "type": "number",
@@ -237,8 +270,17 @@
       "type": "string",
       "name": "lieuExecution_typeCode",
       "title": "Type code lieu exécution",
-      "description": "Type du code du lieu d'exécution. Code postal, Code commune, Code arrondissement, Code canton, Code département, Code région, Code pays.",
-      "short_title": "Type lieu exécution"
+      "description": "Type du code du lieu d'exécution.",
+      "short_title": "Type lieu exécution",
+      "enum": [
+        "Code postal",
+        "Code commune",
+        "Code arrondissement",
+        " Code canton",
+        "Code département",
+        "Code région",
+        "Code pays"
+      ]
     },
     {
       "type": "string",
@@ -258,8 +300,19 @@
       "type": "string",
       "name": "acheteur_categorie",
       "title": "Catégorie de l'acheteur",
-      "description": "Catégorie de l'acheteur selon son code juridique INSEE : Commune, Comm. de communes, Département, Département outre-mer, Région, État, Établissement hospitalier.",
-      "short_title": "Catégorie acheteur"
+      "description": "Catégorie de l'acheteur selon son code juridique INSEE.",
+      "short_title": "Catégorie acheteur",
+      "enum": [
+        "Commune",
+        "Groupement de communes",
+        "Département",
+        "Département outre-mer",
+        "Région",
+        "État",
+        "Établissement hospitalier",
+        "EPIC",
+        "Syndicat mixte"
+      ]
     },
     {
       "type": "string",
@@ -321,8 +374,9 @@
       "type": "string",
       "name": "titulaire_categorie",
       "title": "Catégorie du titulaire",
-      "description": "Catégorie de l'entreprise titulaire selon la classification de l'INSEE : PME, ETI ou GE.",
-      "short_title": "Catégorie titulaire"
+      "description": "Catégorie de l'entreprise titulaire selon la classification de l'INSEE.",
+      "short_title": "Catégorie titulaire",
+      "enum": ["PME", "ETI", "GE"]
     },
     {
       "type": "string",
