@@ -1,3 +1,7 @@
+#### 2.10.2 2026-03-19
+
+- Ajout des valeurs valides (`enum`) dans le schéma pour chaque champ (si applicable)
+
 #### 2.10.1 2026-03-12
 
 - Support de plus d'acheteurs pour `acheteur_categorie`
