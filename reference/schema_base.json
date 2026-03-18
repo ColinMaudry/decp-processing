@@ -76,7 +76,8 @@
       "type": "string",
       "title": "Type",
       "description": "Type de marché public : fournitures, services ou travaux (dérivé du code CPV).",
-      "short_title": "Type"
+      "short_title": "Type",
+      "enum": ["Fournitures", "Services", "Travaux"]
     },
     {
       "type": "string",
