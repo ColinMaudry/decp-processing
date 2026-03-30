@@ -327,7 +327,7 @@
   {
     "id": "5cd57bf68b4c4179299eb0e9",
     "name": "Données essentielles de la commande publique - fichiers consolidés (MINEF)",
-    "code": "minef",
+    "code": "decp_minef",
     "owner_org_name": "MINEF",
     "skip": true
   }

@@ -95,6 +95,13 @@ def list_resources(
                 )
                 raise RuntimeError
         for resource in all_resources:
+            # Pour les données consolidées du MINEF on ne garde que decp-global.json (issue #173)
+            if (
+                dataset["code"] == "decp_minef"
+                and resource["id"] != "bd33e98f-f8e3-49ba-9f26-51c95fe57234"
+            ):
+                continue
+
             # On ne garde que les ressources au format JSON ou XML et celles qui ne sont pas
             # - des fichiers OCDS
             # - des fichiers XML abandonnés
