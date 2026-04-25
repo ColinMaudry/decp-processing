@@ -41,16 +41,18 @@ Nouvelle task Prefect `detect_montant_anomalies` placée dans le flow `decp_proc
 ### Nouveaux fichiers
 
 - `src/tasks/anomaly.py` — task Prefect avec la logique de détection (LazyFrame in → LazyFrame out)
-- `reference/population_communes.parquet` — population INSEE par code commune
 - `tests/test_anomaly.py` — tests unitaires
 - `script/calibrate_anomaly_thresholds.py` — script one-shot de calibration des seuils
+
+### Fichier référentiel attendu en entrée
+
+- `data/identifiants-communes.csv` — fourni hors de cette task, contient au minimum les colonnes `SIREN` et `population`
 
 ### Modifications
 
 - `reference/schema_base.json` — ajout des 3 champs avec leur description frictionless
 - `src/config.py` — constantes de seuils, mise à jour de `BASE_DF_COLUMNS`
 - `src/flows/decp_processing.py` — branchement de la nouvelle task
-- `src/flows/get_cog.py` ou nouvelle task — téléchargement annuel de la population des communes
 - `tests/test_main.py` — vérification de la présence des nouveaux champs en sortie
 
 ### Implémentation polars
@@ -62,13 +64,14 @@ Tout le pipeline reste en `LazyFrame` streaming. La task fonctionne en deux pass
 
 ## Référentiel population
 
-**Source** : INSEE, Populations légales des communes (mise à jour annuelle).
+**Fichier** : `data/identifiants-communes.csv` (fourni en entrée, mise à jour gérée hors de cette task)
 
-**Fichier** : `reference/population_communes.parquet`
+**Colonnes utilisées** :
 
-- Colonnes : `code_commune` (clé, alignée avec `acheteur_commune_code`), `population`, `annee_reference`
+- `SIREN` — identifiant SIREN de la commune (9 chiffres, correspondant aux 9 premiers chiffres du SIRET de l'acheteur)
+- `population` — population de la commune
 
-**Mise à jour** : intégrée dans le flow `get_cog` (qui récupère déjà des référentiels INSEE/COG) ou dans une task dédiée si plus simple à isoler. Annuelle.
+**Jointure avec les marchés** : on extrait le SIREN depuis `acheteur_id` (les 9 premiers chiffres du SIRET) puis on joint sur la colonne `SIREN` du CSV. La jointure ne renvoie une population que pour les acheteurs dont le SIREN figure dans le CSV des communes — pour les autres catégories d'acheteurs (Département, État, EPIC…), la population reste `null`, ce qui désactive naturellement Signal B et la stratification par tranche du Signal A.
 
 ## Détection des anomalies
 
