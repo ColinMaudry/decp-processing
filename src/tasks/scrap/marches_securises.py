@@ -101,6 +101,7 @@ def scrap_marches_securises_month(year: str, month: str, dist_dir: Path):
         if len(marches) > 0:
             dicts = {"marches": marches}
             json_path = dist_dir / f"marches-securises_{year}-{month}.json"
+            dist_dir.mkdir(parents=True, exist_ok=True)
             with open(json_path, "w") as f:
                 f.write(json.dumps(dicts))
             publish_scrap_to_datagouv(year, month, json_path, "marches-securises.fr")
