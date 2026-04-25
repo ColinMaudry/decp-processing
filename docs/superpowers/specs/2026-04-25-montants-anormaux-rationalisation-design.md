@@ -80,13 +80,15 @@ Tout le pipeline reste en `LazyFrame` streaming. La task fonctionne en deux pass
 **Définition du groupe de pairs** :
 
 ```python
-si acheteur_categorie == "Commune":
+si population != null:  # acheteur trouvé dans identifiants-communes.csv
     cle_groupe = (codeCPV[:2], type, "Commune", tranche_population)
 sinon:
     cle_groupe = (codeCPV[:2], type, acheteur_categorie)
 ```
 
-**Tranches de population** (communes uniquement) :
+L'utilisation de `population != null` (plutôt que `acheteur_categorie == "Commune"`) est plus robuste : elle traite correctement les communes qui seraient absentes de `identifiants-communes.csv` (elles tombent sur la clé non stratifiée `(codeCPV[:2], type, "Commune")` via la branche `sinon`, puisque leur `acheteur_categorie` reste "Commune").
+
+**Tranches de population** (appliquées si population disponible) :
 
 | Tranche     | Bornes (habitants) |
 | ----------- | ------------------ |
@@ -96,16 +98,14 @@ sinon:
 | grande      | 50 000 – 200 000   |
 | très grande | > 200 000          |
 
-Si la population de la commune est inconnue, le marché bascule sur la clé sans tranche `(codeCPV[:2], type, "Commune")`.
-
 **Fallback en cas de groupe insuffisant** (< 30 marchés) — chaque niveau est essayé jusqu'à trouver un groupe assez grand :
 
-1. _Communes uniquement_ — retirer la tranche : `(codeCPV[:2], type, "Commune")`
-2. Retirer le CPV : `(type, acheteur_categorie)` _(pour les communes : `(type, "Commune")`)_
+1. _Si population disponible_ — retirer la tranche : `(codeCPV[:2], type, "Commune")`
+2. Retirer le CPV : `(type, acheteur_categorie)`
 3. Garder le `type` seul : `(type,)`
 4. Si toujours insuffisant : `montant_anomalie = null`, `montant_rationalise = null`, `montant_anomalie_raison = "groupe_insuffisant"` (le marché est exclu de l'évaluation, ni `suspect` ni `aberrant`)
 
-Pour un acheteur non-commune, le niveau 1 est sauté et on commence au niveau 2.
+Pour un acheteur sans population disponible, le niveau 1 est sauté et on commence au niveau 2.
 
 **Normalisation du montant** (avant comparaison) :
 
@@ -158,12 +158,12 @@ Sur une distribution normale, MAD ≈ 0,67 σ (donc 1 σ ≈ 1,48 MAD). Les seui
 
 **Statut** : ces valeurs sont **un point de départ raisonnable**, à calibrer empiriquement après la première run via `script/calibrate_anomaly_thresholds.py`. Le rapport HTML produit par ce script permet de visualiser les marchés flaggés à différents seuils et de figer les valeurs définitives dans `config.py`.
 
-### Signal B — Ratio par habitant (communes uniquement)
+### Signal B — Ratio par habitant
 
-Activé seulement si `acheteur_categorie == "Commune"` et `population_commune > 0` :
+Activé dès lors que la jointure SIREN a renvoyé une population (`population != null`). Il n'est pas conditionné à `acheteur_categorie == "Commune"` : si une commune est absente de `identifiants-communes.csv`, sa population sera `null` et le signal restera muet — c'est le comportement souhaité (mieux vaut s'abstenir que produire un signal sur une donnée incomplète).
 
 ```python
-montant_par_habitant = montant / population_commune
+montant_par_habitant = montant / population
 ```
 
 **Seuils par `type`** :
@@ -201,7 +201,7 @@ elif ecart_pairs > 4:
     raisons_actives.append("montant_vs_pairs_suspect")
 
 # Signal B
-if acheteur_categorie == "Commune" and population_commune > 0:
+if population is not None:
     seuils = SEUILS_HABITANT_PAR_TYPE[type]
     if montant_par_habitant > seuils["aberrant"]:
         raisons_actives.append("montant_par_habitant_aberrant")
@@ -295,9 +295,10 @@ ANOMALY_GROUPE_MIN_SIZE = 30
 
 - `test_signal_pairs_basic` — un groupe avec 50 marchés normaux + 1 outlier 1000× la médiane → flag `aberrant`
 - `test_signal_pairs_normalisation_duree` — `formePrix=Forfaitaire` n'applique pas la division par durée
-- `test_signal_pairs_tranche_pop_commune` — la stratification par tranche s'applique aux communes
-- `test_signal_pairs_pas_de_tranche_hors_commune` — pour Département/Région/État, pas de stratification
-- `test_signal_population_par_type` — table paramétrée Travaux / Services / Fournitures, valeurs autour des bornes
+- `test_signal_pairs_tranche_avec_population` — la stratification par tranche s'applique quand la jointure SIREN renvoie une population
+- `test_signal_pairs_pas_de_tranche_sans_population` — pour les acheteurs absents de `identifiants-communes.csv` (Département/Région/État, ou commune manquante), pas de stratification
+- `test_signal_habitant_active_si_population_presente` — Signal B activé sur la seule présence de population, indépendamment de `acheteur_categorie`
+- `test_signal_habitant_par_type` — table paramétrée Travaux / Services / Fournitures, valeurs autour des bornes
 - `test_modulateur_titulaire_pme` — escalation `suspect`→`aberrant` pour PME + montant > 50 M€
 - `test_modulateur_titulaire_etranger_inactif` — `titulaire_categorie = null` n'escalade pas
 - `test_montant_rationalise_aberrant_remplacement` — un `aberrant` voit son montant remplacé par `mediane × duree`
