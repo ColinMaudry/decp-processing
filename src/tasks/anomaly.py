@@ -274,3 +274,33 @@ def classify_anomalies(lf: pl.LazyFrame) -> pl.LazyFrame:
             "modulateur_titulaire",
         ]
     )
+
+
+def compute_montant_rationalise(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """Calcule montant_rationalise.
+
+    - Si montant_anomalie != 'aberrant' → montant_rationalise = montant
+    - Si montant_anomalie == 'aberrant' :
+        - Si normalisation par durée appliquée (Services/Fournitures + dureeMois>1 + non-Forfaitaire) :
+            montant_rationalise = median_montant_norm × dureeMois
+        - Sinon : montant_rationalise = median_montant_norm (déjà en € totaux)
+        - Si median_montant_norm null (groupe insuffisant) : montant_rationalise = null
+    """
+    normalisation_appliquee = (
+        pl.col("type").is_in(["Services", "Fournitures"])
+        & (pl.col("dureeMois") > 1)
+        & (pl.col("formePrix") != "Forfaitaire")
+    )
+
+    return lf.with_columns(
+        montant_rationalise=pl.when(
+            pl.col("montant_anomalie").is_null()
+            | (pl.col("montant_anomalie") != "aberrant")
+        )
+        .then(pl.col("montant"))
+        .when(pl.col("median_montant_norm").is_null())
+        .then(None)
+        .when(normalisation_appliquee)
+        .then(pl.col("median_montant_norm") * pl.col("dureeMois"))
+        .otherwise(pl.col("median_montant_norm")),
+    )

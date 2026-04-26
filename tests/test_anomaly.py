@@ -5,6 +5,7 @@ from src.config import (
 )
 from src.tasks.anomaly import (
     classify_anomalies,
+    compute_montant_rationalise,
     compute_peer_group_stats,
     compute_signals,
     compute_tranche_population_expr,
@@ -294,3 +295,83 @@ class TestClassification:
         result = classify_anomalies(lf).collect()
         assert result["montant_anomalie"].to_list() == [None]
         assert result["montant_anomalie_raison"].to_list() == [None]
+
+
+class TestMontantRationalise:
+    def test_aberrant_remplace_par_mediane_x_duree(self):
+        # Services + Unitaire + 12 mois → normalisation appliquée → rationalise = 8000*12
+        lf = pl.LazyFrame(
+            {
+                "montant": [10_000_000.0],
+                "montant_anomalie": ["aberrant"],
+                "median_montant_norm": [8_000.0],
+                "type": ["Services"],
+                "dureeMois": [12],
+                "formePrix": ["Unitaire"],
+            }
+        )
+        result = compute_montant_rationalise(lf).collect()
+        assert result["montant_rationalise"].to_list() == [96_000.0]
+
+    def test_aberrant_travaux_pas_de_normalisation(self):
+        lf = pl.LazyFrame(
+            {
+                "montant": [10_000_000.0],
+                "montant_anomalie": ["aberrant"],
+                "median_montant_norm": [500_000.0],
+                "type": ["Travaux"],
+                "dureeMois": [24],
+                "formePrix": ["Forfaitaire"],
+            }
+        )
+        result = compute_montant_rationalise(lf).collect()
+        assert result["montant_rationalise"].to_list() == [500_000.0]
+
+    def test_suspect_garde_montant_origine(self):
+        lf = pl.LazyFrame(
+            {
+                "montant": [10_000_000.0],
+                "montant_anomalie": ["suspect"],
+                "median_montant_norm": [8_000.0],
+                "type": ["Services"],
+                "dureeMois": [12],
+                "formePrix": ["Unitaire"],
+            }
+        )
+        result = compute_montant_rationalise(lf).collect()
+        assert result["montant_rationalise"].to_list() == [10_000_000.0]
+
+    def test_pas_d_anomalie_garde_montant(self):
+        lf = pl.LazyFrame(
+            {
+                "montant": [50_000.0],
+                "montant_anomalie": [None],
+                "median_montant_norm": [None],
+                "type": ["Services"],
+                "dureeMois": [None],
+                "formePrix": [None],
+            },
+            schema_overrides={
+                "montant_anomalie": pl.Utf8,
+                "median_montant_norm": pl.Float64,
+                "dureeMois": pl.Int64,
+                "formePrix": pl.Utf8,
+            },
+        )
+        result = compute_montant_rationalise(lf).collect()
+        assert result["montant_rationalise"].to_list() == [50_000.0]
+
+    def test_aberrant_groupe_insuffisant_donne_null(self):
+        lf = pl.LazyFrame(
+            {
+                "montant": [10_000_000.0],
+                "montant_anomalie": ["aberrant"],
+                "median_montant_norm": [None],
+                "type": ["Services"],
+                "dureeMois": [12],
+                "formePrix": ["Unitaire"],
+            },
+            schema_overrides={"median_montant_norm": pl.Float64},
+        )
+        result = compute_montant_rationalise(lf).collect()
+        assert result["montant_rationalise"].to_list() == [None]
