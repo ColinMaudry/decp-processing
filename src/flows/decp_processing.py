@@ -23,6 +23,7 @@ from src.config import (
     TRACKED_DATASETS,
 )
 from src.flows.sirene_preprocess import sirene_preprocess
+from src.tasks.anomaly import detect_montant_anomalies
 from src.tasks.dataset_utils import list_resources
 from src.tasks.enrich import add_duree_restante, add_type_marche, enrich_from_sirene
 from src.tasks.get import get_clean
@@ -120,6 +121,9 @@ def decp_processing(enable_cache_removal: bool = True):
 
     logger.info("Ajout du type de marché...")
     lf = add_type_marche(lf)
+
+    logger.info("Détection des anomalies de montant...")
+    lf = detect_montant_anomalies(lf)
 
     logger.info("Génération des probabilités NAF/CPV...")
     calculate_naf_cpv_matching(lf)

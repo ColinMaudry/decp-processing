@@ -32,3 +32,13 @@ def prefect_test_fixture(tmp_path_factory):
 
 def test_decp_processing(prefect_test_fixture):
     decp_processing()
+
+    import polars as pl
+
+    from src.config import DIST_DIR
+
+    lf_out = pl.scan_parquet(DIST_DIR / "decp.parquet")
+    cols = lf_out.collect_schema().names()
+    assert "montant_rationalise" in cols
+    assert "montant_anomalie" in cols
+    assert "montant_anomalie_raison" in cols
