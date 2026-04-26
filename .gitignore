@@ -3,6 +3,7 @@ logs
 *.csv
 .env
 !decp_augmente_valides_*_test.csv
+!tests/data/*.csv
 .venv
 *.egg-info
 *.parquet

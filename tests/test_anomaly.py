@@ -1,6 +1,11 @@
 import polars as pl
 
-from src.tasks.anomaly import compute_tranche_population_expr, montant_normalise_expr
+from src.config import BASE_DIR
+from src.tasks.anomaly import (
+    compute_tranche_population_expr,
+    join_population,
+    montant_normalise_expr,
+)
 
 
 class TestTranchePopulation:
@@ -83,3 +88,27 @@ class TestMontantNormalise:
             .to_list()
         )
         assert result == [None]
+
+
+class TestJoinPopulation:
+    def test_join_population_via_siren(self):
+        # acheteur_id = SIRET (14 chiffres, string). SIREN = 9 premiers chiffres.
+        lf = pl.LazyFrame(
+            {
+                "acheteur_id": [
+                    "21005400200012",
+                    "21013055700019",
+                    "12345678900012",
+                    None,
+                ],
+                "uid": ["A", "B", "C", "D"],
+            },
+            schema={"acheteur_id": pl.Utf8, "uid": pl.Utf8},
+        )
+
+        csv_path = BASE_DIR / "tests/data/identifiants-communes-test.csv"
+        result = join_population(lf, csv_path).collect()
+
+        # Vérifier l'ordre par uid (le join peut le perturber)
+        result = result.sort("uid")
+        assert result["population"].to_list() == [520000, 870000, None, None]

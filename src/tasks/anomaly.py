@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import polars as pl
 
 
@@ -39,4 +41,21 @@ def montant_normalise_expr() -> pl.Expr:
         .then(pl.col("montant") / pl.col("dureeMois"))
         .otherwise(pl.col("montant"))
         .alias("montant_normalise")
+    )
+
+
+def join_population(lf: pl.LazyFrame, population_csv_path: Path) -> pl.LazyFrame:
+    """Joint le LazyFrame avec le CSV des communes via le SIREN extrait de acheteur_id.
+
+    SIREN = 9 premiers caractères du SIRET (acheteur_id est une chaîne).
+    Renvoie le LazyFrame avec une nouvelle colonne 'population' (null si non trouvé).
+    """
+    population_lf = pl.scan_csv(population_csv_path).select(
+        pl.col("SIREN").cast(pl.Utf8),
+        pl.col("population").cast(pl.Int64),
+    )
+    return (
+        lf.with_columns(pl.col("acheteur_id").str.slice(0, 9).alias("_siren_acheteur"))
+        .join(population_lf, left_on="_siren_acheteur", right_on="SIREN", how="left")
+        .drop("_siren_acheteur")
     )
