@@ -44,6 +44,98 @@ def montant_normalise_expr() -> pl.Expr:
     )
 
 
+def compute_peer_group_stats(lf: pl.LazyFrame, min_size: int) -> pl.LazyFrame:
+    """Calcule les statistiques médiane/MAD du log du montant normalisé par groupe de pairs.
+
+    Quatre niveaux de granularité, du plus spécifique au plus large :
+    - L4 : (cpv_2, type, acheteur_categorie, tranche_population)
+    - L3 : (cpv_2, type, acheteur_categorie)
+    - L2 : (type, acheteur_categorie)
+    - L1 : (type,)
+
+    Pour chaque marché, on retient les stats du niveau le plus spécifique dont le groupe
+    a au moins `min_size` marchés. Si aucun niveau ne suffit, mediane_log/mad_log/median_montant_norm
+    restent null et niveau_groupe est null.
+
+    Le LazyFrame en entrée doit contenir les colonnes : codeCPV_2, type, acheteur_categorie,
+    tranche_population, montant_normalise, log_montant_normalise.
+
+    Renvoie le LazyFrame enrichi avec : n_groupe, niveau_groupe, mediane_log, mad_log,
+    median_montant_norm.
+    """
+    levels = [
+        ("L4", ["codeCPV_2", "type", "acheteur_categorie", "tranche_population"]),
+        ("L3", ["codeCPV_2", "type", "acheteur_categorie"]),
+        ("L2", ["type", "acheteur_categorie"]),
+        ("L1", ["type"]),
+    ]
+
+    for name, keys in levels:
+        # Première passe : médiane par groupe
+        mediane_stats = lf.group_by(keys).agg(
+            pl.len().alias(f"n_{name}"),
+            pl.col("log_montant_normalise").median().alias(f"mediane_log_{name}"),
+            pl.col("montant_normalise").median().alias(f"median_montant_norm_{name}"),
+        )
+        lf = lf.join(mediane_stats, on=keys, how="left")
+
+        # Deuxième passe : MAD = médiane(|log - médiane_log|) par groupe
+        mad_stats = lf.group_by(keys).agg(
+            (pl.col("log_montant_normalise") - pl.col(f"mediane_log_{name}"))
+            .abs()
+            .median()
+            .alias(f"mad_log_{name}"),
+        )
+        lf = lf.join(mad_stats, on=keys, how="left")
+
+    lf = lf.with_columns(
+        pl.coalesce(
+            [
+                pl.when(pl.col(f"n_{name}") >= min_size).then(pl.col(f"n_{name}"))
+                for name, _ in levels
+            ]
+        ).alias("n_groupe"),
+        pl.coalesce(
+            [
+                pl.when(pl.col(f"n_{name}") >= min_size).then(pl.lit(name))
+                for name, _ in levels
+            ]
+        ).alias("niveau_groupe"),
+        pl.coalesce(
+            [
+                pl.when(pl.col(f"n_{name}") >= min_size).then(
+                    pl.col(f"mediane_log_{name}")
+                )
+                for name, _ in levels
+            ]
+        ).alias("mediane_log"),
+        pl.coalesce(
+            [
+                pl.when(pl.col(f"n_{name}") >= min_size).then(pl.col(f"mad_log_{name}"))
+                for name, _ in levels
+            ]
+        ).alias("mad_log"),
+        pl.coalesce(
+            [
+                pl.when(pl.col(f"n_{name}") >= min_size).then(
+                    pl.col(f"median_montant_norm_{name}")
+                )
+                for name, _ in levels
+            ]
+        ).alias("median_montant_norm"),
+    )
+
+    cols_to_drop = []
+    for name, _ in levels:
+        cols_to_drop += [
+            f"n_{name}",
+            f"mediane_log_{name}",
+            f"mad_log_{name}",
+            f"median_montant_norm_{name}",
+        ]
+    return lf.drop(cols_to_drop)
+
+
 def join_population(lf: pl.LazyFrame, population_csv_path: Path) -> pl.LazyFrame:
     """Joint le LazyFrame avec le CSV des communes via le SIREN extrait de acheteur_id.
 
