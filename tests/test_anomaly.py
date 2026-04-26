@@ -4,6 +4,7 @@ from src.config import (
     BASE_DIR,
 )
 from src.tasks.anomaly import (
+    build_anomaly_summary,
     classify_anomalies,
     compute_montant_rationalise,
     compute_peer_group_stats,
@@ -376,6 +377,31 @@ class TestMontantRationalise:
         )
         result = compute_montant_rationalise(lf).collect()
         assert result["montant_rationalise"].to_list() == [None]
+
+
+class TestAnomalySummary:
+    def test_summary_compte_aberrants_et_suspects(self):
+        lf = pl.LazyFrame(
+            {
+                "montant": [100.0, 200.0, 300.0, 400.0, 500.0],
+                "montant_rationalise": [100.0, 200.0, 50.0, 400.0, 500.0],
+                "montant_anomalie": ["suspect", None, "aberrant", "aberrant", None],
+                "montant_anomalie_raison": [
+                    "montant_vs_pairs_suspect",
+                    None,
+                    "montant_par_habitant_aberrant",
+                    "montant_par_habitant_aberrant",
+                    None,
+                ],
+            }
+        )
+        summary = build_anomaly_summary(lf)
+        assert summary["nb_suspects"] == 1
+        assert summary["nb_aberrants"] == 2
+        assert summary["sum_montant"] == 1500.0
+        assert summary["sum_montant_rationalise"] == 1250.0
+        assert summary["top_raisons"][0]["raison"] == "montant_par_habitant_aberrant"
+        assert summary["top_raisons"][0]["count"] == 2
 
 
 class TestDetectMontantAnomalies:

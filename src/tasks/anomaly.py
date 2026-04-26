@@ -2,6 +2,7 @@ from pathlib import Path
 
 import polars as pl
 from prefect import task
+from prefect.artifacts import create_markdown_artifact
 
 from src.config import (
     ANOMALY_GROUPE_MIN_SIZE,
@@ -9,8 +10,10 @@ from src.config import (
     ANOMALY_PAIRS_ABERRANT_THRESHOLD,
     ANOMALY_PAIRS_SUSPECT_THRESHOLD,
     ANOMALY_TITULAIRE_PME_MONTANT_SEUIL,
+    LOG_LEVEL,
     POPULATION_COMMUNES_CSV,
 )
+from src.tasks.utils import get_logger
 
 
 def compute_tranche_population_expr(col: str = "population") -> pl.Expr:
@@ -172,7 +175,15 @@ def join_population(lf: pl.LazyFrame, population_csv_path: Path) -> pl.LazyFrame
 
     SIREN = 9 premiers caractères du SIRET (acheteur_id est une chaîne).
     Renvoie le LazyFrame avec une nouvelle colonne 'population' (null si non trouvé).
+    Si le fichier CSV est absent, la colonne 'population' est ajoutée avec des nulls.
     """
+    if not population_csv_path.exists():
+        logger = get_logger(level=LOG_LEVEL)
+        logger.warning(
+            f"Fichier population communes introuvable : {population_csv_path}. "
+            "La colonne 'population' sera nulle (Signal B désactivé)."
+        )
+        return lf.with_columns(pl.lit(None).cast(pl.Int64).alias("population"))
     population_lf = pl.scan_csv(population_csv_path).select(
         pl.col("SIREN").cast(pl.Utf8),
         pl.col("population").cast(pl.Int64),
@@ -309,6 +320,79 @@ def compute_montant_rationalise(lf: pl.LazyFrame) -> pl.LazyFrame:
     )
 
 
+def build_anomaly_summary(lf: pl.LazyFrame) -> dict:
+    """Construit un résumé des anomalies pour observabilité.
+
+    Renvoie un dict avec : nb_suspects, nb_aberrants, sum_montant, sum_montant_rationalise,
+    top_raisons (liste de dicts {raison, count}).
+    """
+    counts = (
+        lf.select(
+            nb_suspects=(pl.col("montant_anomalie") == "suspect").sum(),
+            nb_aberrants=(pl.col("montant_anomalie") == "aberrant").sum(),
+            sum_montant=pl.col("montant").sum().fill_null(0),
+            sum_montant_rationalise=pl.col("montant_rationalise").sum().fill_null(0),
+        )
+        .collect()
+        .to_dicts()[0]
+    )
+
+    top_raisons_df = (
+        lf.filter(pl.col("montant_anomalie_raison").is_not_null())
+        .group_by("montant_anomalie_raison")
+        .agg(pl.len().alias("count"))
+        .sort("count", descending=True)
+        .head(20)
+        .collect()
+    )
+
+    return {
+        "nb_suspects": int(counts["nb_suspects"]),
+        "nb_aberrants": int(counts["nb_aberrants"]),
+        "sum_montant": float(counts["sum_montant"]),
+        "sum_montant_rationalise": float(counts["sum_montant_rationalise"]),
+        "top_raisons": [
+            {"raison": row["montant_anomalie_raison"], "count": int(row["count"])}
+            for row in top_raisons_df.to_dicts()
+        ],
+    }
+
+
+def _create_anomaly_artifact(summary: dict) -> None:
+    """Crée un artifact markdown Prefect avec le résumé des anomalies."""
+    diff_pct = (
+        100.0
+        * (summary["sum_montant"] - summary["sum_montant_rationalise"])
+        / summary["sum_montant"]
+        if summary["sum_montant"] > 0
+        else 0.0
+    )
+    raisons_md = "\n".join(
+        f"- `{r['raison']}` : {r['count']}" for r in summary["top_raisons"]
+    )
+    md = f"""# Détection des anomalies de montant
+
+## Comptage
+
+- Marchés `suspect` : **{summary["nb_suspects"]}**
+- Marchés `aberrant` : **{summary["nb_aberrants"]}**
+
+## Impact sur les agrégations
+
+- Somme des montants déclarés : **{summary["sum_montant"]:,.0f} €**
+- Somme des montants rationalisés : **{summary["sum_montant_rationalise"]:,.0f} €**
+- Différence : **{diff_pct:.2f} %**
+
+## Top 20 raisons
+
+{raisons_md}
+"""
+    try:
+        create_markdown_artifact(markdown=md, key="montant-anomalies-summary")
+    except Exception:
+        pass
+
+
 @task
 def detect_montant_anomalies(
     lf: pl.LazyFrame,
@@ -351,4 +435,16 @@ def detect_montant_anomalies(
         "ecart_pairs",
         "montant_par_habitant",
     ]
+
+    # Build summary and create Prefect artifact
+    summary = build_anomaly_summary(
+        lf.select(
+            "montant",
+            "montant_rationalise",
+            "montant_anomalie",
+            "montant_anomalie_raison",
+        )
+    )
+    _create_anomaly_artifact(summary)
+
     return lf.drop([c for c in intermediaire if c in lf.collect_schema().names()])
