@@ -157,10 +157,10 @@ POPULATION_COMMUNES_CSV = BASE_DIR / "data" / "identifiants-communes.csv"
 
 # Seuils Signal A (écart MAD sur log du montant normalisé)
 ANOMALY_PAIRS_SUSPECT_THRESHOLD = float(
-    os.getenv("ANOMALY_PAIRS_SUSPECT_THRESHOLD", 4.0)
+    os.getenv("ANOMALY_PAIRS_SUSPECT_THRESHOLD", "4.0")
 )
 ANOMALY_PAIRS_ABERRANT_THRESHOLD = float(
-    os.getenv("ANOMALY_PAIRS_ABERRANT_THRESHOLD", 6.0)
+    os.getenv("ANOMALY_PAIRS_ABERRANT_THRESHOLD", "6.0")
 )
 
 # Seuils Signal B (€/habitant, par type de marché)
@@ -183,7 +183,10 @@ POPULATION_TRANCHES = [
 ]
 
 # Taille minimale d'un groupe de pairs pour calculer une statistique fiable
-ANOMALY_GROUPE_MIN_SIZE = int(os.getenv("ANOMALY_GROUPE_MIN_SIZE", 30))
+ANOMALY_GROUPE_MIN_SIZE = int(os.getenv("ANOMALY_GROUPE_MIN_SIZE", "30"))
+ALL_CONFIG["ANOMALY_PAIRS_SUSPECT_THRESHOLD"] = ANOMALY_PAIRS_SUSPECT_THRESHOLD
+ALL_CONFIG["ANOMALY_PAIRS_ABERRANT_THRESHOLD"] = ANOMALY_PAIRS_ABERRANT_THRESHOLD
+ALL_CONFIG["ANOMALY_GROUPE_MIN_SIZE"] = ANOMALY_GROUPE_MIN_SIZE
 
 COLUMNS_TO_DROP = [
     # Pas encore incluses
