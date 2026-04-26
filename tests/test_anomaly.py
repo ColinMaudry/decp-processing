@@ -9,6 +9,7 @@ from src.tasks.anomaly import (
     compute_peer_group_stats,
     compute_signals,
     compute_tranche_population_expr,
+    detect_montant_anomalies,
     join_population,
     montant_normalise_expr,
 )
@@ -375,3 +376,65 @@ class TestMontantRationalise:
         )
         result = compute_montant_rationalise(lf).collect()
         assert result["montant_rationalise"].to_list() == [None]
+
+
+class TestDetectMontantAnomalies:
+    def test_pipeline_complet_sur_petit_dataset(self):
+        import math
+
+        n_normaux = 35
+        normaux = [
+            {
+                "uid": f"N{i}",
+                "acheteur_id": "21005400200012",  # Lyon SIRET (string)
+                "montant": 100_000.0 * math.exp((i % 5 - 2) * 0.1),
+                "type": "Services",
+                "codeCPV": "72000000",
+                "dureeMois": 12,
+                "formePrix": "Unitaire",
+                "acheteur_categorie": "Commune",
+                "titulaire_categorie": "GE",
+            }
+            for i in range(n_normaux)
+        ]
+
+        outlier = [
+            {
+                "uid": "OUTLIER",
+                "acheteur_id": "21005400200012",
+                "montant": 10_000_000_000.0,  # 10 G€
+                "type": "Services",
+                "codeCPV": "72000000",
+                "dureeMois": 12,
+                "formePrix": "Unitaire",
+                "acheteur_categorie": "Commune",
+                "titulaire_categorie": "GE",
+            }
+        ]
+
+        lf = pl.LazyFrame(normaux + outlier)
+
+        csv_path = BASE_DIR / "tests/data/identifiants-communes-test.csv"
+        result = detect_montant_anomalies(lf, csv_path).collect()
+
+        # Must add exactly 3 columns
+        added = set(result.columns) - set(lf.collect().columns)
+        assert added == {
+            "montant_rationalise",
+            "montant_anomalie",
+            "montant_anomalie_raison",
+        }
+
+        # Outlier must be aberrant
+        outlier_row = result.filter(pl.col("uid") == "OUTLIER").to_dicts()[0]
+        assert outlier_row["montant_anomalie"] == "aberrant"
+        assert outlier_row["montant_rationalise"] is not None
+        assert outlier_row["montant_rationalise"] < 1_000_000
+
+        # Normal markets must not be flagged
+        normaux_anomalies = result.filter(pl.col("uid") != "OUTLIER")[
+            "montant_anomalie"
+        ].to_list()
+        assert all(a is None for a in normaux_anomalies)
+        normaux_check = result.filter(pl.col("uid") != "OUTLIER")
+        assert (normaux_check["montant"] == normaux_check["montant_rationalise"]).all()

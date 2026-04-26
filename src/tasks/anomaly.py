@@ -1,12 +1,15 @@
 from pathlib import Path
 
 import polars as pl
+from prefect import task
 
 from src.config import (
+    ANOMALY_GROUPE_MIN_SIZE,
     ANOMALY_HABITANT_THRESHOLDS,
     ANOMALY_PAIRS_ABERRANT_THRESHOLD,
     ANOMALY_PAIRS_SUSPECT_THRESHOLD,
     ANOMALY_TITULAIRE_PME_MONTANT_SEUIL,
+    POPULATION_COMMUNES_CSV,
 )
 
 
@@ -304,3 +307,48 @@ def compute_montant_rationalise(lf: pl.LazyFrame) -> pl.LazyFrame:
         .then(pl.col("median_montant_norm") * pl.col("dureeMois"))
         .otherwise(pl.col("median_montant_norm")),
     )
+
+
+@task
+def detect_montant_anomalies(
+    lf: pl.LazyFrame,
+    population_csv_path: Path = POPULATION_COMMUNES_CSV,
+) -> pl.LazyFrame:
+    """Task Prefect : détecte les anomalies de montant et calcule montant_rationalise.
+
+    Ajoute trois colonnes au LazyFrame en entrée :
+    - montant_rationalise : montant utilisable pour les agrégations
+    - montant_anomalie : null, 'suspect', ou 'aberrant'
+    - montant_anomalie_raison : code lisible du critère déclenché
+    """
+    lf = join_population(lf, population_csv_path)
+
+    lf = lf.with_columns(
+        compute_tranche_population_expr(),
+        montant_normalise_expr(),
+        pl.col("codeCPV").str.slice(0, 2).alias("codeCPV_2"),
+    )
+    lf = lf.with_columns(
+        log_montant_normalise=(pl.col("montant_normalise") + 1).log10(),
+    )
+
+    lf = compute_peer_group_stats(lf, min_size=ANOMALY_GROUPE_MIN_SIZE)
+    lf = compute_signals(lf)
+    lf = classify_anomalies(lf)
+    lf = compute_montant_rationalise(lf)
+
+    intermediaire = [
+        "population",
+        "tranche_population",
+        "montant_normalise",
+        "log_montant_normalise",
+        "codeCPV_2",
+        "n_groupe",
+        "niveau_groupe",
+        "mediane_log",
+        "mad_log",
+        "median_montant_norm",
+        "ecart_pairs",
+        "montant_par_habitant",
+    ]
+    return lf.drop([c for c in intermediaire if c in lf.collect_schema().names()])
