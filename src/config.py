@@ -149,6 +149,42 @@ ALL_CONFIG["REFERENCE_DIR"] = REFERENCE_DIR
 schema_fields = json.load(open(REFERENCE_DIR / "schema_base.json", "r"))["fields"]
 BASE_DF_COLUMNS = [field["name"] for field in schema_fields]
 
+# === Détection des anomalies de montant ===
+# Voir docs/superpowers/specs/2026-04-25-montants-anormaux-rationalisation-design.md
+
+# Chemin du CSV population des communes (fourni hors pipeline)
+POPULATION_COMMUNES_CSV = BASE_DIR / "data" / "identifiants-communes.csv"
+
+# Seuils Signal A (écart MAD sur log du montant normalisé)
+ANOMALY_PAIRS_SUSPECT_THRESHOLD = float(
+    os.getenv("ANOMALY_PAIRS_SUSPECT_THRESHOLD", 4.0)
+)
+ANOMALY_PAIRS_ABERRANT_THRESHOLD = float(
+    os.getenv("ANOMALY_PAIRS_ABERRANT_THRESHOLD", 6.0)
+)
+
+# Seuils Signal B (€/habitant, par type de marché)
+ANOMALY_HABITANT_THRESHOLDS = {
+    "Travaux": {"suspect": 5_000, "aberrant": 20_000},
+    "Services": {"suspect": 1_000, "aberrant": 5_000},
+    "Fournitures": {"suspect": 500, "aberrant": 2_000},
+}
+
+# Seuil Signal C (modulateur titulaire PME)
+ANOMALY_TITULAIRE_PME_MONTANT_SEUIL = 50_000_000
+
+# Tranches de population (bornes inférieures) pour la stratification du Signal A
+POPULATION_TRANCHES = [
+    (0, "très petite"),
+    (2_000, "petite"),
+    (10_000, "moyenne"),
+    (50_000, "grande"),
+    (200_000, "très grande"),
+]
+
+# Taille minimale d'un groupe de pairs pour calculer une statistique fiable
+ANOMALY_GROUPE_MIN_SIZE = int(os.getenv("ANOMALY_GROUPE_MIN_SIZE", 30))
+
 COLUMNS_TO_DROP = [
     # Pas encore incluses
     "actesSousTraitance",

@@ -453,6 +453,28 @@
       "short_title": null
     },
     {
+      "type": "number",
+      "name": "montant_rationalise",
+      "title": "Montant rationalisé",
+      "description": "Égal à 'montant' sauf pour les marchés classés 'aberrant' (montant_anomalie='aberrant'), où il prend la valeur de la médiane des marchés similaires. À utiliser pour les agrégations (sommes, moyennes) afin d'éviter le biais des montants saisis erronément.",
+      "short_title": "Montant rationalisé"
+    },
+    {
+      "type": "string",
+      "name": "montant_anomalie",
+      "title": "Anomalie de montant",
+      "description": "Indique si le montant déclaré est jugé anormal par comparaison avec les marchés similaires. 'suspect' = anomalie possible, montant conservé ; 'aberrant' = anomalie forte, montant remplacé dans 'montant_rationalise'.",
+      "short_title": "Anomalie",
+      "enum": ["suspect", "aberrant"]
+    },
+    {
+      "type": "string",
+      "name": "montant_anomalie_raison",
+      "title": "Raison de l'anomalie",
+      "description": "Code lisible expliquant le critère ayant déclenché la classification : montant_par_habitant_aberrant, montant_par_habitant_suspect, montant_vs_pairs_aberrant, montant_vs_pairs_suspect, titulaire_incoherent_pme_gros_marche, ou groupe_insuffisant.",
+      "short_title": "Raison anomalie"
+    },
+    {
       "type": "string",
       "name": "sourceDataset",
       "title": "Source dataset",
