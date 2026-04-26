@@ -1,7 +1,10 @@
 import polars as pl
 
-from src.config import BASE_DIR
+from src.config import (
+    BASE_DIR,
+)
 from src.tasks.anomaly import (
+    classify_anomalies,
     compute_peer_group_stats,
     compute_signals,
     compute_tranche_population_expr,
@@ -191,3 +194,103 @@ class TestSignals:
         )
         result = compute_signals(lf).collect()
         assert result["ecart_pairs"].to_list() == [None]
+
+
+class TestClassification:
+    def test_pairs_suspect(self):
+        lf = pl.LazyFrame(
+            {
+                "ecart_pairs": [4.5],
+                "montant_par_habitant": [None],
+                "type": ["Services"],
+                "titulaire_categorie": [None],
+                "montant": [100_000.0],
+            },
+            schema_overrides={"montant_par_habitant": pl.Float64},
+        )
+        result = classify_anomalies(lf).collect()
+        assert result["montant_anomalie"].to_list() == ["suspect"]
+        assert result["montant_anomalie_raison"].to_list() == [
+            "montant_vs_pairs_suspect"
+        ]
+
+    def test_pairs_aberrant(self):
+        lf = pl.LazyFrame(
+            {
+                "ecart_pairs": [10.0],
+                "montant_par_habitant": [None],
+                "type": ["Services"],
+                "titulaire_categorie": [None],
+                "montant": [100_000.0],
+            },
+            schema_overrides={"montant_par_habitant": pl.Float64},
+        )
+        result = classify_anomalies(lf).collect()
+        assert result["montant_anomalie"].to_list() == ["aberrant"]
+        assert result["montant_anomalie_raison"].to_list() == [
+            "montant_vs_pairs_aberrant"
+        ]
+
+    def test_habitant_aberrant_prime_sur_pairs(self):
+        lf = pl.LazyFrame(
+            {
+                "ecart_pairs": [10.0],
+                "montant_par_habitant": [25_000.0],  # Travaux aberrant > 20 000
+                "type": ["Travaux"],
+                "titulaire_categorie": [None],
+                "montant": [100_000_000.0],
+            }
+        )
+        result = classify_anomalies(lf).collect()
+        assert result["montant_anomalie"].to_list() == ["aberrant"]
+        assert result["montant_anomalie_raison"].to_list() == [
+            "montant_par_habitant_aberrant"
+        ]
+
+    def test_modulateur_pme_escalade_suspect_en_aberrant(self):
+        lf = pl.LazyFrame(
+            {
+                "ecart_pairs": [4.5],
+                "montant_par_habitant": [None],
+                "type": ["Services"],
+                "titulaire_categorie": ["PME"],
+                "montant": [60_000_000.0],
+            },
+            schema_overrides={"montant_par_habitant": pl.Float64},
+        )
+        result = classify_anomalies(lf).collect()
+        assert result["montant_anomalie"].to_list() == ["aberrant"]
+        assert result["montant_anomalie_raison"].to_list() == [
+            "titulaire_incoherent_pme_gros_marche"
+        ]
+
+    def test_modulateur_pme_inactif_si_montant_sous_seuil(self):
+        lf = pl.LazyFrame(
+            {
+                "ecart_pairs": [4.5],
+                "montant_par_habitant": [None],
+                "type": ["Services"],
+                "titulaire_categorie": ["PME"],
+                "montant": [10_000_000.0],  # < 50 M€
+            },
+            schema_overrides={"montant_par_habitant": pl.Float64},
+        )
+        result = classify_anomalies(lf).collect()
+        assert result["montant_anomalie"].to_list() == ["suspect"]
+        assert result["montant_anomalie_raison"].to_list() == [
+            "montant_vs_pairs_suspect"
+        ]
+
+    def test_pas_d_anomalie(self):
+        lf = pl.LazyFrame(
+            {
+                "ecart_pairs": [2.0],
+                "montant_par_habitant": [100.0],
+                "type": ["Services"],
+                "titulaire_categorie": ["GE"],
+                "montant": [50_000.0],
+            }
+        )
+        result = classify_anomalies(lf).collect()
+        assert result["montant_anomalie"].to_list() == [None]
+        assert result["montant_anomalie_raison"].to_list() == [None]

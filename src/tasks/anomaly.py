@@ -2,6 +2,13 @@ from pathlib import Path
 
 import polars as pl
 
+from src.config import (
+    ANOMALY_HABITANT_THRESHOLDS,
+    ANOMALY_PAIRS_ABERRANT_THRESHOLD,
+    ANOMALY_PAIRS_SUSPECT_THRESHOLD,
+    ANOMALY_TITULAIRE_PME_MONTANT_SEUIL,
+)
+
 
 def compute_tranche_population_expr(col: str = "population") -> pl.Expr:
     """Renvoie une expression polars qui calcule la tranche de population.
@@ -171,4 +178,99 @@ def join_population(lf: pl.LazyFrame, population_csv_path: Path) -> pl.LazyFrame
         lf.with_columns(pl.col("acheteur_id").str.slice(0, 9).alias("_siren_acheteur"))
         .join(population_lf, left_on="_siren_acheteur", right_on="SIREN", how="left")
         .drop("_siren_acheteur")
+    )
+
+
+def classify_anomalies(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """Applique la logique de classification suspect/aberrant et choisit la raison principale.
+
+    Le LazyFrame en entrée doit contenir : ecart_pairs, montant_par_habitant, type,
+    titulaire_categorie, montant.
+
+    Renvoie le LazyFrame enrichi avec montant_anomalie (null/suspect/aberrant) et
+    montant_anomalie_raison.
+
+    Priorité des signaux : aberrant prime sur suspect. Le premier when
+    (pairs_aberrant | habitant_aberrant → "aberrant") est évalué avant le second
+    (pairs_suspect | habitant_suspect → "suspect"), donc aberrant a toujours la priorité
+    même si plusieurs signaux sont actifs simultanément.
+    """
+    suspect_habitant_expr = (
+        pl.when(pl.col("type") == "Travaux")
+        .then(pl.lit(ANOMALY_HABITANT_THRESHOLDS["Travaux"]["suspect"]))
+        .when(pl.col("type") == "Services")
+        .then(pl.lit(ANOMALY_HABITANT_THRESHOLDS["Services"]["suspect"]))
+        .when(pl.col("type") == "Fournitures")
+        .then(pl.lit(ANOMALY_HABITANT_THRESHOLDS["Fournitures"]["suspect"]))
+        .otherwise(None)
+    )
+    aberrant_habitant_expr = (
+        pl.when(pl.col("type") == "Travaux")
+        .then(pl.lit(ANOMALY_HABITANT_THRESHOLDS["Travaux"]["aberrant"]))
+        .when(pl.col("type") == "Services")
+        .then(pl.lit(ANOMALY_HABITANT_THRESHOLDS["Services"]["aberrant"]))
+        .when(pl.col("type") == "Fournitures")
+        .then(pl.lit(ANOMALY_HABITANT_THRESHOLDS["Fournitures"]["aberrant"]))
+        .otherwise(None)
+    )
+
+    lf = lf.with_columns(
+        pairs_aberrant=pl.col("ecart_pairs") > ANOMALY_PAIRS_ABERRANT_THRESHOLD,
+        pairs_suspect=(pl.col("ecart_pairs") > ANOMALY_PAIRS_SUSPECT_THRESHOLD)
+        & (pl.col("ecart_pairs") <= ANOMALY_PAIRS_ABERRANT_THRESHOLD),
+        habitant_aberrant=pl.col("montant_par_habitant").is_not_null()
+        & (pl.col("montant_par_habitant") > aberrant_habitant_expr),
+        habitant_suspect=pl.col("montant_par_habitant").is_not_null()
+        & (pl.col("montant_par_habitant") > suspect_habitant_expr)
+        & ~(pl.col("montant_par_habitant") > aberrant_habitant_expr),
+    )
+
+    # aberrant prime sur suspect : le premier when gagne
+    lf = lf.with_columns(
+        classification_initiale=pl.when(
+            pl.col("pairs_aberrant") | pl.col("habitant_aberrant")
+        )
+        .then(pl.lit("aberrant"))
+        .when(pl.col("pairs_suspect") | pl.col("habitant_suspect"))
+        .then(pl.lit("suspect"))
+        .otherwise(None),
+    )
+
+    lf = lf.with_columns(
+        modulateur_titulaire=(pl.col("classification_initiale") == "suspect")
+        & (pl.col("titulaire_categorie") == "PME")
+        & (pl.col("montant") > ANOMALY_TITULAIRE_PME_MONTANT_SEUIL),
+    )
+
+    lf = lf.with_columns(
+        montant_anomalie=pl.when(pl.col("modulateur_titulaire"))
+        .then(pl.lit("aberrant"))
+        .otherwise(pl.col("classification_initiale")),
+    )
+
+    lf = lf.with_columns(
+        montant_anomalie_raison=pl.when(pl.col("montant_anomalie").is_null())
+        .then(None)
+        .when(pl.col("habitant_aberrant"))
+        .then(pl.lit("montant_par_habitant_aberrant"))
+        .when(pl.col("habitant_suspect") & (pl.col("montant_anomalie") == "suspect"))
+        .then(pl.lit("montant_par_habitant_suspect"))
+        .when(pl.col("pairs_aberrant"))
+        .then(pl.lit("montant_vs_pairs_aberrant"))
+        .when(pl.col("pairs_suspect") & (pl.col("montant_anomalie") == "suspect"))
+        .then(pl.lit("montant_vs_pairs_suspect"))
+        .when(pl.col("modulateur_titulaire"))
+        .then(pl.lit("titulaire_incoherent_pme_gros_marche"))
+        .otherwise(None),
+    )
+
+    return lf.drop(
+        [
+            "pairs_aberrant",
+            "pairs_suspect",
+            "habitant_aberrant",
+            "habitant_suspect",
+            "classification_initiale",
+            "modulateur_titulaire",
+        ]
     )
