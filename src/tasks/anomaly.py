@@ -136,6 +136,27 @@ def compute_peer_group_stats(lf: pl.LazyFrame, min_size: int) -> pl.LazyFrame:
     return lf.drop(cols_to_drop)
 
 
+def compute_signals(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """Calcule ecart_pairs (Signal A) et montant_par_habitant (Signal B).
+
+    ecart_pairs = (log_montant_normalise - mediane_log) / mad_log, null si mad_log nulle ou null.
+    montant_par_habitant = montant / population, null si population null ou nulle.
+    """
+    return lf.with_columns(
+        pl.when(pl.col("mad_log").is_null() | (pl.col("mad_log") == 0))
+        .then(None)
+        .otherwise(
+            (pl.col("log_montant_normalise") - pl.col("mediane_log"))
+            / pl.col("mad_log")
+        )
+        .alias("ecart_pairs"),
+        pl.when(pl.col("population").is_null() | (pl.col("population") == 0))
+        .then(None)
+        .otherwise(pl.col("montant") / pl.col("population"))
+        .alias("montant_par_habitant"),
+    )
+
+
 def join_population(lf: pl.LazyFrame, population_csv_path: Path) -> pl.LazyFrame:
     """Joint le LazyFrame avec le CSV des communes via le SIREN extrait de acheteur_id.
 

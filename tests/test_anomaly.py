@@ -3,6 +3,7 @@ import polars as pl
 from src.config import BASE_DIR
 from src.tasks.anomaly import (
     compute_peer_group_stats,
+    compute_signals,
     compute_tranche_population_expr,
     join_population,
     montant_normalise_expr,
@@ -156,3 +157,37 @@ class TestPeerGroupStats:
         result = compute_peer_group_stats(lf, min_size=30).collect()
         assert result["niveau_groupe"].to_list() == [None] * 5
         assert result["mediane_log"].to_list() == [None] * 5
+
+
+class TestSignals:
+    def test_ecart_pairs_calcul(self):
+        lf = pl.LazyFrame(
+            {
+                "montant_normalise": [100_000.0, 100_000_000.0, 100_000.0],
+                "log_montant_normalise": [5.0, 8.0, 5.0],
+                "mediane_log": [5.0, 5.0, None],  # Dernier : groupe insuffisant
+                "mad_log": [0.5, 0.5, None],
+                "montant": [100_000.0, 100_000_000.0, 100_000.0],
+                "population": [10_000, 10_000, None],
+                "type": ["Services", "Services", "Services"],
+            }
+        )
+        result = compute_signals(lf).collect()
+        assert result["ecart_pairs"].to_list() == [0.0, 6.0, None]
+        assert result["montant_par_habitant"].to_list() == [10.0, 10_000.0, None]
+
+    def test_ecart_pairs_mad_zero_renvoie_null(self):
+        lf = pl.LazyFrame(
+            {
+                "montant_normalise": [100_000.0],
+                "log_montant_normalise": [5.0],
+                "mediane_log": [5.0],
+                "mad_log": [0.0],
+                "montant": [100_000.0],
+                "population": [None],
+                "type": ["Services"],
+            },
+            schema_overrides={"population": pl.Int64},
+        )
+        result = compute_signals(lf).collect()
+        assert result["ecart_pairs"].to_list() == [None]
