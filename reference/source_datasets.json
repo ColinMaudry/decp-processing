@@ -336,5 +336,11 @@
     "name": "Données essentielles - medialex.fr",
     "code": "medialex",
     "owner_org_name": "MEDIALEX"
+  },
+  {
+    "id": "67b4575f32c309fd76327c87",
+    "name": "Données Essentielles du profil acheteur Alsace Marchés Publics",
+    "code": "alsace_marches_publics",
+    "owner_org_name": "ALSACE MARCHES PUBLICS"
   }
 ]
