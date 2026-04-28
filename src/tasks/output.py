@@ -143,6 +143,7 @@ def generate_final_schema(lf):
         "Int16": "integer",
         "Boolean": "boolean",
         "Date": "date",
+        "List(String)": "arrayt ",
     }
 
     # conversion en dict sérialisable en JSON

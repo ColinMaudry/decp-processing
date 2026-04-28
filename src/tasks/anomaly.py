@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import polars as pl
-from prefect import task
 from prefect.artifacts import create_markdown_artifact
 
 from src.config import (
@@ -196,13 +195,13 @@ def join_population(lf: pl.LazyFrame, population_csv_path: Path) -> pl.LazyFrame
 
 
 def classify_anomalies(lf: pl.LazyFrame) -> pl.LazyFrame:
-    """Applique la logique de classification suspect/aberrant et choisit la raison principale.
+    """Applique la logique de classification suspect/aberrant et collecte toutes les raisons.
 
     Le LazyFrame en entrée doit contenir : ecart_pairs, montant_par_habitant, type,
     titulaire_categorie, montant.
 
     Renvoie le LazyFrame enrichi avec montant_anomalie (null/suspect/aberrant) et
-    montant_anomalie_raison.
+    montant_anomalie_raisons (List[String] de toutes les raisons déclenchées, null si aucune).
 
     Priorité des signaux : aberrant prime sur suspect. Le premier when
     (pairs_aberrant | habitant_aberrant → "aberrant") est évalué avant le second
@@ -263,19 +262,30 @@ def classify_anomalies(lf: pl.LazyFrame) -> pl.LazyFrame:
     )
 
     lf = lf.with_columns(
-        montant_anomalie_raison=pl.when(pl.col("montant_anomalie").is_null())
-        .then(None)
-        .when(pl.col("habitant_aberrant"))
-        .then(pl.lit("montant_par_habitant_aberrant"))
-        .when(pl.col("habitant_suspect") & (pl.col("montant_anomalie") == "suspect"))
-        .then(pl.lit("montant_par_habitant_suspect"))
-        .when(pl.col("pairs_aberrant"))
-        .then(pl.lit("montant_vs_pairs_aberrant"))
-        .when(pl.col("pairs_suspect") & (pl.col("montant_anomalie") == "suspect"))
-        .then(pl.lit("montant_vs_pairs_suspect"))
-        .when(pl.col("modulateur_titulaire"))
-        .then(pl.lit("titulaire_incoherent_pme_gros_marche"))
-        .otherwise(None),
+        montant_anomalie_raisons=pl.concat_list(
+            [
+                pl.when(pl.col("habitant_aberrant"))
+                .then(pl.lit("montant_par_habitant_aberrant"))
+                .otherwise(None),
+                pl.when(pl.col("habitant_suspect"))
+                .then(pl.lit("montant_par_habitant_suspect"))
+                .otherwise(None),
+                pl.when(pl.col("pairs_aberrant"))
+                .then(pl.lit("montant_vs_pairs_aberrant"))
+                .otherwise(None),
+                pl.when(pl.col("pairs_suspect"))
+                .then(pl.lit("montant_vs_pairs_suspect"))
+                .otherwise(None),
+                pl.when(pl.col("modulateur_titulaire"))
+                .then(pl.lit("titulaire_incoherent_pme_gros_marche"))
+                .otherwise(None),
+            ]
+        ).list.drop_nulls()
+    )
+    lf = lf.with_columns(
+        montant_anomalie_raisons=pl.when(pl.col("montant_anomalie").is_not_null())
+        .then(pl.col("montant_anomalie_raisons"))
+        .otherwise(None)
     )
 
     return lf.drop(
@@ -338,8 +348,9 @@ def build_anomaly_summary(lf: pl.LazyFrame) -> dict:
     )
 
     top_raisons_df = (
-        lf.filter(pl.col("montant_anomalie_raison").is_not_null())
-        .group_by("montant_anomalie_raison")
+        lf.filter(pl.col("montant_anomalie_raisons").is_not_null())
+        .explode("montant_anomalie_raisons")
+        .group_by("montant_anomalie_raisons")
         .agg(pl.len().alias("count"))
         .sort("count", descending=True)
         .head(20)
@@ -352,7 +363,7 @@ def build_anomaly_summary(lf: pl.LazyFrame) -> dict:
         "sum_montant": float(counts["sum_montant"]),
         "sum_montant_rationalise": float(counts["sum_montant_rationalise"]),
         "top_raisons": [
-            {"raison": row["montant_anomalie_raison"], "count": int(row["count"])}
+            {"raison": row["montant_anomalie_raisons"], "count": int(row["count"])}
             for row in top_raisons_df.to_dicts()
         ],
     }
@@ -393,18 +404,15 @@ def _create_anomaly_artifact(summary: dict) -> None:
         pass
 
 
-@task
-def detect_montant_anomalies(
-    lf: pl.LazyFrame,
-    population_csv_path: Path = POPULATION_COMMUNES_CSV,
-) -> pl.LazyFrame:
+def detect_montant_anomalies(lf: pl.LazyFrame) -> pl.LazyFrame:
     """Task Prefect : détecte les anomalies de montant et calcule montant_rationalise.
 
     Ajoute trois colonnes au LazyFrame en entrée :
     - montant_rationalise : montant utilisable pour les agrégations
     - montant_anomalie : null, 'suspect', ou 'aberrant'
-    - montant_anomalie_raison : code lisible du critère déclenché
+    - montant_anomalie_raisons : code lisible du critère déclenché
     """
+    population_csv_path = POPULATION_COMMUNES_CSV
     lf = join_population(lf, population_csv_path)
 
     lf = lf.with_columns(
@@ -442,7 +450,7 @@ def detect_montant_anomalies(
             "montant",
             "montant_rationalise",
             "montant_anomalie",
-            "montant_anomalie_raison",
+            "montant_anomalie_raisons",
         )
     )
     _create_anomaly_artifact(summary)

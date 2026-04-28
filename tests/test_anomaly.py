@@ -214,7 +214,7 @@ class TestClassification:
         result = classify_anomalies(lf).collect()
         assert result["montant_anomalie"].to_list() == ["suspect"]
         assert result["montant_anomalie_raison"].to_list() == [
-            "montant_vs_pairs_suspect"
+            ["montant_vs_pairs_suspect"]
         ]
 
     def test_pairs_aberrant(self):
@@ -231,10 +231,10 @@ class TestClassification:
         result = classify_anomalies(lf).collect()
         assert result["montant_anomalie"].to_list() == ["aberrant"]
         assert result["montant_anomalie_raison"].to_list() == [
-            "montant_vs_pairs_aberrant"
+            ["montant_vs_pairs_aberrant"]
         ]
 
-    def test_habitant_aberrant_prime_sur_pairs(self):
+    def test_habitant_aberrant_et_pairs_aberrant_deux_raisons(self):
         lf = pl.LazyFrame(
             {
                 "ecart_pairs": [10.0],
@@ -247,7 +247,7 @@ class TestClassification:
         result = classify_anomalies(lf).collect()
         assert result["montant_anomalie"].to_list() == ["aberrant"]
         assert result["montant_anomalie_raison"].to_list() == [
-            "montant_par_habitant_aberrant"
+            ["montant_par_habitant_aberrant", "montant_vs_pairs_aberrant"]
         ]
 
     def test_modulateur_pme_escalade_suspect_en_aberrant(self):
@@ -264,7 +264,7 @@ class TestClassification:
         result = classify_anomalies(lf).collect()
         assert result["montant_anomalie"].to_list() == ["aberrant"]
         assert result["montant_anomalie_raison"].to_list() == [
-            "titulaire_incoherent_pme_gros_marche"
+            ["montant_vs_pairs_suspect", "titulaire_incoherent_pme_gros_marche"]
         ]
 
     def test_modulateur_pme_inactif_si_montant_sous_seuil(self):
@@ -281,7 +281,7 @@ class TestClassification:
         result = classify_anomalies(lf).collect()
         assert result["montant_anomalie"].to_list() == ["suspect"]
         assert result["montant_anomalie_raison"].to_list() == [
-            "montant_vs_pairs_suspect"
+            ["montant_vs_pairs_suspect"]
         ]
 
     def test_pas_d_anomalie(self):
@@ -296,7 +296,9 @@ class TestClassification:
         )
         result = classify_anomalies(lf).collect()
         assert result["montant_anomalie"].to_list() == [None]
-        assert result["montant_anomalie_raison"].to_list() == [None]
+        assert result["montant_anomalie_raison"].to_list() == [
+            None
+        ]  # null, pas liste vide
 
 
 class TestMontantRationalise:
@@ -387,10 +389,10 @@ class TestAnomalySummary:
                 "montant_rationalise": [100.0, 200.0, 50.0, 400.0, 500.0],
                 "montant_anomalie": ["suspect", None, "aberrant", "aberrant", None],
                 "montant_anomalie_raison": [
-                    "montant_vs_pairs_suspect",
+                    ["montant_vs_pairs_suspect"],
                     None,
-                    "montant_par_habitant_aberrant",
-                    "montant_par_habitant_aberrant",
+                    ["montant_par_habitant_aberrant"],
+                    ["montant_par_habitant_aberrant"],
                     None,
                 ],
             }
