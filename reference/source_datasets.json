@@ -330,5 +330,11 @@
     "code": "minef",
     "owner_org_name": "MINEF",
     "skip": true
+  },
+  {
+    "id": "68d505db4463555f7ed9b8b5",
+    "name": "Données essentielles - medialex.fr",
+    "code": "medialex",
+    "owner_org_name": "MEDIALEX"
   }
 ]

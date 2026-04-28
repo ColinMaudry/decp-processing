@@ -153,7 +153,11 @@ BASE_DF_COLUMNS = [field["name"] for field in schema_fields]
 # Voir docs/superpowers/specs/2026-04-25-montants-anormaux-rationalisation-design.md
 
 # Chemin du CSV population des communes (fourni hors pipeline)
-POPULATION_COMMUNES_CSV = BASE_DIR / "data" / "identifiants-communes.csv"
+POPULATION_COMMUNES_CSV = Path(
+    os.getenv(
+        "POPULATION_COMMUNES_CSV", str(BASE_DIR / "data" / "identifiants-communes.csv")
+    )
+)
 
 # Seuils Signal A (écart MAD sur log du montant normalisé)
 ANOMALY_PAIRS_SUSPECT_THRESHOLD = float(
