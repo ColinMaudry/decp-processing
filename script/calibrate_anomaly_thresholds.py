@@ -8,7 +8,10 @@ Usage : python script/calibrate_anomaly_thresholds.py [--parquet PATH]
 """
 
 import argparse
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import polars as pl
 
