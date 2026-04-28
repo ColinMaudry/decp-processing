@@ -407,7 +407,6 @@
       "description": "Nom du département où se trouve le titulaire.",
       "short_title": "Département titulaire"
     },
-
     {
       "type": "string",
       "name": "titulaire_region_code",
@@ -422,7 +421,6 @@
       "description": "Nom de la région où se trouve le titulaire.",
       "short_title": "Région titulaire"
     },
-
     {
       "type": "number",
       "name": "titulaire_latitude",
@@ -437,7 +435,6 @@
       "description": "Longitude des coordonnées géographiques du titulaire.",
       "short_title": "Longitude titulaire"
     },
-
     {
       "type": "integer",
       "name": "modification_id",
@@ -468,8 +465,8 @@
       "enum": ["suspect", "aberrant"]
     },
     {
-      "type": "string",
-      "name": "montant_anomalie_raison",
+      "type": "array",
+      "name": "montant_anomalie_raisons",
       "title": "Raison de l'anomalie",
       "description": "Code lisible expliquant le critère ayant déclenché la classification : montant_par_habitant_aberrant, montant_par_habitant_suspect, montant_vs_pairs_aberrant, montant_vs_pairs_suspect, titulaire_incoherent_pme_gros_marche, ou groupe_insuffisant.",
       "short_title": "Raison anomalie"
