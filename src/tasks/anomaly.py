@@ -455,4 +455,7 @@ def detect_montant_anomalies(lf: pl.LazyFrame) -> pl.LazyFrame:
     )
     _create_anomaly_artifact(summary)
 
+    # On conserve la population
+    lf = lf.rename({"population": "acheteur_population"})
+
     return lf.drop([c for c in intermediaire if c in lf.collect_schema().names()])

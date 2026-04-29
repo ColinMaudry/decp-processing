@@ -13,6 +13,15 @@ from src.config import DIST_DIR, LOG_LEVEL, POSTGRESQL_DB_URI, REFERENCE_DIR
 from src.tasks.utils import get_logger
 
 
+def flatten_lists(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """Les champs de type liste sont pour l'instant publiés comme des chaînes de caractères (#176)"""
+    schema = lf.collect_schema()
+    for column, datatype in schema.items():
+        if isinstance(datatype, pl.List):
+            lf = lf.with_columns(pl.col(column).list.join(", "))
+    return lf
+
+
 def save_to_files(df: pl.DataFrame, path: Path, file_format=None):
     if file_format is None:
         file_format = ["csv", "parquet"]

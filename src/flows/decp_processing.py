@@ -27,7 +27,7 @@ from src.tasks.anomaly import detect_montant_anomalies
 from src.tasks.dataset_utils import list_resources
 from src.tasks.enrich import add_duree_restante, add_type_marche, enrich_from_sirene
 from src.tasks.get import get_clean
-from src.tasks.output import generate_final_schema, sink_to_files
+from src.tasks.output import flatten_lists, generate_final_schema, sink_to_files
 from src.tasks.publish import publish_to_datagouv
 from src.tasks.transform import (
     calculate_naf_cpv_matching,
@@ -137,6 +137,8 @@ def decp_processing(enable_cache_removal: bool = True):
     )
     lf: pl.LazyFrame = sort_columns(lf, BASE_DF_COLUMNS)
     generate_final_schema(lf)
+
+    lf = flatten_lists(lf)
     sink_to_files(lf, DIST_DIR / "decp")
 
     # Base de données SQLite dédiée aux activités du Datalab d'Anticor

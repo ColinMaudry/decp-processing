@@ -372,6 +372,13 @@
       "short_title": "Longitude acheteur"
     },
     {
+      "type": "integer",
+      "name": "acheteur_population",
+      "title": "Population de l'acheteur",
+      "description": "Population de l'acheteur s'il s'agit d'une ville. Chiffres de 2024.",
+      "short_title": "Population acheteur"
+    },
+    {
       "type": "string",
       "name": "titulaire_categorie",
       "title": "Catégorie du titulaire",
@@ -465,7 +472,7 @@
       "enum": ["suspect", "aberrant"]
     },
     {
-      "type": "array",
+      "type": "string",
       "name": "montant_anomalie_raisons",
       "title": "Raison de l'anomalie",
       "description": "Code lisible expliquant le critère ayant déclenché la classification : montant_par_habitant_aberrant, montant_par_habitant_suspect, montant_vs_pairs_aberrant, montant_vs_pairs_suspect, titulaire_incoherent_pme_gros_marche, ou groupe_insuffisant.",
