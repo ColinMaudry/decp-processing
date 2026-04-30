@@ -150,6 +150,7 @@ def generate_final_schema(lf):
         "Float32": "number",
         "Float64": "number",
         "Int16": "integer",
+        "Int32": "integer",
         "Boolean": "boolean",
         "Date": "date",
         "List(String)": "arrayt ",

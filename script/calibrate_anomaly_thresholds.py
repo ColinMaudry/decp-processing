@@ -15,12 +15,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import polars as pl
 
-from src.config import BASE_DIR, DIST_DIR
+from src.config import ANOMALY_GROUPE_MIN_SIZE, BASE_DIR, DIST_DIR
 from src.tasks.anomaly import (
     compute_peer_group_stats,
     compute_signals,
     compute_tranche_population_expr,
     join_population,
+    make_short_cpv_code,
     montant_normalise_expr,
 )
 
@@ -36,16 +37,58 @@ def calibrate(parquet_path: Path, pairs_grid: list[float]) -> None:
     lf = lf.with_columns(
         compute_tranche_population_expr(),
         montant_normalise_expr(),
-        pl.col("codeCPV").str.slice(0, 2).alias("codeCPV_2"),
+        make_short_cpv_code(),
     )
     lf = lf.with_columns(
         log_montant_normalise=(pl.col("montant_normalise") + 1).log10()
     )
-    lf = compute_peer_group_stats(lf, min_size=30)
+    lf = compute_peer_group_stats(
+        lf, min_size=ANOMALY_GROUPE_MIN_SIZE, drop_columns=False
+    )
     lf = compute_signals(lf)
 
     df = lf.collect()
     print(f"Marchés analysés : {len(df):,}")
+
+    # Vérification du nombre de marchés par groupe impliquant le code CPV pour
+    # calibrer la bonne taille de code CPV (make_short_cpv_code)
+    df_cpv_groupes = (
+        df.select("codeCPV_2", "n_groupe", "niveau_groupe")
+        .filter(
+            pl.col("niveau_groupe").is_in(["L3", "L4"])
+        )  # on ne veut ques les stats sur des groupes basés sur le code CPV
+        .drop("niveau_groupe")
+        .group_by("codeCPV_2")
+        .agg(
+            count=pl.len(),
+            min=pl.col("n_groupe").min(),
+            median=pl.col("n_groupe").median(),
+            average=pl.col("n_groupe").mean(),
+        )
+    ).sort(by="count", descending=True)
+
+    pl.Config(fmt_str_lengths=80, fmt_table_cell_list_len=50, set_tbl_rows=50)
+    median_n_groupe = df["n_groupe"].median()
+    average_n_groupe = df["n_groupe"].mean()
+
+    print(df_cpv_groupes)
+    print("Somme count: ", df_cpv_groupes["count"].sum())
+
+    print("n_groupe médian :", median_n_groupe, "n_groupe moyen :", average_n_groupe)
+
+    # Échantillon de marchés pour vérfier la cohérence des montants
+    df_sample = df.select(
+        "objet",
+        "montant_normalise",
+        "acheteur_nom",
+        "acheteur_categorie",
+        "acheteur_population",
+        "codeCPV_2",
+        "n_groupe",
+        "niveau_groupe",
+    ).filter(pl.col("montant_anomalie").is_not_null())
+    df_sample = df.sample(30)
+    print(df_sample)
 
     rows = []
     for suspect_thr in pairs_grid:
@@ -72,27 +115,6 @@ def calibrate(parquet_path: Path, pairs_grid: list[float]) -> None:
     out_path = OUT_DIR / "grille_seuils_pairs.csv"
     out_df.write_csv(out_path)
     print(f"Grille écrite : {out_path}")
-
-    top_aberrants = (
-        df.filter(pl.col("ecart_pairs") > 6.0)
-        .sort("montant", descending=True)
-        .head(50)
-        .select(
-            [
-                "uid",
-                "acheteur_nom",
-                "titulaire_nom",
-                "objet",
-                "montant",
-                "type",
-                "codeCPV",
-                "ecart_pairs",
-            ]
-        )
-    )
-    top_path = OUT_DIR / "top_aberrants.csv"
-    top_aberrants.write_csv(top_path)
-    print(f"Top aberrants écrit : {top_path}")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import polars as pl
+import polars.selectors as cs
 from prefect.artifacts import create_markdown_artifact
 
 from src.config import (
@@ -9,10 +10,19 @@ from src.config import (
     ANOMALY_PAIRS_ABERRANT_THRESHOLD,
     ANOMALY_PAIRS_SUSPECT_THRESHOLD,
     ANOMALY_TITULAIRE_PME_MONTANT_SEUIL,
-    LOG_LEVEL,
     POPULATION_COMMUNES_CSV,
 )
-from src.tasks.utils import get_logger
+from src.tasks.utils import logger
+
+
+def make_short_cpv_code() -> pl.Expr:
+    """Renvoie un code CPV plus court, dont la longueur dépend du code."""
+    return (
+        pl.when(pl.col("codeCPV").str.starts_with("45"))
+        .then(pl.col("codeCPV").str.slice(0, 4))
+        .otherwise(pl.col("codeCPV").str.slice(0, 3))
+        .alias("codeCPV_2")
+    )
 
 
 def compute_tranche_population_expr(col: str = "population") -> pl.Expr:
@@ -56,7 +66,9 @@ def montant_normalise_expr() -> pl.Expr:
     )
 
 
-def compute_peer_group_stats(lf: pl.LazyFrame, min_size: int) -> pl.LazyFrame:
+def compute_peer_group_stats(
+    lf: pl.LazyFrame, min_size: int, drop_columns: bool = True
+) -> pl.LazyFrame:
     """Calcule les statistiques médiane/MAD du log du montant normalisé par groupe de pairs.
 
     Quatre niveaux de granularité, du plus spécifique au plus large :
@@ -81,6 +93,18 @@ def compute_peer_group_stats(lf: pl.LazyFrame, min_size: int) -> pl.LazyFrame:
         ("L2", ["type", "acheteur_categorie"]),
         ("L1", ["type"]),
     ]
+
+    # Une ligne = un marché on retire les données des titulaires et on
+    # ne garde que le données actuelles.
+    lf = (
+        (
+            lf.drop(cs.starts_with("titulaire"))
+            .filter(pl.col("donneesActuelles"))
+            .unique()
+        )
+        .collect(engine="streaming")
+        .lazy()
+    )
 
     for name, keys in levels:
         # Première passe : médiane par groupe
@@ -138,14 +162,17 @@ def compute_peer_group_stats(lf: pl.LazyFrame, min_size: int) -> pl.LazyFrame:
     )
 
     cols_to_drop = []
-    for name, _ in levels:
-        cols_to_drop += [
-            f"n_{name}",
-            f"mediane_log_{name}",
-            f"mad_log_{name}",
-            f"median_montant_norm_{name}",
-        ]
-    return lf.drop(cols_to_drop)
+    if drop_columns:
+        cols_to_drop = []
+        for name, _ in levels:
+            cols_to_drop += [
+                f"n_{name}",
+                f"mediane_log_{name}",
+                f"mad_log_{name}",
+                f"median_montant_norm_{name}",
+            ]
+        lf = lf.drop(cols_to_drop)
+    return lf
 
 
 def compute_signals(lf: pl.LazyFrame) -> pl.LazyFrame:
@@ -177,7 +204,6 @@ def join_population(lf: pl.LazyFrame, population_csv_path: Path) -> pl.LazyFrame
     Si le fichier CSV est absent, la colonne 'population' est ajoutée avec des nulls.
     """
     if not population_csv_path.exists():
-        logger = get_logger(level=LOG_LEVEL)
         logger.warning(
             f"Fichier population communes introuvable : {population_csv_path}. "
             "La colonne 'population' sera nulle (Signal B désactivé)."
@@ -398,13 +424,18 @@ def _create_anomaly_artifact(summary: dict) -> None:
 
 {raisons_md}
 """
+
+    logger.info(md)
+
     try:
         create_markdown_artifact(markdown=md, key="montant-anomalies-summary")
     except Exception:
         pass
 
 
-def detect_montant_anomalies(lf: pl.LazyFrame) -> pl.LazyFrame:
+def detect_montant_anomalies(
+    lf: pl.LazyFrame, drop_columns: bool = True
+) -> pl.LazyFrame:
     """Task Prefect : détecte les anomalies de montant et calcule montant_rationalise.
 
     Ajoute trois colonnes au LazyFrame en entrée :
@@ -418,7 +449,7 @@ def detect_montant_anomalies(lf: pl.LazyFrame) -> pl.LazyFrame:
     lf = lf.with_columns(
         compute_tranche_population_expr(),
         montant_normalise_expr(),
-        pl.col("codeCPV").str.slice(0, 2).alias("codeCPV_2"),
+        make_short_cpv_code(),
     )
     lf = lf.with_columns(
         log_montant_normalise=(pl.col("montant_normalise") + 1).log10(),
@@ -430,7 +461,6 @@ def detect_montant_anomalies(lf: pl.LazyFrame) -> pl.LazyFrame:
     lf = compute_montant_rationalise(lf)
 
     intermediaire = [
-        "population",
         "tranche_population",
         "montant_normalise",
         "log_montant_normalise",
@@ -456,6 +486,8 @@ def detect_montant_anomalies(lf: pl.LazyFrame) -> pl.LazyFrame:
     _create_anomaly_artifact(summary)
 
     # On conserve la population
-    lf = lf.rename({"population": "acheteur_population"})
+    lf = lf.with_columns(acheteur_population=pl.col("population").cast(pl.Int32))
+    if drop_columns:
+        lf.drop([c for c in intermediaire if c in lf.collect_schema().names()])
 
-    return lf.drop([c for c in intermediaire if c in lf.collect_schema().names()])
+    return lf
