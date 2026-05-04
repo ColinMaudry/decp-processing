@@ -94,18 +94,6 @@ def compute_peer_group_stats(
         ("L1", ["type"]),
     ]
 
-    # Une ligne = un marché on retire les données des titulaires et on
-    # ne garde que le données actuelles.
-    lf = (
-        (
-            lf.drop(cs.starts_with("titulaire"))
-            .filter(pl.col("donneesActuelles"))
-            .unique()
-        )
-        .collect(engine="streaming")
-        .lazy()
-    )
-
     for name, keys in levels:
         # Première passe : médiane par groupe
         mediane_stats = lf.group_by(keys).agg(
@@ -275,9 +263,10 @@ def classify_anomalies(lf: pl.LazyFrame) -> pl.LazyFrame:
         .otherwise(None),
     )
 
+    # Le montant est aberrant si au-dessus d'un certain seuil et attribbué à une PME seule
     lf = lf.with_columns(
         modulateur_titulaire=(pl.col("classification_initiale") == "suspect")
-        & (pl.col("titulaire_categorie") == "PME")
+        & (pl.col("single_pme"))
         & (pl.col("montant") > ANOMALY_TITULAIRE_PME_MONTANT_SEUIL),
     )
 
@@ -434,7 +423,7 @@ def _create_anomaly_artifact(summary: dict) -> None:
 
 
 def detect_montant_anomalies(
-    lf: pl.LazyFrame, drop_columns: bool = True
+    lf: pl.LazyFrame, calibrating: bool = False
 ) -> pl.LazyFrame:
     """Task Prefect : détecte les anomalies de montant et calcule montant_rationalise.
 
@@ -443,6 +432,26 @@ def detect_montant_anomalies(
     - montant_anomalie : null, 'suspect', ou 'aberrant'
     - montant_anomalie_raisons : code lisible du critère déclenché
     """
+
+    # Une ligne = un marché on retire les données des titulaires et on
+    # ne garde que le données actuelles.
+
+    lf_titulaires = lf.select("uid", cs.starts_with("titulaire"))
+
+    df = lf.collect()
+    print("height df avec titulaires: ", df.height)
+    lf = df.lazy()
+    df = (
+        lf.filter(pl.col("donneesActuelles"))
+        .group_by(cs.exclude("titulaire_categorie"))
+        .agg(pl.col("titulaire_categorie"))
+        .with_columns(single_pme=pl.col("titulaire_categorie") == ["PME"])
+        .drop("titulaire_categorie")
+        .unique()
+    ).collect(engine="streaming")
+
+    lf = df.lazy()
+
     population_csv_path = POPULATION_COMMUNES_CSV
     lf = join_population(lf, population_csv_path)
 
@@ -472,22 +481,30 @@ def detect_montant_anomalies(
         "median_montant_norm",
         "ecart_pairs",
         "montant_par_habitant",
+        "single_pme",
     ]
 
     # Build summary and create Prefect artifact
-    summary = build_anomaly_summary(
-        lf.select(
-            "montant",
-            "montant_rationalise",
-            "montant_anomalie",
-            "montant_anomalie_raisons",
+    if not calibrating:
+        summary = build_anomaly_summary(
+            lf.select(
+                "montant",
+                "montant_rationalise",
+                "montant_anomalie",
+                "montant_anomalie_raisons",
+            )
         )
-    )
-    _create_anomaly_artifact(summary)
+        _create_anomaly_artifact(summary)
 
     # On conserve la population
     lf = lf.with_columns(acheteur_population=pl.col("population").cast(pl.Int32))
-    if drop_columns:
+
+    if not calibrating:
         lf.drop([c for c in intermediaire if c in lf.collect_schema().names()])
+        # On remet les données titulaires
+        lf = lf.join(lf_titulaires, how="left", on="uid")
+        df = lf.collect()
+        print("df height à la fin:", df.height)
+        lf = df.lazy()
 
     return lf

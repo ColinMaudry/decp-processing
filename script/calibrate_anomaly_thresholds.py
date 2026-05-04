@@ -15,14 +15,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import polars as pl
 
-from src.config import ANOMALY_GROUPE_MIN_SIZE, BASE_DIR, DIST_DIR
+from src.config import BASE_DIR, DIST_DIR
 from src.tasks.anomaly import (
-    compute_peer_group_stats,
-    compute_signals,
-    compute_tranche_population_expr,
-    join_population,
-    make_short_cpv_code,
-    montant_normalise_expr,
+    detect_montant_anomalies,
 )
 
 OUT_DIR = BASE_DIR / "data" / "calibration"
@@ -33,21 +28,9 @@ def calibrate(parquet_path: Path, pairs_grid: list[float]) -> None:
 
     lf = pl.scan_parquet(parquet_path)
 
-    lf = join_population(lf, BASE_DIR / "data" / "identifiants-communes.csv")
-    lf = lf.with_columns(
-        compute_tranche_population_expr(),
-        montant_normalise_expr(),
-        make_short_cpv_code(),
-    )
-    lf = lf.with_columns(
-        log_montant_normalise=(pl.col("montant_normalise") + 1).log10()
-    )
-    lf = compute_peer_group_stats(
-        lf, min_size=ANOMALY_GROUPE_MIN_SIZE, drop_columns=False
-    )
-    lf = compute_signals(lf)
+    lf = detect_montant_anomalies(lf, calibrating=True)
 
-    df = lf.collect()
+    df = lf.collect(engine="streaming")
     print(f"Marchés analysés : {len(df):,}")
 
     # Vérification du nombre de marchés par groupe impliquant le code CPV pour
@@ -86,6 +69,7 @@ def calibrate(parquet_path: Path, pairs_grid: list[float]) -> None:
         "codeCPV_2",
         "n_groupe",
         "niveau_groupe",
+        "montant_anomalie",
     ).filter(pl.col("montant_anomalie").is_not_null())
     df_sample = df.sample(30)
     print(df_sample)
