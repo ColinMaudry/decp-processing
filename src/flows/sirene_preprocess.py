@@ -1,11 +1,15 @@
-import os
-
+import polars as pl
 from prefect import flow
 from prefect.transactions import transaction
 
 from src.config import LOG_LEVEL, SIRENE_DATA_DIR
 from src.flows.get_cog import get_cog
-from src.tasks.get import get_etablissements, get_unite_legales
+from src.tasks.get import (
+    bootstrap_siret_latlong,
+    get_etablissements,
+    get_from_s3,
+    get_unite_legales,
+)
 from src.tasks.transform import prepare_etablissements
 from src.tasks.utils import create_sirene_data_dir, get_logger
 
@@ -26,9 +30,11 @@ def sirene_preprocess():
         # Récupération et préparation des données du Code Officiel Géographique
         get_cog()
 
-        if not os.path.exists("data/siret_latlong.parquet"):
-            # TOOD: télécharge siret_latlong
-            pass
+        # Récupération du cache de géolocalisations
+        lf_siret_latlong = get_from_s3(key="siret_latlong.parquet", prefix="")
+
+        if not isinstance(lf_siret_latlong, pl.LazyFrame):
+            lf_siret_latlong = bootstrap_siret_latlong()
 
         # préparer les données unités légales
         processed_ul_parquet_path = SIRENE_DATA_DIR / "unites_legales.parquet"

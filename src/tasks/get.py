@@ -44,6 +44,7 @@ from src.tasks.clean import (
     extract_innermost_struct,
 )
 from src.tasks.output import sink_to_files
+from src.tasks.publish import publish_to_s3
 from src.tasks.transform import prepare_unites_legales
 from src.tasks.utils import (
     full_resource_name,
@@ -447,6 +448,51 @@ def get_clean(
             return parquet_path.with_suffix(".parquet")
 
 
+def bootstrap_siret_latlong() -> pl.LazyFrame:
+    """Crée siret_latlong.parquet à partir des coordonnées présentes dans
+    decp.parquet publié sur data.gouv.fr.
+
+    Utilisé quand siret_latlong.parquet n'existe pas encore sur S3.
+    """
+    logger = get_logger(level=LOG_LEVEL)
+    output_path = DATA_DIR / "siret_latlong.parquet"
+
+    decp_url = (
+        "https://www.data.gouv.fr/datasets/r/11cea8e8-df3e-4ed1-932b-781e2635e432"
+    )
+    logger.info(f"Bootstrap de siret_latlong depuis {decp_url}...")
+
+    lf = pl.scan_parquet(decp_url)
+
+    acheteurs = lf.select(
+        pl.col("acheteur_id").alias("siret"),
+        pl.col("acheteur_latitude").alias("latitude"),
+        pl.col("acheteur_longitude").alias("longitude"),
+    )
+    titulaires = lf.select(
+        pl.col("titulaire_id").alias("siret"),
+        pl.col("titulaire_latitude").alias("latitude"),
+        pl.col("titulaire_longitude").alias("longitude"),
+    )
+
+    output_path.parent.mkdir(exist_ok=True, parents=True)
+    (
+        pl.concat([acheteurs, titulaires])
+        .filter(
+            pl.col("siret").is_not_null()
+            & (pl.col("siret").str.len_chars() == 14)
+            & pl.col("latitude").is_not_null()
+            & pl.col("longitude").is_not_null()
+        )
+        .unique(subset=["siret"], keep="first")
+        .sink_parquet(output_path)
+    )
+
+    publish_to_s3(output_path)
+
+    return pl.scan_parquet(output_path)
+
+
 def get_from_s3(key: str, prefix: str = "") -> pl.LazyFrame | None:
     logger = get_logger(level=LOG_LEVEL)
 
@@ -480,7 +526,6 @@ def get_from_s3(key: str, prefix: str = "") -> pl.LazyFrame | None:
         if e.response.get("Error", {}).get("Code") in ("404", "NoSuchKey"):
             logger.info(f"Fichier absent sur S3 : s3://{S3_BUCKET}/{full_key}")
             return None
-        raise
 
     return pl.scan_parquet(local_path)
 
