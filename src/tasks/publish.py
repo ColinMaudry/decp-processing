@@ -1,3 +1,8 @@
+import mimetypes
+from pathlib import Path
+
+import boto3
+from botocore.config import Config
 from httpx import get, post, put
 
 from src.config import (
@@ -6,6 +11,11 @@ from src.config import (
     DECP_PROCESSING_PUBLISH_TIMEOUT,
     DIST_DIR,
     LOG_LEVEL,
+    S3_ACCESS_KEY_ID,
+    S3_BUCKET,
+    S3_ENDPOINT_URL,
+    S3_REGION,
+    S3_SECRET_ACCESS_KEY,
 )
 from src.tasks.utils import get_logger
 
@@ -108,6 +118,47 @@ def publish_new_resource(dataset_id, file_path, description):
     ).raise_for_status()
 
     return response.json()
+
+
+def publish_to_s3(file: Path, prefix: str = "") -> None:
+    logger = get_logger(level=LOG_LEVEL)
+
+    missing = [
+        name
+        for name, value in [
+            ("S3_ENDPOINT_URL", S3_ENDPOINT_URL),
+            ("S3_BUCKET", S3_BUCKET),
+            ("S3_ACCESS_KEY_ID", S3_ACCESS_KEY_ID),
+            ("S3_SECRET_ACCESS_KEY", S3_SECRET_ACCESS_KEY),
+            ("S3_REGION", S3_REGION),
+        ]
+        if not value
+    ]
+    if missing:
+        raise ValueError(
+            f"Variables d'environnement S3 non définies : {', '.join(missing)}"
+        )
+
+    file = Path(file)
+    key = f"{prefix.strip('/')}/{file.name}" if prefix else file.name
+
+    content_type, _ = mimetypes.guess_type(file.name)
+    extra_args = {"ContentType": content_type} if content_type else {}
+
+    client = boto3.client(
+        "s3",
+        endpoint_url=S3_ENDPOINT_URL,
+        region_name=S3_REGION,
+        aws_access_key_id=S3_ACCESS_KEY_ID,
+        aws_secret_access_key=S3_SECRET_ACCESS_KEY,
+        config=Config(
+            signature_version="s3v4",
+            s3={"addressing_style": "path"},
+        ),
+    )
+    logger.info(f"Publication de {file.name} sur s3://{S3_BUCKET}/{key}...")
+    client.upload_file(str(file), S3_BUCKET, key, ExtraArgs=extra_args)
+    logger.info("OK")
 
 
 def publish_scrap_to_datagouv(year: str, month: str, file_path, target):

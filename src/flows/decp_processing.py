@@ -27,7 +27,7 @@ from src.tasks.dataset_utils import list_resources
 from src.tasks.enrich import add_duree_restante, add_type_marche, enrich_from_sirene
 from src.tasks.get import get_clean
 from src.tasks.output import generate_final_schema, sink_to_files
-from src.tasks.publish import publish_to_datagouv
+from src.tasks.publish import publish_to_datagouv, publish_to_s3
 from src.tasks.transform import (
     calculate_naf_cpv_matching,
     concat_parquet_files,
@@ -142,6 +142,11 @@ def decp_processing(enable_cache_removal: bool = True):
     if decp_publish:
         logger.info("Publication sur data.gouv.fr...")
         publish_to_datagouv()
+
+        logger.info("Publication sur S3...")
+        publish_to_s3(
+            file=DIST_DIR / "decp.parquet", prefix=f"decp/{DATE_NOW}/decp.parquet"
+        )
     else:
         logger.info("Publication sur data.gouv.fr désactivée.")
 

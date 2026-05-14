@@ -20,6 +20,7 @@ dependencies = [
     "lxml",
     "psycopg2",
     "bs4",
+    "boto3",
     "selenium",
     "polars_ds",
     "scikit-learn",

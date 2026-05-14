@@ -1,3 +1,5 @@
+import os
+
 from prefect import flow
 from prefect.transactions import transaction
 
@@ -23,6 +25,10 @@ def sirene_preprocess():
 
         # Récupération et préparation des données du Code Officiel Géographique
         get_cog()
+
+        if not os.path.exists("data/siret_latlong.parquet"):
+            # TOOD: télécharge siret_latlong
+            pass
 
         # préparer les données unités légales
         processed_ul_parquet_path = SIRENE_DATA_DIR / "unites_legales.parquet"

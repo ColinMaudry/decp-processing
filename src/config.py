@@ -10,7 +10,6 @@ import httpx
 from dotenv import find_dotenv, load_dotenv
 from ijson import sendable_list
 from prefect.logging import get_logger
-from prefect.variables import Variable
 
 logger = get_logger(__name__)
 
@@ -51,6 +50,13 @@ MONTH_NOW = DATE_NOW[:7]  # YYYY-MM
 DECP_PROCESSING_PUBLISH = os.getenv("DECP_PROCESSING_PUBLISH", "").lower() == "true"
 ALL_CONFIG["DECP_PROCESSING_PUBLISH"] = DECP_PROCESSING_PUBLISH
 
+# Configuration S3 (service S3-compatible générique, pas spécifique à AWS)
+S3_ENDPOINT_URL = os.getenv("S3_ENDPOINT_URL", "")
+S3_BUCKET = os.getenv("S3_BUCKET", "")
+S3_ACCESS_KEY_ID = os.getenv("S3_ACCESS_KEY_ID", "")
+S3_SECRET_ACCESS_KEY = os.getenv("S3_SECRET_ACCESS_KEY", "")
+S3_REGION = os.getenv("S3_REGION", "")
+
 
 # Client HTTP
 HTTP_CLIENT = httpx.Client()
@@ -70,9 +76,7 @@ else:
 DATAGOUVFR_API = "https://www.data.gouv.fr/api/1"
 
 # Clé d'API data.gouv.fr
-DATAGOUVFR_API_KEY = (
-    Variable.get("datagouvfr_api_key") or os.getenv("DATAGOUVFR_API_KEY") or None
-)
+DATAGOUVFR_API_KEY = os.getenv("DATAGOUVFR_API_KEY") or None
 
 # URL API Prefect
 PREFECT_API_URL = os.getenv("PREFECT_API_URL")
