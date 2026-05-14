@@ -230,6 +230,20 @@ for dataset in tracked_datasets_complete:
         TRACKED_DATASETS.append(dataset)
 
 
+def check_s3_config() -> list:
+    return [
+        name
+        for name, value in [
+            ("S3_ENDPOINT_URL", S3_ENDPOINT_URL),
+            ("S3_BUCKET", S3_BUCKET),
+            ("S3_ACCESS_KEY_ID", S3_ACCESS_KEY_ID),
+            ("S3_SECRET_ACCESS_KEY", S3_SECRET_ACCESS_KEY),
+            ("S3_REGION", S3_REGION),
+        ]
+        if not value
+    ]
+
+
 @dataclass
 class DecpFormat:
     label: str

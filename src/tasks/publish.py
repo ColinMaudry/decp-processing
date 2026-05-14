@@ -16,6 +16,7 @@ from src.config import (
     S3_ENDPOINT_URL,
     S3_REGION,
     S3_SECRET_ACCESS_KEY,
+    check_s3_config,
 )
 from src.tasks.utils import get_logger
 
@@ -122,18 +123,8 @@ def publish_new_resource(dataset_id, file_path, description):
 
 def publish_to_s3(file: Path, prefix: str = "") -> None:
     logger = get_logger(level=LOG_LEVEL)
+    missing = check_s3_config()
 
-    missing = [
-        name
-        for name, value in [
-            ("S3_ENDPOINT_URL", S3_ENDPOINT_URL),
-            ("S3_BUCKET", S3_BUCKET),
-            ("S3_ACCESS_KEY_ID", S3_ACCESS_KEY_ID),
-            ("S3_SECRET_ACCESS_KEY", S3_SECRET_ACCESS_KEY),
-            ("S3_REGION", S3_REGION),
-        ]
-        if not value
-    ]
     if missing:
         raise ValueError(
             f"Variables d'environnement S3 non définies : {', '.join(missing)}"

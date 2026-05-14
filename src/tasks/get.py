@@ -4,10 +4,13 @@ from functools import partial
 from pathlib import Path
 from time import sleep
 
+import boto3
 import httpx
 import ijson
 import orjson
 import polars as pl
+from botocore.config import Config
+from botocore.exceptions import ClientError
 from lxml import etree
 from prefect.transactions import transaction
 from tenacity import (
@@ -24,9 +27,15 @@ from src.config import (
     HTTP_HEADERS,
     LOG_LEVEL,
     RESOURCE_CACHE_DIR,
+    S3_ACCESS_KEY_ID,
+    S3_BUCKET,
+    S3_ENDPOINT_URL,
+    S3_REGION,
+    S3_SECRET_ACCESS_KEY,
     SIRENE_ETABLISSEMENTS_URL,
     SIRENE_UNITES_LEGALES_URL,
     DecpFormat,
+    check_s3_config,
 )
 from src.schemas import SCHEMA_MARCHE_2019, SCHEMA_MARCHE_2022
 from src.tasks.clean import (
@@ -436,6 +445,44 @@ def get_clean(
             # Le fichier parquet est déjà disponible pour ce checksum
             logger.debug(f"👍 Ressource déjà en cache : {resource['dataset_code']}")
             return parquet_path.with_suffix(".parquet")
+
+
+def get_from_s3(key: str, prefix: str = "") -> pl.LazyFrame | None:
+    logger = get_logger(level=LOG_LEVEL)
+
+    missing = check_s3_config()
+
+    if missing:
+        raise ValueError(
+            f"Variables d'environnement S3 non définies : {', '.join(missing)}"
+        )
+
+    full_key = f"{prefix.strip('/')}/{key}" if prefix else key
+    local_path = DATA_DIR / "s3" / full_key
+    local_path.parent.mkdir(exist_ok=True, parents=True)
+
+    client = boto3.client(
+        "s3",
+        endpoint_url=S3_ENDPOINT_URL,
+        region_name=S3_REGION,
+        aws_access_key_id=S3_ACCESS_KEY_ID,
+        aws_secret_access_key=S3_SECRET_ACCESS_KEY,
+        config=Config(
+            signature_version="s3v4",
+            s3={"addressing_style": "path"},
+        ),
+    )
+
+    logger.info(f"Téléchargement de s3://{S3_BUCKET}/{full_key}...")
+    try:
+        client.download_file(S3_BUCKET, full_key, str(local_path))
+    except ClientError as e:
+        if e.response.get("Error", {}).get("Code") in ("404", "NoSuchKey"):
+            logger.info(f"Fichier absent sur S3 : s3://{S3_BUCKET}/{full_key}")
+            return None
+        raise
+
+    return pl.scan_parquet(local_path)
 
 
 def get_unite_legales(processed_parquet_path):
