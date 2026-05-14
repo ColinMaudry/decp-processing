@@ -1,4 +1,3 @@
-import concurrent.futures
 import tempfile
 from collections.abc import Iterator
 from functools import partial
@@ -9,8 +8,7 @@ import httpx
 import ijson
 import orjson
 import polars as pl
-from httpx import Client, get
-from lxml import etree, html
+from lxml import etree
 from prefect.transactions import transaction
 from tenacity import (
     retry,
@@ -26,6 +24,7 @@ from src.config import (
     HTTP_HEADERS,
     LOG_LEVEL,
     RESOURCE_CACHE_DIR,
+    SIRENE_ETABLISSEMENTS_URL,
     SIRENE_UNITES_LEGALES_URL,
     DecpFormat,
 )
@@ -374,62 +373,21 @@ def norm_titulaire(titulaire: dict):
 
 
 def get_etablissements() -> pl.LazyFrame:
-    logger = get_logger(level=LOG_LEVEL)
+    columns = [
+        "siret",
+        "codeCommuneEtablissement",
+        "activitePrincipaleEtablissement",
+        "nomenclatureActivitePrincipaleEtablissement",
+        "enseigne1Etablissement",
+        "denominationUsuelleEtablissement",
+        "libelleVoieEtablissement",
+        "typeVoieEtablissement",
+    ]
 
-    schema = {
-        "siret": pl.String,
-        "codeCommuneEtablissement": pl.String,
-        "latitude": pl.Float64,
-        "longitude": pl.Float64,
-        "activitePrincipaleEtablissement": pl.String,
-        "nomenclatureActivitePrincipaleEtablissement": pl.String,
-        "enseigne1Etablissement": pl.String,
-        "denominationUsuelleEtablissement": pl.String,
-    }
+    lf_etablissements = pl.scan_parquet(SIRENE_ETABLISSEMENTS_URL)
+    lf_etablissements = lf_etablissements.select(columns)
+    lf_etablissements = lf_etablissements.with_columns()
 
-    columns = list(schema.keys())
-
-    base_url = "https://files.data.gouv.fr/geo-sirene/last/dep/"
-    htmlpage: str = get(base_url).text
-    htmlpage: html.HtmlElement = html.fromstring(htmlpage)
-    http_client = Client()
-
-    # Préparation des hrefs
-    hrefs = []
-    for link in htmlpage.findall(".//a"):
-        href = link.get("href")
-        if href.startswith("geo_siret"):
-            hrefs.append(base_url + href)
-
-    # Fonction de traitement pour un fichier
-    @retry(
-        stop=stop_after_attempt(4), wait=wait_exponential(multiplier=1, min=1, max=20)
-    )
-    def get_process_file(_href: str):
-        response = http_client.get(
-            _href, headers=HTTP_HEADERS, timeout=30
-        ).raise_for_status()
-
-        content = response.content
-        lff = pl.scan_csv(content, schema_overrides=schema)
-        lff = lff.select(columns)
-        logger.info(_href.split("/")[-1] + " OK")
-
-        return lff
-
-    # Traitement en parrallèle avec 8 threads
-    lfs = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=15) as executor:
-        futures = [executor.submit(get_process_file, href) for href in hrefs]
-        for future in concurrent.futures.as_completed(futures):
-            try:
-                lf = future.result()
-                lfs.append(lf)
-            except Exception as e:
-                logger.info(f"Error processing file: {e}")
-
-    logger.info("Concaténation...")
-    lf_etablissements: pl.LazyFrame = pl.concat(lfs)
     return lf_etablissements
 
 

@@ -103,7 +103,7 @@ def make_sirene_data_dir(sirene_data_parent_dir) -> Path:
     # car les nouvelles données n'ont peut-être pas été encore générées
     if int(DATE_NOW[-2:]) <= 5:
         last_month = datetime.today() - timedelta(days=27)
-        last_month = f"{str(last_month.year)}-{str(last_month.month)}"
+        last_month = f"{str(last_month.year)}-{str(last_month.month).zfill(2)}"
         return sirene_data_parent_dir / f"sirene_{last_month}"
     return default_dir
 
@@ -117,6 +117,7 @@ ALL_CONFIG["SIRENE_DATA_DIR"] = SIRENE_DATA_DIR
 
 
 SIRENE_UNITES_LEGALES_URL = os.getenv("SIRENE_UNITES_LEGALES_URL", "")
+SIRENE_ETABLISSEMENTS_URL = os.getenv("SIRENE_ETABLISSEMENTS_URL", "")
 
 # Mode de scraping
 SCRAPING_MODE = os.getenv("SCRAPING_MODE", "month")
