@@ -1,9 +1,15 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
 
 import polars as pl
 import polars.selectors as cs
 
-from src.config import ACHETEURS_NON_SIRENE, LOG_LEVEL, SIRENE_DATA_DIR
+from src.config import (
+    ACHETEURS_NON_SIRENE,
+    GEOCODING_RETRY_DAYS,
+    LOG_LEVEL,
+    SIRENE_DATA_DIR,
+    SIRET_LATLONG_SCHEMA,
+)
 from src.tasks.transform import (
     extract_unique_acheteurs_siret,
     extract_unique_titulaires_siret,
@@ -314,6 +320,93 @@ def add_type_marche(lf: pl.LazyFrame) -> pl.LazyFrame:
         .alias("type")
     )
     return lf
+
+
+def select_sirets_to_geocode(
+    lf_decp: pl.LazyFrame,
+    lf_siret_latlong: pl.LazyFrame,
+    today: date,
+    retry_days: int,
+) -> pl.LazyFrame:
+    """Retourne les SIRETs DECP à géocoder, après exclusion des déjà traités."""
+    sirets_decp = (
+        pl.concat(
+            [
+                lf_decp.select(pl.col("acheteur_id").cast(pl.String).alias("siret")),
+                lf_decp.select(pl.col("titulaire_id").cast(pl.String).alias("siret")),
+            ]
+        )
+        .filter(pl.col("siret").is_not_null() & (pl.col("siret").str.len_chars() == 14))
+        .unique()
+    )
+
+    cutoff = today - timedelta(days=retry_days)
+    excluded = lf_siret_latlong.filter(
+        (pl.col("status") == "success")
+        | (pl.col("status") == "not_in_sirene")
+        | ((pl.col("status") == "failed") & (pl.col("geocoded_at") >= cutoff))
+    ).select("siret")
+
+    return sirets_decp.join(excluded, on="siret", how="anti")
+
+
+def geocode_missing_sirets(
+    lf_decp: pl.LazyFrame,
+    lf_siret_latlong: pl.LazyFrame,
+    lf_etablissements: pl.LazyFrame,
+) -> pl.LazyFrame:
+    """Géocode les SIRETs DECP manquants et retourne le siret_latlong mis à jour.
+
+    Tolère un échec de l'API : le flow continue sans ajouter de nouvelles entrées.
+    """
+    import httpx
+    from tenacity import RetryError
+
+    from src.tasks.geocode import geocode_csv
+
+    logger = get_logger(level=LOG_LEVEL)
+    today = date.today()
+
+    to_geocode = select_sirets_to_geocode(
+        lf_decp, lf_siret_latlong, today, GEOCODING_RETRY_DAYS
+    )
+
+    with_address = to_geocode.join(lf_etablissements, on="siret", how="inner")
+    not_in_sirene = to_geocode.join(
+        lf_etablissements.select("siret"), on="siret", how="anti"
+    )
+
+    not_in_sirene_entries = not_in_sirene.with_columns(
+        pl.lit(None, dtype=pl.Float64).alias("latitude"),
+        pl.lit(None, dtype=pl.Float64).alias("longitude"),
+        pl.lit("geoplateforme").alias("source"),
+        pl.lit(None, dtype=pl.Float64).alias("score"),
+        pl.lit(today).alias("geocoded_at"),
+        pl.lit("not_in_sirene").alias("status"),
+    ).select(list(SIRET_LATLONG_SCHEMA.keys()))
+
+    try:
+        df_addresses = with_address.collect()
+        if df_addresses.height > 0:
+            geocoded = geocode_csv(df_addresses)
+        else:
+            geocoded = pl.DataFrame(schema=SIRET_LATLONG_SCHEMA)
+    except (httpx.HTTPError, RetryError) as exc:
+        logger.warning(
+            f"⚠️  API Géoplateforme indisponible ({exc}) — skip géocodage du jour"
+        )
+        geocoded = pl.DataFrame(schema=SIRET_LATLONG_SCHEMA)
+
+    updated = pl.concat(
+        [
+            lf_siret_latlong.select(list(SIRET_LATLONG_SCHEMA.keys())),
+            not_in_sirene_entries,
+            geocoded.lazy(),
+        ],
+        how="vertical",
+    ).unique(subset=["siret"], keep="last")
+
+    return updated
 
 
 def add_duree_restante(lff: pl.LazyFrame):
