@@ -31,7 +31,6 @@ from src.tasks.enrich import (
     enrich_from_sirene,
     geocode_missing_sirets,
 )
-from src.tasks.geocode import pad_siret_latlong_schema
 from src.tasks.get import bootstrap_siret_latlong, get_clean, get_from_s3
 from src.tasks.output import generate_final_schema, sink_to_files
 from src.tasks.publish import publish_to_datagouv, publish_to_s3
@@ -123,8 +122,6 @@ def decp_processing(enable_cache_removal: bool = True):
     lf_siret_latlong = get_from_s3(key="siret_latlong.parquet", prefix="")
     if not isinstance(lf_siret_latlong, pl.LazyFrame):
         lf_siret_latlong = bootstrap_siret_latlong()
-    lf_siret_latlong = pad_siret_latlong_schema(lf_siret_latlong)
-
     lf_etab = pl.scan_parquet(SIRENE_DATA_DIR / "etablissements.parquet")
     lf_siret_latlong_updated = geocode_missing_sirets(lf, lf_siret_latlong, lf_etab)
 

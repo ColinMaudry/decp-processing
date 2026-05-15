@@ -12,23 +12,6 @@ from src.config import (
     SIRET_LATLONG_SCHEMA,
 )
 
-_DEFAULTS = {
-    "source": pl.lit("decp"),
-    "score": pl.lit(None, dtype=pl.Float64),
-    "geocoded_at": pl.lit(None, dtype=pl.Date),
-    "status": pl.lit("success"),
-}
-
-
-def pad_siret_latlong_schema(lf: pl.LazyFrame) -> pl.LazyFrame:
-    existing = set(lf.collect_schema().names())
-    to_add = [
-        expr.alias(name) for name, expr in _DEFAULTS.items() if name not in existing
-    ]
-    if to_add:
-        lf = lf.with_columns(to_add)
-    return lf.select(list(SIRET_LATLONG_SCHEMA.keys()))
-
 
 def build_geocoding_csv(addresses: pl.DataFrame) -> bytes:
     df = addresses.select(

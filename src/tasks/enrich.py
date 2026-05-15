@@ -367,6 +367,24 @@ def geocode_missing_sirets(
     logger = get_logger(level=LOG_LEVEL)
     today = date.today()
 
+    # Compatibilité avec les fichiers legacy (siret, latitude, longitude) sans les
+    # colonnes étendues du schéma cible.
+    existing = set(lf_siret_latlong.collect_schema().names())
+    _legacy_defaults = {
+        "source": pl.lit("decp"),
+        "score": pl.lit(None, dtype=pl.Float64),
+        "geocoded_at": pl.lit(None, dtype=pl.Date),
+        "status": pl.lit("success"),
+    }
+    to_add = [
+        expr.alias(name)
+        for name, expr in _legacy_defaults.items()
+        if name not in existing
+    ]
+    if to_add:
+        lf_siret_latlong = lf_siret_latlong.with_columns(to_add)
+    lf_siret_latlong = lf_siret_latlong.select(list(SIRET_LATLONG_SCHEMA.keys()))
+
     to_geocode = select_sirets_to_geocode(
         lf_decp, lf_siret_latlong, today, GEOCODING_RETRY_DAYS
     )
