@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import httpx
+import polars as pl
 from dotenv import find_dotenv, load_dotenv
 from ijson import sendable_list
 from prefect.logging import get_logger
@@ -122,6 +123,12 @@ ALL_CONFIG["SIRENE_DATA_DIR"] = SIRENE_DATA_DIR
 
 SIRENE_UNITES_LEGALES_URL = os.getenv("SIRENE_UNITES_LEGALES_URL", "")
 SIRENE_ETABLISSEMENTS_URL = os.getenv("SIRENE_ETABLISSEMENTS_URL", "")
+
+# API de géocodage Géoplateforme
+GEOCODING_API_URL = os.getenv("GEOCODING_API_URL", "https://data.geopf.fr/geocodage")
+GEOCODING_MIN_SCORE = float(os.getenv("GEOCODING_MIN_SCORE", "0.5"))
+GEOCODING_RETRY_DAYS = int(os.getenv("GEOCODING_RETRY_DAYS", "30"))
+GEOCODING_CHUNK_SIZE = int(os.getenv("GEOCODING_CHUNK_SIZE", "5000"))
 
 # Mode de scraping
 SCRAPING_MODE = os.getenv("SCRAPING_MODE", "month")
@@ -242,6 +249,17 @@ def check_s3_config() -> list:
         ]
         if not value
     ]
+
+
+SIRET_LATLONG_SCHEMA = {
+    "siret": pl.String,
+    "latitude": pl.Float64,
+    "longitude": pl.Float64,
+    "source": pl.String,
+    "score": pl.Float64,
+    "geocoded_at": pl.Date,
+    "status": pl.String,
+}
 
 
 @dataclass
