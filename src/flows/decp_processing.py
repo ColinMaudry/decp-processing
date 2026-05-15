@@ -11,6 +11,7 @@ from prefect_email import EmailServerCredentials, email_send_message
 
 from src.config import (
     BASE_DF_COLUMNS,
+    DATA_DIR,
     DATE_NOW,
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
@@ -24,8 +25,14 @@ from src.config import (
 )
 from src.flows.sirene_preprocess import sirene_preprocess
 from src.tasks.dataset_utils import list_resources
-from src.tasks.enrich import add_duree_restante, add_type_marche, enrich_from_sirene
-from src.tasks.get import get_clean
+from src.tasks.enrich import (
+    add_duree_restante,
+    add_type_marche,
+    enrich_from_sirene,
+    geocode_missing_sirets,
+)
+from src.tasks.geocode import pad_siret_latlong_schema
+from src.tasks.get import bootstrap_siret_latlong, get_clean, get_from_s3
 from src.tasks.output import generate_final_schema, sink_to_files
 from src.tasks.publish import publish_to_datagouv, publish_to_s3
 from src.tasks.transform import (
@@ -111,6 +118,20 @@ def decp_processing(enable_cache_removal: bool = True):
         sirene_preprocess()
 
     lf: pl.LazyFrame = enrich_from_sirene(lf)
+
+    logger.info("Géocodage des SIRETs manquants...")
+    lf_siret_latlong = get_from_s3(key="siret_latlong.parquet", prefix="")
+    if not isinstance(lf_siret_latlong, pl.LazyFrame):
+        lf_siret_latlong = bootstrap_siret_latlong()
+    lf_siret_latlong = pad_siret_latlong_schema(lf_siret_latlong)
+
+    lf_etab = pl.scan_parquet(SIRENE_DATA_DIR / "etablissements.parquet")
+    lf_siret_latlong_updated = geocode_missing_sirets(lf, lf_siret_latlong, lf_etab)
+
+    siret_latlong_path = DATA_DIR / "siret_latlong.parquet"
+    lf_siret_latlong_updated.sink_parquet(siret_latlong_path)
+    if decp_publish:
+        publish_to_s3(file=siret_latlong_path, prefix="")
 
     sink_to_files(lf, DIST_DIR / "decp", file_format="parquet")
     lf: pl.LazyFrame = pl.scan_parquet(DIST_DIR / "decp.parquet")
