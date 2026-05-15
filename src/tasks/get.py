@@ -392,6 +392,10 @@ def get_etablissements() -> pl.LazyFrame:
         "denominationUsuelleEtablissement",
         "libelleVoieEtablissement",
         "typeVoieEtablissement",
+        "numeroVoieEtablissement",
+        "indiceRepetitionEtablissement",
+        "codePostalEtablissement",
+        "libelleCommuneEtablissement",
     ]
 
     lf_etablissements = pl.scan_parquet(SIRENE_ETABLISSEMENTS_URL)
@@ -504,6 +508,7 @@ def get_from_s3(key: str, prefix: str = "") -> pl.LazyFrame | None:
         )
 
     full_key = f"{prefix.strip('/')}/{key}" if prefix else key
+    full_s3_path = f"s3://{S3_ENDPOINT_URL}/{S3_BUCKET}/{full_key}"
     local_path = DATA_DIR / "s3" / full_key
     local_path.parent.mkdir(exist_ok=True, parents=True)
 
@@ -519,12 +524,12 @@ def get_from_s3(key: str, prefix: str = "") -> pl.LazyFrame | None:
         ),
     )
 
-    logger.info(f"Téléchargement de s3://{S3_BUCKET}/{full_key}...")
+    logger.info(f"Téléchargement de {full_s3_path}...")
     try:
         client.download_file(S3_BUCKET, full_key, str(local_path))
     except ClientError as e:
         if e.response.get("Error", {}).get("Code") in ("404", "NoSuchKey"):
-            logger.info(f"Fichier absent sur S3 : s3://{S3_BUCKET}/{full_key}")
+            logger.info(f"Fichier absent sur S3 : {full_s3_path}")
             return None
 
     return pl.scan_parquet(local_path)
