@@ -3,55 +3,44 @@ name = "decp-processing"
 description = "Traitement des données des marchés publics français."
 version = "2.10.2"
 requires-python = ">= 3.10"
-authors = [
-    { name = "Colin Maudry", email = "colin@colmo.tech" }
-]
+authors = [{ name = "Colin Maudry", email = "colin@colmo.tech" }]
 dependencies = [
-    "python-dotenv",
-    "pandas", # nécessaire pour l'écriture en base de données
-    "polars==1.36.1",
-    "pyarrow",
-    "frictionless",
-    "ipykernel",
-    "prefect==3.6.6",
-    "prefect[email]==3.6.6",
-    "orjson",
-    "ijson==3.4.0",
-    "lxml",
-    "psycopg2",
-    "bs4",
-    "boto3",
-    "selenium",
-    "polars_ds",
-    "scikit-learn",
-    "tenacity",
-    "dume_api"
+  "python-dotenv",
+  "pandas",                # nécessaire pour l'écriture en base de données
+  "polars==1.36.1",
+  "pyarrow",
+  "frictionless",
+  "ipykernel",
+  "prefect==3.7.0",
+  "prefect[email]==3.7.0",
+  "orjson",
+  "ijson==3.4.0",
+  "lxml",
+  "psycopg2",
+  "bs4",
+  "boto3",
+  "selenium",
+  "polars_ds",
+  "scikit-learn",
+  "tenacity",
+  "dume_api",
 ]
 
 [project.optional-dependencies]
-dev = [
-    "pre-commit",
-    "pytest-env",
-    "pytest",
-    "pytest-cov",
-]
+dev = ["pre-commit", "pytest-env", "pytest", "pytest-cov"]
 
 [tool.pytest.ini_options]
-pythonpath = [
-  "src"
-]
-testpaths = [
-    "tests",
-]
+pythonpath = ["src"]
+testpaths = ["tests"]
 env = [
-    "LOG_LEVEL=DEBUG",
-    "DATASETS_REFERENCE_FILEPATH=tests/data/source_datasets_test.json",
-    "PREFECT_API_URL=",
-    "DECP_PROCESSING_PUBLISH=",
-    "DECP_USE_CACHE=false",
-    "MAX_PREFECT_WORKERS=1",
-    "SOLO_DATASETS=",
-    "PREFECT_TASKS_DISABLE_CACHE=True"
+  "LOG_LEVEL=DEBUG",
+  "DATASETS_REFERENCE_FILEPATH=tests/data/source_datasets_test.json",
+  "PREFECT_API_URL=",
+  "DECP_PROCESSING_PUBLISH=",
+  "DECP_USE_CACHE=false",
+  "MAX_PREFECT_WORKERS=1",
+  "SOLO_DATASETS=",
+  "PREFECT_TASKS_DISABLE_CACHE=True",
 ]
 addopts = "-p no:warnings"
 

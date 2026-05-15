@@ -5,11 +5,13 @@ import polars.selectors as cs
 
 from src.config import (
     ACHETEURS_NON_SIRENE,
+    DATA_DIR,
     GEOCODING_RETRY_DAYS,
     LOG_LEVEL,
     SIRENE_DATA_DIR,
     SIRET_LATLONG_SCHEMA,
 )
+from src.tasks.get import bootstrap_siret_latlong, get_from_s3
 from src.tasks.transform import (
     extract_unique_acheteurs_siret,
     extract_unique_titulaires_siret,
@@ -350,6 +352,18 @@ def select_sirets_to_geocode(
     return sirets_decp.join(excluded, on="siret", how="anti")
 
 
+def geocode_sirene(lf: pl.LazyFrame):
+    lf_siret_latlong = get_from_s3(key="siret_latlong.parquet", prefix="")
+    if not isinstance(lf_siret_latlong, pl.LazyFrame):
+        lf_siret_latlong = bootstrap_siret_latlong()
+    lf_etab = pl.scan_parquet(SIRENE_DATA_DIR / "etablissements.parquet")
+    lf_siret_latlong_updated = geocode_missing_sirets(lf, lf_siret_latlong, lf_etab)
+
+    siret_latlong_path = DATA_DIR / "siret_latlong.parquet"
+    lf_siret_latlong_updated.sink_parquet(siret_latlong_path)
+    return lf, siret_latlong_path
+
+
 def geocode_missing_sirets(
     lf_decp: pl.LazyFrame,
     lf_siret_latlong: pl.LazyFrame,
@@ -366,24 +380,6 @@ def geocode_missing_sirets(
 
     logger = get_logger(level=LOG_LEVEL)
     today = date.today()
-
-    # Compatibilité avec les fichiers legacy (siret, latitude, longitude) sans les
-    # colonnes étendues du schéma cible.
-    existing = set(lf_siret_latlong.collect_schema().names())
-    _legacy_defaults = {
-        "source": pl.lit("decp"),
-        "score": pl.lit(None, dtype=pl.Float64),
-        "geocoded_at": pl.lit(None, dtype=pl.Date),
-        "status": pl.lit("success"),
-    }
-    to_add = [
-        expr.alias(name)
-        for name, expr in _legacy_defaults.items()
-        if name not in existing
-    ]
-    if to_add:
-        lf_siret_latlong = lf_siret_latlong.with_columns(to_add)
-    lf_siret_latlong = lf_siret_latlong.select(list(SIRET_LATLONG_SCHEMA.keys()))
 
     to_geocode = select_sirets_to_geocode(
         lf_decp, lf_siret_latlong, today, GEOCODING_RETRY_DAYS
