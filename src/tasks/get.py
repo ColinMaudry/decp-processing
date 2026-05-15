@@ -489,6 +489,12 @@ def bootstrap_siret_latlong() -> pl.LazyFrame:
             & pl.col("longitude").is_not_null()
         )
         .unique(subset=["siret"], keep="first")
+        .with_columns(
+            pl.lit("decp").alias("source"),
+            pl.lit(None, dtype=pl.Float64).alias("score"),
+            pl.lit(None, dtype=pl.Date).alias("geocoded_at"),
+            pl.lit("success").alias("status"),
+        )
         .sink_parquet(output_path)
     )
 
