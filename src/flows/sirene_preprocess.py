@@ -4,6 +4,7 @@ from prefect.transactions import transaction
 
 from src.config import LOG_LEVEL, SIRENE_DATA_DIR
 from src.flows.get_cog import get_cog
+from src.tasks.geocode import pad_siret_latlong_schema
 from src.tasks.get import (
     bootstrap_siret_latlong,
     get_etablissements,
@@ -36,6 +37,8 @@ def sirene_preprocess():
         if not isinstance(lf_siret_latlong, pl.LazyFrame):
             lf_siret_latlong = bootstrap_siret_latlong()
 
+        lf_siret_latlong = pad_siret_latlong_schema(lf_siret_latlong)
+
         # préparer les données unités légales
         processed_ul_parquet_path = SIRENE_DATA_DIR / "unites_legales.parquet"
         if not processed_ul_parquet_path.exists():
@@ -48,8 +51,10 @@ def sirene_preprocess():
         processed_etab_parquet_path = SIRENE_DATA_DIR / "etablissements.parquet"
         if not processed_etab_parquet_path.exists():
             logger.info("Téléchargement et préparation des établissements...")
-            lf = get_etablissements()
-            prepare_etablissements(lf).sink_parquet(processed_etab_parquet_path)
+            lf: pl.LazyFrame = get_etablissements()
+            lf = prepare_etablissements(lf)
+            lf = lf.join(lf_siret_latlong, on="siret", how="left")
+            lf.sink_parquet(processed_etab_parquet_path)
         else:
             logger.info(str(processed_etab_parquet_path) + " existe, skipping.")
 
