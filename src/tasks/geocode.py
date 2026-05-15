@@ -45,8 +45,8 @@ def build_geocoding_csv(addresses: pl.DataFrame) -> bytes:
         .str.replace_all(r"\s+", " ")
         .str.strip_chars()
         .alias("q"),
-        pl.col("codePostalEtablissement").alias("postcode"),
-        pl.col("codeCommuneEtablissement").alias("citycode"),
+        pl.col("codePostalEtablissement").cast(pl.String).alias("postcode"),
+        pl.col("codeCommuneEtablissement").cast(pl.String).alias("citycode"),
     )
     buf = io.BytesIO()
     df.write_csv(buf)
