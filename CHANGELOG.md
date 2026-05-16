@@ -1,3 +1,7 @@
+### 2.11.0 2026-05
+
+- Utilisation du géocodage de Géoplateforme (IGN) au lieu des données SIRENE géocodées d'Etalab, qui ne sont plus publiées
+
 #### 2.10.2 2026-03-19
 
 - Ajout des valeurs valides (`enum`) dans le schéma pour chaque champ (si applicable)
@@ -123,7 +127,7 @@
 
 - scraping des données DECP de marches-oublics.infos (AWS) ([#118](https://github.com/ColinMaudry/decp-processing/issues/118))
 - ajout des [données AWS scrapées](<(https://www.data.gouv.fr/datasets/68caf6b135f19236a4f37a32/)>) à la consolidation
-- ajout des[ données officielles AWS](https://www.data.gouv.fr/datasets/declaration-des-donnees-essentielles-avenue-web-systemes/) (a priori incomplètes) à la consolidation
+- ajout des[données officielles AWS](https://www.data.gouv.fr/datasets/declaration-des-donnees-essentielles-avenue-web-systemes/) (a priori incomplètes) à la consolidation
 - scripts de scrap plus flexibles
 
 #### 2.2.1 2025-10-18
