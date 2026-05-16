@@ -327,7 +327,7 @@ def write_marche_rows(marche: dict, file, decp_format: DecpFormat) -> set[str]:
     return fields
 
 
-def yield_modifications(row: dict, separator="_") -> Iterator[dict] or None:
+def yield_modifications(row: dict, separator="_") -> Iterator[dict] | None:
     """Pour chaque modification, génère un objet/dict marché aplati."""
     raw_mods = row.pop("modifications", [])
     # Couvre le format 2022:

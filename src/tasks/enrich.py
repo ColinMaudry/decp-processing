@@ -411,6 +411,19 @@ def geocode_missing_sirets(
         )
         geocoded = pl.DataFrame(schema=SIRET_LATLONG_SCHEMA)
 
+    total = geocoded.height
+    if total > 0:
+        stats = (
+            geocoded.group_by("status")
+            .agg(pl.len().alias("n"))
+            .with_columns((pl.col("n") / total * 100).round(1).alias("pct"))
+            .sort("n", descending=True)
+        )
+        for row in stats.iter_rows(named=True):
+            logger.info(f"  {row['status']}: {row['n']} ({row['pct']}%)")
+    else:
+        logger.info("Aucun SIRET géocodé.")
+
     updated = pl.concat(
         [
             lf_siret_latlong.select(list(SIRET_LATLONG_SCHEMA.keys())),

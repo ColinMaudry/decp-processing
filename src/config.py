@@ -150,7 +150,7 @@ ALL_CONFIG["SCRAPING_MONTH"] = SCRAPING_MONTH
 DECP_USE_CACHE = os.getenv("DECP_USE_CACHE", "false").lower() == "true"
 
 # POSTGRESQL
-POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI")
+POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI", "")
 
 # Données de référence
 REFERENCE_DIR = BASE_DIR / "reference"
