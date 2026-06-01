@@ -10,7 +10,6 @@ import ijson
 import orjson
 import polars as pl
 from botocore.config import Config
-from botocore.exceptions import ClientError
 from lxml import etree
 from prefect.transactions import transaction
 from tenacity import (
@@ -533,10 +532,17 @@ def get_from_s3(key: str, prefix: str = "") -> pl.LazyFrame | None:
     logger.info(f"Téléchargement de {full_s3_path}...")
     try:
         client.download_file(S3_BUCKET, full_key, str(local_path))
-    except ClientError as e:
-        if e.response.get("Error", {}).get("Code") in ("404", "NoSuchKey"):
-            logger.info(f"Fichier absent sur S3 : {full_s3_path}")
-            return None
+    except Exception as e:
+        print(type(e).__name__, ":", e)
+        if hasattr(e, "response"):
+            print("Error code:", e.response.get("Error", {}).get("Code"))
+            print("Error message:", e.response.get("Error", {}).get("Message"))
+        return None
+
+    # except ClientError as e:
+    # if e.response.get("Error", {}).get("Code") in ("404", "NoSuchKey"):
+    #    logger.info(f"Fichier absent sur S3 : {full_s3_path}")
+    #    return None
 
     assert local_path.exists()
 
