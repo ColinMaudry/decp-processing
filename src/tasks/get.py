@@ -538,6 +538,8 @@ def get_from_s3(key: str, prefix: str = "") -> pl.LazyFrame | None:
             logger.info(f"Fichier absent sur S3 : {full_s3_path}")
             return None
 
+    assert local_path.exists()
+
     return pl.scan_parquet(local_path)
 
 
