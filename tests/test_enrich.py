@@ -175,7 +175,7 @@ class TestEnrich:
                 "typeVoieEtablissement": ["RUE", "AVENUE"],
                 "libelleVoieEtablissement": ["DE LA PAIX", "DE LYON"],
                 "codePostalEtablissement": ["75001", "69001"],
-                "codeCommuneEtablissement": ["75101", "69381"],
+                "commune_code": ["75101", "69381"],
             }
         )
 
@@ -248,7 +248,7 @@ class TestEnrich:
                 "typeVoieEtablissement": ["RUE"],
                 "libelleVoieEtablissement": ["FOO"],
                 "codePostalEtablissement": ["75001"],
-                "codeCommuneEtablissement": ["75101"],
+                "commune_code": ["75101"],
             }
         )
 

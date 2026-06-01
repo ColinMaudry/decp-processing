@@ -20,7 +20,7 @@ def test_build_geocoding_csv_concatenates_address():
             "typeVoieEtablissement": ["RUE"],
             "libelleVoieEtablissement": ["DE LA PAIX"],
             "codePostalEtablissement": ["75001"],
-            "codeCommuneEtablissement": ["75101"],
+            "commune_code": ["75101"],
         }
     )
     csv_bytes = build_geocoding_csv(addresses)
@@ -47,7 +47,7 @@ def test_build_geocoding_csv_handles_null_address_fields():
             "typeVoieEtablissement": ["AVENUE"],
             "libelleVoieEtablissement": ["DES CHAMPS"],
             "codePostalEtablissement": ["75008"],
-            "codeCommuneEtablissement": ["75108"],
+            "commune_code": ["75108"],
         }
     )
     df = pl.read_csv(
@@ -127,7 +127,7 @@ def test_geocode_csv_calls_api_and_returns_dataframe(monkeypatch):
             "typeVoieEtablissement": ["RUE"],
             "libelleVoieEtablissement": ["DE LA PAIX"],
             "codePostalEtablissement": ["75001"],
-            "codeCommuneEtablissement": ["75101"],
+            "commune_code": ["75101"],
         }
     )
 
@@ -167,7 +167,7 @@ def test_geocode_csv_chunks_large_input(monkeypatch):
             "typeVoieEtablissement": ["RUE"] * n,
             "libelleVoieEtablissement": ["FOO"] * n,
             "codePostalEtablissement": ["75001"] * n,
-            "codeCommuneEtablissement": ["75101"] * n,
+            "commune_code": ["75101"] * n,
         }
     )
     call_count = {"n": 0}

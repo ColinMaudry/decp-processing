@@ -3,6 +3,7 @@ from polars.testing import assert_frame_equal
 
 from src.tasks.transform import (
     apply_modifications,
+    calculate_naf_cpv_matching,
     prepare_etablissements,
     prepare_unites_legales,
     sort_modifications,
@@ -344,3 +345,65 @@ class TestHandleModificationsMarche:
             check_column_order=False,
             check_row_order=True,
         )
+
+
+class TestCalculateNafCpvMatching:
+    @staticmethod
+    def _capture_output(monkeypatch):
+        """Capture le DataFrame de résultats au lieu de l'écrire sur disque."""
+        captured = {}
+
+        def fake_save(df, path, file_format=None):
+            captured["df"] = df
+
+        monkeypatch.setattr("src.tasks.transform.save_to_files", fake_save)
+        return captured
+
+    def test_handles_no_naf_cpv_pairs_without_crashing(self, monkeypatch):
+        captured = self._capture_output(monkeypatch)
+        # Aucune ligne n'a à la fois un NAF et un CPV exploitables :
+        # le pivot ne produit aucune colonne CPV.
+        lf = pl.LazyFrame(
+            {
+                "uid": ["M1", "M2"],
+                "codeCPV": ["45000000", "45000000"],
+                "activite_code": [None, None],
+                "activite_nomenclature": [None, None],
+                "donneesActuelles": [True, True],
+            },
+            schema_overrides={
+                "activite_code": pl.String,
+                "activite_nomenclature": pl.String,
+            },
+        )
+
+        calculate_naf_cpv_matching(lf)  # ne doit pas lever
+
+        assert captured["df"].is_empty()
+
+    def test_keeps_marche_naf_even_when_a_titulaire_has_no_naf(self, monkeypatch):
+        captured = self._capture_output(monkeypatch)
+        n = 30
+        # Chaque marché a 2 titulaires (tous donneesActuelles) : un sans NAF, un avec.
+        # La ligne SANS NAF est placée en premier : .unique("uid") sans tri la
+        # garderait, écartant arbitrairement la ligne porteuse du NAF.
+        # Tous les marchés doivent malgré tout être comptés pour la paire
+        # (43.21B, 45000000).
+        lf = pl.LazyFrame(
+            {
+                "uid": [f"M{i}" for i in range(n)] * 2,
+                "codeCPV": ["45000000"] * (2 * n),
+                "activite_code": [None] * n + ["43.21B"] * n,
+                "activite_nomenclature": [None] * n + ["NAFREV2"] * n,
+                "donneesActuelles": [True] * (2 * n),
+            }
+        )
+
+        calculate_naf_cpv_matching(lf)
+        df = captured["df"]
+
+        pair = df.filter(
+            (pl.col("activite_code") == "43.21B") & (pl.col("cpv") == "45000000")
+        )
+        assert pair.height == 1
+        assert pair["nb_marches"].item() == n

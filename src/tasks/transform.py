@@ -284,6 +284,8 @@ def sort_columns(lf: pl.LazyFrame, config_columns):
 
 
 def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
+    logger = get_logger(level=LOG_LEVEL)
+
     # Unité de base pour le comptage : dernière version d'un marché attribué (donc pas forcément attributaire initial)
     lf_naf_cpv = (
         lf_naf_cpv.select(
@@ -294,7 +296,13 @@ def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
             "donneesActuelles",
         )
         .filter(pl.col("donneesActuelles"))
-        .unique("uid")
+        # On écarte d'abord les lignes inexploitables (NAF ou CPV absent) AVANT de
+        # dédupliquer par marché : sinon .unique("uid") peut conserver arbitrairement
+        # un titulaire sans NAF et faire perdre la paire NAF/CPV du marché.
+        .drop_nulls(["codeCPV", "activite_code", "activite_nomenclature"])
+        # Une seule ligne par marché, de façon déterministe (tri préalable).
+        .sort("uid", "activite_nomenclature", "activite_code", "codeCPV")
+        .unique("uid", keep="first", maintain_order=True)
     )
 
     # Nettoyage et normalisation
@@ -310,7 +318,7 @@ def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
             .alias("activite_nomenclature"),
             pl.col("codeCPV").str.strip_chars().alias("cpv_code"),
         ]
-    ).drop_nulls()
+    )
 
     cpv_naf_counts = lf_naf_cpv.group_by(
         "cpv_code", "activite_code", "activite_nomenclature"
@@ -330,6 +338,29 @@ def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
 
     # Pas de pivot en Lazy, donc on repasse en DataFrame
     df_occurences_cpv = lf_naf_cpv.collect(engine="streaming")
+
+    # Aucune paire NAF/CPV exploitable : on évite le pivot vide (to_numpy planterait)
+    # et on écrit une table de probabilités vide.
+    if df_occurences_cpv.is_empty():
+        logger.warning(
+            "Aucune paire NAF/CPV exploitable : table de probabilités NAF/CPV vide."
+        )
+        save_to_files(
+            pl.DataFrame(
+                schema={
+                    "activite_nomenclature": pl.String,
+                    "activite_code": pl.String,
+                    "cpv": pl.String,
+                    "score": pl.Float64,
+                    "rank": pl.UInt32,
+                    "nb_marches": pl.UInt32,
+                }
+            ),
+            DIST_DIR / "probabilites_naf_cpv",
+            "csv",
+        )
+        return
+
     df_occurences_cpv = df_occurences_cpv.pivot(
         index="activite", on="cpv_code", values="compte", aggregate_function=None
     )
