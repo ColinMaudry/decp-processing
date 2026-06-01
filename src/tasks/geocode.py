@@ -10,6 +10,7 @@ from src.config import (
     GEOCODING_CHUNK_SIZE,
     GEOCODING_MIN_SCORE,
     SIRET_LATLONG_SCHEMA,
+    logger,
 )
 
 
@@ -93,6 +94,7 @@ def geocode_csv(
     chunk_size: int = GEOCODING_CHUNK_SIZE,
     min_score: float = GEOCODING_MIN_SCORE,
 ) -> pl.DataFrame:
+    logger.info("Géocodage via Géoplateforme...")
     today = date.today()
     results = []
     for i in range(0, addresses.height, chunk_size):
