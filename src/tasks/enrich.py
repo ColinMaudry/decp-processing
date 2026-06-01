@@ -66,6 +66,19 @@ def add_etablissement_data(
             "region_nom": f"{type_siret}_region_nom",
         }
     )
+    lf_sirets = lf_sirets.drop(
+        cs.by_name(
+            [
+                "libelleVoieEtablissement",
+                "typeVoieEtablissement",
+                "numeroVoieEtablissement",
+                "indiceRepetitionEtablissement",
+                "codePostalEtablissement",
+                "libelleCommuneEtablissement",
+            ],
+            require_all=False,
+        )
+    )
     return lf_sirets
 
 
