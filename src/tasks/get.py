@@ -132,6 +132,18 @@ def get_resource(
     return lf, decp_format
 
 
+def _close_ijson_coro(coro) -> None:
+    """Ferme un coroutine ijson en ignorant l'erreur de flux incomplet.
+
+    Les formats DECP non-retenus ne reçoivent qu'un fragment du flux ; les fermer
+    (ou les laisser au GC) lève IncompleteJSONError. On la neutralise pour éviter
+    le bruit « Exception ignored while closing generator »."""
+    try:
+        coro.close()
+    except ijson.common.IncompleteJSONError:
+        pass
+
+
 def find_json_decp_format(chunk, decp_formats, resource: dict):
     logger = get_logger(level=LOG_LEVEL)
 
@@ -194,7 +206,17 @@ def json_stream_to_parquet(
 
     decp_format = find_json_decp_format(chunk, decp_formats, resource)
     if decp_format is None:
+        # Aucun format détecté : on ferme tous les coroutines pour éviter le bruit
+        # « Exception ignored while closing generator » au moment du GC.
+        for fmt in decp_formats:
+            _close_ijson_coro(fmt.coroutine_ijson)
         return set(), None
+
+    # Les formats non-retenus ne seront plus alimentés : on les ferme proprement
+    # (flux incomplet → IncompleteJSONError neutralisée).
+    for fmt in decp_formats:
+        if fmt is not decp_format:
+            _close_ijson_coro(fmt.coroutine_ijson)
 
     for marche in decp_format.liste_marches_ijson:
         new_fields = write_marche_rows(marche, tmp_file, decp_format)
@@ -399,7 +421,6 @@ def get_etablissements() -> pl.LazyFrame:
 
     lf_etablissements = pl.scan_parquet(SIRENE_ETABLISSEMENTS_URL)
     lf_etablissements = lf_etablissements.select(columns)
-    lf_etablissements = lf_etablissements.with_columns()
 
     return lf_etablissements
 
@@ -550,9 +571,6 @@ def get_from_s3(key: str, prefix: str = "") -> pl.LazyFrame | None:
 
 
 def get_unite_legales(processed_parquet_path):
-    logger = get_logger(level=LOG_LEVEL)
-
-    logger.info("Téléchargement des données unité légales et sélection des colonnes...")
     (
         pl.scan_parquet(SIRENE_UNITES_LEGALES_URL)
         .pipe(prepare_unites_legales)
