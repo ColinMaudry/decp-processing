@@ -29,7 +29,7 @@ def build_geocoding_csv(addresses: pl.DataFrame) -> bytes:
         .str.strip_chars()
         .alias("q"),
         pl.col("codePostalEtablissement").cast(pl.String).alias("postcode"),
-        pl.col("codeCommuneEtablissement").cast(pl.String).alias("citycode"),
+        pl.col("commune_code").cast(pl.String).alias("citycode"),
     )
     buf = io.BytesIO()
     df.write_csv(buf)
@@ -43,12 +43,14 @@ def parse_geocoding_results(
 ) -> pl.DataFrame:
     df = pl.read_csv(
         io.BytesIO(csv_bytes),
+        null_values=["[ND]"],
         schema_overrides={
             "siret": pl.String,
             "result_score": pl.Float64,
             "latitude": pl.Float64,
             "longitude": pl.Float64,
         },
+        columns=["siret", "result_score", "latitude", "longitude"],
     )
     is_success = pl.col("result_score").is_not_null() & (
         pl.col("result_score") >= min_score
