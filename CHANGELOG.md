@@ -1,6 +1,7 @@
-### 2.11.0 2026-05
+### 2.11.0 2026-06-02
 
-- Utilisation du géocodage de Géoplateforme (IGN) au lieu des données SIRENE géocodées d'Etalab, qui ne sont plus publiées
+- Utilisation du [géocodage de Géoplateforme (IGN)](https://cartes.gouv.fr/aide/fr/guides-utilisateur/utiliser-les-services-de-la-geoplateforme/geocodage/) au lieu des données SIRENE géocodées d'Etalab, qui ne sont plus publiées
+- Fiabilisation du scrap de marchés-sécurisés
 
 #### 2.10.2 2026-03-19
 
