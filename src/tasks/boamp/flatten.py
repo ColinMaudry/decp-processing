@@ -3,6 +3,11 @@
 Aucune I/O : fonctions pures sur des éléments lxml.
 """
 
+from src.config import (
+    BOAMP_INCLUDED_NATURES,
+    BOAMP_MISE_EN_CONCURRENCE_NATURES,
+)
+
 
 def localname(tag) -> str:
     """Nom local d'une balise lxml (sans préfixe de namespace)."""
@@ -46,3 +51,61 @@ def flatten(
 
     walk(elem, start_path)
     return acc
+
+
+def _find(elem, name: str):
+    """Premier descendant (ou self) dont le nom local == name, sinon None."""
+    if localname(elem.tag) == name:
+        return elem
+    for e in elem.iter():
+        if localname(e.tag) == name:
+            return e
+    return None
+
+
+def _first_child_localname(elem) -> str | None:
+    """Nom local du premier enfant élément, sinon None."""
+    for c in elem:
+        if isinstance(c.tag, str):
+            return localname(c.tag)
+    return None
+
+
+def detect_format(root) -> str:
+    """'eforms' si un élément EFORMS est présent, sinon 'boamp' (legacy v240)."""
+    return "eforms" if _find(root, "EFORMS") is not None else "boamp"
+
+
+def parse_type_avis(root):
+    """(nature, sous_nature, statut, famille) depuis GESTION/REFERENCE/TYPE_AVIS.
+
+    Chaque valeur est le nom local de l'enfant (ex. NATURE -> 'APPEL_OFFRE',
+    sous-nature = enfant de cet enfant -> 'MISE_EN_CONCURRENCE'), ou None.
+    """
+    type_avis = _find(root, "TYPE_AVIS")
+    if type_avis is None:
+        return None, None, None, None
+    nature_el = _find(type_avis, "NATURE")
+    nature = _first_child_localname(nature_el) if nature_el is not None else None
+    sub = None
+    if nature_el is not None:
+        nature_child = next((c for c in nature_el if isinstance(c.tag, str)), None)
+        if nature_child is not None:
+            sub = _first_child_localname(nature_child)
+    famille_el = _find(type_avis, "FAMILLE")
+    famille = _first_child_localname(famille_el) if famille_el is not None else None
+    statut_el = _find(type_avis, "STATUT")
+    statut = _first_child_localname(statut_el) if statut_el is not None else None
+    return nature, sub, statut, famille
+
+
+def is_included(nature: str | None, sous_nature: str | None) -> bool:
+    """Décide si l'avis entre dans le périmètre (liste blanche NATURE)."""
+    if nature in BOAMP_INCLUDED_NATURES:
+        return True
+    if (
+        nature in BOAMP_MISE_EN_CONCURRENCE_NATURES
+        and sous_nature == "MISE_EN_CONCURRENCE"
+    ):
+        return True
+    return False
