@@ -113,6 +113,28 @@ flow Prefect dédié** (`boamp_processing`), indépendant du flow `decp_processi
   négligeable ; les rares vraies collisions seront suffixées.
 - **Exclusions** : `HTML` et `HTMLSYNTHESE` du legacy (gros blobs lisibles).
 
+### Extraction du grain (lot) par format
+
+Algorithme commun, paramétré par le **conteneur de lot** propre à chaque format :
+
+- **eForms** (réf. `UBL-ContractNotice-2.3.xsd`, SDK eForms 1.10) : conteneur de
+  lot = `cac:ProcurementProjectLot` (`0..unbounded`). Niveau-annonce = tout le
+  reste du `ContractNotice` (`ext:UBLExtensions` → `efac:Organizations` +
+  `NoticeSubType`, en-têtes `cbc:*`, `cac:ContractingParty` (`1..unbounded`),
+  `cac:TenderingTerms`, `cac:TenderingProcess`, `cac:ProcurementProject`).
+- **legacy v240** : conteneur de lot = `…/lots/lot` sous la famille `DONNEES`.
+  Niveau-annonce = `GESTION` + le reste de la famille hors `lots`.
+
+Pour chaque fichier : `lignes = [ aplatir(annonce \ conteneurs_de_lot) ⊕ aplatir(lot) pour chaque lot ]` ; si aucun lot, une seule ligne avec les colonnes lot à `null`.
+Les éléments répétés **au niveau annonce** (ex. plusieurs `ContractingParty`,
+plusieurs `Note`) deviennent des colonnes liste répétées sur chaque ligne de lot ;
+pour le **cœur** mono-valué (`acheteur_nom`…), on prend le premier et on conserve
+l'ensemble dans les colonnes brutes.
+
+> Le détail des champs eForms vit dans les composants `cac`/`cbc`
+> (CommonAggregate/BasicComponents) ; l'aplatisseur générique les traverse sans
+> énumération préalable.
+
 ### Cœur harmonisé
 
 En **plus** des colonnes brutes ci-dessus, un cœur de colonnes typées propres,
