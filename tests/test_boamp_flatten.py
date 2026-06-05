@@ -1,12 +1,17 @@
+from pathlib import Path
+
 from lxml import etree
 
 from src.tasks.boamp.flatten import (
+    annonce_to_rows,
     detect_format,
     flatten,
     is_included,
     localname,
     parse_type_avis,
 )
+
+FIXTURES = Path(__file__).parent / "data" / "boamp"
 
 
 def _el(xml: str):
@@ -253,3 +258,49 @@ def test_extract_core_eforms_id_prefix_and_subtype():
     assert core["type_document"] == "ContractNotice"
     assert core["sous_type_eforms"] == "16"
     assert core["objet"] == "Objet global"
+
+
+def _parse_fixture(name):
+    return etree.parse(str(FIXTURES / name)).getroot()
+
+
+def test_annonce_to_rows_excludes_attribution():
+    root = _parse_fixture("eforms_award_notice.xml")
+    assert annonce_to_rows(root, "eforms_award_notice.xml") == []
+
+
+def test_annonce_to_rows_eforms_one_row_per_lot():
+    root = _parse_fixture("eforms_contract_notice.xml")
+    rows = annonce_to_rows(root, "eforms_contract_notice.xml")
+    assert len(rows) >= 1
+    r = rows[0]
+    assert r["source_format"] == "eforms"
+    assert r["id_annonce"].startswith("ef_")
+    assert r["nature_avis"] == "APPEL_OFFRE"
+    assert r["acheteur_siret"] is not None  # SIRET déréférencé
+    assert r["lot_id"] is not None
+    # colonnes génériques = listes
+    list_cols = [k for k, v in r.items() if isinstance(v, list)]
+    assert list_cols, "au moins une colonne générique de type liste"
+
+
+def test_annonce_to_rows_legacy_lot_grain():
+    root = _parse_fixture("legacy_mapa.xml")
+    rows = annonce_to_rows(root, "legacy_mapa.xml")
+    assert len(rows) >= 1
+    assert rows[0]["source_format"] == "boamp"
+    assert rows[0]["id_annonce"] == "bo_26-10979"
+    # le lot legacy 26-10979 a numLot=4
+    assert any(r["lot_id"] == "4" for r in rows)
+
+
+def test_annonce_to_rows_no_lot_single_row():
+    xml = """
+    <ann><DONNEES><MAPA><initial><description><objet>X</objet></description></initial></MAPA></DONNEES>
+    <GESTION><REFERENCE><IDWEB>26-9</IDWEB><TYPE_AVIS><FAMILLE><MAPA/></FAMILLE>
+      <NATURE><APPEL_OFFRE/></NATURE><STATUT><INITIAL/></STATUT></TYPE_AVIS></REFERENCE>
+      <INDEXATION><DATE_PUBLICATION>2026-01-01</DATE_PUBLICATION></INDEXATION></GESTION></ann>
+    """
+    rows = annonce_to_rows(_el(xml), "x.xml")
+    assert len(rows) == 1
+    assert rows[0]["lot_id"] is None

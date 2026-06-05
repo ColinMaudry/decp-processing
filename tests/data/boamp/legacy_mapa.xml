@@ -1,0 +1,630 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jo:ann xmlns:jo="http://boamp.journal-officiel.gouv.fr/XML/3.2.5">
+   <DONNEES>
+      <MAPA>
+         <organisme>
+            <correspondantPRM>
+               <civilite>M</civilite>
+               <nom>RSMA Guyane</nom>
+               <pren>DAF</pren>
+               <fonc>Acheteur</fonc>
+            </correspondantPRM>
+            <acheteurPublic>Régiment du service militaire adapté de la Guyane</acheteurPublic>
+            <adr>
+               <voie>
+                  <num>Camp</num>
+                  <typevoie>route de saint-jean</typevoie>
+                  <nomvoie>Camp de Saint-Jean</nomvoie>
+               </voie>
+               <cp>97320</cp>
+               <ville>Saint-Laurent du Maroni</ville>
+            </adr>
+            <coord>
+               <tel>0594344638</tel>
+               <mel>daf-guyane@guyane-sma.fr</mel>
+            </coord>
+            <urlProfilAcheteur>https://www.marches-publics.gouv.fr/entreprise</urlProfilAcheteur>
+            <classificationOrganisme>1</classificationOrganisme>
+         </organisme>
+         <initial>
+            <natureMarche>
+               <travaux/>
+            </natureMarche>
+            <description>
+               <objet>Marché de travaux pour la construction de 33 logements au RSMA de St Jean</objet>
+               <lieuExecution>
+                  <voie>
+                     <num>Régiment du Service Militaire Adapté de la Guyane</num>
+                     <typevoie>ROUTE DE ST-JEAN</typevoie>
+                     <nomvoie>Camp de Saint Jean</nomvoie>
+                  </voie>
+                  <cp>97320</cp>
+                  <ville>Saint-Jean du Maroni</ville>
+               </lieuExecution>
+               <lieuLivraison>
+                  <voie>
+                     <num>Régiment du Service Militaire Adapté de la Guyane</num>
+                     <typevoie>ROUTE DE ST-JEAN</typevoie>
+                     <nomvoie>Camp de Saint Jean</nomvoie>
+                  </voie>
+                  <cp>97320</cp>
+                  <ville>Saint-Jean du Maroni</ville>
+               </lieuLivraison>
+            </description>
+            <caracteristiques>
+               <variantes>
+                  <oui xmlns:ns2="http://www.w3.org/2001/XMLSchema-instance"
+                       xmlns:ns4="http://www.w3.org/2001/XMLSchema"
+                       ns2:type="ns4:boolean">true</oui>
+               </variantes>
+            </caracteristiques>
+            <duree/>
+            <conditions>
+               <euro/>
+               <langueFR/>
+            </conditions>
+            <justifications>
+               <redressementJudiciaire/>
+               <articlesL5212/>
+               <articlesL1221-L3243/>
+               <articleL3243/>
+               <chiffresAffaires/>
+               <risquesProfessionels/>
+               <bilans/>
+               <effectifs/>
+               <listeFournituresServices/>
+               <listeTravaux/>
+               <indicationTitresOperateur/>
+               <indicationTitresCadres/>
+               <equipementTechnique/>
+               <equipementFournituresServices/>
+               <qualificationsProfessionnelles/>
+               <conformiteFournitures/>
+               <detailFournitures/>
+               <defenseNationaliteCandidat/>
+               <defenseHabilitationSecret/>
+               <autorisationSpecifique/>
+               <DC1/>
+               <DC2/>
+               <DC3/>
+               <DC4/>
+               <documentsAutreOperateur/>
+               <traductionFrancaiseCandidat/>
+               <articlesD8222/>
+               <attestationObligationsFiscales/>
+               <certificatPaysOrigine/>
+               <traductionFrancaiseAttributaire/>
+            </justifications>
+            <criteres>
+               <critereCDC/>
+            </criteres>
+            <procedure>
+               <procedureAdaptee/>
+            </procedure>
+            <delais>
+               <receptionOffres>2026-03-30T22:00:00</receptionOffres>
+               <validite>
+                  <nbJours>180</nbJours>
+               </validite>
+            </delais>
+            <renseignements/>
+            <adressesComplt>
+               <admEtTech>
+                  <PersonnePhysique>
+                     <civilite>M</civilite>
+                     <nom>MONCHAUSSÉ</nom>
+                     <pren>CHRISTIAN</pren>
+                     <fonc>Direction des travaux d’infrastructure du RSMA de la Guyane</fonc>
+                  </PersonnePhysique>
+                  <PersonneMorale>Régiment du service militaire adapté de la Guyane</PersonneMorale>
+                  <adr>
+                     <voie>
+                        <num>Camp de Saint-Jean</num>
+                        <typevoie>route de Saint-Jean</typevoie>
+                        <nomvoie>Camp de Saint-Jean</nomvoie>
+                     </voie>
+                     <cp>97320</cp>
+                     <ville>Saint-Jean du Maroni</ville>
+                  </adr>
+                  <coord>
+                     <tel>0594344508</tel>
+                     <mel>christian.monchausse@guyane-sma.fr</mel>
+                  </coord>
+               </admEtTech>
+            </adressesComplt>
+            <lots>
+               <lot>
+                  <numLot>4</numLot>
+                  <description>INSTALLATION DE STRUCTURES EN METAL</description>
+               </lot>
+               <lot>
+                  <numLot>6</numLot>
+                  <description>TRAVAUX DE PLOMBERIE</description>
+               </lot>
+               <lot>
+                  <numLot>7</numLot>
+                  <description>TRAVAUX DE CABLAGE ET D'INSTALLATIONS ELECTRIQUES</description>
+               </lot>
+               <lot>
+                  <numLot>8</numLot>
+                  <description>TRAVAUX D'INSTALLATION  DE MATERIEL DE VENTILATION ET DE CLIMATISATION</description>
+               </lot>
+               <lot>
+                  <numLot>9</numLot>
+                  <description>INSTALLATION DE CUISINE EQUIPEES</description>
+               </lot>
+               <lot>
+                  <numLot>13</numLot>
+                  <description>TRAVAUX D’AMÉNAGEMENT PAYSAGERS</description>
+               </lot>
+            </lots>
+            <infosSup/>
+         </initial>
+      </MAPA>
+   </DONNEES>
+   <GESTION>
+      <REFERENCE>
+         <IDWEB>26-10979</IDWEB>
+         <TYPE_AVIS>
+            <FAMILLE>
+               <MAPA/>
+            </FAMILLE>
+            <PERIMETRE>
+               <MAPA/>
+            </PERIMETRE>
+            <NATURE>
+               <APPEL_OFFRE/>
+            </NATURE>
+            <STATUT>
+               <INITIAL/>
+            </STATUT>
+         </TYPE_AVIS>
+      </REFERENCE>
+      <INDEXATION>
+         <SCHEMA>3.2.5</SCHEMA>
+         <NOMORGANISME>RSMA - GUYANE</NOMORGANISME>
+         <TYPE_PROCEDURE>
+            <PROCEDURE_ADAPTE/>
+         </TYPE_PROCEDURE>
+         <DATE_PUBLICATION>2026-01-31</DATE_PUBLICATION>
+         <DATE_LIMITE_REPONSE>2026-03-30T22:00:00</DATE_LIMITE_REPONSE>
+         <DATE_FIN_DIFFUSION>2026-03-30</DATE_FIN_DIFFUSION>
+         <DESCRIPTEURS>
+            <DESCRIPTEUR>
+               <CODE>33</CODE>
+               <LIBELLE>Bâtiment</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>253</CODE>
+               <LIBELLE>Ouvrage d'infrastructure</LIBELLE>
+            </DESCRIPTEUR>
+         </DESCRIPTEURS>
+         <NATURE_MARCHE>
+            <TRAVAUX/>
+         </NATURE_MARCHE>
+         <DEP_PUBLICATION>973</DEP_PUBLICATION>
+         <RESUME_OBJET>MAPA - MARCHÉ DE TRAVAUX POUR LA CONSTRUCTION DE 33 LOGEMENTS AU RSMA DE SAINT-JEAN</RESUME_OBJET>
+      </INDEXATION>
+   </GESTION>
+   <HTML><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="FR">
+   <head>
+      <title>Avis de marché - Avis n° 26-10979 du 31/01/2026</title>
+      <meta name="subject" content="Avis de marché"/>
+      <meta name="author"
+            content="Direction de l’information légale et administrative (DILA)"/>
+      <meta name="description"
+            content="Avis de marché - Avis n° 26-10979 du 31/01/2026 sur le site Boamp.fr"/>
+      <style type="text/css">
+                body {
+                    font-size: 1rem;
+                    line-height: 1.5rem;
+                }
+                .fr-h4 {
+                    font-weight: 700 !important;
+                    margin: 0.5rem 0 0.5rem 0rem !important;
+                    font-size: 1.4rem !important;
+                    line-height: 2rem !important;
+                }
+                .fr-h5 {
+                    font-weight: 700 !important;
+                    margin: 0.5rem 0 0.5rem 0rem !important;
+                    font-size: 1.3rem !important;
+                    line-height: 2rem !important;
+                }
+
+        .section {
+            padding: 6px 6px 6px 36px;
+        }
+        .fr-text--bold {
+            font-weight: bold;
+        }
+        .center {
+            text-align: center;
+        }
+        .list_style_none {
+            list-style: none;
+        }
+    </style>
+   </head>
+   <body>
+      <div class="center">
+         <div class="fr-h4" id="doc_titre">Avis de marché</div>
+      </div>
+      <div>Département(s) de publication : <span>
+            <strong>973</strong>
+         </span>
+      </div>
+      <div>
+         <span>Annonce n°</span>
+         <strong>26-10979</strong>
+      </div>
+      <div>Travaux</div>
+      <hr/>
+      <div class="fr-h5" id="section_1">Section 1 - Identification de l'acheteur</div>
+      <div class="section">
+         <div>
+            <span class="fr-text--bold">Nom et adresse officiels de l'organisme acheteur : </span>Régiment du service militaire adapté de la Guyane</div>
+         <div>
+            <span class="fr-text--bold">Correspondant : </span>M. RSMA Guyane DAF<span>, Acheteur</span>
+         </div>
+         <div>
+            <span class="fr-text--bold">Adresse : </span>
+            <span>Camp </span>
+            <span>route de saint-jean </span>Camp de Saint-Jean<span>,</span>
+            <span> 97320 </span>
+            <span>Saint-Laurent du Maroni</span>
+         </div>
+         <div>
+            <span class="fr-text--bold">Coordonnées :</span>
+            <div class="section">
+               <div>
+                  <span class="fr-text--bold">Téléphone :</span>
+                  <span>0594344638</span>
+               </div>
+               <div>
+                  <span class="fr-text--bold">Courriel :</span>
+                  <span>daf-guyane@guyane-sma.fr</span>
+               </div>
+            </div>
+         </div>
+         <span class="fr-text--bold">Adresse internet du profil d'acheteur :</span>
+         <a xmlns=""
+            href="https://www.marches-publics.gouv.fr/entreprise"
+            target="_blank"
+            title="Aller sur la page https://www.marches-publics.gouv.fr/entreprise - nouvelle fenêtre">
+            <span>https://www.marches-publics.gouv.fr/entreprise</span>
+         </a>
+      </div>
+      <div class="fr-h5" id="section_2">Section 2 - Description du marché</div>
+      <div class="section">
+         <div>
+            <span class="fr-text--bold">Objet du marché : </span>Marché de travaux pour la construction de 33 logements au RSMA de St Jean</div>
+         <div>
+            <span class="fr-text--bold">Lieu d'exécution : </span>
+            <span>Régiment du Service Militaire Adapté de la Guyane </span>
+            <span>ROUTE DE ST-JEAN </span>Camp de Saint Jean<span>,</span>
+            <span>97320 </span>
+            <span>Saint-Jean du Maroni</span>
+         </div>
+         <div>
+            <span class="fr-text--bold">Lieu de livraison : </span>
+            <span>Régiment du Service Militaire Adapté de la Guyane </span>
+            <span>ROUTE DE ST-JEAN </span>Camp de Saint Jean<span>,</span>
+            <span>97320 </span>
+            <span>Saint-Jean du Maroni</span>
+         </div>
+      </div>
+      <div class="fr-h5" id="section_3">Section 3 - Caractéristiques du marché</div>
+      <div class="section">
+         <div>
+            <span class="fr-text--bold">Des variantes seront-elles prises en compte : </span>Oui
+                                </div>
+      </div>
+      <div class="fr-h5" id="section_4">Section 4 - Durée du marché ou délai
+                            d'exécution
+                        </div>
+      <div class="section"/>
+      <div class="fr-h5" id="section_5">Section 5 - Conditions relative au marché
+                        </div>
+      <div class="section">
+         <div>
+            <span class="fr-text--bold">Unité monétaire utilisée, l'euro.</span>
+         </div>
+         <div>
+            <span class="fr-text--bold">Les candidatures et les offres seront entièrement
+                                        rédigées en langue française ainsi que les documents de présentation associés.
+                                    </span>
+         </div>
+      </div>
+      <div class="fr-h5" id="section_6">Section 6 - Justifications à produire quant
+                            aux qualités et capacités du candidat
+                        </div>
+      <div class="section">
+         <span class="fr-text--bold">
+                                Documents à produire obligatoirement par le candidat, à l'appui de sa candidature :
+                            </span>
+         <ul>
+            <li>Copie du ou des jugements prononcés, si le candidat est en redressement
+                                        judiciaire
+                                    </li>
+            <li>Déclaration sur l'honneur du candidat attestant qu'il est en règle, au cours de
+                                        l'année précédant celle au cours de laquelle a lieu le lancement de la
+                                        consultation, au regard des articles L. ;5212-1, L. 5212-2, L. 5212 5 et L.
+                                        5212-9 du code du travail, concernant l'emploi des travailleurs handicapés
+                                    </li>
+            <li>Si le candidat est établi en France, une déclaration sur l'honneur du candidat
+                                        justifiant que le travail est effectué par des salariés employés régulièrement
+                                        au regard des articles L. ;1221-10, L. 3243-2 et R. 3243-1 du code du travail
+                                        (dans le cas où le candidat emploie des salariés, conformément à l'article D.
+                                        8222-5-3° du code du travail)
+                                    </li>
+            <li>Si le candidat est établi ou domicilié à l'étranger, une déclaration sur
+                                        l'honneur du candidat attestant qu'il fournit à ses salariés des bulletins de
+                                        paie comportant les mentions prévues à l'article R. 3243-1 du code du travail,
+                                        ou des documents équivalents
+                                    </li>
+         </ul>
+         <span class="fr-text--bold">
+                                Documents à produire à l'appui des candidatures par le candidat, au choix de l'acheteur
+                                public :
+                            </span>
+         <ul>
+            <li>Déclaration concernant le chiffre d'affaires global et le chiffre d'affaires
+                                        concernant les fournitures, services ou travaux objet du marché, réalisés au
+                                        cours des trois derniers exercices disponibles
+                                    </li>
+            <li>Déclaration appropriée de banques ou preuve d'une assurance pour les risques
+                                        professionnels
+                                    </li>
+            <li>Bilans ou extraits de bilans, concernant les trois dernières années, des
+                                        opérateurs économiques pour lesquels l'établissement des bilans est obligatoire
+                                        en vertu de la loi
+                                    </li>
+            <li>Déclaration indiquant les effectifs moyens annuels du candidat et l'importance
+                                        du personnel d'encadrement pour chacune des trois dernières années
+                                    </li>
+            <li>Présentation d'une liste des principales fournitures ou des principaux services
+                                        effectués au cours des trois dernières années, indiquant le montant, la date et
+                                        le destinataire public ou privé. Les livraisons et les prestations de services
+                                        sont prouvées par des attestations du destinataire ou, à défaut, par une
+                                        déclaration de l'opérateur économique
+                                    </li>
+            <li>Présentation d'une liste des travaux exécutés au cours des cinq dernières
+                                        années, appuyée d'attestations de bonne exécution pour les travaux les plus
+                                        importants. Ces attestations indiquent le montant, l'époque et le lieu
+                                        d'exécution des travaux et précisent s'ils ont été effectués selon les règles de
+                                        l'art et menés régulièrement à bonne fin
+                                    </li>
+            <li>Indication des titres d'études et professionnels de l'opérateur économique</li>
+            <li>Indication des titres d'études et professionnels des cadres de l'entreprise et
+                                        notamment des responsables de prestation de services ou de conduite des travaux
+                                        de même nature que celle du marché
+                                    </li>
+            <li>Déclaration indiquant l'outillage, le matériel et l'équipement technique dont le
+                                        candidat dispose pour la réalisation de marchés de même nature
+                                    </li>
+            <li>En matière de fournitures et services, une description de l'équipement
+                                        technique, des mesures employées par l'opérateur économique pour s'assurer de la
+                                        qualité et des moyens d'étude et de recherche de son entreprise
+                                    </li>
+            <li>Certificats de qualifications professionnelles. La preuve de la capacité du
+                                        candidat peut être apportée par tout moyen, notamment par des certificats
+                                        d'identité professionnelle ou des références de travaux attestant de la
+                                        compétence de l'opérateur économique à réaliser la prestation pour laquelle il
+                                        se porte candidat
+                                        </li>
+            <li>Certificats établis par des services chargés du contrôle de la qualité et
+                                        habilités à attester la conformité des fournitures par des références à
+                                        certaines spécifications techniques. Il est accepté d'autres preuves de mesures
+                                        équivalentes de garantie de la qualité produites par le candidat, si celui-ci
+                                        n'a pas accès à ces certificats ou n'a aucune possibilité de les obtenir dans
+                                        les délais fixés
+                                        </li>
+            <li>Echantillons, descriptions et/ou photographies des fournitures</li>
+            <li>En cas de marché public ou d'accord-cadre passé pour les besoins de la défense,
+                                        renseignements relatifs à la nationalité du candidat
+                                    </li>
+            <li>En cas de marché public ou d'accord-cadre passé pour les besoins de la défense,
+                                        et si l'objet ou les conditions du marché le justifient, renseignements relatifs
+                                        à l'habilitation préalable du candidat, ou à sa demande d'habilitation
+                                        préalable, en application des articles R. 2311-1 et suivants du code de la
+                                        défense, relatifs à la protection du secret de la défense nationale
+                                    </li>
+            <li>Document prouvant que le candidat dispose d'une autorisation spécifique ou est
+                                        membre d'une organisation spécifique pour pouvoir fournir, dans leur pays
+                                        d'origine, le service concerné
+                                        </li>
+            <li>Formulaire DC1, Lettre de candidature - Habilitation du mandataire par ses
+                                        co-traitants (disponible à l'adresse suivante :
+                                        http://www.economie.gouv.fr/daj/formulaires-declaration-du-candidat)
+                                    </li>
+            <li>Formulaire DC2, Déclaration du candidat individuel ou du membre du groupement
+                                        (disponible à l'adresse suivante :
+                                        http://www.economie.gouv.fr/daj/formulaires-declaration-du-candidat)
+                                    </li>
+            <li>Formulaire ATTRI1, Acte d'engagement (disponible à l'adresse suivante :
+                                        http://www.economie.gouv.fr/daj/formulaires-attribution-marches-2016
+                                    </li>
+            <li>Formulaire DC 4, Déclaration de sous-traitance (disponible à l'adresse suivante
+                                        :
+                                        http://www.economie.gouv.fr/daj/formulaires-declaration-candidat-dc1-dc2-dc3-dc4)
+                                    </li>
+            <li>S'il s'appuie, pour présenter sa candidature, sur les capacités
+                                        professionnelles, techniques et financières d'autres opérateurs économiques, le
+                                        candidat produit les mêmes documents concernant cet opérateur économique que
+                                        ceux qui lui sont exigés par l'acheteur public. Le candidat doit également
+                                        apporter la preuve que chacun de ces opérateurs économiques mettra à sa
+                                        disposition les moyens nécessaires, pendant toute la durée d'exécution du marché
+                                        public ou de l'accord-cadre
+                                    </li>
+            <li>Si les documents fournis par le candidat ne sont pas établis en langue
+                                        française, ils doivent être accompagnés d'une traduction en français, certifiée
+                                        conforme à l'original par un traducteur assermenté
+                                    </li>
+         </ul>
+         <span class="fr-text--bold">
+                                Documents à produire obligatoirement par l'attributaire, avant la signature et la
+                                notification du marché public ou de l'accord-cadre (formulaire NOTI1) :
+                            </span>
+         <ul>
+            <li>Les pièces prévues aux articles D. 8222-5 ou D. 8222-7 et D. 8222-8 du code du
+                                        travail
+                                    </li>
+            <li>Si l'attributaire est établi en France, les attestations et certificats délivrés
+                                        par les administrations et organismes compétents prouvant qu'il a satisfait à
+                                        ses obligations fiscales et sociales ou un état annuel des certificats reçus
+                                    </li>
+            <li>Si l'attributaire est établi dans un Etat autre que la France, un certificat
+                                        établi par les administrations et organismes du pays d'origine. Lorsqu'un tel
+                                        certificat n'est pas délivré par le pays concerné, il peut être remplacé par une
+                                        déclaration sous serment, ou dans les Etats où un tel serment n'existe pas, par
+                                        une déclaration solennelle faite par l'intéressé devant l'autorité judiciaire ou
+                                        administrative compétente, un notaire ou un organisme professionnel qualifié du
+                                        pays
+                                    </li>
+            <li>Si les documents fournis par le candidat ne sont pas établis en langue
+                                        française, ils doivent être accompagnés d'une traduction en français, certifiée
+                                        conforme à l'original par un traducteur assermenté
+                                    </li>
+         </ul>
+      </div>
+      <div class="fr-h5" id="section_7">Section 7 - Critères d'attribution</div>
+      <div class="section">
+         <div>
+            <span class="fr-text--bold">Offre économiquement la plus avantageuse appréciée en fonction des
+                        critères énoncés dans le cahier des charges (règlement de la consultation, lettre d'invitation
+                        ou document descriptif)
+                    </span>
+         </div>
+      </div>
+      <div class="fr-h5" id="section_8">Section 8 - Mode de passation du marché</div>
+      <div class="section">
+         <div>
+            <span class="fr-text--bold">Type de procédure : </span>procédure adaptée</div>
+      </div>
+      <div class="fr-h5" id="section_10">Section 10 - Conditions de délai</div>
+      <div class="section">
+         <div>
+            <span class="fr-text--bold">Date limite de réception des offres : </span>30/03/2026 à 22:00</div>
+         <div>
+            <span class="fr-text--bold">Délai minimum de validité des offres : </span>180 jours à compter de la date limite de réception des offres.</div>
+      </div>
+      <div class="fr-h5" id="section_11">Section 11 - Autres renseignements</div>
+      <div class="section"/>
+      <div class="fr-h5" id="section_12">Section 12 - Adresses complémentaires</div>
+      <div class="section">
+         <div>
+            <span class="fr-text--bold">Adresse auprès de laquelle des renseignements d'ordre
+                                        administratif et technique peuvent être obtenus :
+                                    </span>Régiment du service militaire adapté de la Guyane<div class="section">
+               <div>
+                  <span class="fr-text--bold">Contact : </span>M. MONCHAUSSÉ CHRISTIAN<span>, Direction des travaux d’infrastructure du RSMA de la Guyane</span>
+               </div>
+               <div>
+                  <span class="fr-text--bold">Adresse :</span>
+                  <span>Camp de Saint-Jean </span>
+                  <span>route de Saint-Jean </span>Camp de Saint-Jean<span>,</span>
+                  <span> 97320 </span>
+                  <span>Saint-Jean du Maroni</span>
+               </div>
+               <div>
+                  <span class="fr-text--bold">Coordonnées : </span>
+                  <div class="section">
+                     <div>
+                        <span class="fr-text--bold">Téléphone :</span>
+                        <span>0594344508</span>
+                     </div>
+                     <div>
+                        <span class="fr-text--bold">Courriel :</span>
+                        <span>christian.monchausse@guyane-sma.fr</span>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="fr-h5" id="section_13">Section 13 - Renseignements relatifs aux
+                            lots
+                        </div>
+      <div class="section">
+         <ul>
+            <li>
+               <div>
+                  <span class="fr-text--bold">Lot(s)
+                                                4</span> - INSTALLATION DE STRUCTURES EN METAL</div>
+            </li>
+            <li>
+               <div>
+                  <span class="fr-text--bold">Lot(s)
+                                                6</span> - TRAVAUX DE PLOMBERIE</div>
+            </li>
+            <li>
+               <div>
+                  <span class="fr-text--bold">Lot(s)
+                                                7</span> - TRAVAUX DE CABLAGE ET D'INSTALLATIONS ELECTRIQUES</div>
+            </li>
+            <li>
+               <div>
+                  <span class="fr-text--bold">Lot(s)
+                                                8</span> - TRAVAUX D'INSTALLATION  DE MATERIEL DE VENTILATION ET DE CLIMATISATION</div>
+            </li>
+            <li>
+               <div>
+                  <span class="fr-text--bold">Lot(s)
+                                                9</span> - INSTALLATION DE CUISINE EQUIPEES</div>
+            </li>
+            <li>
+               <div>
+                  <span class="fr-text--bold">Lot(s)
+                                                13</span> - TRAVAUX D’AMÉNAGEMENT PAYSAGERS</div>
+            </li>
+         </ul>
+      </div>
+      <div class="fr-h5" id="section_14">Section 14 - Informations complémentaires
+                        </div>
+      <div class="section"/>
+      <hr/>
+      <div>
+         <span class="fr-text--bold">Date d'envoi du présent avis à la publication : </span>31/01/2026</div>
+   </body>
+</html>
+]]></HTML>
+   <HTMLSYNTHESE><![CDATA[<!DOCTYPE HTML>
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   </head>
+   <body>
+      <h3>L’essentiel du marché</h3>
+      <ul>
+         <li><span class="fr-text--bold">Nom de l'organisme acheteur : </span>Régiment du service militaire adapté de la Guyane</li>
+         <li><span class="fr-text--bold">A l'attention de : </span>M&nbsp;DAF&nbsp;RSMA Guyane&nbsp;Acheteur</li>
+         <li><span class="fr-text--bold">Adresse : </span>Camp&nbsp;route de saint-jean&nbsp;Camp de Saint-Jean,&nbsp;97320,&nbsp;Saint-Laurent du Maroni&nbsp;</li>
+         <li><span class="fr-text--bold">Téléphone : </span>0594344638</li>
+         <li><span class="fr-text--bold">Courriel : </span>daf-guyane@guyane-sma.fr</li>
+         <li><span class="fr-text--bold">Adresse internet du profil d'acheteur : </span><a href="https://www.marches-publics.gouv.fr/entreprise" target="_blank" title="Aller sur la page https://www.marches-publics.gouv.fr/entreprise - nouvelle fenêtre"><span>https://www.marches-publics.gouv.fr/entreprise</span></a></li>
+         <li><span class="fr-text--bold">Objet du marché : </span>Marché de travaux pour la construction de 33 logements au RSMA de St Jean</li>
+         <li><span class="fr-text--bold">Renseignements relatifs aux lots :</span><ul>
+               <li>Lot no 4 : INSTALLATION DE STRUCTURES EN METAL</li>
+               <li>Lot no 6 : TRAVAUX DE PLOMBERIE</li>
+               <li>Lot no 7 : TRAVAUX DE CABLAGE ET D'INSTALLATIONS ELECTRIQUES</li>
+               <li>Lot no 8 : TRAVAUX D'INSTALLATION DE MATERIEL DE VENTILATION ET DE CLIMATISATION</li>
+               <li>Lot no 9 : INSTALLATION DE CUISINE EQUIPEES</li>
+               <li>Lot no 13 : TRAVAUX D’AMÉNAGEMENT PAYSAGERS</li>
+            </ul>
+         </li>
+      </ul>
+      <h3>Informations pratiques</h3>
+      <ul>
+         <li><span class="fr-text--bold">Date limite de réception des offres : </span>30/03/2026 à 22:00</li>
+         <li><span class="fr-text--bold">Délai minimum de validité des offres : </span>180 jours</li>
+         <li><span class="fr-text--bold">Critères d'attribution : </span>Offre économiquement la plus avantageuse appréciée en fonction des critères énoncés
+            dans le cahier des charges (règlement de la consultation, lettre d'invitation ou document
+            descriptif).</li>
+      </ul>
+   </body>
+</html>]]></HTMLSYNTHESE>
+</jo:ann>

@@ -211,6 +211,40 @@ def eforms_acheteur(root) -> dict:
     }
 
 
+LOT_CONTAINER: dict[str, str] = {
+    "eforms": "ProcurementProjectLot",
+    "boamp": "lots",
+}
+
+EXCLUDE_ELEMENTS = frozenset({"HTML", "HTMLSYNTHESE"})
+
+
+def annonce_to_rows(root, fichier_source: str) -> list[dict]:
+    """Transforme une annonce en lignes (une par lot, ou une seule si pas de lot).
+
+    Retourne [] si l'avis est hors périmètre (filtre NATURE).
+    """
+    source_format = detect_format(root)
+    nature, sous_nature, _statut, _famille = parse_type_avis(root)
+    if not is_included(nature, sous_nature):
+        return []
+
+    core = extract_core(root, source_format, fichier_source)
+    lot_container = LOT_CONTAINER[source_format]
+    notice_cols = flatten(root, skip_localnames=EXCLUDE_ELEMENTS | {lot_container})
+    lots = find_lots(root, source_format)
+
+    if not lots:
+        return [{**core, **notice_cols}]
+
+    rows = []
+    for lot in lots:
+        lot_core = extract_lot_core(lot, source_format)
+        lot_cols = flatten(lot, start_path=lot_container)
+        rows.append({**core, **lot_core, **notice_cols, **lot_cols})
+    return rows
+
+
 CORE_KEYS = (
     "source_format",
     "id_annonce",
