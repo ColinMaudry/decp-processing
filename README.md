@@ -1,7 +1,5 @@
 # DECP processing
 
-> version 2.10.2([notes de version](https://github.com/ColinMaudry/decp-processing/blob/main/CHANGELOG.md))
-
 Projet de traitement et de publication de meilleures données sur les marchés publics attribués en France. Vous pouvez consulter, filtrer et télécharger
 ces données sur le site [decp.info](https://decp.info). Enfin la section [À propos](https://decp.info/a-propos) décrit les objectifs du projet et regroupe toutes les informations clés.
 
@@ -13,9 +11,9 @@ Ce projet prend sa source dans la complexité de la publication des données par
 
 - code source de l'agrégation [ouvert mais très peu lisible](https://github.com/139bercy/decp-arr2022)
 - documentation incomplète et éparpillée
-  - https://github.com/139bercy/decp-arr2022/blob/main/README.md
-  - https://www.data.gouv.fr/fr/datasets/5cd57bf68b4c4179299eb0e9
-  - https://data.economie.gouv.fr/pages/donnees-essentielles-de-la-commande-publique/
+  - <https://github.com/139bercy/decp-arr2022/blob/main/README.md>
+  - <https://www.data.gouv.fr/fr/datasets/5cd57bf68b4c4179299eb0e9>
+  - <https://data.economie.gouv.fr/pages/donnees-essentielles-de-la-commande-publique/>
 - schéma de données DECP 2 [complexe à utiliser](https://github.com/ColinMaudry/decp-processing/issues/4)
 
 Vous trouverez des informations sur le contexte, le cadre réglementaire et les données de la commande publique sur [le wiki](https://github.com/ColinMaudry/decp-processing/wiki).
@@ -133,7 +131,7 @@ Attention, la version de prefect du client utilisé pour le déploiement et cell
 python src/deployments.py
 ```
 
-4. Le run se lancera tous les jours selon la configuration cron. Si tu souhaites exécuter le run maintenant :
+1. Le run se lancera tous les jours selon la configuration cron. Si tu souhaites exécuter le run maintenant :
 
 ```bash
 prefect deployment run decp-processing
