@@ -31,16 +31,27 @@ flow Prefect dédié** (`boamp_processing`), indépendant du flow `decp_processi
   - **BOAMP v240 legacy** (dans `DONNEES/<FAMILLE>`, ex. `FNSimple`, `MAPA`,
     `AVIS`, `RECTIFICATIF`, `ANNULATION`…). Le legacy ne disparaît jamais
     totalement (encore fréquent fin 2025).
-- **Avis inclus** : avis de marché / appels d'offres et leur cycle de vie
-  (rectificatifs, annulations).
-- **Avis exclus** :
-  - **Avis d'attribution** (recoupent les marchés déjà couverts par DECP) :
-    eForms racine `ContractAwardNotice` (quel que soit le subtype — 29/30/32/33
-    observés) ; legacy famille/nature `ATTRIBUTION` (via la métadonnée GESTION).
-  - **Avis de préinformation** : eForms racine `PriorInformationNotice`
-    (subtypes 4/14 observés) ; équivalents legacy de préinformation (via GESTION).
+- **Filtrage par `GESTION/REFERENCE/TYPE_AVIS/NATURE`** : les deux formats sont
+  enveloppés dans `jo:ann` et portent le **même** bloc `GESTION` (vérifié :
+  eForms `ContractNotice` → `NATURE=APPEL_OFFRE`, `ContractAwardNotice` →
+  `NATURE=ATTRIBUTION`). Le filtrage se fait donc par une **seule métadonnée
+  commune**, sans distinguer eForms-par-racine vs legacy-par-vocabulaire.
+- **Liste blanche `NATURE` (avis inclus)** : `APPEL_OFFRE`, `QUALIFICATION`,
+  `RECTIFICATIF`, `MODIFICATION` (+ `STATUT` = `INITIAL` / `RECTIFICATIF` /
+  `ANNULATION` / `MODIFICATION` du cycle de vie).
+- **Avis exclus** (toute autre `NATURE`, comptés pour le suivi) : `ATTRIBUTION`
+  (recoupe DECP), `PRE-INFORMATION`, `PROFIL_ACHETEUR`, `INTENTION_CONCLURE`,
+  `PERIODIQUE`, `SOUS-TRAITANCE`, `AUTRE`.
 - **Pas d'enrichissement SIRENE** en v1 (données brutes ; SIREN/SIRET conservés
   quand présents dans le XML).
+
+> **Schéma de référence — attention.** Le XSD publié `Boamp_v240.xsd` (racine
+> `<ANNONCE>`, `DONNEES/IDENTITE/…` en vocabulaire majuscule) **ne décrit pas**
+> les instances réelles (racine `<jo:ann>`, schema **3.2.5**,
+> `DONNEES/MAPA|FNSimple|EFORMS` en vocabulaire minuscule). On ne s'appuie donc
+> **pas** sur ce XSD pour énumérer les champs (l'aplatisseur est générique). En
+> revanche son type `TYPE_AVIS_Type` correspond bien au bloc `GESTION` des
+> instances et fournit l'énumération autoritaire des `NATURE` / `STATUT` ci-dessus.
 
 ### Distribution observée (échantillonnage 1 jour/mois, 2024-2025)
 
@@ -49,9 +60,11 @@ flow Prefect dédié** (`boamp_processing`), indépendant du flow `decp_processi
   20, 23), `ContractAwardNotice` (29, 30, 32, 33), `PriorInformationNotice`
   (4, 14) — avec du legacy résiduel (`FNSimple`, `MAPA`) en proportion variable
   (forte à nouveau fin 2025).
-- **Conséquence** : on conserve les `ContractNotice` (16/17/19/20/23…) et les
-  familles legacy correspondant à des avis de marché ; on écarte
-  `ContractAwardNotice` et `PriorInformationNotice` (et leurs équivalents legacy).
+- **Conséquence** : la sélection ne se fait pas par racine UBL ni par subtype
+  mais par la liste blanche `NATURE` (voir Périmètre) — `ContractNotice` et
+  legacy d'appel d'offres sont conservés via `NATURE=APPEL_OFFRE/QUALIFICATION`,
+  `ContractAwardNotice` et `PriorInformationNotice` écartés via
+  `NATURE=ATTRIBUTION/PRE-INFORMATION`.
 
 ## Architecture
 
@@ -67,13 +80,15 @@ flow Prefect dédié** (`boamp_processing`), indépendant du flow `decp_processi
      jours** (défaut 7) pour rattraper les ajouts tardifs de DILA ;
    - lister l'index HTML du jour → télécharger les `.xml` via `stream_get`
      (réutilise le cache de `src/config.py`).
-3. **Détection de format / filtrage** par fichier :
-   - présence de `<EFORMS>` → eForms ; sinon → legacy v240 ;
-   - **eForms** : racine `ContractAwardNotice` ou `PriorInformationNotice` →
-     **ignoré** (compté pour le suivi) ;
-   - **legacy** : nature/statut d'attribution ou de préinformation (métadonnée
-     `GESTION/REFERENCE/TYPE_AVIS`) → **ignoré** ;
-   - fichiers ni eForms ni legacy reconnu → comptés et ignorés.
+3. **Filtrage (commun aux deux formats)** par `GESTION/REFERENCE/TYPE_AVIS/NATURE` :
+   - `NATURE` ∈ liste blanche (`APPEL_OFFRE`, `QUALIFICATION`, `RECTIFICATIF`,
+     `MODIFICATION`) → **conservé** ;
+   - toute autre `NATURE` → **ignoré** (compté par valeur, pour le suivi) ;
+   - **format** déterminé en parallèle pour l'aplatissement : présence de
+     `<EFORMS>` → eForms (`source_format=eforms`) ; sinon → legacy v240
+     (`source_format=boamp`) ;
+   - fichiers sans `GESTION/NATURE` exploitable ou structure non reconnue →
+     comptés et ignorés.
 4. **Aplatissement** (voir ci-dessous) → DataFrame polars par jour.
 5. **Écriture** de la partition jour.
 6. **Concaténation** de toutes les partitions → `sink_parquet` (+ CSV) en
@@ -108,8 +123,11 @@ aussi dans les colonnes brutes.
 | ---------------------- | ----------------------------- | ------------------------------ |
 | `source_format`        | `eforms`                      | `boamp`                        |
 | `id_annonce`           | `ef_<IDWEB>`                  | `bo_<IDWEB>`                   |
-| `type_avis`            | racine (`ContractNotice`)     | `FAMILLE` (`MAPA`…)            |
-| `sous_type_avis`       | `SubTypeCode` (16/17)         | `NATURE` / `STATUT`            |
+| `nature_avis`          | `GESTION/…/NATURE` (commun)   | `GESTION/…/NATURE` (commun)    |
+| `statut_avis`          | `GESTION/…/STATUT` (commun)   | `GESTION/…/STATUT` (commun)    |
+| `famille_avis`         | `GESTION/…/FAMILLE` (commun)  | `GESTION/…/FAMILLE` (commun)   |
+| `type_document`        | racine UBL (`ContractNotice`) | famille `DONNEES` (`MAPA`…)    |
+| `sous_type_eforms`     | `SubTypeCode` (16/17/19…)     | —                              |
 | `date_publication`     | `IssueDate`                   | `GESTION/.../DATE_PUBLICATION` |
 | `date_limite_reponse`  | deadline de soumission        | `DATE_LIMITE_REPONSE`          |
 | `acheteur_nom`         | organisation déréférencée     | `organisme/acheteurPublic`     |
@@ -152,8 +170,9 @@ aussi dans les colonnes brutes.
   - aplatissement générique (chemins-feuilles, colonnes liste),
   - grain lot + fallback annonce-sans-lot,
   - mapping du cœur harmonisé (dont préfixe `ef_`/`bo_` de `id_annonce`),
-  - détection de format et exclusion des attributions **et** des préinformations
-    (eForms par racine, legacy par métadonnée GESTION),
+  - filtrage par liste blanche `NATURE` (commun eForms + legacy) : inclusion de
+    `APPEL_OFFRE`/`QUALIFICATION`, exclusion de `ATTRIBUTION`/`PRE-INFORMATION`/etc.,
+  - détection du format (`source_format`) via présence de `<EFORMS>`,
   - exclusion `HTML`/`HTMLSYNTHESE`.
 
 ## Hors périmètre (v2 potentielle)
