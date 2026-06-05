@@ -304,3 +304,43 @@ def test_annonce_to_rows_no_lot_single_row():
     rows = annonce_to_rows(_el(xml), "x.xml")
     assert len(rows) == 1
     assert rows[0]["lot_id"] is None
+
+
+def test_rows_to_frame_lists_and_typed_dates():
+    import polars as pl
+
+    from src.tasks.boamp.flatten import rows_to_frame
+
+    rows = [
+        {"id_annonce": "bo_1", "date_publication": "2026-01-31", "GESTION_X": ["a"]},
+        {
+            "id_annonce": "bo_2",
+            "date_publication": "2026-02-01",
+            "GESTION_X": ["a", "b"],
+        },
+    ]
+    df = rows_to_frame(rows)
+    assert df.height == 2
+    assert df.schema["date_publication"] == pl.Date
+    assert df.schema["GESTION_X"] == pl.List(pl.String)
+
+
+def test_rows_to_frame_empty():
+    from src.tasks.boamp.flatten import rows_to_frame
+
+    assert rows_to_frame([]).is_empty()
+
+
+def test_concat_partitions_diagonal(tmp_path):
+    import polars as pl
+
+    from src.tasks.boamp.flatten import concat_partitions
+
+    pl.DataFrame({"a": ["1"], "only_x": [["v"]]}).write_parquet(tmp_path / "p1.parquet")
+    sub = tmp_path / "2026" / "01"
+    sub.mkdir(parents=True)
+    pl.DataFrame({"a": ["2"], "only_y": [["w"]]}).write_parquet(sub / "02.parquet")
+    lf = concat_partitions(tmp_path)
+    df = lf.collect()
+    assert set(df.columns) == {"a", "only_x", "only_y"}
+    assert df.height == 2

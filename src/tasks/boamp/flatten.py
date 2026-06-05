@@ -3,6 +3,10 @@
 Aucune I/O : fonctions pures sur des éléments lxml.
 """
 
+from pathlib import Path
+
+import polars as pl
+
 from src.config import (
     BOAMP_AVIS_URL_TEMPLATE,
     BOAMP_INCLUDED_NATURES,
@@ -335,3 +339,31 @@ def extract_core(root, source_format: str, fichier_source: str) -> dict:
         "lot_id": None,
         "lot_intitule": None,
     }
+
+
+DATE_CORE_COLUMNS = ("date_publication", "date_limite_reponse")
+
+
+def rows_to_frame(rows: list[dict]) -> pl.DataFrame:
+    """Construit un DataFrame depuis des lignes hétérogènes.
+
+    - colonnes manquantes -> null ; colonnes génériques -> List(String) ;
+    - les colonnes de date du cœur sont castées en pl.Date (non strict).
+    """
+    if not rows:
+        return pl.DataFrame()
+    df = pl.from_dicts(rows, infer_schema_length=None)
+    for col in DATE_CORE_COLUMNS:
+        if col in df.columns:
+            df = df.with_columns(
+                pl.col(col).cast(pl.String).str.slice(0, 10).str.to_date(strict=False)
+            )
+    return df
+
+
+def concat_partitions(partitions_dir) -> pl.LazyFrame:
+    """Concatène (diagonale) tous les parquets sous partitions_dir, récursivement."""
+    paths = sorted(Path(partitions_dir).rglob("*.parquet"))
+    if not paths:
+        return pl.LazyFrame()
+    return pl.concat([pl.scan_parquet(p) for p in paths], how="diagonal_relaxed")
