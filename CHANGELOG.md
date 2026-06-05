@@ -1,3 +1,20 @@
+### 2.12.0 2026-06-05
+
+- Ajout de nouvelles sources de données :
+  - Modula :
+    - <www.proxilegales.fr>
+    - <www.marches-demat.com>
+    - <www.laprovencemarchespublics.com>
+    - <www.corsematinmarchespublics.com>
+    - <www.achatspublicscorse.com>
+    - <www.marchespublics.pro>
+    - <www.antilles-legales.fr>
+    - <www.guyane-legales.fr>
+  - alsacemarchespublics.eu
+  - Eurométropole de Strasbourg
+  - Ville de Strasbourg
+- Meilleur gestion du tampon d'ingestion XML qui ne voyait pas les petits fichiers
+
 ### 2.11.0 2026-06-02
 
 - Utilisation du [géocodage de Géoplateforme (IGN)](https://cartes.gouv.fr/aide/fr/guides-utilisateur/utiliser-les-services-de-la-geoplateforme/geocodage/) au lieu des données SIRENE géocodées d'Etalab, qui ne sont plus publiées

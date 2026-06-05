@@ -254,7 +254,7 @@
   },
   {
     "id": "5df410e86f44413a91d34be3",
-    "name": "AIFE_DE_13001977100018",
+    "name": "API DECP (AIFE DUME)",
     "owner_org_name": "Agence pour l'Informatique Financière de l'Etat",
     "code": "aife_dume"
   },
@@ -330,5 +330,59 @@
     "code": "minef",
     "owner_org_name": "MINEF",
     "skip": true
+  },
+  {
+    "id": "68c951f5501fc2243b7996b1",
+    "name": "Données Essentielles - www.proxilegales.fr",
+    "code": "modula_proxilegales",
+    "owner_org_name": "Modula"
+  },
+  {
+    "id": "68c93247fda0dc4d2aa52a86",
+    "name": "Données Essentielles - www.marches-demat.com",
+    "code": "modula_marches-demat",
+    "owner_org_name": "Modula"
+  },
+  {
+    "id": "68c9571b7d6a0e64a5f7582b",
+    "name": "Données Essentielles - www.laprovencemarchespublics.com et www.corsematinmarchespublics.com ",
+    "code": "modula_laprovence_corsematin",
+    "owner_org_name": "Modula"
+  },
+  {
+    "id": "68c955112e0cc622a82626b8",
+    "name": "Données Essentielles - www.achatspublicscorse.com",
+    "code": "modula_achatspublicscorse",
+    "owner_org_name": "Modula"
+  },
+  {
+    "id": "68c953c24aa801f3ce4289ea",
+    "name": "Données Essentielles - www.marchespublics.pro",
+    "code": "modula_marchespublics.pro",
+    "owner_org_name": "Modula"
+  },
+  {
+    "id": "68c959a6fecb75ff0b47f079",
+    "name": "Données Essentielles - www.antilles-legales.fr et www.guyane-legales.fr",
+    "code": "modula_antilles_guyane_legales",
+    "owner_org_name": "Modula"
+  },
+  {
+    "id": "68834dc0f3f93ee2ff6050e2",
+    "name": "Données essentielles de la commande publique - Eurométropole de Strasbourg",
+    "code": "eurometropole_strasbourg",
+    "owner_org_name": "Eurométropole de Strasbourg"
+  },
+  {
+    "id": "68834a9b7285ebd8466fb23e",
+    "name": "Données essentielles de la commande publique - Ville de Strasbourg",
+    "code": "ville_strasbourg",
+    "owner_org_name": "Eurométropole de Strasbourg"
+  },
+  {
+    "id": "67b4575f32c309fd76327c87",
+    "name": "Données Essentielles du profil acheteur Alsace Marchés Publics",
+    "code": "alsace_mp",
+    "owner_org_name": "Alsace marchés publics"
   }
 ]
