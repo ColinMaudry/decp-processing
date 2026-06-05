@@ -15,39 +15,53 @@ flow Prefect dédié** (`boamp_processing`), indépendant du flow `decp_processi
 
 ## Périmètre
 
-- **Source** : archive DILA `https://echanges.dila.gouv.fr/OPENDATA/BOAMP/AAAA/MM/JJ/NN-XXXXX.xml`
-  (un fichier XML par annonce ; pas d'archive bulk, crawl de l'index HTML par jour).
-- **Début** : 1ᵉʳ janvier 2026. Pas de reprise d'historique antérieur pour l'instant.
-- **Formats** : les deux schémas présents dans le flux 2026 :
+- **Source** : archive DILA `https://echanges.dila.gouv.fr/OPENDATA/BOAMP/…`.
+  Un fichier XML par annonce, sous `<année>/<mois>/<jour>/NN-XXXXX.xml`. Deux
+  emplacements :
+  - flux courant : `/OPENDATA/BOAMP/2026/MM/JJ/` (fichiers quotidiens) ;
+  - historique : `/OPENDATA/BOAMP/FluxHistorique/Boamp_v240/<année>/MM/JJ/`
+    (2024, 2025), accompagné d'**archives bulk `*.tar.gz`** par année et par
+    type (`BOAMP-J-AO`, `BOAMP-N-AO`, `MAPA-AO`, `*-IC-AA`…).
+- **Début** : 1ᵉʳ janvier 2024.
+  - eForms n'apparaît dans le flux que **vers février 2024** ; **janvier 2024 est
+    quasi-intégralement legacy v240**. L'aplatisseur legacy est donc requis dès le
+    début de période.
+- **Formats** : les deux schémas coexistent sur toute la période 2024 → 2026 :
   - **eForms** (UBL 2.3, dans `DONNEES/EFORMS`),
-  - **BOAMP v240 legacy** (dans `DONNEES/<FAMILLE>`, ex. `MAPA`, `AVIS`,
-    `RECTIFICATIF`, `ANNULATION`…).
+  - **BOAMP v240 legacy** (dans `DONNEES/<FAMILLE>`, ex. `FNSimple`, `MAPA`,
+    `AVIS`, `RECTIFICATIF`, `ANNULATION`…). Le legacy ne disparaît jamais
+    totalement (encore fréquent fin 2025).
 - **Avis inclus** : avis de marché / appels d'offres et leur cycle de vie
   (rectificatifs, annulations).
-- **Avis exclus** : avis d'attribution (ils recoupent les marchés déjà couverts
-  par DECP). Concrètement on ignore :
-  - eForms : racine `ContractAwardNotice` et/ou `SubTypeCode` ∈ {29, 30} ;
-  - legacy : famille / nature `ATTRIBUTION`.
+- **Avis exclus** :
+  - **Avis d'attribution** (recoupent les marchés déjà couverts par DECP) :
+    eForms racine `ContractAwardNotice` (quel que soit le subtype — 29/30/32/33
+    observés) ; legacy famille/nature `ATTRIBUTION` (via la métadonnée GESTION).
+  - **Avis de préinformation** : eForms racine `PriorInformationNotice`
+    (subtypes 4/14 observés) ; équivalents legacy de préinformation (via GESTION).
 - **Pas d'enrichissement SIRENE** en v1 (données brutes ; SIREN/SIRET conservés
   quand présents dans le XML).
 
-### Distribution observée (échantillon 32 fichiers, 2026-01-31)
+### Distribution observée (échantillonnage 1 jour/mois, 2024-2025)
 
-| Type (racine eForms / famille legacy)              | Subtype | Inclus ?         |
-| -------------------------------------------------- | ------- | ---------------- |
-| eForms `ContractNotice`                            | 16, 17  | ✅               |
-| eForms `ContractAwardNotice`                       | 29, 30  | ❌ (attribution) |
-| legacy `MAPA` (et autres familles non-attribution) | —       | ✅               |
-| legacy `ATTRIBUTION`                               | —       | ❌               |
-
-Aucun `PriorInformationNotice` observé dans le flux.
+- **2024-01** : 100 % legacy (`FNSimple`) — pas encore d'eForms.
+- **2024-02 → 2025** : eForms dominant — `ContractNotice` (subtypes 16, 17, 19,
+  20, 23), `ContractAwardNotice` (29, 30, 32, 33), `PriorInformationNotice`
+  (4, 14) — avec du legacy résiduel (`FNSimple`, `MAPA`) en proportion variable
+  (forte à nouveau fin 2025).
+- **Conséquence** : on conserve les `ContractNotice` (16/17/19/20/23…) et les
+  familles legacy correspondant à des avis de marché ; on écarte
+  `ContractAwardNotice` et `PriorInformationNotice` (et leurs équivalents legacy).
 
 ## Architecture
 
 ### Flow `boamp_processing`
 
-1. **Énumération des jours** : du 2026-01-01 à aujourd'hui.
-2. **Acquisition incrémentale** :
+1. **Backfill historique (2024-2025)** : récupéré via les **archives bulk
+   `*.tar.gz`** de `FluxHistorique/Boamp_v240/<année>/` (un seul téléchargement
+   par année/type plutôt que des dizaines de milliers de requêtes), décompressé
+   puis aplati. Exécuté une fois.
+2. **Acquisition incrémentale (2026 →)** :
    - sortie parquet **partitionnée par date de publication** (`year/month/day`) ;
    - à chaque run : traiter les jours absents + **re-crawler les N derniers
      jours** (défaut 7) pour rattraper les ajouts tardifs de DILA ;
@@ -55,7 +69,10 @@ Aucun `PriorInformationNotice` observé dans le flux.
      (réutilise le cache de `src/config.py`).
 3. **Détection de format / filtrage** par fichier :
    - présence de `<EFORMS>` → eForms ; sinon → legacy v240 ;
-   - fichiers d'attribution → **ignorés** (comptés pour le suivi) ;
+   - **eForms** : racine `ContractAwardNotice` ou `PriorInformationNotice` →
+     **ignoré** (compté pour le suivi) ;
+   - **legacy** : nature/statut d'attribution ou de préinformation (métadonnée
+     `GESTION/REFERENCE/TYPE_AVIS`) → **ignoré** ;
    - fichiers ni eForms ni legacy reconnu → comptés et ignorés.
 4. **Aplatissement** (voir ci-dessous) → DataFrame polars par jour.
 5. **Écriture** de la partition jour.
@@ -128,21 +145,23 @@ aussi dans les colonnes brutes.
 
 - Fixtures XML réduites dans `tests/data/` :
   - un `ContractNotice` eForms,
-  - un legacy `MAPA`,
-  - un avis d'attribution (eForms ou legacy) pour vérifier qu'il est **bien
-    ignoré**.
+  - un legacy de type avis de marché (`FNSimple` ou `MAPA`),
+  - un `ContractAwardNotice` (attribution) et un `PriorInformationNotice`
+    (préinformation) pour vérifier qu'ils sont **bien ignorés**.
 - Tests unitaires :
   - aplatissement générique (chemins-feuilles, colonnes liste),
   - grain lot + fallback annonce-sans-lot,
   - mapping du cœur harmonisé (dont préfixe `ef_`/`bo_` de `id_annonce`),
-  - détection de format et exclusion des avis d'attribution,
+  - détection de format et exclusion des attributions **et** des préinformations
+    (eForms par racine, legacy par métadonnée GESTION),
   - exclusion `HTML`/`HTMLSYNTHESE`.
 
 ## Hors périmètre (v2 potentielle)
 
-- Reprise d'historique avant 2026.
+- Reprise d'historique avant 2024.
 - Versions de schéma legacy antérieures (v010 / v110 / v230).
 - Avis d'attribution / `ContractAwardNotice`.
+- Avis de préinformation / `PriorInformationNotice`.
 - Enrichissement SIRENE de l'acheteur.
 - Liaison rectificatif → annonce d'origine.
 - Cœur harmonisé étendu.
