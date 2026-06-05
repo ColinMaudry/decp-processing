@@ -94,3 +94,58 @@ def test_is_included_pre_information_only_when_mise_en_concurrence():
     assert is_included("PERIODIQUE", "MISE_EN_CONCURRENCE") is True
     assert is_included("PRE-INFORMATION", "STANDARD") is False
     assert is_included("PERIODIQUE", None) is False
+
+
+EFORMS_LOT = """
+<ContractNotice xmlns:cac="urn:c" xmlns:cbc="urn:b">
+  <cac:ProcurementProjectLot>
+    <cbc:ID schemeName="Lot">LOT-0001</cbc:ID>
+    <cac:ProcurementProject><cbc:Name>Intitulé A</cbc:Name></cac:ProcurementProject>
+  </cac:ProcurementProjectLot>
+  <cac:ProcurementProjectLot>
+    <cbc:ID schemeName="Lot">LOT-0002</cbc:ID>
+    <cac:ProcurementProject><cbc:Name>Intitulé B</cbc:Name></cac:ProcurementProject>
+  </cac:ProcurementProjectLot>
+</ContractNotice>
+"""
+
+LEGACY_LOTS = """
+<MAPA><initial><lots>
+  <lot><numLot>4</numLot><description>Métal</description></lot>
+  <lot><numLot>5</numLot><description>Bois</description></lot>
+</lots></initial></MAPA>
+"""
+
+
+def test_find_lots_eforms():
+    from src.tasks.boamp.flatten import find_lots
+
+    lots = find_lots(_el(EFORMS_LOT), "eforms")
+    assert len(lots) == 2
+
+
+def test_find_lots_legacy():
+    from src.tasks.boamp.flatten import find_lots
+
+    lots = find_lots(_el(LEGACY_LOTS), "boamp")
+    assert len(lots) == 2
+
+
+def test_extract_lot_core_eforms():
+    from src.tasks.boamp.flatten import extract_lot_core, find_lots
+
+    lots = find_lots(_el(EFORMS_LOT), "eforms")
+    assert extract_lot_core(lots[0], "eforms") == {
+        "lot_id": "LOT-0001",
+        "lot_intitule": "Intitulé A",
+    }
+
+
+def test_extract_lot_core_legacy():
+    from src.tasks.boamp.flatten import extract_lot_core, find_lots
+
+    lots = find_lots(_el(LEGACY_LOTS), "boamp")
+    assert extract_lot_core(lots[1], "boamp") == {
+        "lot_id": "5",
+        "lot_intitule": "Bois",
+    }

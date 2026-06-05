@@ -109,3 +109,46 @@ def is_included(nature: str | None, sous_nature: str | None) -> bool:
     ):
         return True
     return False
+
+
+def _text(elem) -> str | None:
+    """Extrait le texte d'un élément, ou None si vide."""
+    if elem is None:
+        return None
+    t = (elem.text or "").strip()
+    return t or None
+
+
+def find_lots(root, source_format: str) -> list:
+    """Liste des éléments-lot selon le format.
+
+    - eforms: ProcurementProjectLot éléments
+    - boamp: lot éléments enfants d'un conteneur lots
+    """
+    if source_format == "eforms":
+        return [e for e in root.iter() if localname(e.tag) == "ProcurementProjectLot"]
+    lots = []
+    for container in root.iter():
+        if localname(container.tag) == "lots":
+            lots.extend(c for c in container if localname(c.tag) == "lot")
+    return lots
+
+
+def extract_lot_core(lot, source_format: str) -> dict:
+    """{lot_id, lot_intitule} pour un élément-lot.
+
+    - eforms: ID[@schemeName='Lot'] et Name sous ProcurementProject
+    - boamp: numLot et description directs
+    """
+    if source_format == "eforms":
+        lot_id = None
+        for e in lot.iter():
+            if localname(e.tag) == "ID" and e.get("schemeName") == "Lot":
+                lot_id = _text(e)
+                break
+        name_el = next((e for e in lot.iter() if localname(e.tag) == "Name"), None)
+        return {"lot_id": lot_id, "lot_intitule": _text(name_el)}
+    # legacy boamp
+    num = next((c for c in lot if localname(c.tag) == "numLot"), None)
+    desc = next((c for c in lot if localname(c.tag) == "description"), None)
+    return {"lot_id": _text(num), "lot_intitule": _text(desc)}
