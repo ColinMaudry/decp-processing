@@ -254,7 +254,7 @@
   },
   {
     "id": "5df410e86f44413a91d34be3",
-    "name": "AIFE_DE_13001977100018",
+    "name": "API DECP (AIFE DUME)",
     "owner_org_name": "Agence pour l'Informatique Financière de l'Etat",
     "code": "aife_dume"
   },
@@ -372,5 +372,17 @@
     "name": "Données essentielles de la commande publique - Eurométropole de Strasbourg",
     "code": "eurometropole_strasbourg",
     "owner_org_name": "Eurométropole de Strasbourg"
+  },
+  {
+    "id": "68834a9b7285ebd8466fb23e",
+    "name": "Données essentielles de la commande publique - Ville de Strasbourg",
+    "code": "ville_strasbourg",
+    "owner_org_name": "Eurométropole de Strasbourg"
+  },
+  {
+    "id": "67b4575f32c309fd76327c87",
+    "name": "Données Essentielles du profil acheteur Alsace Marchés Publics",
+    "code": "alsace_mp",
+    "owner_org_name": "Alsace marchés publics"
   }
 ]
