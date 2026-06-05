@@ -152,3 +152,59 @@ def extract_lot_core(lot, source_format: str) -> dict:
     num = next((c for c in lot if localname(c.tag) == "numLot"), None)
     desc = next((c for c in lot if localname(c.tag) == "description"), None)
     return {"lot_id": _text(num), "lot_intitule": _text(desc)}
+
+
+def _direct_child(elem, name: str):
+    """Premier enfant DIRECT dont le nom local == name, sinon None."""
+    return next((c for c in elem if localname(c.tag) == name), None)
+
+
+def _buyer_org_id(root) -> str | None:
+    """ID de l'organisation acheteuse = PartyIdentification/ID enfant DIRECT de
+    ContractingParty/Party (et non du ServiceProviderParty imbriqué)."""
+    cp = _find(root, "ContractingParty")
+    if cp is None:
+        return None
+    party = _direct_child(cp, "Party")
+    if party is None:
+        return None
+    pid = _direct_child(party, "PartyIdentification")
+    if pid is None:
+        return None
+    return _text(_direct_child(pid, "ID"))
+
+
+def _find_company_by_id(root, org_id: str):
+    """efac:Company dont PartyIdentification/ID == org_id."""
+    for org in root.iter():
+        if localname(org.tag) != "Organization":
+            continue
+        company = _find(org, "Company")
+        if company is None:
+            continue
+        pid = _find(company, "PartyIdentification")
+        if pid is None:
+            continue
+        idv = next((e for e in pid.iter() if localname(e.tag) == "ID"), None)
+        if _text(idv) == org_id:
+            return company
+    return None
+
+
+def eforms_acheteur(root) -> dict:
+    """{acheteur_nom, acheteur_siret, acheteur_ville} par déréférencement interne."""
+    empty = {"acheteur_nom": None, "acheteur_siret": None, "acheteur_ville": None}
+    org_id = _buyer_org_id(root)
+    if org_id is None:
+        return empty
+    company = _find_company_by_id(root, org_id)
+    if company is None:
+        return empty
+    name_el = _find(_find(company, "PartyName") or company, "Name")
+    siret_el = _find(_find(company, "PartyLegalEntity") or company, "CompanyID")
+    city_el = _find(_find(company, "PostalAddress") or company, "CityName")
+    return {
+        "acheteur_nom": _text(name_el),
+        "acheteur_siret": _text(siret_el),
+        "acheteur_ville": _text(city_el),
+    }

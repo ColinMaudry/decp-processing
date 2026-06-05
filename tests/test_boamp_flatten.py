@@ -149,3 +149,45 @@ def test_extract_lot_core_legacy():
         "lot_id": "5",
         "lot_intitule": "Bois",
     }
+
+
+EFORMS_BUYER = """
+<ContractNotice xmlns:cac="urn:c" xmlns:cbc="urn:b" xmlns:efac="urn:e">
+  <ext:UBLExtensions xmlns:ext="urn:x"><efac:Organizations>
+    <efac:Organization><efac:Company>
+      <cac:PartyIdentification><cbc:ID schemeName="organization">ORG-0001</cbc:ID></cac:PartyIdentification>
+      <cac:PartyName><cbc:Name>Hauts-de-Seine Habitat</cbc:Name></cac:PartyName>
+      <cac:PostalAddress><cbc:CityName>Levallois</cbc:CityName></cac:PostalAddress>
+      <cac:PartyLegalEntity><cbc:CompanyID>27920022400012</cbc:CompanyID></cac:PartyLegalEntity>
+    </efac:Company></efac:Organization>
+    <efac:Organization><efac:Company>
+      <cac:PartyIdentification><cbc:ID schemeName="organization">ORG-0000</cbc:ID></cac:PartyIdentification>
+      <cac:PartyName><cbc:Name>Plateforme eSender</cbc:Name></cac:PartyName>
+    </efac:Company></efac:Organization>
+  </efac:Organizations></ext:UBLExtensions>
+  <cac:ContractingParty><cac:Party>
+    <cac:PartyIdentification><cbc:ID>ORG-0001</cbc:ID></cac:PartyIdentification>
+    <cac:ServiceProviderParty><cac:Party>
+      <cac:PartyIdentification><cbc:ID>ORG-0000</cbc:ID></cac:PartyIdentification>
+    </cac:Party></cac:ServiceProviderParty>
+  </cac:Party></cac:ContractingParty>
+</ContractNotice>
+"""
+
+
+def test_eforms_acheteur_resolves_buyer_not_service_provider():
+    from src.tasks.boamp.flatten import eforms_acheteur
+
+    res = eforms_acheteur(_el(EFORMS_BUYER))
+    assert res == {
+        "acheteur_nom": "Hauts-de-Seine Habitat",
+        "acheteur_siret": "27920022400012",
+        "acheteur_ville": "Levallois",
+    }
+
+
+def test_eforms_acheteur_empty_when_no_contracting_party():
+    from src.tasks.boamp.flatten import eforms_acheteur
+
+    res = eforms_acheteur(_el('<ContractNotice xmlns:cac="urn:c"/>'))
+    assert res == {"acheteur_nom": None, "acheteur_siret": None, "acheteur_ville": None}
