@@ -191,3 +191,65 @@ def test_eforms_acheteur_empty_when_no_contracting_party():
 
     res = eforms_acheteur(_el('<ContractNotice xmlns:cac="urn:c"/>'))
     assert res == {"acheteur_nom": None, "acheteur_siret": None, "acheteur_ville": None}
+
+
+LEGACY_FULL = """
+<ann>
+  <DONNEES><MAPA><organisme>
+      <acheteurPublic>Ville de X</acheteurPublic>
+      <adr><ville>Paristown</ville></adr>
+    </organisme>
+    <initial><description><objet>Travaux divers</objet></description></initial>
+  </MAPA></DONNEES>
+  <GESTION><REFERENCE><IDWEB>26-10979</IDWEB>
+    <TYPE_AVIS><FAMILLE><MAPA/></FAMILLE><NATURE><APPEL_OFFRE><STANDARD/></APPEL_OFFRE></NATURE>
+      <STATUT><INITIAL/></STATUT></TYPE_AVIS>
+  </REFERENCE>
+  <INDEXATION><DATE_PUBLICATION>2026-01-31</DATE_PUBLICATION>
+    <DATE_LIMITE_REPONSE>2026-03-30T22:00:00</DATE_LIMITE_REPONSE></INDEXATION>
+  </GESTION>
+</ann>
+"""
+
+
+def test_extract_core_legacy():
+    from src.tasks.boamp.flatten import extract_core
+
+    root = _el(LEGACY_FULL)
+    core = extract_core(root, "boamp", "26-10979.xml")
+    assert core["id_annonce"] == "bo_26-10979"
+    assert core["source_format"] == "boamp"
+    assert core["nature_avis"] == "APPEL_OFFRE"
+    assert core["statut_avis"] == "INITIAL"
+    assert core["famille_avis"] == "MAPA"
+    assert core["type_document"] == "MAPA"
+    assert core["sous_type_eforms"] is None
+    assert core["acheteur_nom"] == "Ville de X"
+    assert core["acheteur_ville"] == "Paristown"
+    assert core["objet"] == "Travaux divers"
+    assert core["date_publication"] == "2026-01-31"
+    assert core["date_limite_reponse"] == "2026-03-30T22:00:00"
+    assert core["url_avis"] == 'https://www.boamp.fr/pages/avis/?q=idweb:"26-10979"'
+    assert core["fichier_source"] == "26-10979.xml"
+    assert core["lot_id"] is None and core["lot_intitule"] is None
+
+
+def test_extract_core_eforms_id_prefix_and_subtype():
+    from src.tasks.boamp.flatten import extract_core
+
+    xml = """
+    <ann><DONNEES><EFORMS><ContractNotice xmlns:cac="urn:c" xmlns:cbc="urn:b" xmlns:efac="urn:e" xmlns:efbc="urn:f">
+        <ext:UBLExtensions xmlns:ext="urn:x"><efac:NoticeSubType>
+          <cbc:SubTypeCode listName="notice-subtype">16</cbc:SubTypeCode></efac:NoticeSubType></ext:UBLExtensions>
+        <cac:ProcurementProject><cbc:Name>Objet global</cbc:Name></cac:ProcurementProject>
+      </ContractNotice></EFORMS></DONNEES>
+      <GESTION><REFERENCE><IDWEB>26-100</IDWEB>
+        <TYPE_AVIS><FAMILLE><JOUE/></FAMILLE><NATURE><APPEL_OFFRE/></NATURE><STATUT><INITIAL/></STATUT></TYPE_AVIS>
+      </REFERENCE><INDEXATION><DATE_PUBLICATION>2026-02-01</DATE_PUBLICATION></INDEXATION></GESTION>
+    </ann>
+    """
+    core = extract_core(_el(xml), "eforms", "26-100.xml")
+    assert core["id_annonce"] == "ef_26-100"
+    assert core["type_document"] == "ContractNotice"
+    assert core["sous_type_eforms"] == "16"
+    assert core["objet"] == "Objet global"

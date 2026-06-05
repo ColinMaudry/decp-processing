@@ -4,6 +4,7 @@ Aucune I/O : fonctions pures sur des éléments lxml.
 """
 
 from src.config import (
+    BOAMP_AVIS_URL_TEMPLATE,
     BOAMP_INCLUDED_NATURES,
     BOAMP_MISE_EN_CONCURRENCE_NATURES,
 )
@@ -207,4 +208,96 @@ def eforms_acheteur(root) -> dict:
         "acheteur_nom": _text(name_el),
         "acheteur_siret": _text(siret_el),
         "acheteur_ville": _text(city_el),
+    }
+
+
+CORE_KEYS = (
+    "source_format",
+    "id_annonce",
+    "nature_avis",
+    "statut_avis",
+    "famille_avis",
+    "type_document",
+    "sous_type_eforms",
+    "date_publication",
+    "date_limite_reponse",
+    "acheteur_nom",
+    "acheteur_siret",
+    "acheteur_ville",
+    "objet",
+    "url_avis",
+    "fichier_source",
+    "lot_id",
+    "lot_intitule",
+)
+
+
+def _gestion_text(root, name: str) -> str | None:
+    gestion = _find(root, "GESTION")
+    if gestion is None:
+        return None
+    return _text(_find(gestion, name))
+
+
+def _legacy_objet(root):
+    donnees = _find(root, "DONNEES")
+    return _text(_find(donnees, "objet")) if donnees is not None else None
+
+
+def _eforms_objet(root):
+    """Name du ProcurementProject de niveau annonce (enfant direct du ContractNotice)."""
+    cn = _find(root, "ContractNotice")
+    if cn is None:
+        return None
+    pp = _direct_child(cn, "ProcurementProject")
+    return _text(_find(pp, "Name")) if pp is not None else None
+
+
+def _legacy_acheteur(root) -> dict:
+    organisme = _find(root, "organisme")
+    if organisme is None:
+        return {"acheteur_nom": None, "acheteur_siret": None, "acheteur_ville": None}
+    return {
+        "acheteur_nom": _text(_find(organisme, "acheteurPublic")),
+        "acheteur_siret": None,
+        "acheteur_ville": _text(_find(organisme, "ville")),
+    }
+
+
+def extract_core(root, source_format: str, fichier_source: str) -> dict:
+    """Cœur harmonisé (colonnes scalaires) pour une annonce."""
+    nature, _sub, statut, famille = parse_type_avis(root)
+    idweb = _gestion_text(root, "IDWEB")
+    prefix = "ef_" if source_format == "eforms" else "bo_"
+    id_annonce = f"{prefix}{idweb}" if idweb else None
+
+    if source_format == "eforms":
+        acheteur = eforms_acheteur(root)
+        objet = _eforms_objet(root)
+        type_document = _first_child_localname(_find(root, "EFORMS"))
+        sous_type_eforms = _text(_find(root, "SubTypeCode"))
+    else:
+        acheteur = _legacy_acheteur(root)
+        objet = _legacy_objet(root)
+        type_document = _first_child_localname(_find(root, "DONNEES"))
+        sous_type_eforms = None
+
+    return {
+        "source_format": source_format,
+        "id_annonce": id_annonce,
+        "nature_avis": nature,
+        "statut_avis": statut,
+        "famille_avis": famille,
+        "type_document": type_document,
+        "sous_type_eforms": sous_type_eforms,
+        "date_publication": _gestion_text(root, "DATE_PUBLICATION"),
+        "date_limite_reponse": _gestion_text(root, "DATE_LIMITE_REPONSE"),
+        "acheteur_nom": acheteur["acheteur_nom"],
+        "acheteur_siret": acheteur["acheteur_siret"],
+        "acheteur_ville": acheteur["acheteur_ville"],
+        "objet": objet,
+        "url_avis": BOAMP_AVIS_URL_TEMPLATE.format(idweb=idweb) if idweb else None,
+        "fichier_source": fichier_source,
+        "lot_id": None,
+        "lot_intitule": None,
     }
