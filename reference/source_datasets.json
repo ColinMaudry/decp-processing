@@ -366,5 +366,11 @@
     "name": "Données Essentielles - www.antilles-legales.fr et www.guyane-legales.fr",
     "code": "modula_antilles_guyane_legales",
     "owner_org_name": "Modula"
+  },
+  {
+    "id": "68834dc0f3f93ee2ff6050e2",
+    "name": "Données essentielles de la commande publique - Eurométropole de Strasbourg",
+    "code": "eurometropole_strasbourg",
+    "owner_org_name": "Eurométropole de Strasbourg"
   }
 ]

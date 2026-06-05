@@ -183,8 +183,12 @@ def json_stream_to_parquet(
     http_stream_iter = stream_get(url)
 
     stream_replace_iter = stream_replace_bytestring(
-        http_stream_iter, rb"NaN([,\n])", rb"null\1"
-    )  # Nan => null
+        http_stream_iter, b"\xef\xbb\xbf", b""
+    )  # Strip UTF-8 BOM
+
+    stream_replace_iter = stream_replace_bytestring(
+        stream_replace_iter, rb"NaN([,\n])", rb"null\1"
+    )  # NaN => null
 
     # Le dataset AWS scraping a pas mal de bugs de backslash
     if "/68caf6b135f19236a4f37a32/" in url or "/aws/" in url:
