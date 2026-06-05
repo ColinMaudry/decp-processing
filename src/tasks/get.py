@@ -86,6 +86,7 @@ def get_resource(
     output_path.parent.mkdir(exist_ok=True, parents=True)
     url = r["url"]
     file_format = r["format"]
+    logger.debug(f"Récupération de {r['dataset_code']} - {r['ori_filename']}")
     if file_format == "json":
         fields, decp_format = json_stream_to_parquet(url, output_path, r)
     elif file_format == "xml":
@@ -182,8 +183,12 @@ def json_stream_to_parquet(
     http_stream_iter = stream_get(url)
 
     stream_replace_iter = stream_replace_bytestring(
-        http_stream_iter, rb"NaN([,\n])", rb"null\1"
-    )  # Nan => null
+        http_stream_iter, b"\xef\xbb\xbf", b""
+    )  # Strip UTF-8 BOM
+
+    stream_replace_iter = stream_replace_bytestring(
+        stream_replace_iter, rb"NaN([,\n])", rb"null\1"
+    )  # NaN => null
 
     # Le dataset AWS scraping a pas mal de bugs de backslash
     if "/68caf6b135f19236a4f37a32/" in url or "/aws/" in url:
@@ -246,8 +251,6 @@ def json_stream_to_parquet(
 def xml_stream_to_parquet(
     url: str, output_path: Path, fix_chars=False
 ) -> tuple[set, DecpFormat]:
-    """Uniquement utilisé pour les données publiées par l'AIFE."""
-
     decp_format_2022 = DecpFormat("DECP 2022", SCHEMA_MARCHE_2022, "marches.marche")
 
     fields = set()
@@ -263,6 +266,10 @@ def xml_stream_to_parquet(
                 marche = parse_element(elem)
                 new_fields = write_marche_rows(marche, tmp_file, decp_format_2022)
                 fields = fields.union(new_fields)
+        # Vidage du buffer d'écriture sur le disque avant la lecture par son nom :
+        # sans cela, les petits fichiers (< taille du buffer) restent en mémoire et
+        # pl.scan_ndjson lit un fichier vide → 0 ligne (le chemin JSON, lui, fait seek(0)).
+        tmp_file.flush()
         lf = pl.scan_ndjson(tmp_file.name, schema=decp_format_2022.schema)
         sink_to_files(lf, output_path, file_format="parquet")
     return fields, decp_format_2022
@@ -441,9 +448,10 @@ def get_insee_cog_data(url, schema_overrides, columns) -> pl.DataFrame:
 
 def get_clean(
     resource, resources_artifact: list, available_parquet_files: set
-) -> pl.DataFrame or None:
+) -> pl.DataFrame | None:
     logger = get_logger(level=LOG_LEVEL)
 
+    logger.debug(f"get_clean {resource['ori_filename']}")
     with transaction():
         checksum = resource["checksum"]
         parquet_path = RESOURCE_CACHE_DIR / f"{checksum}"
