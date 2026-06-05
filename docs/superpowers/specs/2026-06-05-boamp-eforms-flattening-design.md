@@ -36,12 +36,16 @@ flow Prefect dédié** (`boamp_processing`), indépendant du flow `decp_processi
   eForms `ContractNotice` → `NATURE=APPEL_OFFRE`, `ContractAwardNotice` →
   `NATURE=ATTRIBUTION`). Le filtrage se fait donc par une **seule métadonnée
   commune**, sans distinguer eForms-par-racine vs legacy-par-vocabulaire.
-- **Liste blanche `NATURE` (avis inclus)** : `APPEL_OFFRE`, `QUALIFICATION`,
-  `RECTIFICATIF`, `MODIFICATION` (+ `STATUT` = `INITIAL` / `RECTIFICATIF` /
-  `ANNULATION` / `MODIFICATION` du cycle de vie).
+- **Liste blanche `NATURE` (avis inclus)** :
+  - `APPEL_OFFRE`, `QUALIFICATION`, `RECTIFICATIF`, `MODIFICATION` (+ `STATUT` =
+    `INITIAL` / `RECTIFICATIF` / `ANNULATION` / `MODIFICATION` du cycle de vie) ;
+  - **`PRE-INFORMATION` et `PERIODIQUE` uniquement si le sous-élément est
+    `MISE_EN_CONCURRENCE`** (avis valant appel à la concurrence — eForms
+    `NoticeSubType` 10-14). Les autres sous-cas de pré-information/périodique sont
+    exclus.
 - **Avis exclus** (toute autre `NATURE`, comptés pour le suivi) : `ATTRIBUTION`
-  (recoupe DECP), `PRE-INFORMATION`, `PROFIL_ACHETEUR`, `INTENTION_CONCLURE`,
-  `PERIODIQUE`, `SOUS-TRAITANCE`, `AUTRE`.
+  (recoupe DECP), `PRE-INFORMATION`/`PERIODIQUE` hors `MISE_EN_CONCURRENCE`,
+  `PROFIL_ACHETEUR`, `INTENTION_CONCLURE`, `SOUS-TRAITANCE`, `AUTRE`.
 - **Pas d'enrichissement SIRENE** en v1 (données brutes ; SIREN/SIRET conservés
   quand présents dans le XML).
 
@@ -81,8 +85,9 @@ flow Prefect dédié** (`boamp_processing`), indépendant du flow `decp_processi
    - lister l'index HTML du jour → télécharger les `.xml` via `stream_get`
      (réutilise le cache de `src/config.py`).
 3. **Filtrage (commun aux deux formats)** par `GESTION/REFERENCE/TYPE_AVIS/NATURE` :
-   - `NATURE` ∈ liste blanche (`APPEL_OFFRE`, `QUALIFICATION`, `RECTIFICATIF`,
-     `MODIFICATION`) → **conservé** ;
+   - `NATURE` ∈ {`APPEL_OFFRE`, `QUALIFICATION`, `RECTIFICATIF`, `MODIFICATION`},
+     ou (`PRE-INFORMATION`/`PERIODIQUE` avec sous-élément `MISE_EN_CONCURRENCE`)
+     → **conservé** ;
    - toute autre `NATURE` → **ignoré** (compté par valeur, pour le suivi) ;
    - **format** déterminé en parallèle pour l'aplatissement : présence de
      `<EFORMS>` → eForms (`source_format=eforms`) ; sinon → legacy v240
@@ -135,41 +140,52 @@ l'ensemble dans les colonnes brutes.
 > (CommonAggregate/BasicComponents) ; l'aplatisseur générique les traverse sans
 > énumération préalable.
 
+**Référence `notice-subtype`** : la valeur `sous_type_eforms` (eForms
+`NoticeSubType/SubTypeCode`) se décode via la codelist `codelists/notice-subtype.gc`
+du SDK eForms (colonne `fra_label`). Codes observés dans les données : 16/17/20
+= avis de marché, 19 = concession, 23 = concours (→ inclus) ; 4/14 = préinformation
+(14 = valant appel à la concurrence) ; 29/30/32/33 = attribution (→ exclus).
+
 ### Cœur harmonisé
 
 En **plus** des colonnes brutes ci-dessus, un cœur de colonnes typées propres,
 mappées depuis les deux formats. Aucune perte de donnée : ces champs figurent
 aussi dans les colonnes brutes.
 
-| Colonne                | source eForms                 | source legacy v240             |
-| ---------------------- | ----------------------------- | ------------------------------ |
-| `source_format`        | `eforms`                      | `boamp`                        |
-| `id_annonce`           | `ef_<IDWEB>`                  | `bo_<IDWEB>`                   |
-| `nature_avis`          | `GESTION/…/NATURE` (commun)   | `GESTION/…/NATURE` (commun)    |
-| `statut_avis`          | `GESTION/…/STATUT` (commun)   | `GESTION/…/STATUT` (commun)    |
-| `famille_avis`         | `GESTION/…/FAMILLE` (commun)  | `GESTION/…/FAMILLE` (commun)   |
-| `type_document`        | racine UBL (`ContractNotice`) | famille `DONNEES` (`MAPA`…)    |
-| `sous_type_eforms`     | `SubTypeCode` (16/17/19…)     | —                              |
-| `date_publication`     | `IssueDate`                   | `GESTION/.../DATE_PUBLICATION` |
-| `date_limite_reponse`  | deadline de soumission        | `DATE_LIMITE_REPONSE`          |
-| `acheteur_nom`         | organisation déréférencée     | `organisme/acheteurPublic`     |
-| `acheteur_siret`       | `CompanyID` (si présent)      | (si présent)                   |
-| `objet`                | `ProcurementProject` Name     | `description/objet`            |
-| `nature_marche`        | classification                | `natureMarche`                 |
-| `type_procedure`       | `ProcedureCode`               | `procedure`                    |
-| `cpv_principal`        | `MainCommodityClassification` | descripteurs CPV               |
-| `lot_id`               | `ProcurementProjectLot` ID    | numéro de `lots/lot`           |
-| `lot_intitule`         | lot Name                      | intitulé du lot                |
-| `lot_cpv_principal`    | lot CPV principal             | —                              |
-| `lot_cpv_additionnels` | lot CPV additionnels (liste)  | —                              |
-| `url_avis`             | construite depuis IDWEB       | construite depuis IDWEB        |
-| `fichier_source`       | nom du fichier DILA           | nom du fichier DILA            |
+| Colonne                | source eForms                                                       | source legacy v240             |
+| ---------------------- | ------------------------------------------------------------------- | ------------------------------ |
+| `source_format`        | `eforms`                                                            | `boamp`                        |
+| `id_annonce`           | `ef_<IDWEB>`                                                        | `bo_<IDWEB>`                   |
+| `nature_avis`          | `GESTION/…/NATURE` (commun)                                         | `GESTION/…/NATURE` (commun)    |
+| `statut_avis`          | `GESTION/…/STATUT` (commun)                                         | `GESTION/…/STATUT` (commun)    |
+| `famille_avis`         | `GESTION/…/FAMILLE` (commun)                                        | `GESTION/…/FAMILLE` (commun)   |
+| `type_document`        | racine UBL (`ContractNotice`)                                       | famille `DONNEES` (`MAPA`…)    |
+| `sous_type_eforms`     | `SubTypeCode` (16/17/19…)                                           | —                              |
+| `date_publication`     | `IssueDate`                                                         | `GESTION/.../DATE_PUBLICATION` |
+| `date_limite_reponse`  | deadline de soumission                                              | `DATE_LIMITE_REPONSE`          |
+| `acheteur_nom`         | Organization déréf. → `PartyName/Name`                              | `organisme/acheteurPublic`     |
+| `acheteur_siret`       | Organization déréf. → `PartyLegalEntity/CompanyID` (SIRET, présent) | (si présent)                   |
+| `acheteur_ville`       | Organization déréf. → `PostalAddress/CityName`                      | `organisme/adr/ville`          |
+| `objet`                | `ProcurementProject` Name                                           | `description/objet`            |
+| `nature_marche`        | classification                                                      | `natureMarche`                 |
+| `type_procedure`       | `ProcedureCode`                                                     | `procedure`                    |
+| `cpv_principal`        | `MainCommodityClassification`                                       | descripteurs CPV               |
+| `lot_id`               | `ProcurementProjectLot` ID                                          | numéro de `lots/lot`           |
+| `lot_intitule`         | lot Name                                                            | intitulé du lot                |
+| `lot_cpv_principal`    | lot CPV principal                                                   | —                              |
+| `lot_cpv_additionnels` | lot CPV additionnels (liste)                                        | —                              |
+| `url_avis`             | construite depuis IDWEB                                             | construite depuis IDWEB        |
+| `fichier_source`       | nom du fichier DILA                                                 | nom du fichier DILA            |
 
 - **Clé de ligne logique** : `id_annonce` + `lot_id`.
-- **Déréférencement intra-XML (eForms)** : l'acheteur est référencé par ID vers
-  `efac:Organizations` ; le résoudre pour remplir `acheteur_nom` / `acheteur_siret`
-  n'est **pas** de l'enrichissement SIRENE, juste une résolution interne au
-  document.
+- **Déréférencement intra-XML (eForms)** — jointure interne au document :
+  `ContractingParty/Party/PartyIdentification/ID` (ex. `ORG-0001`) → la
+  `efac:Organizations/Organization/Company` dont `PartyIdentification/ID` est
+  égal, d'où `PartyName/Name` (nom), `PartyLegalEntity/CompanyID` (**SIRET, bien
+  présent**), `PostalAddress/*`, `Contact/*`. **Ne pas confondre l'acheteur avec
+  le `ServiceProviderParty`** (eSender plateforme, ex. `ORG-0000`) imbriqué dans
+  `ContractingParty`. Ce n'est **pas** de l'enrichissement SIRENE, juste une
+  résolution interne. En cas de multi-acheteurs, le cœur prend le premier.
 
 > Le cœur est volontairement minimal en v1 et pourra être étendu sans migration
 > (les données restent disponibles dans les colonnes brutes).
@@ -187,13 +203,18 @@ aussi dans les colonnes brutes.
   - un `ContractNotice` eForms,
   - un legacy de type avis de marché (`FNSimple` ou `MAPA`),
   - un `ContractAwardNotice` (attribution) et un `PriorInformationNotice`
-    (préinformation) pour vérifier qu'ils sont **bien ignorés**.
+    « information seule » pour vérifier qu'ils sont **bien ignorés**,
+  - un avis `PRE-INFORMATION`/`MISE_EN_CONCURRENCE` pour vérifier qu'il est **bien
+    conservé** (cas limite).
 - Tests unitaires :
   - aplatissement générique (chemins-feuilles, colonnes liste),
   - grain lot + fallback annonce-sans-lot,
   - mapping du cœur harmonisé (dont préfixe `ef_`/`bo_` de `id_annonce`),
-  - filtrage par liste blanche `NATURE` (commun eForms + legacy) : inclusion de
-    `APPEL_OFFRE`/`QUALIFICATION`, exclusion de `ATTRIBUTION`/`PRE-INFORMATION`/etc.,
+  - **déréférencement acheteur** : `acheteur_nom`/`acheteur_siret` résolus depuis
+    `efac:Organizations`, **sans** prendre le `ServiceProviderParty`,
+  - filtrage `NATURE` (commun eForms + legacy) : inclusion de
+    `APPEL_OFFRE`/`QUALIFICATION` et de `PRE-INFORMATION`/`MISE_EN_CONCURRENCE`,
+    exclusion de `ATTRIBUTION`/`PRE-INFORMATION` (autres sous-cas)/etc.,
   - détection du format (`source_format`) via présence de `<EFORMS>`,
   - exclusion `HTML`/`HTMLSYNTHESE`.
 
