@@ -153,7 +153,28 @@ def publish_to_s3(file: Path, prefix: str = "") -> None:
 
 
 def publish_boamp_to_datagouv():
-    pass
+    """Met à jour les ressources parquet/CSV BOAMP sur data.gouv.fr."""
+    from src.config import (
+        BOAMP_CSV_RESOURCE_ID,
+        BOAMP_DATASET_ID,
+        BOAMP_PARQUET_RESOURCE_ID,
+    )
+
+    logger = get_logger(level=LOG_LEVEL)
+    uploads = [
+        (DIST_DIR / "boamp.parquet", BOAMP_PARQUET_RESOURCE_ID),
+        (DIST_DIR / "boamp.csv", BOAMP_CSV_RESOURCE_ID),
+    ]
+    for file_path, resource_id in uploads:
+        if not resource_id:
+            logger.warning(f"Resource id manquant pour {file_path.name}, ignoré.")
+            continue
+        logger.info(f"Mise à jour de {file_path.name}...")
+        result = update_resource(
+            BOAMP_DATASET_ID, resource_id, str(file_path), DATAGOUVFR_API_KEY
+        )
+        if result.get("success") is True:
+            logger.info("OK")
 
 
 def publish_scrap_to_datagouv(year: str, month: str, file_path, target):
