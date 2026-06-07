@@ -1,5 +1,6 @@
 """Flow boamp_processing : acquisition + aplatissement + publication (issue #174)."""
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -15,6 +16,7 @@ from src.config import (
     DECP_PROCESSING_PUBLISH,
     DIST_DIR,
     LOG_LEVEL,
+    MAX_PREFECT_WORKERS,
 )
 from src.tasks.boamp.fetch import (
     download_xml,
@@ -89,12 +91,18 @@ def boamp_processing():
     start = max(date.fromisoformat(BOAMP_START_DATE), crawl_start)
     end = date.today()
     recrawl_floor = end - timedelta(days=BOAMP_RECRAWL_DAYS)
-    for d in iter_days(start, end):
-        part = _partition_path(d)
-        if part.exists() and d < recrawl_floor:
-            continue
+    days_to_process = [
+        d
+        for d in iter_days(start, end)
+        if not (_partition_path(d).exists() and d < recrawl_floor)
+    ]
+    futures = {}
+    with ThreadPoolExecutor(max_workers=MAX_PREFECT_WORKERS) as executor:
+        for d in days_to_process:
+            futures[executor.submit(process_day, d)] = d
+    for future, d in futures.items():
         try:
-            process_day(d)
+            future.result()
         except Exception as e:
             logger.error(f"❌ Jour {d.isoformat()} en échec ({type(e).__name__}): {e}")
 
