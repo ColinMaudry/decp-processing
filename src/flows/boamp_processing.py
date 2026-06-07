@@ -1,6 +1,5 @@
 """Flow boamp_processing : acquisition + aplatissement + publication (issue #174)."""
 
-from concurrent.futures import ThreadPoolExecutor
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -27,7 +26,7 @@ from src.tasks.boamp.fetch import (
 from src.tasks.boamp.flatten import annonce_to_rows, concat_partitions, rows_to_frame
 from src.tasks.output import sink_to_files
 from src.tasks.publish import publish_boamp_to_datagouv
-from src.tasks.utils import get_logger, print_all_config
+from src.tasks.utils import get_logger, print_all_config, run_in_pool
 
 
 def _partition_path(d: date) -> Path:
@@ -96,15 +95,13 @@ def boamp_processing():
         for d in iter_days(start, end)
         if not (_partition_path(d).exists() and d < recrawl_floor)
     ]
-    futures = {}
-    with ThreadPoolExecutor(max_workers=MAX_PREFECT_WORKERS) as executor:
-        for d in days_to_process:
-            futures[executor.submit(process_day, d)] = d
-    for future, d in futures.items():
-        try:
-            future.result()
-        except Exception as e:
-            logger.error(f"❌ Jour {d.isoformat()} en échec ({type(e).__name__}): {e}")
+    run_in_pool(
+        process_day,
+        days_to_process,
+        max_workers=MAX_PREFECT_WORKERS,
+        logger=logger,
+        label=lambda d: f"jour {d.isoformat()}",
+    )
 
     # 3. Concaténation -> écriture -> publication.
     logger.info("Concaténation des partitions BOAMP...")

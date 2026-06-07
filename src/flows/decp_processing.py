@@ -1,6 +1,5 @@
 import os
 import shutil
-from concurrent.futures import ThreadPoolExecutor
 
 import polars as pl
 import polars.selectors as cs
@@ -45,6 +44,7 @@ from src.tasks.utils import (
     get_logger,
     print_all_config,
     remove_unused_cache,
+    run_in_pool,
 )
 
 
@@ -182,27 +182,18 @@ def process_batch(
     logger.info(
         f"🗃️ Traitement du lot {i // batch_size + 1} / {len(resources_to_process) // batch_size + 1}"
     )
-    futures = {}
-    with ThreadPoolExecutor(max_workers=MAX_PREFECT_WORKERS) as executor:
-        for resource in batch:
-            future = executor.submit(
-                get_clean, resource, resources_artifact, available_parquet_files
-            )
-            futures[future] = full_resource_name(resource)
-
-    for future in futures:
-        try:
-            result = future.result()
-            if result is not None:
-                parquet_files.append(result)
-        except Exception as e:
-            resource_name = futures[future]
-            logger.error(
-                f"❌ Erreur de traitement de {resource_name} ({type(e).__name__}):"
-            )
-            logger.info(e)
-    # Nettoyage explicite
-    futures.clear()
+    results = run_in_pool(
+        lambda resource: get_clean(
+            resource, resources_artifact, available_parquet_files
+        ),
+        batch,
+        max_workers=MAX_PREFECT_WORKERS,
+        logger=logger,
+        label=full_resource_name,
+    )
+    for _resource, result in results:
+        if result is not None:
+            parquet_files.append(result)
 
 
 @sirene_preprocess.on_failure
