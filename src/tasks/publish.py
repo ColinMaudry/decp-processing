@@ -152,6 +152,10 @@ def publish_to_s3(file: Path, prefix: str = "") -> None:
     logger.info("OK")
 
 
+def publish_boamp_to_datagouv():
+    pass
+
+
 def publish_scrap_to_datagouv(year: str, month: str, file_path, target):
     dataset_ids = {
         "aws": "68caf6b135f19236a4f37a32",
