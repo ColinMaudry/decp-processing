@@ -152,7 +152,7 @@ def generate_final_schema(lf):
             {"name": col, "type": polars_frictionless_mapping[polars_type]}
         )
 
-    # récupération de data/data_fields.json
+    # récupération du schéma de base
     with open(REFERENCE_DIR / "schema_base.json", "r", encoding="utf-8") as file:
         base_json = json.load(file)
 
@@ -162,7 +162,15 @@ def generate_final_schema(lf):
         sorted(base_json["fields"] + frictonless_schema, key=itemgetter("name")),
         itemgetter("name"),
     )
+
     merged_schema = {"fields": [dict(ChainMap(*g)) for k, g in merged_fields]}
+
+    # Suppression des entrées du schéma qui n'étaient pas dans le schéma de base
+    for i, o in enumerate(merged_schema["fields"]):
+        if "title" in o:
+            continue
+        else:
+            del merged_schema["fields"][i]
 
     # création de dist/schema.json
     with open(DIST_DIR / "schema.json", "w", encoding="utf-8") as file:
