@@ -205,9 +205,9 @@ def eforms_acheteur(root) -> dict:
     company = _find_company_by_id(root, org_id)
     if company is None:
         return empty
-    name_el = _find(_find(company, "PartyName") or company, "Name")
-    siret_el = _find(_find(company, "PartyLegalEntity") or company, "CompanyID")
-    city_el = _find(_find(company, "PostalAddress") or company, "CityName")
+    name_el = _find(company, "Name")
+    siret_el = _find(company, "CompanyID")
+    city_el = _find(company, "CityName")
     return {
         "acheteur_nom": _text(name_el),
         "acheteur_siret": _text(siret_el),
