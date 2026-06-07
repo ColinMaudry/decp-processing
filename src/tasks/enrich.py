@@ -374,6 +374,11 @@ def geocode_sirene(lf: pl.LazyFrame):
 
     siret_latlong_path = DATA_DIR / "siret_latlong.parquet"
     lf_siret_latlong_updated.sink_parquet(siret_latlong_path)
+
+    lf = lf.drop(
+        cs.by_name("geocoded_at", "score", "source", "status"), cs.ends_with("_right")
+    )
+
     return lf, siret_latlong_path
 
 
