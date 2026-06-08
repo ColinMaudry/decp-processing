@@ -42,13 +42,15 @@ def sink_to_files(
 
         # Utilisation du parquet plutôt que de relaculer le plan de requête du LazyFrame
         if "csv" in file_format:
-            pl.scan_parquet(f"{path}.parquet").sink_csv(
-                f"{path}.csv", engine="streaming"
-            )
+            pl.scan_parquet(f"{path}.parquet").select(
+                cs.exclude(cs.by_dtype(pl.Struct, pl.List, pl.Array))
+            ).sink_csv(f"{path}.csv", engine="streaming")
 
     elif "csv" in file_format:
         # Fallback if only CSV is requested
-        lf.sink_csv(f"{path}.csv", engine="streaming")
+        lf.select(cs.exclude(cs.by_dtype(pl.Struct, pl.List, pl.Array))).sink_csv(
+            f"{path}.csv", engine="streaming"
+        )
 
     # Si ça peut réduire un peu l'empreinte mémoire
     del lf
