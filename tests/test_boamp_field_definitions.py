@@ -90,6 +90,50 @@ _FIELDS_JSON = {
 }
 
 
+_FIELDS_JSON_LOT = {
+    "fields": [
+        # xpath avec /@ DANS un prédicat → ne doit PAS être filtré
+        {
+            "id": "BT-137-Lot",
+            "name": "Lot Identifier",
+            "xpathAbsolute": "/*/cac:ProcurementProjectLot[cbc:ID/@schemeName='Lot']/cbc:ID",
+        },
+        # xpath avec /@ EN dehors d'un prédicat → doit être filtré
+        {
+            "id": "BT-137-attr",
+            "name": "Lot Identifier scheme",
+            "xpathAbsolute": "/*/cac:ProcurementProjectLot/cbc:ID/@schemeName",
+        },
+    ]
+}
+
+_FIELD_FR_LOT = """<?xml version="1.0" encoding="UTF-8"?>
+<properties>
+  <entry key="field|description|BT-137-Lot">Identifiant du lot.</entry>
+</properties>
+"""
+
+
+def test_build_eforms_index_lot_predicate_not_filtered(tmp_path):
+    """Un xpath avec /@ DANS un prédicat [cbc:ID/@schemeName='Lot'] ne doit pas
+    être rejeté par le filtre des attributs — il décrit un élément, pas un attribut."""
+    (tmp_path / "field_fr.xml").write_text(_FIELD_FR_LOT, encoding="utf-8")
+    (tmp_path / "fields.json").write_text(
+        json.dumps(_FIELDS_JSON_LOT), encoding="utf-8"
+    )
+    idx = build_eforms_index(tmp_path)
+    # BT-137-Lot doit être indexé : son xpath contient /@ seulement dans un prédicat
+    assert ("ProcurementProjectLot", "ID") in idx, (
+        "ProcurementProjectLot fields filtered out by false positive on /@ in predicate"
+    )
+    assert idx[("ProcurementProjectLot", "ID")] == "Identifiant du lot."
+    # BT-137-attr doit être ignoré : son xpath finit sur un attribut
+    # (le résultat normalisé serait ('ProcurementProjectLot', 'ID') aussi, mais
+    # le champ est ignoré avant normalisation)
+    # Vérifié indirectement : BT-137-attr n'a pas de desc FR, donc pas d'impact sur
+    # la valeur — on vérifie surtout que BT-137-Lot passe bien.
+
+
 def test_build_eforms_index(tmp_path):
     (tmp_path / "field_fr.xml").write_text(_FIELD_FR, encoding="utf-8")
     (tmp_path / "fields.json").write_text(json.dumps(_FIELDS_JSON), encoding="utf-8")

@@ -89,7 +89,12 @@ def build_eforms_index(sdk_dir) -> dict[tuple[str, ...], str]:
     paths: dict[tuple[str, ...], set[str]] = {}
     for field in fields:
         xpath = field.get("xpathAbsolute", "")
-        if not xpath or "/@" in xpath or xpath.lstrip().startswith("@"):
+        if not xpath:
+            continue
+        # Strip predicates before checking for attribute steps: a /@ inside
+        # [...] is part of a predicate condition, not an attribute-axis step.
+        xpath_no_pred = _PREDICATE.sub("", xpath)
+        if "/@" in xpath_no_pred or xpath_no_pred.lstrip().startswith("@"):
             continue
         key = normalize_xpath(xpath)
         if not key:
