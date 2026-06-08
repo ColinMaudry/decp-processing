@@ -6,6 +6,8 @@ from pathlib import Path
 from src.tasks.boamp.field_definitions import (
     build_eforms_index,
     build_legacy_index,
+    column_to_ubl_path,
+    is_eforms,
     normalize_xpath,
 )
 
@@ -92,3 +94,23 @@ def test_build_eforms_index(tmp_path):
     # champ d'attribut ignoré : BT-03 (@listName) ne crée pas d'entrée propre
     # champ sans FR -> fallback sur le name EN
     assert idx[("Foo", "Bar")] == "Sans FR"
+
+
+def test_is_eforms():
+    assert is_eforms("ann_DONNEES_EFORMS_ContractNotice_RegulatoryDomain")
+    assert is_eforms("ProcurementProjectLot_TenderingTerms_FundingProgramCode")
+    assert not is_eforms("ann_DONNEES_DSP_initial_objet")
+
+
+def test_column_to_ubl_path_notice_level():
+    col = "ann_DONNEES_EFORMS_ContractNotice_RegulatoryDomain"
+    assert column_to_ubl_path(col) == ("RegulatoryDomain",)
+
+
+def test_column_to_ubl_path_lot_level():
+    col = "ProcurementProjectLot_TenderingTerms_FundingProgramCode"
+    assert column_to_ubl_path(col) == (
+        "ProcurementProjectLot",
+        "TenderingTerms",
+        "FundingProgramCode",
+    )

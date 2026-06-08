@@ -98,3 +98,49 @@ def build_eforms_index(sdk_dir) -> dict[tuple[str, ...], str]:
         if desc:
             paths.setdefault(key, set()).add(desc)
     return {key: " / ".join(sorted(values)) for key, values in paths.items()}
+
+
+EFORMS_DOCTYPES = frozenset(
+    {
+        "ContractNotice",
+        "ContractAwardNotice",
+        "PriorInformationNotice",
+        "BusinessRegistrationInformationNotice",
+    }
+)
+
+# Segments purement structurels, omis de la colonne `definitions`.
+STRUCTURAL = (
+    frozenset(
+        {
+            "ann",
+            "DONNEES",
+            "EFORMS",
+            "UBLExtensions",
+            "UBLExtension",
+            "ExtensionContent",
+            "EformsExtension",
+        }
+    )
+    | EFORMS_DOCTYPES
+)
+
+
+def is_eforms(col: str) -> bool:
+    return "EFORMS" in col or col.startswith("ProcurementProjectLot")
+
+
+def column_to_ubl_path(col: str) -> tuple[str, ...]:
+    """Nom de colonne eForms -> chemin UBL relatif à /* (pour matcher l'index).
+
+    - ``ann_DONNEES_EFORMS_<DocType>_…`` -> segments après <DocType> ;
+    - ``ProcurementProjectLot_…`` -> tels quels (xpaths SDK sous /*/cac:ProcurementProjectLot).
+    Conserve les wrappers (UBLExtensions…) car ils font partie des xpaths du SDK.
+    """
+    parts = col.split("_")
+    if parts[:3] == ["ann", "DONNEES", "EFORMS"]:
+        rest = parts[3:]
+        if rest and rest[0] in EFORMS_DOCTYPES:
+            rest = rest[1:]
+        return tuple(rest)
+    return tuple(parts)
