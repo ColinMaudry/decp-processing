@@ -144,3 +144,36 @@ def column_to_ubl_path(col: str) -> tuple[str, ...]:
             rest = rest[1:]
         return tuple(rest)
     return tuple(parts)
+
+
+_NOT_FOUND = "(définition introuvable)"
+
+
+def resolve_column(
+    col: str,
+    legacy_index: dict[str, str],
+    eforms_index: dict[tuple[str, ...], str],
+) -> tuple[str, str]:
+    """(definitions multi-lignes, definition_feuille) pour une colonne.
+
+    Les segments structurels sont omis. eForms : la feuille est résolue par match
+    du chemin UBL complet ; les segments intermédiaires sont best-effort
+    (souvent introuvables). Legacy : chaque segment via le dict par nom.
+    """
+    meaningful = [s for s in col.split("_") if s not in STRUCTURAL]
+    if not meaningful:
+        return "", ""
+
+    if is_eforms(col):
+        leaf_def = eforms_index.get(column_to_ubl_path(col), "")
+        lines = []
+        for seg in meaningful:
+            if seg is meaningful[-1] and leaf_def:
+                lines.append(f"{seg} : {leaf_def}")
+            else:
+                lines.append(f"{seg} : {_NOT_FOUND}")
+        return "\n".join(lines), (leaf_def or _NOT_FOUND)
+
+    lines = [f"{seg} : {legacy_index.get(seg, _NOT_FOUND)}" for seg in meaningful]
+    leaf_def = legacy_index.get(meaningful[-1], _NOT_FOUND)
+    return "\n".join(lines), leaf_def

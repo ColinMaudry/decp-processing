@@ -9,6 +9,7 @@ from src.tasks.boamp.field_definitions import (
     column_to_ubl_path,
     is_eforms,
     normalize_xpath,
+    resolve_column,
 )
 
 
@@ -114,3 +115,71 @@ def test_column_to_ubl_path_lot_level():
         "TenderingTerms",
         "FundingProgramCode",
     )
+
+
+_NOT_FOUND = "(définition introuvable)"
+
+
+def test_resolve_column_legacy():
+    legacy = {
+        "DSP": "Délégation de service public",
+        "adr": "Informations d'adresse",
+        "cp": "Code postal",
+    }
+    eforms = {}
+    col = "ann_DONNEES_DSP_adr_cp"
+    defs, leaf = resolve_column(col, legacy, eforms)
+    # 'ann' et 'DONNEES' omis (structurels)
+    assert defs == (
+        "DSP : Délégation de service public\n"
+        "adr : Informations d'adresse\n"
+        "cp : Code postal"
+    )
+    assert leaf == "Code postal"
+
+
+def test_resolve_column_legacy_missing_segment():
+    legacy = {"cp": "Code postal"}
+    defs, leaf = resolve_column("ann_DONNEES_DSP_cp", legacy, {})
+    assert defs == f"DSP : {_NOT_FOUND}\ncp : Code postal"
+    assert leaf == "Code postal"
+
+
+def test_resolve_column_eforms_leaf_resolved():
+    eforms = {("RegulatoryDomain",): "Base juridique de la procedure."}
+    col = "ann_DONNEES_EFORMS_ContractNotice_RegulatoryDomain"
+    defs, leaf = resolve_column(col, {}, eforms)
+    # seuls les segments non-structurels restent : RegulatoryDomain (la feuille)
+    assert defs == "RegulatoryDomain : Base juridique de la procedure."
+    assert leaf == "Base juridique de la procedure."
+
+
+def test_resolve_column_eforms_intermediate_best_effort():
+    eforms = {
+        (
+            "UBLExtensions",
+            "UBLExtension",
+            "ExtensionContent",
+            "EformsExtension",
+            "Organizations",
+            "Organization",
+            "Company",
+            "PostalAddress",
+            "CityName",
+        ): "Ville de l'organisation.",
+    }
+    col = (
+        "ann_DONNEES_EFORMS_ContractNotice_UBLExtensions_UBLExtension_"
+        "ExtensionContent_EformsExtension_Organizations_Organization_Company_"
+        "PostalAddress_CityName"
+    )
+    defs, leaf = resolve_column(col, {}, eforms)
+    # wrappers structurels omis ; intermédiaires non-feuille -> introuvable ; feuille OK
+    assert defs == (
+        f"Organizations : {_NOT_FOUND}\n"
+        f"Organization : {_NOT_FOUND}\n"
+        f"Company : {_NOT_FOUND}\n"
+        f"PostalAddress : {_NOT_FOUND}\n"
+        "CityName : Ville de l'organisation."
+    )
+    assert leaf == "Ville de l'organisation."
