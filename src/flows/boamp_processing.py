@@ -7,7 +7,6 @@ from lxml import etree
 from prefect import flow, task
 
 from src.config import (
-    BOAMP_BACKFILL_YEARS,
     BOAMP_DATASET_ID,
     BOAMP_PARTITIONS_DIR,
     BOAMP_RECRAWL_DAYS,
@@ -19,7 +18,6 @@ from src.config import (
 )
 from src.tasks.boamp.fetch import (
     download_xml,
-    iter_archive_xml,
     iter_days,
     list_day_files,
 )
@@ -43,9 +41,12 @@ def _rows_from_bytes(xml_bytes: bytes, source_name: str) -> list[dict]:
     return annonce_to_rows(root, source_name)
 
 
-@task(retries=2, timeout_seconds=1800)
 def process_day(d: date) -> Path:
-    """Télécharge, aplatit et écrit la partition parquet d'un jour."""
+    """Télécharge, aplatit et écrit la partition parquet d'un jour.
+
+    Fonction simple (non-task) parallélisée à l'intérieur de ``process_day_batch``,
+    sur le modèle de ``get_clean`` dans le flow ``decp_processing``.
+    """
     logger = get_logger(level=LOG_LEVEL)
     rows: list[dict] = []
     for filename in list_day_files(d):
@@ -58,17 +59,21 @@ def process_day(d: date) -> Path:
     return part
 
 
-@task(retries=1, timeout_seconds=7200)
-def backfill_year(year: int) -> Path:
-    """Aplatit toutes les archives tar.gz d'une année dans un parquet annuel."""
+@task(retries=2, timeout_seconds=7200)
+def process_day_batch(days: list[date]) -> None:
+    """Traite un lot de jours en parallèle (1 task run Prefect par lot)."""
     logger = get_logger(level=LOG_LEVEL)
-    rows: list[dict] = []
-    for name, xml_bytes in iter_archive_xml(year):
-        rows.extend(_rows_from_bytes(xml_bytes, Path(name).name))
-    out = BOAMP_PARTITIONS_DIR / f"backfill_{year}.parquet"
-    rows_to_frame(rows).write_parquet(out)
-    logger.info(f"🗄️ Backfill {year} : {len(rows)} lignes -> {out.name}")
-    return out
+    logger.info(
+        f"🗃️ Traitement du lot de {len(days)} jours "
+        f"({days[0].isoformat()} → {days[-1].isoformat()})"
+    )
+    run_in_pool(
+        process_day,
+        days,
+        max_workers=MAX_PREFECT_WORKERS,
+        logger=logger,
+        label=lambda d: f"jour {d.isoformat()}",
+    )
 
 
 @flow(log_prints=True)
@@ -77,17 +82,11 @@ def boamp_processing():
     logger.info("🚀  Début du flow boamp_processing")
     print_all_config()
 
-    # 1. Backfill des années complètes (une fois, via marqueur).
-    for year in BOAMP_BACKFILL_YEARS:
-        marker = BOAMP_PARTITIONS_DIR / f".backfill_{year}.done"
-        if marker.exists():
-            continue
-        backfill_year(year)
-        marker.touch()
-
-    # 2. Incrémental sur la période courante (crawl quotidien).
-    crawl_start = date(max(BOAMP_BACKFILL_YEARS) + 1, 1, 1)
-    start = max(date.fromisoformat(BOAMP_START_DATE), crawl_start)
+    # 1. Crawl quotidien sur toute la période (BOAMP_START_DATE -> aujourd'hui).
+    # Le crawl jour-par-jour est l'unique voie d'acquisition : les archives bulk
+    # annuelles de FluxHistorique se sont révélées trop fragiles (imbrication
+    # tar/zip/tar mal étiquetée) et n'existent pas pour l'année courante (#174).
+    start = date.fromisoformat(BOAMP_START_DATE)
     end = date.today()
     recrawl_floor = end - timedelta(days=BOAMP_RECRAWL_DAYS)
     days_to_process = [
@@ -95,15 +94,11 @@ def boamp_processing():
         for d in iter_days(start, end)
         if not (_partition_path(d).exists() and d < recrawl_floor)
     ]
-    run_in_pool(
-        process_day,
-        days_to_process,
-        max_workers=MAX_PREFECT_WORKERS,
-        logger=logger,
-        label=lambda d: f"jour {d.isoformat()}",
-    )
+    batch_size = 30
+    for i in range(0, len(days_to_process), batch_size):
+        process_day_batch(days_to_process[i : i + batch_size])
 
-    # 3. Concaténation -> écriture -> publication.
+    # 2. Concaténation -> écriture -> publication.
     logger.info("Concaténation des partitions BOAMP...")
     lf = concat_partitions(BOAMP_PARTITIONS_DIR)
     sink_to_files(lf, DIST_DIR / "boamp")

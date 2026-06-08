@@ -1,13 +1,10 @@
 """Acquisition des annonces BOAMP depuis l'archive DILA (issue #174)."""
 
 import re
-import tarfile
-import tempfile
 from datetime import date, timedelta
 
 from src.config import (
     BOAMP_ARCHIVE_CUTOFF_YEAR,
-    BOAMP_BACKFILL_ARCHIVES,
     BOAMP_BASE_URL,
 )
 from src.tasks.get import stream_get
@@ -40,29 +37,3 @@ def list_day_files(d: date) -> list[str]:
 def download_xml(d: date, filename: str) -> bytes:
     """Télécharge un fichier d'annonce d'un jour donné."""
     return b"".join(stream_get(day_index_url(d) + filename))
-
-
-def year_archive_urls(year: int) -> list[str]:
-    """Retourne les URLs des archives .tar.gz pour une année donnée."""
-    base = f"{BOAMP_BASE_URL}/FluxHistorique/Boamp_v240/{year}"
-    return [f"{base}/{name}.tar.gz" for name in BOAMP_BACKFILL_ARCHIVES]
-
-
-def iter_archive_xml(year: int):
-    """Yield (member_name, xml_bytes) pour chaque .xml des archives .tar.gz d'une année."""
-    for url in year_archive_urls(year):
-        with tempfile.NamedTemporaryFile(suffix=".tar.gz") as tmp:
-            for chunk in stream_get(url):
-                tmp.write(chunk)
-            tmp.flush()
-            try:
-                archive = tarfile.open(tmp.name, "r:gz")
-            except (tarfile.ReadError, FileNotFoundError, EOFError):
-                continue
-            with archive:
-                for member in archive:
-                    if not member.isfile() or not member.name.endswith(".xml"):
-                        continue
-                    extracted = archive.extractfile(member)
-                    if extracted is not None:
-                        yield member.name, extracted.read()

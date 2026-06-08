@@ -232,20 +232,9 @@ BOAMP_BASE_URL = os.getenv(
 # Première date traitée (incluse). Les fichiers < cette date sont ignorés.
 BOAMP_START_DATE = os.getenv("BOAMP_START_DATE", "2024-01-01")
 
-# Années traitées en backfill via les archives .tar.gz de FluxHistorique.
-BOAMP_BACKFILL_YEARS = [
-    int(y) for y in os.getenv("BOAMP_BACKFILL_YEARS", "2024,2025").split(",") if y
-]
-
 # Année à partir de laquelle le flux est servi dans /OPENDATA/BOAMP/<année>/
 # (et non FluxHistorique). Les années < cette valeur sont en FluxHistorique.
 BOAMP_ARCHIVE_CUTOFF_YEAR = int(os.getenv("BOAMP_ARCHIVE_CUTOFF_YEAR", "2026"))
-
-# Archives bulk téléchargées pour le backfill (uniquement les appels d'offres "AO" ;
-# les "IC-AA" = avis d'attribution, exclus du périmètre).
-BOAMP_BACKFILL_ARCHIVES = os.getenv(
-    "BOAMP_BACKFILL_ARCHIVES", "BOAMP-J-AO,BOAMP-N-AO,MAPA-AO"
-).split(",")
 
 # Nombre de derniers jours re-crawlés à chaque run (rattrapage des ajouts tardifs).
 BOAMP_RECRAWL_DAYS = int(os.getenv("BOAMP_RECRAWL_DAYS", "7"))

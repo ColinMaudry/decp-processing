@@ -1,14 +1,10 @@
-import io
-import tarfile
 from datetime import date
 
 import src.tasks.boamp.fetch as fetch
 from src.tasks.boamp.fetch import (
     day_index_url,
-    iter_archive_xml,
     iter_days,
     list_day_files,
-    year_archive_urls,
 )
 
 INDEX_HTML = """
@@ -40,34 +36,3 @@ def test_list_day_files_parses_and_dedupes(monkeypatch):
     )
     files = list_day_files(date(2026, 1, 31))
     assert files == ["26-10240.xml", "26-10979.xml"]
-
-
-def test_year_archive_urls_uses_ao_only(monkeypatch):
-    urls = year_archive_urls(2024)
-    assert all(u.endswith(".tar.gz") for u in urls)
-    assert any("MAPA-AO" in u for u in urls)
-    assert not any("IC-AA" in u for u in urls)  # attributions exclues
-
-
-def _make_targz(members: dict[str, bytes]) -> bytes:
-    buf = io.BytesIO()
-    with tarfile.open(fileobj=buf, mode="w:gz") as tf:
-        for name, content in members.items():
-            info = tarfile.TarInfo(name=name)
-            info.size = len(content)
-            tf.addfile(info, io.BytesIO(content))
-    return buf.getvalue()
-
-
-def test_iter_archive_xml_yields_xml_members(monkeypatch):
-    targz = _make_targz(
-        {"a/26-1.xml": b"<ann/>", "a/readme.txt": b"x", "a/26-2.xml": b"<ann/>"}
-    )
-    monkeypatch.setattr("src.tasks.boamp.fetch.year_archive_urls", lambda y: ["u1"])
-    monkeypatch.setattr(
-        "src.tasks.boamp.fetch.stream_get", lambda url, **kw: iter([targz])
-    )
-    out = list(iter_archive_xml(2024))
-    names = sorted(n for n, _ in out)
-    assert names == ["a/26-1.xml", "a/26-2.xml"]
-    assert all(content == b"<ann/>" for _, content in out)
