@@ -4,7 +4,9 @@ Fonctions pures : parsing des XSD legacy et du SDK eForms, résolution des
 chemins de colonnes vers des définitions humaines.
 """
 
+import json
 import re
+from pathlib import Path
 
 from lxml import etree
 
@@ -56,3 +58,43 @@ def build_legacy_index(xsd_paths: list) -> dict[str, str]:
             if cleaned:
                 texts.setdefault(name, set()).add(cleaned)
     return {name: " / ".join(sorted(values)) for name, values in texts.items()}
+
+
+def _parse_translations(path, kind: str) -> dict[str, str]:
+    """Fichier de traductions SDK -> {id -> texte} pour ``<kind>|description|<id>``."""
+    out: dict[str, str] = {}
+    tree = etree.parse(str(path))
+    for entry in tree.iter("entry"):
+        key = entry.get("key", "")
+        parts = key.split("|")
+        if len(parts) == 3 and parts[0] == kind and parts[1] == "description":
+            text = (entry.text or "").strip()
+            if text:
+                out[parts[2]] = text
+    return out
+
+
+def build_eforms_index(sdk_dir) -> dict[tuple[str, ...], str]:
+    """Mappe chemin UBL normalisé (relatif à /*) -> description FR.
+
+    Source : ``fields.json`` (xpathAbsolute) + ``field_fr.xml`` (description FR),
+    fallback sur le ``name`` anglais du field si pas de FR. Les champs d'attribut
+    (xpath en ``/@x``) sont ignorés.
+    """
+    sdk_dir = Path(sdk_dir)
+    field_fr = _parse_translations(sdk_dir / "field_fr.xml", "field")
+    fields = json.loads((sdk_dir / "fields.json").read_text(encoding="utf-8"))["fields"]
+
+    paths: dict[tuple[str, ...], set[str]] = {}
+    for field in fields:
+        xpath = field.get("xpathAbsolute", "")
+        if not xpath or "/@" in xpath or xpath.lstrip().startswith("@"):
+            continue
+        key = normalize_xpath(xpath)
+        if not key:
+            continue
+        desc = field_fr.get(field["id"]) or field.get("name") or ""
+        desc = desc.strip()
+        if desc:
+            paths.setdefault(key, set()).add(desc)
+    return {key: " / ".join(sorted(values)) for key, values in paths.items()}

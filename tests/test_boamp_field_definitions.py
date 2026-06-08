@@ -1,8 +1,13 @@
 """Tests pour les définitions de champs BOAMP (#178)."""
 
+import json
 from pathlib import Path
 
-from src.tasks.boamp.field_definitions import build_legacy_index, normalize_xpath
+from src.tasks.boamp.field_definitions import (
+    build_eforms_index,
+    build_legacy_index,
+    normalize_xpath,
+)
 
 
 def test_normalize_xpath_simple():
@@ -46,3 +51,44 @@ def test_build_legacy_index(tmp_path: Path):
     # "- Objet du marché" et "Objet du marché" -> même texte après nettoyage -> dédoublonné
     assert idx["objet"] == "Objet du marché"
     assert "sansdoc" not in idx
+
+
+_FIELD_FR = """<?xml version="1.0" encoding="UTF-8"?>
+<properties>
+  <entry key="field|description|BT-01-notice">Base juridique de la procedure.</entry>
+  <entry key="field|description|BT-02-notice">Type de l'avis.</entry>
+  <entry key="field|name|BT-02-notice">Notice Type</entry>
+</properties>
+"""
+
+_FIELDS_JSON = {
+    "fields": [
+        {
+            "id": "BT-01-notice",
+            "name": "Procedure Legal Basis",
+            "xpathAbsolute": "/*/cbc:RegulatoryDomain",
+        },
+        {
+            "id": "BT-02-notice",
+            "name": "Notice Type",
+            "xpathAbsolute": "/*/cbc:NoticeTypeCode",
+        },
+        {
+            "id": "BT-03-notice",
+            "name": "Form Type",
+            "xpathAbsolute": "/*/cbc:NoticeTypeCode/@listName",
+        },
+        {"id": "BT-99-x", "name": "Sans FR", "xpathAbsolute": "/*/cac:Foo/cbc:Bar"},
+    ]
+}
+
+
+def test_build_eforms_index(tmp_path):
+    (tmp_path / "field_fr.xml").write_text(_FIELD_FR, encoding="utf-8")
+    (tmp_path / "fields.json").write_text(json.dumps(_FIELDS_JSON), encoding="utf-8")
+    idx = build_eforms_index(tmp_path)
+    assert idx[("RegulatoryDomain",)] == "Base juridique de la procedure."
+    assert idx[("NoticeTypeCode",)] == "Type de l'avis."
+    # champ d'attribut ignoré : BT-03 (@listName) ne crée pas d'entrée propre
+    # champ sans FR -> fallback sur le name EN
+    assert idx[("Foo", "Bar")] == "Sans FR"
