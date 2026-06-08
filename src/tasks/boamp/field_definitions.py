@@ -8,6 +8,7 @@ import json
 import re
 from pathlib import Path
 
+import polars as pl
 from lxml import etree
 
 _PREDICATE = re.compile(r"\[[^\]]*\]")
@@ -177,3 +178,32 @@ def resolve_column(
     lines = [f"{seg} : {legacy_index.get(seg, _NOT_FOUND)}" for seg in meaningful]
     leaf_def = legacy_index.get(meaningful[-1], _NOT_FOUND)
     return "\n".join(lines), leaf_def
+
+
+def load_list_columns(parquet_path) -> list[str]:
+    """Noms des colonnes de type List(String) du parquet (schéma seul)."""
+    schema = pl.scan_parquet(parquet_path).collect_schema()
+    return [name for name in schema.names() if isinstance(schema[name], pl.List)]
+
+
+def build_definitions_frame(
+    parquet_path,
+    legacy_index: dict[str, str],
+    eforms_index: dict[tuple[str, ...], str],
+) -> pl.DataFrame:
+    """DataFrame {nom_colonne, definitions, definition_feuille}, trié par nom."""
+    rows = []
+    for col in sorted(load_list_columns(parquet_path)):
+        definitions, leaf = resolve_column(col, legacy_index, eforms_index)
+        rows.append(
+            {
+                "nom_colonne": col,
+                "definitions": definitions,
+                "definition_feuille": leaf,
+            }
+        )
+    return pl.DataFrame(
+        rows,
+        schema=["nom_colonne", "definitions", "definition_feuille"],
+        orient="row",
+    )

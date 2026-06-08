@@ -3,11 +3,15 @@
 import json
 from pathlib import Path
 
+import polars as pl
+
 from src.tasks.boamp.field_definitions import (
+    build_definitions_frame,
     build_eforms_index,
     build_legacy_index,
     column_to_ubl_path,
     is_eforms,
+    load_list_columns,
     normalize_xpath,
     resolve_column,
 )
@@ -183,3 +187,35 @@ def test_resolve_column_eforms_intermediate_best_effort():
         "CityName : Ville de l'organisation."
     )
     assert leaf == "Ville de l'organisation."
+
+
+def test_load_list_columns(tmp_path):
+    p = tmp_path / "mini.parquet"
+    pl.DataFrame(
+        {
+            "id_annonce": ["x"],  # String -> exclu
+            "ann_DONNEES_DSP_cp": [["75001"]],  # List(String) -> gardé
+        }
+    ).write_parquet(p)
+    cols = load_list_columns(p)
+    assert cols == ["ann_DONNEES_DSP_cp"]
+
+
+def test_build_definitions_frame(tmp_path):
+    p = tmp_path / "mini.parquet"
+    pl.DataFrame(
+        {
+            "id_annonce": ["x"],
+            "ann_DONNEES_DSP_cp": [["75001"]],
+        }
+    ).write_parquet(p)
+    legacy = {"DSP": "Délégation de service public", "cp": "Code postal"}
+    df = build_definitions_frame(p, legacy_index=legacy, eforms_index={})
+    assert df.columns == ["nom_colonne", "definitions", "definition_feuille"]
+    assert df.height == 1
+    row = df.row(0, named=True)
+    assert row["nom_colonne"] == "ann_DONNEES_DSP_cp"
+    assert row["definitions"] == (
+        "DSP : Délégation de service public\ncp : Code postal"
+    )
+    assert row["definition_feuille"] == "Code postal"
