@@ -1,3 +1,8 @@
+### 2.13.0 2026-06-23
+
+- Ajout des données de Medialex
+- Ajout des codes et libellés NAF des titulaires
+
 ### 2.12.0 2026-06-05
 
 - Ajout de nouvelles sources de données :
