@@ -372,6 +372,13 @@
       "short_title": "Longitude acheteur"
     },
     {
+      "type": "integer",
+      "name": "acheteur_population",
+      "title": "Population de l'acheteur",
+      "description": "Population de l'acheteur s'il s'agit d'une ville. Chiffres de 2024.",
+      "short_title": "Population acheteur"
+    },
+    {
       "type": "string",
       "name": "titulaire_categorie",
       "title": "Catégorie du titulaire",

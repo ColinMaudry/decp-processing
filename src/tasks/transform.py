@@ -3,7 +3,7 @@ from pathlib import Path
 import polars as pl
 import polars.selectors as cs
 
-from src.config import DATA_DIR, DIST_DIR, LOG_LEVEL
+from src.config import DATA_DIR, DIST_DIR, LOG_LEVEL, POPULATION_COMMUNES_CSV
 from src.tasks.output import save_to_files
 from src.tasks.utils import (
     calculate_duplicates_across_source,
@@ -430,3 +430,31 @@ def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
     )
 
     save_to_files(df_results, DIST_DIR / "probabilites_naf_cpv", "csv")
+
+
+def join_population(
+    lf: pl.LazyFrame, population_csv_path: Path = POPULATION_COMMUNES_CSV
+) -> pl.LazyFrame:
+    """Joint le LazyFrame avec le CSV des communes via le SIREN extrait de acheteur_id.
+
+    SIREN = 9 premiers caractères du SIRET (acheteur_id est une chaîne).
+    Renvoie le LazyFrame avec une nouvelle colonne 'acheteur_population' (null si non trouvé).
+    Si le fichier CSV est absent, la colonne est ajoutée avec des nulls.
+    """
+    logger = get_logger(level=LOG_LEVEL)
+    if not population_csv_path.exists():
+        logger.warning(
+            f"Fichier population communes introuvable : {population_csv_path}. "
+            "La colonne 'acheteur_population' sera nulle."
+        )
+        return lf.with_columns(pl.lit(None).cast(pl.Int64).alias("acheteur_population"))
+    population_lf = pl.scan_csv(population_csv_path).select(
+        pl.col("SIREN").cast(pl.Utf8),
+        pl.col("population").cast(pl.Int64),
+    )
+    return (
+        lf.with_columns(pl.col("acheteur_id").str.slice(0, 9).alias("_siren_acheteur"))
+        .join(population_lf, left_on="_siren_acheteur", right_on="SIREN", how="left")
+        .drop("_siren_acheteur")
+        .rename({"population": "acheteur_population"})
+    )

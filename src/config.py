@@ -152,6 +152,13 @@ DECP_USE_CACHE = os.getenv("DECP_USE_CACHE", "false").lower() == "true"
 # POSTGRESQL
 POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI", "")
 
+# Population des communes (SIREN → population, pour acheteur_population)
+POPULATION_COMMUNES_CSV = Path(
+    os.getenv(
+        "POPULATION_COMMUNES_CSV", str(BASE_DIR / "data" / "identifiants-communes.csv")
+    )
+)
+
 # Données de référence
 REFERENCE_DIR = BASE_DIR / "reference"
 ALL_CONFIG["REFERENCE_DIR"] = REFERENCE_DIR

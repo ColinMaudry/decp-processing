@@ -1,9 +1,11 @@
 import polars as pl
 from polars.testing import assert_frame_equal
 
+from src.config import BASE_DIR
 from src.tasks.transform import (
     apply_modifications,
     calculate_naf_cpv_matching,
+    join_population,
     prepare_etablissements,
     prepare_unites_legales,
     sort_modifications,
@@ -407,3 +409,30 @@ class TestCalculateNafCpvMatching:
         )
         assert pair.height == 1
         assert pair["nb_marches"].item() == n
+
+
+class TestJoinPopulation:
+    def test_join_population_via_siren(self):
+        lf = pl.LazyFrame(
+            {
+                "acheteur_id": [
+                    "21005400200012",  # Lyon
+                    "21013055700019",  # Marseille
+                    "12345678900012",  # inconnu
+                    None,
+                ],
+                "uid": ["A", "B", "C", "D"],
+            },
+            schema={"acheteur_id": pl.Utf8, "uid": pl.Utf8},
+        )
+
+        csv_path = BASE_DIR / "tests/data/identifiants-communes-test.csv"
+        result = join_population(lf, csv_path).collect().sort("uid")
+
+        assert result["acheteur_population"].to_list() == [520000, 870000, None, None]
+
+    def test_join_population_fichier_absent(self, tmp_path):
+        lf = pl.LazyFrame({"acheteur_id": ["21005400200012"], "uid": ["A"]})
+        result = join_population(lf, tmp_path / "inexistant.csv").collect()
+
+        assert result["acheteur_population"].to_list() == [None]
