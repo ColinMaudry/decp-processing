@@ -2,6 +2,7 @@
 
 - Ajout des données de Medialex
 - Ajout des codes et libellés NAF des titulaires
+- Ajout de la population des acheteurs (communes)
 
 ### 2.12.0 2026-06-05
 
