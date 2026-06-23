@@ -381,6 +381,20 @@
     },
     {
       "type": "string",
+      "name": "titulaire_activite_code",
+      "title": "Code NAF du titulaire",
+      "description": "Code d'activité principale (NAF rév. 2) de l'établissement titulaire selon le répertoire SIRENE de l'INSEE.",
+      "short_title": "Code NAF titulaire"
+    },
+    {
+      "type": "string",
+      "name": "titulaire_activite_libelle",
+      "title": "Libellé NAF du titulaire",
+      "description": "Libellé long de l'activité principale (NAF rév. 2) de l'établissement titulaire selon le répertoire SIRENE de l'INSEE.",
+      "short_title": "Libellé NAF titulaire"
+    },
+    {
+      "type": "string",
       "name": "titulaire_commune_code",
       "title": "Commune du titulaire (code)",
       "description": "Code de la commune où se trouve le titulaire.",
@@ -407,7 +421,6 @@
       "description": "Nom du département où se trouve le titulaire.",
       "short_title": "Département titulaire"
     },
-
     {
       "type": "string",
       "name": "titulaire_region_code",
@@ -422,7 +435,6 @@
       "description": "Nom de la région où se trouve le titulaire.",
       "short_title": "Région titulaire"
     },
-
     {
       "type": "number",
       "name": "titulaire_latitude",
@@ -437,7 +449,6 @@
       "description": "Longitude des coordonnées géographiques du titulaire.",
       "short_title": "Longitude titulaire"
     },
-
     {
       "type": "integer",
       "name": "modification_id",

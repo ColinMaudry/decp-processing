@@ -26,6 +26,7 @@ from src.flows.sirene_preprocess import sirene_preprocess
 from src.tasks.dataset_utils import list_resources
 from src.tasks.enrich import (
     add_duree_restante,
+    add_naf_libelle,
     add_type_marche,
     enrich_from_sirene,
     geocode_sirene,
@@ -134,6 +135,9 @@ def decp_processing(enable_cache_removal: bool = True):
 
     logger.info("Génération des probabilités NAF/CPV...")
     calculate_naf_cpv_matching(lf)
+
+    logger.info("Ajout des codes et libellés NAF des titulaires...")
+    lf = add_naf_libelle(lf)
     lf = lf.drop(cs.starts_with("activite"))
 
     logger.info("Génération de l'artefact (statistiques) sur le base df...")

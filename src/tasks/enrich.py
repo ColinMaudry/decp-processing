@@ -8,6 +8,7 @@ from src.config import (
     DATA_DIR,
     GEOCODING_RETRY_DAYS,
     LOG_LEVEL,
+    REFERENCE_DIR,
     SIRENE_DATA_DIR,
     SIRET_LATLONG_SCHEMA,
 )
@@ -75,6 +76,10 @@ def add_etablissement_data(
                 "indiceRepetitionEtablissement",
                 "codePostalEtablissement",
                 "libelleCommuneEtablissement",
+                "source",
+                "score",
+                "geocoded_at",
+                "status",
             ],
             require_all=False,
         )
@@ -318,6 +323,18 @@ def haversine(
 
     # Distance
     return R * c
+
+
+def add_naf_libelle(lf: pl.LazyFrame) -> pl.LazyFrame:
+    lf_naf = pl.scan_csv(REFERENCE_DIR / "naf_libelles.csv")
+    lf = lf.join(lf_naf, left_on="activite_code", right_on="code_naf", how="left")
+    lf = lf.rename(
+        {
+            "activite_code": "titulaire_activite_code",
+            "libelle_naf": "titulaire_activite_libelle",
+        }
+    )
+    return lf
 
 
 def add_type_marche(lf: pl.LazyFrame) -> pl.LazyFrame:
