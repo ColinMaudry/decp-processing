@@ -124,6 +124,9 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
     # - qui ont une hauteur de 0"""
     logger = get_logger(level=LOG_LEVEL)
 
+    if len(parquet_files) == 0:
+        raise ValueError("No parquet file to concat.")
+
     checked_parquet_files = [file for file in parquet_files if check_parquet_file(file)]
 
     chunk_size = 500

@@ -23,6 +23,7 @@ from src.config import (
     TRACKED_DATASETS,
 )
 from src.flows.sirene_preprocess import sirene_preprocess
+from src.tasks.anomaly import detect_montant_anomalies
 from src.tasks.dataset_utils import list_resources
 from src.tasks.enrich import (
     add_duree_restante,
@@ -32,7 +33,7 @@ from src.tasks.enrich import (
     geocode_sirene,
 )
 from src.tasks.get import get_clean
-from src.tasks.output import generate_final_schema, sink_to_files
+from src.tasks.output import flatten_lists, generate_final_schema, sink_to_files
 from src.tasks.publish import publish_to_datagouv, publish_to_s3
 from src.tasks.transform import (
     calculate_naf_cpv_matching,
@@ -134,6 +135,9 @@ def decp_processing(enable_cache_removal: bool = True):
     logger.info("Ajout du type de marché...")
     lf = add_type_marche(lf)
 
+    logger.info("Détection des anomalies de montant...")
+    lf = detect_montant_anomalies(lf)
+
     logger.info("Génération des probabilités NAF/CPV...")
     calculate_naf_cpv_matching(lf)
 
@@ -152,6 +156,8 @@ def decp_processing(enable_cache_removal: bool = True):
     )
     lf: pl.LazyFrame = sort_columns(lf, BASE_DF_COLUMNS)
     generate_final_schema(lf)
+
+    lf = flatten_lists(lf)
     sink_to_files(lf, DIST_DIR / "decp")
 
     # Base de données SQLite dédiée aux activités du Datalab d'Anticor

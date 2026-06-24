@@ -17,11 +17,11 @@ from src.config import (
     CACHE_EXPIRATION_TIME_HOURS,
     DATE_NOW,
     DIST_DIR,
-    LOG_LEVEL,
     RESOURCE_CACHE_DIR,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
     DecpFormat,
+    logger,
 )
 
 
@@ -70,8 +70,6 @@ def remove_unused_cache(
     cache_dir: Path = RESOURCE_CACHE_DIR,
     cache_expiration_time_hours: int = CACHE_EXPIRATION_TIME_HOURS,
 ):
-    logger = get_logger(level=LOG_LEVEL)
-
     now = time.time()
     age_limit = cache_expiration_time_hours * 3600  # seconds
     deleted_files = []
@@ -148,37 +146,23 @@ def generate_stats(lf: pl.LazyFrame):
         .unique(subset=["uid"])
     )
 
-    # Statistiques sur les sources de données (statistiques.csv)
-    # generate_public_source_stats does aggregations. Let's make it lazy too.
     generate_public_source_stats(lf_uid)
 
-    # Collect only the necessary aggregates for the main stats
-    # We need to compute several things. It might be efficient to do one big aggregation or several small collects.
+    logger.info("Création de l'artefact et du JSON de statistiques...")
+
+    # Collect lf_uid once — avoids re-scanning parquet for every subsequent query
+    df_uid = lf_uid.collect()
 
     # 1. Resources and Sources
-    resources = (
-        lf_uid.select("sourceFile")
-        .unique()
-        .collect()
-        .get_column("sourceFile")
-        .to_list()
-    )
-    sources = (
-        lf_uid.select("sourceDataset")
-        .unique()
-        .collect()
-        .get_column("sourceDataset")
-        .to_list()
-    )
+    resources = df_uid["sourceFile"].unique().to_list()
+    sources = df_uid["sourceDataset"].unique().to_list()
 
     # 2. Counts
     nb_lignes = lf.select(pl.len()).collect().item()
-    nb_marches = lf_uid.select(pl.len()).collect().item()
+    nb_marches = len(df_uid)
 
-    # 3. Unique counts (approximate or exact)
-    nb_acheteurs_uniques = (
-        lf_uid.select("acheteur_id").unique().select(pl.len()).collect().item() - 1
-    )
+    # 3. Unique counts
+    nb_acheteurs_uniques = df_uid["acheteur_id"].n_unique() - 1
     nb_titulaires_uniques = (
         lf.select("titulaire_id", "titulaire_typeIdentifiant")
         .unique()
@@ -204,24 +188,19 @@ def generate_stats(lf: pl.LazyFrame):
         "nb_titulaires_uniques": nb_titulaires_uniques,
     }
 
-    # 5. Yearly stats
-    # We can do this with a group_by and then iterate over the result
+    # 5. Yearly stats — pre-aggregate in one pass to avoid per-year filter+collect in the loop
+    pub_stats = df_uid.group_by("anneePublicationDonnees").agg(pl.len().alias("count"))
 
-    # Aggregations for publications per year
-    pub_stats = (
-        lf_uid.group_by("anneePublicationDonnees")
-        .agg(pl.len().alias("count"))
-        .collect()
+    notif_stats = df_uid.group_by("anneeNotification").agg(
+        pl.len().alias("count"),
+        pl.sum("montant").alias("sum_montant"),
+        pl.median("montant").alias("median_montant"),
+        pl.col("acheteur_id").n_unique().alias("nb_acheteurs_uniques"),
     )
 
-    # Aggregations for notifications per year (count, sum, median)
-    notif_stats = (
-        lf_uid.group_by("anneeNotification")
-        .agg(
-            pl.len().alias("count"),
-            pl.sum("montant").alias("sum_montant"),
-            pl.median("montant").alias("median_montant"),
-        )
+    titulaire_year_stats = (
+        lf.group_by("anneeNotification")
+        .agg(pl.col("titulaire_id").n_unique().alias("nb_titulaires_uniques"))
         .collect()
     )
 
@@ -229,16 +208,10 @@ def generate_stats(lf: pl.LazyFrame):
         stats[str(year)] = stats_year = {}
 
         # Publications
-        pub_count = (
-            pub_stats.filter(pl.col("anneePublicationDonnees") == year)
-            .select("count")
-            .item()
-            if not pub_stats.filter(
-                pl.col("anneePublicationDonnees") == year
-            ).is_empty()
-            else 0
+        pub_rows = pub_stats.filter(pl.col("anneePublicationDonnees") == year)
+        stats_year["nb_publications_marches"] = (
+            pub_rows.select("count").item() if not pub_rows.is_empty() else 0
         )
-        stats_year["nb_publications_marches"] = pub_count
 
         # Notifications
         df_year_stats = notif_stats.filter(pl.col("anneeNotification") == year)
@@ -252,21 +225,15 @@ def generate_stats(lf: pl.LazyFrame):
             stats_year["mediane_montant_marches_notifies"] = int(
                 df_year_stats.select("median_montant").item() or 0
             )
-            stats_year["nb_acheteurs_uniques"] = (
-                lf_uid.filter(pl.col("anneeNotification") == year)
-                .select("acheteur_id")
-                .unique()
-                .collect(engine="streaming")
-                .height
-            )
+            stats_year["nb_acheteurs_uniques"] = df_year_stats.select(
+                "nb_acheteurs_uniques"
+            ).item()
+            tit_rows = titulaire_year_stats.filter(pl.col("anneeNotification") == year)
             stats_year["nb_titulaires_uniques"] = (
-                lf.filter(pl.col("anneeNotification") == year)
-                .select("titulaire_id")
-                .unique()
-                .collect(engine="streaming")
-                .height
+                tit_rows.select("nb_titulaires_uniques").item()
+                if not tit_rows.is_empty()
+                else 0
             )
-
         else:
             stats_year["nb_notifications_marches"] = 0
             stats_year["somme_montant_marchés_notifies"] = ""
@@ -285,8 +252,6 @@ def generate_stats(lf: pl.LazyFrame):
 
 
 def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
-    logger = get_logger(level=LOG_LEVEL)
-
     logger.info("Génération des statistiques sur les sources de données...")
     lf_uid = lf_uid.select("uid", "acheteur_id", "sourceDataset")
 
@@ -384,7 +349,6 @@ def check_parquet_file(path) -> bool:
 
 
 def print_all_config():
-    logger = get_logger(level=LOG_LEVEL)
     all_config = ALL_CONFIG
 
     msg = ""
