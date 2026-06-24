@@ -36,12 +36,12 @@ def calibrate(parquet_path: Path, pairs_grid: list[float]) -> None:
     # Vérification du nombre de marchés par groupe impliquant le code CPV pour
     # calibrer la bonne taille de code CPV (make_short_cpv_code)
     df_cpv_groupes = (
-        df.select("codeCPV_2", "n_groupe", "niveau_groupe")
+        df.select("codeCPV_court", "n_groupe", "niveau_groupe")
         .filter(
             pl.col("niveau_groupe").is_in(["L3", "L4"])
         )  # on ne veut ques les stats sur des groupes basés sur le code CPV
         .drop("niveau_groupe")
-        .group_by("codeCPV_2")
+        .group_by("codeCPV_court")
         .agg(
             count=pl.len(),
             min=pl.col("n_groupe").min(),
@@ -66,7 +66,7 @@ def calibrate(parquet_path: Path, pairs_grid: list[float]) -> None:
         "acheteur_nom",
         "acheteur_categorie",
         "acheteur_population",
-        "codeCPV_2",
+        "codeCPV_court",
         "n_groupe",
         "niveau_groupe",
         "montant_anomalie",

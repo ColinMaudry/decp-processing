@@ -41,4 +41,4 @@ def test_decp_processing(prefect_test_fixture):
     cols = lf_out.collect_schema().names()
     assert "montant_rationalise" in cols
     assert "montant_anomalie" in cols
-    assert "montant_anomalie_raison" in cols
+    assert "montant_anomalie_raisons" in cols

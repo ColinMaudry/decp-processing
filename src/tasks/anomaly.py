@@ -21,7 +21,7 @@ def make_short_cpv_code() -> pl.Expr:
         pl.when(pl.col("codeCPV").str.starts_with("45"))
         .then(pl.col("codeCPV").str.slice(0, 4))
         .otherwise(pl.col("codeCPV").str.slice(0, 3))
-        .alias("codeCPV_2")
+        .alias("codeCPV_court")
     )
 
 
@@ -81,15 +81,15 @@ def compute_peer_group_stats(
     a au moins `min_size` marchés. Si aucun niveau ne suffit, mediane_log/mad_log/median_montant_norm
     restent null et niveau_groupe est null.
 
-    Le LazyFrame en entrée doit contenir les colonnes : codeCPV_2, type, acheteur_categorie,
+    Le LazyFrame en entrée doit contenir les colonnes : codeCPV_court, type, acheteur_categorie,
     tranche_population, montant_normalise, log_montant_normalise.
 
     Renvoie le LazyFrame enrichi avec : n_groupe, niveau_groupe, mediane_log, mad_log,
     median_montant_norm.
     """
     levels = [
-        ("L4", ["codeCPV_2", "type", "acheteur_categorie", "tranche_population"]),
-        ("L3", ["codeCPV_2", "type", "acheteur_categorie"]),
+        ("L4", ["codeCPV_court", "type", "acheteur_categorie", "tranche_population"]),
+        ("L3", ["codeCPV_court", "type", "acheteur_categorie"]),
         ("L2", ["type", "acheteur_categorie"]),
         ("L1", ["type"]),
     ]
@@ -423,7 +423,9 @@ def _create_anomaly_artifact(summary: dict) -> None:
 
 
 def detect_montant_anomalies(
-    lf: pl.LazyFrame, calibrating: bool = False
+    lf: pl.LazyFrame,
+    csv_path: Path | None = None,
+    calibrating: bool = False,
 ) -> pl.LazyFrame:
     """Task Prefect : détecte les anomalies de montant et calcule montant_rationalise.
 
@@ -441,9 +443,11 @@ def detect_montant_anomalies(
     df = lf.collect()
     print("height df avec titulaires: ", df.height)
     lf = df.lazy()
+    schema_names = lf.collect_schema().names()
+    if "donneesActuelles" in schema_names:
+        lf = lf.filter(pl.col("donneesActuelles"))
     df = (
-        lf.filter(pl.col("donneesActuelles"))
-        .group_by(cs.exclude("titulaire_categorie"))
+        lf.group_by(cs.exclude("titulaire_categorie"))
         .agg(pl.col("titulaire_categorie"))
         .with_columns(single_pme=pl.col("titulaire_categorie") == ["PME"])
         .drop("titulaire_categorie")
@@ -452,7 +456,7 @@ def detect_montant_anomalies(
 
     lf = df.lazy()
 
-    population_csv_path = POPULATION_COMMUNES_CSV
+    population_csv_path = csv_path or POPULATION_COMMUNES_CSV
     lf = join_population(lf, population_csv_path)
 
     lf = lf.with_columns(
@@ -473,7 +477,7 @@ def detect_montant_anomalies(
         "tranche_population",
         "montant_normalise",
         "log_montant_normalise",
-        "codeCPV_2",
+        "codeCPV_court",
         "n_groupe",
         "niveau_groupe",
         "mediane_log",
@@ -482,6 +486,7 @@ def detect_montant_anomalies(
         "ecart_pairs",
         "montant_par_habitant",
         "single_pme",
+        "population",
     ]
 
     # Build summary and create Prefect artifact
@@ -500,7 +505,7 @@ def detect_montant_anomalies(
     lf = lf.with_columns(acheteur_population=pl.col("population").cast(pl.Int32))
 
     if not calibrating:
-        lf.drop([c for c in intermediaire if c in lf.collect_schema().names()])
+        lf = lf.drop([c for c in intermediaire if c in lf.collect_schema().names()])
         # On remet les données titulaires
         lf = lf.join(lf_titulaires, how="left", on="uid")
         df = lf.collect()

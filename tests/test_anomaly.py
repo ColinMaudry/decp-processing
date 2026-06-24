@@ -134,7 +134,7 @@ class TestPeerGroupStats:
                 "uid": [f"U{i}" for i in range(36)],
                 "montant_normalise": montants,
                 "log_montant_normalise": [math.log10(m + 1) for m in montants],
-                "codeCPV_2": ["45"] * 36,
+                "codeCPV_court": ["45"] * 36,
                 "type": ["Travaux"] * 36,
                 "acheteur_categorie": ["Commune"] * 36,
                 "tranche_population": [None] * 36,
@@ -154,7 +154,7 @@ class TestPeerGroupStats:
                 "uid": [f"U{i}" for i in range(5)],
                 "montant_normalise": [100.0] * 5,
                 "log_montant_normalise": [2.0] * 5,
-                "codeCPV_2": ["99"] * 5,
+                "codeCPV_court": ["99"] * 5,
                 "type": ["Fournitures"] * 5,
                 "acheteur_categorie": ["État"] * 5,
                 "tranche_population": [None] * 5,
@@ -206,14 +206,14 @@ class TestClassification:
                 "ecart_pairs": [4.5],
                 "montant_par_habitant": [None],
                 "type": ["Services"],
-                "titulaire_categorie": [None],
+                "single_pme": [False],
                 "montant": [100_000.0],
             },
             schema_overrides={"montant_par_habitant": pl.Float64},
         )
         result = classify_anomalies(lf).collect()
         assert result["montant_anomalie"].to_list() == ["suspect"]
-        assert result["montant_anomalie_raison"].to_list() == [
+        assert result["montant_anomalie_raisons"].to_list() == [
             ["montant_vs_pairs_suspect"]
         ]
 
@@ -223,14 +223,14 @@ class TestClassification:
                 "ecart_pairs": [10.0],
                 "montant_par_habitant": [None],
                 "type": ["Services"],
-                "titulaire_categorie": [None],
+                "single_pme": [False],
                 "montant": [100_000.0],
             },
             schema_overrides={"montant_par_habitant": pl.Float64},
         )
         result = classify_anomalies(lf).collect()
         assert result["montant_anomalie"].to_list() == ["aberrant"]
-        assert result["montant_anomalie_raison"].to_list() == [
+        assert result["montant_anomalie_raisons"].to_list() == [
             ["montant_vs_pairs_aberrant"]
         ]
 
@@ -240,13 +240,13 @@ class TestClassification:
                 "ecart_pairs": [10.0],
                 "montant_par_habitant": [25_000.0],  # Travaux aberrant > 20 000
                 "type": ["Travaux"],
-                "titulaire_categorie": [None],
+                "single_pme": [False],
                 "montant": [100_000_000.0],
             }
         )
         result = classify_anomalies(lf).collect()
         assert result["montant_anomalie"].to_list() == ["aberrant"]
-        assert result["montant_anomalie_raison"].to_list() == [
+        assert result["montant_anomalie_raisons"].to_list() == [
             ["montant_par_habitant_aberrant", "montant_vs_pairs_aberrant"]
         ]
 
@@ -256,14 +256,14 @@ class TestClassification:
                 "ecart_pairs": [4.5],
                 "montant_par_habitant": [None],
                 "type": ["Services"],
-                "titulaire_categorie": ["PME"],
+                "single_pme": [True],
                 "montant": [60_000_000.0],
             },
             schema_overrides={"montant_par_habitant": pl.Float64},
         )
         result = classify_anomalies(lf).collect()
         assert result["montant_anomalie"].to_list() == ["aberrant"]
-        assert result["montant_anomalie_raison"].to_list() == [
+        assert result["montant_anomalie_raisons"].to_list() == [
             ["montant_vs_pairs_suspect", "titulaire_incoherent_pme_gros_marche"]
         ]
 
@@ -273,14 +273,14 @@ class TestClassification:
                 "ecart_pairs": [4.5],
                 "montant_par_habitant": [None],
                 "type": ["Services"],
-                "titulaire_categorie": ["PME"],
+                "single_pme": [True],
                 "montant": [10_000_000.0],  # < 50 M€
             },
             schema_overrides={"montant_par_habitant": pl.Float64},
         )
         result = classify_anomalies(lf).collect()
         assert result["montant_anomalie"].to_list() == ["suspect"]
-        assert result["montant_anomalie_raison"].to_list() == [
+        assert result["montant_anomalie_raisons"].to_list() == [
             ["montant_vs_pairs_suspect"]
         ]
 
@@ -290,13 +290,13 @@ class TestClassification:
                 "ecart_pairs": [2.0],
                 "montant_par_habitant": [100.0],
                 "type": ["Services"],
-                "titulaire_categorie": ["GE"],
+                "single_pme": [False],
                 "montant": [50_000.0],
             }
         )
         result = classify_anomalies(lf).collect()
         assert result["montant_anomalie"].to_list() == [None]
-        assert result["montant_anomalie_raison"].to_list() == [
+        assert result["montant_anomalie_raisons"].to_list() == [
             None
         ]  # null, pas liste vide
 
@@ -388,7 +388,7 @@ class TestAnomalySummary:
                 "montant": [100.0, 200.0, 300.0, 400.0, 500.0],
                 "montant_rationalise": [100.0, 200.0, 50.0, 400.0, 500.0],
                 "montant_anomalie": ["suspect", None, "aberrant", "aberrant", None],
-                "montant_anomalie_raison": [
+                "montant_anomalie_raisons": [
                     ["montant_vs_pairs_suspect"],
                     None,
                     ["montant_par_habitant_aberrant"],
@@ -422,6 +422,7 @@ class TestDetectMontantAnomalies:
                 "formePrix": "Unitaire",
                 "acheteur_categorie": "Commune",
                 "titulaire_categorie": "GE",
+                "donneesActuelles": True,
             }
             for i in range(n_normaux)
         ]
@@ -437,20 +438,22 @@ class TestDetectMontantAnomalies:
                 "formePrix": "Unitaire",
                 "acheteur_categorie": "Commune",
                 "titulaire_categorie": "GE",
+                "donneesActuelles": True,
             }
         ]
 
         lf = pl.LazyFrame(normaux + outlier)
 
         csv_path = BASE_DIR / "tests/data/identifiants-communes-test.csv"
-        result = detect_montant_anomalies(lf, csv_path).collect()
+        result = detect_montant_anomalies(lf, csv_path=csv_path).collect()
 
-        # Must add exactly 3 columns
+        # Must add exactly these columns
         added = set(result.columns) - set(lf.collect().columns)
         assert added == {
             "montant_rationalise",
             "montant_anomalie",
-            "montant_anomalie_raison",
+            "montant_anomalie_raisons",
+            "acheteur_population",
         }
 
         # Outlier must be aberrant
