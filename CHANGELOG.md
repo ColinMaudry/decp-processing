@@ -1,8 +1,9 @@
 ### 2.13.0 2026-06-23
 
 - Ajout des données de Medialex
+- Signalisation des montants suspects et aberrants ([#174](https://github.com/ColinMaudry/decp-processing/issues/174))
 - Ajout des codes et libellés NAF des titulaires
-- Ajout de la population des acheteurs (communes)
+- Ajout de la population des acheteurs (communes), merci Datactivist pour [ce précieux jeu de données](https://www.data.gouv.fr/datasets/identifiants-des-collectivites-territoriales-et-leurs-etablissements)
 
 ### 2.12.0 2026-06-05
 
