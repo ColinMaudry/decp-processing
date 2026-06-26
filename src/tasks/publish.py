@@ -4,6 +4,7 @@ from pathlib import Path
 import boto3
 from botocore.config import Config
 from httpx import get, post, put
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from src.config import (
     DATAGOUVFR_API,
@@ -121,6 +122,7 @@ def publish_new_resource(dataset_id, file_path, description):
     return response.json()
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=30))
 def publish_to_s3(file: Path, prefix: str = "") -> None:
     logger = get_logger(level=LOG_LEVEL)
     missing = check_s3_config()
@@ -145,6 +147,8 @@ def publish_to_s3(file: Path, prefix: str = "") -> None:
         config=Config(
             signature_version="s3v4",
             s3={"addressing_style": "path"},
+            connect_timeout=30,
+            read_timeout=30,
         ),
     )
     logger.info(f"Publication de {file.name} sur s3://{S3_BUCKET}/{key}...")
