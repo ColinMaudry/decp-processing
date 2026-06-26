@@ -100,10 +100,12 @@ def decp_processing(enable_cache_removal: bool = True):
         )
         del resources_artifact
 
-    # Réinitialisation de DIST_DIR
-    if os.path.exists(DIST_DIR):
-        shutil.rmtree(DIST_DIR)
-    os.makedirs(DIST_DIR)
+    # Répertoire de travail temporaire — DIST_DIR n'est écrasé qu'à la fin,
+    # pour que decp.info garde accès aux données précédentes pendant tout le traitement.
+    work_dir = DIST_DIR.parent / f"{DIST_DIR.name}_wip"
+    if work_dir.exists():
+        shutil.rmtree(work_dir)
+    os.makedirs(work_dir)
 
     logger.info("Concaténation des dataframes...")
     lf: pl.LazyFrame = concat_parquet_files(parquet_files)
@@ -126,8 +128,8 @@ def decp_processing(enable_cache_removal: bool = True):
     if decp_publish:
         publish_to_s3(file=siret_latlong_path, prefix="")
 
-    sink_to_files(lf, DIST_DIR / "decp", file_format="parquet")
-    lf: pl.LazyFrame = pl.scan_parquet(DIST_DIR / "decp.parquet")
+    sink_to_files(lf, work_dir / "decp", file_format="parquet")
+    lf: pl.LazyFrame = pl.scan_parquet(work_dir / "decp.parquet")
 
     logger.info("Ajout de la colonne 'dureeRestanteMois'...")
     lf = add_duree_restante(lf)
@@ -158,11 +160,19 @@ def decp_processing(enable_cache_removal: bool = True):
     generate_final_schema(lf)
 
     lf = flatten_lists(lf)
-    sink_to_files(lf, DIST_DIR / "decp")
+    sink_to_files(lf, work_dir / "decp")
 
     # Base de données SQLite dédiée aux activités du Datalab d'Anticor
     # Désactivé pour l'instant https://github.com/ColinMaudry/decp-processing/issues/124
     # make_data_tables()
+
+    # Bascule atomique : on remplace DIST_DIR seulement maintenant que work_dir est complet
+    dist_dir_old = DIST_DIR.parent / f"{DIST_DIR.name}_old"
+    if DIST_DIR.exists():
+        DIST_DIR.rename(dist_dir_old)
+    work_dir.rename(DIST_DIR)
+    if dist_dir_old.exists():
+        shutil.rmtree(dist_dir_old)
 
     if decp_publish:
         logger.info("Publication sur data.gouv.fr...")
