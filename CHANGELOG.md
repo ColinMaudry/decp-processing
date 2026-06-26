@@ -5,6 +5,10 @@
 - Ajout des codes et libellés NAF des titulaires
 - Ajout de la population des acheteurs (communes), merci Datactivist pour [ce précieux jeu de données](https://www.data.gouv.fr/datasets/identifiants-des-collectivites-territoriales-et-leurs-etablissements)
 
+#### 2.12.1 2026-06-07
+
+- Suppression des entrées sans titre du schéma de données
+
 ### 2.12.0 2026-06-05
 
 - Ajout de nouvelles sources de données :
