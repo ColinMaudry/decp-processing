@@ -67,7 +67,10 @@ def montant_normalise_expr() -> pl.Expr:
 
 
 def compute_peer_group_stats(
-    lf: pl.LazyFrame, min_size: int, drop_columns: bool = True
+    lf: pl.LazyFrame,
+    min_size: int,
+    drop_columns: bool = True,
+    lf_peers: pl.LazyFrame | None = None,
 ) -> pl.LazyFrame:
     """Calcule les statistiques médiane/MAD du log du montant normalisé par groupe de pairs.
 
@@ -84,9 +87,19 @@ def compute_peer_group_stats(
     Le LazyFrame en entrée doit contenir les colonnes : codeCPV_court, type, acheteur_categorie,
     tranche_population, montant_normalise, log_montant_normalise.
 
+    lf_peers : sous-ensemble de lf servant de base au calcul des médianes/MAD par groupe
+        (typiquement les marchés actuels uniquement). Si None, lf sert à la fois de base
+        statistique et de cible : c'est le comportement historique. Séparer les deux évite
+        qu'un marché modifié plusieurs fois ne soit compté plusieurs fois dans les stats de
+        son groupe de pairs, tout en laissant classifier toutes les lignes de lf (y compris
+        l'historique des modifications) contre ces mêmes stats de référence.
+
     Renvoie le LazyFrame enrichi avec : n_groupe, niveau_groupe, mediane_log, mad_log,
     median_montant_norm.
     """
+    if lf_peers is None:
+        lf_peers = lf
+
     levels = [
         ("L4", ["codeCPV_court", "type", "acheteur_categorie", "tranche_population"]),
         ("L3", ["codeCPV_court", "type", "acheteur_categorie"]),
@@ -95,22 +108,24 @@ def compute_peer_group_stats(
     ]
 
     for name, keys in levels:
-        # Première passe : médiane par groupe
-        mediane_stats = lf.group_by(keys).agg(
+        # Première passe : médiane par groupe (sur la base de pairs)
+        mediane_stats = lf_peers.group_by(keys).agg(
             pl.len().alias(f"n_{name}"),
             pl.col("log_montant_normalise").median().alias(f"mediane_log_{name}"),
             pl.col("montant_normalise").median().alias(f"median_montant_norm_{name}"),
         )
         lf = lf.join(mediane_stats, on=keys, how="left")
+        lf_peers = lf_peers.join(mediane_stats, on=keys, how="left")
 
-        # Deuxième passe : MAD = médiane(|log - médiane_log|) par groupe
-        mad_stats = lf.group_by(keys).agg(
+        # Deuxième passe : MAD = médiane(|log - médiane_log|) par groupe (sur la base de pairs)
+        mad_stats = lf_peers.group_by(keys).agg(
             (pl.col("log_montant_normalise") - pl.col(f"mediane_log_{name}"))
             .abs()
             .median()
             .alias(f"mad_log_{name}"),
         )
         lf = lf.join(mad_stats, on=keys, how="left")
+        lf_peers = lf_peers.join(mad_stats, on=keys, how="left")
 
     lf = lf.with_columns(
         pl.coalesce(
@@ -441,23 +456,27 @@ def detect_montant_anomalies(
     - montant_anomalie_raisons : code lisible du critère déclenché
     """
 
-    # Une ligne = un marché on retire les données des titulaires et on
-    # ne garde que le données actuelles.
+    # Une ligne = un marché (une version : actuelle ou une ancienne modification) où
+    # on retire les données des titulaires pour fusionner les cotraitants.
+    # Toutes les lignes (actuelles et historiques) sont classifiées : un montant
+    # historique a lui aussi été réellement engagé et mérite d'être évalué.
 
     df = lf.collect()
     print("height df avec titulaires: ", df.height)
     lf = df.lazy()
     schema_names = lf.collect_schema().names()
-    if "donneesActuelles" in schema_names:
-        lf = lf.filter(pl.col("donneesActuelles"))
+    has_donnees_actuelles = "donneesActuelles" in schema_names
 
-    # Capturé après le filtre donneesActuelles : sinon les lignes des anciennes
-    # modifications (même uid, historique) sont aussi rejointes à la fin et
-    # dupliquent les titulaires.
-    lf_titulaires = lf.select("uid", cs.starts_with("titulaire"))
+    # "uid" seul ne suffit pas à identifier une ligne : un marché modifié plusieurs
+    # fois a plusieurs lignes qui partagent le même uid (une par modification_id).
+    marche_key = (
+        ["uid", "modification_id"] if "modification_id" in schema_names else ["uid"]
+    )
+
+    lf_titulaires = lf.select(*marche_key, cs.starts_with("titulaire"))
 
     # On retire les colonnes titulaire_* (sauf titulaire_categorie, agrégée ci-dessous)
-    # pour que le group_by fusionne bien les cotraitants en une seule ligne par marché.
+    # pour que le group_by fusionne bien les cotraitants d'une même version de marché.
     lf = lf.drop(cs.starts_with("titulaire") - cs.by_name("titulaire_categorie"))
     df = (
         lf.group_by(cs.exclude("titulaire_categorie"))
@@ -481,7 +500,15 @@ def detect_montant_anomalies(
         log_montant_normalise=(pl.col("montant_normalise") + 1).log10(),
     )
 
-    lf = compute_peer_group_stats(lf, min_size=ANOMALY_GROUPE_MIN_SIZE)
+    # Les stats de pairs (médiane/MAD par groupe) sont calculées uniquement sur les
+    # marchés actuels : un marché modifié plusieurs fois ne doit pas peser plusieurs
+    # fois dans le calcul des seuils de son groupe. Mais la classification elle-même
+    # (ci-dessous) s'applique à toutes les lignes, actuelles et historiques.
+    lf_peers = lf.filter(pl.col("donneesActuelles")) if has_donnees_actuelles else lf
+
+    lf = compute_peer_group_stats(
+        lf, min_size=ANOMALY_GROUPE_MIN_SIZE, lf_peers=lf_peers
+    )
     lf = compute_signals(lf)
     lf = classify_anomalies(lf)
     lf = compute_montant_rationalise(lf)
@@ -519,8 +546,10 @@ def detect_montant_anomalies(
 
     if not calibrating:
         lf = lf.drop([c for c in intermediaire if c in lf.collect_schema().names()])
-        # On remet les données titulaires
-        lf = lf.join(lf_titulaires, how="left", on="uid")
+        # On remet les données titulaires (par marché-version, pas juste par uid,
+        # sinon les cotraitants d'un marché modifié plusieurs fois se dupliquent
+        # sur chaque version).
+        lf = lf.join(lf_titulaires, how="left", on=marche_key)
         df = lf.collect()
         print("df height à la fin:", df.height)
         lf = df.lazy()
