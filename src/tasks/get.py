@@ -14,6 +14,7 @@ from lxml import etree
 from prefect.transactions import transaction
 from tenacity import (
     retry,
+    retry_if_exception_type,
     stop_after_attempt,
     wait_exponential,
 )
@@ -53,7 +54,6 @@ from src.tasks.utils import (
 )
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=20))
 def stream_get(url: str, chunk_size=1024**2):  # chunk_size en octets (1 Mo par défaut)
     logger = get_logger(level=LOG_LEVEL)
 
@@ -160,6 +160,11 @@ def find_json_decp_format(chunk, decp_formats, resource: dict):
     return None
 
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    retry=retry_if_exception_type(httpx.TransportError),
+)
 def json_stream_to_parquet(
     url: str, output_path: Path, resource: dict
 ) -> tuple[set, DecpFormat or None]:
@@ -180,74 +185,86 @@ def json_stream_to_parquet(
 
     tmp_file = tempfile.NamedTemporaryFile(mode="wb", suffix=".ndjson", delete=False)
 
-    http_stream_iter = stream_get(url)
-
-    stream_replace_iter = stream_replace_bytestring(
-        http_stream_iter, b"\xef\xbb\xbf", b""
-    )  # Strip UTF-8 BOM
-
-    stream_replace_iter = stream_replace_bytestring(
-        stream_replace_iter, rb"NaN([,\n])", rb"null\1"
-    )  # NaN => null
-
-    # Le dataset AWS scraping a pas mal de bugs de backslash
-    if "/68caf6b135f19236a4f37a32/" in url or "/aws/" in url:
-        stream_replace_iter = stream_replace_bytestring(
-            stream_replace_bytestring(
-                stream_replace_bytestring(stream_replace_iter, rb"(\\\\\\)", rb"\\"),
-                rb"\\\\",
-                rb"\\",
-            ),
-            rb"\\ ",
-            rb" ",
-        )
-
-    # In first iteration, will find the right format
     try:
-        chunk = next(stream_replace_iter)
-    except StopIteration:
-        logger.error(f"⚠️  Flux vide pour {url}")
-        return set(), None
+        http_stream_iter = stream_get(url)
 
-    decp_format = find_json_decp_format(chunk, decp_formats, resource)
-    if decp_format is None:
-        # Aucun format détecté : on ferme tous les coroutines pour éviter le bruit
-        # « Exception ignored while closing generator » au moment du GC.
+        stream_replace_iter = stream_replace_bytestring(
+            http_stream_iter, b"\xef\xbb\xbf", b""
+        )  # Strip UTF-8 BOM
+
+        stream_replace_iter = stream_replace_bytestring(
+            stream_replace_iter, rb"NaN([,\n])", rb"null\1"
+        )  # NaN => null
+
+        # Le dataset AWS scraping a pas mal de bugs de backslash
+        if "/68caf6b135f19236a4f37a32/" in url or "/aws/" in url:
+            stream_replace_iter = stream_replace_bytestring(
+                stream_replace_bytestring(
+                    stream_replace_bytestring(
+                        stream_replace_iter, rb"(\\\\\\)", rb"\\"
+                    ),
+                    rb"\\\\",
+                    rb"\\",
+                ),
+                rb"\\ ",
+                rb" ",
+            )
+
+        # In first iteration, will find the right format
+        try:
+            chunk = next(stream_replace_iter)
+        except StopIteration:
+            logger.error(f"⚠️  Flux vide pour {url}")
+            return set(), None
+
+        decp_format = find_json_decp_format(chunk, decp_formats, resource)
+        if decp_format is None:
+            # Aucun format détecté : on ferme tous les coroutines pour éviter le bruit
+            # « Exception ignored while closing generator » au moment du GC.
+            for fmt in decp_formats:
+                _close_ijson_coro(fmt.coroutine_ijson)
+            return set(), None
+
+        # Les formats non-retenus ne seront plus alimentés : on les ferme proprement
+        # (flux incomplet → IncompleteJSONError neutralisée).
         for fmt in decp_formats:
-            _close_ijson_coro(fmt.coroutine_ijson)
-        return set(), None
+            if fmt is not decp_format:
+                _close_ijson_coro(fmt.coroutine_ijson)
 
-    # Les formats non-retenus ne seront plus alimentés : on les ferme proprement
-    # (flux incomplet → IncompleteJSONError neutralisée).
-    for fmt in decp_formats:
-        if fmt is not decp_format:
-            _close_ijson_coro(fmt.coroutine_ijson)
-
-    for marche in decp_format.liste_marches_ijson:
-        new_fields = write_marche_rows(marche, tmp_file, decp_format)
-        fields = fields.union(new_fields)
-
-    del decp_format.liste_marches_ijson[:]
-
-    for chunk in stream_replace_iter:
-        decp_format.coroutine_ijson.send(chunk)
         for marche in decp_format.liste_marches_ijson:
             new_fields = write_marche_rows(marche, tmp_file, decp_format)
             fields = fields.union(new_fields)
 
         del decp_format.liste_marches_ijson[:]
 
-    decp_format.coroutine_ijson.close()
-    tmp_file.seek(0)
+        for chunk in stream_replace_iter:
+            decp_format.coroutine_ijson.send(chunk)
+            for marche in decp_format.liste_marches_ijson:
+                new_fields = write_marche_rows(marche, tmp_file, decp_format)
+                fields = fields.union(new_fields)
 
-    lf = pl.scan_ndjson(tmp_file.name, schema=decp_format.schema)
-    sink_to_files(lf, output_path, file_format="parquet")
+            del decp_format.liste_marches_ijson[:]
 
-    tmp_file.close()
+        decp_format.coroutine_ijson.close()
+        tmp_file.seek(0)
 
-    return fields, decp_format
+        lf = pl.scan_ndjson(tmp_file.name, schema=decp_format.schema)
+        sink_to_files(lf, output_path, file_format="parquet")
+
+        tmp_file.close()
+
+        return fields, decp_format
+    except Exception:
+        tmp_file.close()
+        Path(tmp_file.name).unlink(missing_ok=True)
+        raise
 
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    retry=retry_if_exception_type(httpx.TransportError),
+)
 def xml_stream_to_parquet(
     url: str, output_path: Path, fix_chars=False
 ) -> tuple[set, DecpFormat]:
