@@ -141,6 +141,12 @@ Pour chaque groupe, on calcule :
 
 Si aucun niveau n'atteint 30 marchés, ces colonnes restent `null` et le Signal A est inactif pour ce marché.
 
+> **Marchés modifiés et historique.** Un marché public peut être modifié plusieurs fois au cours de sa vie (avenants) ; chaque version (donnée initiale + chaque modification) est une ligne distincte, identifiée par `modification_id`, et `donneesActuelles` indique la version actuellement en vigueur.
+>
+> Les groupes de pairs (médiane, MAD) sont calculés **uniquement sur les marchés actuels** (`donneesActuelles = true`) : sinon un marché modifié 5 fois pèserait 5 fois plus qu'un marché normal dans le calcul des seuils de son groupe, biaisant la référence.
+>
+> En revanche, **toutes les lignes sont classifiées** contre ces mêmes seuils de référence — la version actuelle comme chacune des versions historiques. Un montant historique a réellement été engagé à un moment donné et mérite d'être évalué pour lui-même, plutôt que d'hériter silencieusement de la classification de la version actuelle ou d'être ignoré.
+
 ---
 
 ## Signal A — Écart par rapport aux pairs (`ecart_pairs`)
