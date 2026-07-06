@@ -197,7 +197,13 @@ def join_population(lf: pl.LazyFrame, population_csv_path: Path) -> pl.LazyFrame
             "La colonne 'population' sera nulle (Signal B désactivé)."
         )
         return lf.with_columns(pl.lit(None).cast(pl.Int64).alias("population"))
-    population_lf = pl.scan_csv(population_csv_path).select(
+    population_lf = pl.scan_csv(population_csv_path)
+    # Paris, Lyon et Marseille partagent leur SIREN avec leurs arrondissements
+    # (type=ARR, population vide) : on ne garde que la ligne de la commune (type=COM)
+    # pour éviter un join qui duplique ces marchés et renvoie une population nulle.
+    if "type" in population_lf.collect_schema().names():
+        population_lf = population_lf.filter(pl.col("type") == "COM")
+    population_lf = population_lf.select(
         pl.col("SIREN").cast(pl.Utf8),
         pl.col("population").cast(pl.Int64),
     )
@@ -438,14 +444,21 @@ def detect_montant_anomalies(
     # Une ligne = un marché on retire les données des titulaires et on
     # ne garde que le données actuelles.
 
-    lf_titulaires = lf.select("uid", cs.starts_with("titulaire"))
-
     df = lf.collect()
     print("height df avec titulaires: ", df.height)
     lf = df.lazy()
     schema_names = lf.collect_schema().names()
     if "donneesActuelles" in schema_names:
         lf = lf.filter(pl.col("donneesActuelles"))
+
+    # Capturé après le filtre donneesActuelles : sinon les lignes des anciennes
+    # modifications (même uid, historique) sont aussi rejointes à la fin et
+    # dupliquent les titulaires.
+    lf_titulaires = lf.select("uid", cs.starts_with("titulaire"))
+
+    # On retire les colonnes titulaire_* (sauf titulaire_categorie, agrégée ci-dessous)
+    # pour que le group_by fusionne bien les cotraitants en une seule ligne par marché.
+    lf = lf.drop(cs.starts_with("titulaire") - cs.by_name("titulaire_categorie"))
     df = (
         lf.group_by(cs.exclude("titulaire_categorie"))
         .agg(pl.col("titulaire_categorie"))
