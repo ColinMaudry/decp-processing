@@ -1,4 +1,4 @@
-### 2.13.0 2026-06-23
+### 2.13.0
 
 - Ajout des données de Medialex
 - Signalisation des montants suspects et aberrants ([#174](https://github.com/ColinMaudry/decp-processing/issues/174))
