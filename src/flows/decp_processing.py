@@ -38,7 +38,6 @@ from src.tasks.publish import publish_to_datagouv, publish_to_s3
 from src.tasks.transform import (
     calculate_naf_cpv_matching,
     concat_parquet_files,
-    join_population,
     sort_columns,
     sort_modifications,
 )
@@ -146,9 +145,6 @@ def decp_processing(enable_cache_removal: bool = True):
     logger.info("Ajout des codes et libellés NAF des titulaires...")
     lf = add_naf_libelle(lf)
     lf = lf.drop(cs.starts_with("activite"))
-
-    logger.info("Jointure population des communes (acheteur_population)...")
-    lf = join_population(lf)
 
     logger.info("Génération de l'artefact (statistiques) sur le base df...")
     generate_stats(lf)
