@@ -3,9 +3,24 @@ import datetime
 from httpx import HTTPError, get
 from prefect import task
 from prefect.cache_policies import INPUTS
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from src.config import DATAGOUVFR_API_KEY, EXCLUDED_RESOURCES, LOG_LEVEL
 from src.tasks.utils import get_logger
+
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=30))
+def _get_page(url: str) -> dict:
+    return (
+        get(
+            url,
+            follow_redirects=True,
+            headers={"X-API-KEY": DATAGOUVFR_API_KEY},
+            timeout=30,
+        )
+        .raise_for_status()
+        .json()
+    )
 
 
 def handle_paginated_calls(url: str) -> list[dict]:
@@ -24,15 +39,7 @@ def handle_paginated_calls(url: str) -> list[dict]:
     """
     data = []
     while url:
-        response = (
-            get(
-                url,
-                follow_redirects=True,
-                headers={"X-API-KEY": DATAGOUVFR_API_KEY},
-            )
-            .raise_for_status()
-            .json()
-        )
+        response = _get_page(url)
         data.extend(response["data"])
         url = response.get("next_page")
     return data

@@ -22,13 +22,17 @@ from src.config import (
 from src.tasks.utils import get_logger
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=30))
 def update_resource(dataset_id, resource_id, file_path, api_key):
     url = f"{DATAGOUVFR_API}/datasets/{dataset_id}/resources/{resource_id}/upload/"
     headers = {"X-API-KEY": api_key}
-    file = {"file": open(file_path, "rb")}
-    response = post(
-        url, files=file, headers=headers, timeout=DECP_PROCESSING_PUBLISH_TIMEOUT
-    ).raise_for_status()
+    with open(file_path, "rb") as f:
+        response = post(
+            url,
+            files={"file": f},
+            headers=headers,
+            timeout=DECP_PROCESSING_PUBLISH_TIMEOUT,
+        ).raise_for_status()
     return response.json()
 
 
@@ -82,10 +86,12 @@ def publish_to_datagouv():
             logger.info("OK")
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=30))
 def get_resource_id(dataset_id, filepath) -> str or None:
     response = get(
         f"{DATAGOUVFR_API}/datasets/{dataset_id}/",
         headers={"X-API-KEY": DATAGOUVFR_API_KEY},
+        timeout=30,
     ).raise_for_status()
     resources = response.json()["resources"]
     description = ""
@@ -117,6 +123,7 @@ def publish_new_resource(dataset_id, file_path, description):
         url,
         json={"title": str(file_path).split("/")[-1], "description": description},
         headers=headers,
+        timeout=30,
     ).raise_for_status()
 
     return response.json()
