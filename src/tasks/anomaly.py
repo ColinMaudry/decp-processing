@@ -10,6 +10,7 @@ from src.config import (
     ANOMALY_PAIRS_ABERRANT_THRESHOLD,
     ANOMALY_PAIRS_SUSPECT_THRESHOLD,
     ANOMALY_TITULAIRE_PME_MONTANT_SEUIL,
+    DATA_DIR,
     POPULATION_COMMUNES_CSV,
 )
 from src.tasks.utils import logger
@@ -461,9 +462,6 @@ def detect_montant_anomalies(
     # Toutes les lignes (actuelles et historiques) sont classifiées : un montant
     # historique a lui aussi été réellement engagé et mérite d'être évalué.
 
-    df = lf.collect()
-    print("height df avec titulaires: ", df.height)
-    lf = df.lazy()
     schema_names = lf.collect_schema().names()
     has_donnees_actuelles = "donneesActuelles" in schema_names
 
@@ -550,8 +548,12 @@ def detect_montant_anomalies(
         # sinon les cotraitants d'un marché modifié plusieurs fois se dupliquent
         # sur chaque version).
         lf = lf.join(lf_titulaires, how="left", on=marche_key)
-        df = lf.collect()
-        print("df height à la fin:", df.height)
-        lf = df.lazy()
+        # Checkpoint sur disque plutôt qu'en RAM : le résultat des anomalies est relu
+        # en streaming par l'aval (stats, NAF/CPV, sink final) au lieu de conserver tout
+        # le DataFrame déplié (titulaires réintégrés) en mémoire jusqu'à la fin du flow.
+        anomalies_path = DATA_DIR / "temp" / "decp_anomalies.parquet"
+        anomalies_path.parent.mkdir(parents=True, exist_ok=True)
+        lf.sink_parquet(anomalies_path, engine="streaming")
+        lf = pl.scan_parquet(anomalies_path)
 
     return lf
