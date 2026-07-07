@@ -5,6 +5,7 @@
 - Ajout des codes et libellés NAF des titulaires
 - Ajout de la population des acheteurs (communes), merci Datactivist pour [ce précieux jeu de données](https://www.data.gouv.fr/datasets/identifiants-des-collectivites-territoriales-et-leurs-etablissements)
 - Correction des probabilités NAF/CPV, qui étaient faussées dans le fichier publié `probabilites_naf_cpv.csv` ([#142](https://github.com/ColinMaudry/decp-processing/issues/142))
+- Correction d'une démultiplication des lignes titulaires (et de NAF croisés entre cotraitants) pour les marchés à plusieurs titulaires de codes NAF différents
 - Réduction de l'empreinte mémoire du traitement (détection des anomalies de montant, calcul des doublons entre sources, probabilités NAF/CPV)
 
 #### 2.12.1 2026-06-07
