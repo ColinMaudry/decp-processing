@@ -55,18 +55,24 @@ def add_etablissement_data(
         .alias(f"{type_siret}_nom")
     ).drop("etablissement_nom")
 
-    lf_sirets = lf_sirets.rename(
-        {
-            "latitude": f"{type_siret}_latitude",
-            "longitude": f"{type_siret}_longitude",
-            "commune_code": f"{type_siret}_commune_code",
-            "commune_nom": f"{type_siret}_commune_nom",
-            "departement_code": f"{type_siret}_departement_code",
-            "departement_nom": f"{type_siret}_departement_nom",
-            "region_code": f"{type_siret}_region_code",
-            "region_nom": f"{type_siret}_region_nom",
-        }
-    )
+    rename_map = {
+        "latitude": f"{type_siret}_latitude",
+        "longitude": f"{type_siret}_longitude",
+        "commune_code": f"{type_siret}_commune_code",
+        "commune_nom": f"{type_siret}_commune_nom",
+        "departement_code": f"{type_siret}_departement_code",
+        "departement_nom": f"{type_siret}_departement_nom",
+        "region_code": f"{type_siret}_region_code",
+        "region_nom": f"{type_siret}_region_nom",
+    }
+    # Les colonnes NAF de l'établissement sont des données DU titulaire : on les préfixe
+    # dès maintenant (pour les acheteurs elles ont déjà été droppées plus haut). Sans ce
+    # préfixe, elles ne seraient pas reconnues comme colonnes titulaire en aval et
+    # feraient éclater la fusion des cotraitants dans detect_montant_anomalies.
+    if type_siret != "acheteur":
+        rename_map["activite_code"] = f"{type_siret}_activite_code"
+        rename_map["activite_nomenclature"] = f"{type_siret}_activite_nomenclature"
+    lf_sirets = lf_sirets.rename(rename_map)
     lf_sirets = lf_sirets.drop(
         cs.by_name(
             [
@@ -327,13 +333,11 @@ def haversine(
 
 def add_naf_libelle(lf: pl.LazyFrame) -> pl.LazyFrame:
     lf_naf = pl.scan_csv(REFERENCE_DIR / "naf_libelles.csv")
-    lf = lf.join(lf_naf, left_on="activite_code", right_on="code_naf", how="left")
-    lf = lf.rename(
-        {
-            "activite_code": "titulaire_activite_code",
-            "libelle_naf": "titulaire_activite_libelle",
-        }
+    # activite_code est déjà préfixé titulaire_ depuis add_etablissement_data
+    lf = lf.join(
+        lf_naf, left_on="titulaire_activite_code", right_on="code_naf", how="left"
     )
+    lf = lf.rename({"libelle_naf": "titulaire_activite_libelle"})
     return lf
 
 

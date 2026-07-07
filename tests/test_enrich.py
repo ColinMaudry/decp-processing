@@ -87,8 +87,8 @@ class TestEnrich:
                 "org_departement_nom": ["Département", "Département"],
                 "org_region_nom": ["Région", "Région"],
                 "org_nom": ["Org (Établissement nom)", "Org"],
-                "activite_code": ["11.11A", "11.11B"],
-                "activite_nomenclature": ["NAFRev2", "NAFRev2"],
+                "org_activite_code": ["11.11A", "11.11B"],
+                "org_activite_nomenclature": ["NAFRev2", "NAFRev2"],
             }
         )
 

@@ -369,13 +369,13 @@ class TestCalculateNafCpvMatching:
             {
                 "uid": ["M1", "M2"],
                 "codeCPV": ["45000000", "45000000"],
-                "activite_code": [None, None],
-                "activite_nomenclature": [None, None],
+                "titulaire_activite_code": [None, None],
+                "titulaire_activite_nomenclature": [None, None],
                 "donneesActuelles": [True, True],
             },
             schema_overrides={
-                "activite_code": pl.String,
-                "activite_nomenclature": pl.String,
+                "titulaire_activite_code": pl.String,
+                "titulaire_activite_nomenclature": pl.String,
             },
         )
 
@@ -395,8 +395,8 @@ class TestCalculateNafCpvMatching:
             {
                 "uid": [f"M{i}" for i in range(n)] * 2,
                 "codeCPV": ["45000000"] * (2 * n),
-                "activite_code": [None] * n + ["43.21B"] * n,
-                "activite_nomenclature": [None] * n + ["NAFREV2"] * n,
+                "titulaire_activite_code": [None] * n + ["43.21B"] * n,
+                "titulaire_activite_nomenclature": [None] * n + ["NAFREV2"] * n,
                 "donneesActuelles": [True] * (2 * n),
             }
         )
@@ -427,8 +427,8 @@ class TestCalculateNafCpvMatching:
             {
                 "uid": [r[0] for r in rows],
                 "codeCPV": [r[1] for r in rows],
-                "activite_code": [r[2] for r in rows],
-                "activite_nomenclature": ["NAFREV2"] * len(rows),
+                "titulaire_activite_code": [r[2] for r in rows],
+                "titulaire_activite_nomenclature": ["NAFREV2"] * len(rows),
                 "donneesActuelles": [True] * len(rows),
             }
         )

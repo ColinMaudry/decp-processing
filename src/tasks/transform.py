@@ -292,8 +292,10 @@ def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
         lf_naf_cpv.select(
             "uid",
             "codeCPV",
-            "activite_code",
-            "activite_nomenclature",
+            # Le NAF du titulaire est préfixé titulaire_ en amont ; on le ramène aux
+            # noms activite_* utilisés (et publiés) par cette fonction.
+            pl.col("titulaire_activite_code").alias("activite_code"),
+            pl.col("titulaire_activite_nomenclature").alias("activite_nomenclature"),
             "donneesActuelles",
         )
         .filter(pl.col("donneesActuelles"))

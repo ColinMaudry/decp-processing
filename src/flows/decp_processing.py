@@ -3,7 +3,6 @@ import shutil
 from concurrent.futures import ThreadPoolExecutor
 
 import polars as pl
-import polars.selectors as cs
 from prefect import flow, task
 from prefect.artifacts import create_table_artifact
 from prefect.context import get_run_context
@@ -144,7 +143,8 @@ def decp_processing(enable_cache_removal: bool = True):
 
     logger.info("Ajout des codes et libellés NAF des titulaires...")
     lf = add_naf_libelle(lf)
-    lf = lf.drop(cs.starts_with("activite"))
+    # La nomenclature NAF du titulaire est interne : on ne la publie pas
+    lf = lf.drop("titulaire_activite_nomenclature", strict=False)
 
     logger.info("Génération de l'artefact (statistiques) sur le base df...")
     generate_stats(lf)

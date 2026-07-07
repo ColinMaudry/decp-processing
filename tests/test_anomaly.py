@@ -469,3 +469,64 @@ class TestDetectMontantAnomalies:
         assert all(a is None for a in normaux_anomalies)
         normaux_check = result.filter(pl.col("uid") != "OUTLIER")
         assert (normaux_check["montant"] == normaux_check["montant_rationalise"]).all()
+
+    def test_cotraitants_naf_differents_ne_demultiplient_pas(self):
+        """Un marché à plusieurs cotraitants de NAF différents ne doit pas voir ses
+        lignes démultipliées par la fusion/re-jointure des titulaires.
+
+        titulaire_activite_code/_nomenclature sont des attributs DU titulaire (préfixés
+        titulaire_ dès add_etablissement_data). Ils doivent donc être exclus de la clé de
+        fusion des cotraitants : sinon un marché à 2 cotraitants de NAF différents n'est
+        pas fusionné et la re-jointure produit un produit cartésien (2×2 = 4 lignes, NAF
+        croisés).
+        """
+        rows = [
+            {
+                "uid": "M1",
+                "modification_id": 0,
+                "donneesActuelles": True,
+                "acheteur_id": "21005400200012",
+                "montant": 100_000.0,
+                "type": "Services",
+                "codeCPV": "72000000",
+                "dureeMois": 12,
+                "formePrix": "Unitaire",
+                "acheteur_categorie": "Commune",
+                "titulaire_id": "111",
+                "titulaire_typeIdentifiant": "SIRET",
+                "titulaire_categorie": "GE",
+                "titulaire_activite_code": "62.01Z",
+                "titulaire_activite_nomenclature": "NAFREV2",
+            },
+            {
+                "uid": "M1",
+                "modification_id": 0,
+                "donneesActuelles": True,
+                "acheteur_id": "21005400200012",
+                "montant": 100_000.0,
+                "type": "Services",
+                "codeCPV": "72000000",
+                "dureeMois": 12,
+                "formePrix": "Unitaire",
+                "acheteur_categorie": "Commune",
+                "titulaire_id": "222",
+                "titulaire_typeIdentifiant": "SIRET",
+                "titulaire_categorie": "PME",
+                "titulaire_activite_code": "43.21B",
+                "titulaire_activite_nomenclature": "NAFREV2",
+            },
+        ]
+        lf = pl.LazyFrame(rows)
+        csv_path = BASE_DIR / "tests/data/identifiants-communes-test.csv"
+        result = detect_montant_anomalies(lf, csv_path=csv_path).collect()
+
+        # Pas de démultiplication : une ligne par (marché, titulaire)
+        assert result.height == 2
+        # Chaque titulaire garde SON propre NAF (pas de croisement)
+        pairs = set(
+            zip(
+                result["titulaire_id"].to_list(),
+                result["titulaire_activite_code"].to_list(),
+            )
+        )
+        assert pairs == {("111", "62.01Z"), ("222", "43.21B")}
