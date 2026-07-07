@@ -393,45 +393,50 @@ def calculate_duplicates_across_source(lf: pl.LazyFrame) -> pl.DataFrame:
     # Get the names of all dataset columns
     source_cols = [c for c in membership.columns if c != "uid"]
 
-    # 3. Calculate "Row Sum" to find purely unique UIDs
-    # (A UID is unique if it appears in exactly 1 column)
+    # 3. "Row Sum" : un UID est unique s'il n'apparaît que dans une seule source
     membership = membership.with_columns(
         pl.sum_horizontal(pl.col(source_cols).cast(pl.Int8)).alias("appearance_count")
     )
 
-    results = []
-    for source in source_cols:
-        # 1. Total UIDs in this source
-        # (Summing a boolean column treats True as 1)
-        total_in_source = membership.select(pl.col(source).sum()).item()
+    # 4. Toutes les agrégations (total par source, comptes uniques, intersections par
+    # paire) sont calculées en UNE seule passe. L'ancienne version enchaînait
+    # O(S²) appels .select(...).item() (une exécution Polars complète par paire de
+    # sources), coûteux dès que le nombre de sources grandit.
+    agg_exprs = []
+    for i, source in enumerate(source_cols):
+        agg_exprs.append(pl.col(source).sum().alias(f"total_{i}"))
+        agg_exprs.append(
+            (pl.col(source) & (pl.col("appearance_count") == 1))
+            .sum()
+            .alias(f"uniq_{i}")
+        )
+        for j, other in enumerate(source_cols):
+            if i != j:
+                agg_exprs.append(
+                    (pl.col(source) & pl.col(other)).sum().alias(f"inter_{i}_{j}")
+                )
 
+    aggs = membership.select(agg_exprs).row(0, named=True)
+
+    # 5. Reconstruction du tableau de résultats à partir des scalaires agrégés
+    results = []
+    for i, source in enumerate(source_cols):
+        total_in_source = aggs[f"total_{i}"]
         if total_in_source == 0:
             continue
 
-        # 2. Unique count
-        # We use a logical AND then sum the result
-        unique_count = membership.select(
-            (pl.col(source) & (pl.col("appearance_count") == 1)).sum()
-        ).item()
-
-        row_stats = {"sourceDataset": source, "unique": unique_count / total_in_source}
-
-        # 3. Intersections
-        for other in source_cols:
-            if source == other:
+        row_stats = {
+            "sourceDataset": source,
+            "unique": aggs[f"uniq_{i}"] / total_in_source,
+        }
+        for j, other in enumerate(source_cols):
+            if i == j:
                 continue
-
-            # Intersection: where both columns are True
-            intersect_count = membership.select(
-                (pl.col(source) & pl.col(other)).sum()
-            ).item()
-
-            row_stats[other] = intersect_count / total_in_source
+            row_stats[other] = aggs[f"inter_{i}_{j}"] / total_in_source
 
         results.append(row_stats)
 
     result = pl.DataFrame(results)
-    del results, membership, source_cols, row_stats
     result.write_parquet(DIST_DIR / "statistiques_doublons_sources.parquet")
     # Le return est pour tester la fonction
     return result
