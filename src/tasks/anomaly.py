@@ -465,6 +465,10 @@ def detect_montant_anomalies(
     schema_names = lf.collect_schema().names()
     has_donnees_actuelles = "donneesActuelles" in schema_names
 
+    # Comptage en streaming (pas de matérialisation du DataFrame) pour surveiller une
+    # éventuelle démultiplication des lignes titulaires (cf. fusion des cotraitants).
+    logger.info(f"height df avec titulaires: {lf.select(pl.len()).collect().item()}")
+
     # "uid" seul ne suffit pas à identifier une ligne : un marché modifié plusieurs
     # fois a plusieurs lignes qui partagent le même uid (une par modification_id).
     marche_key = (
@@ -555,5 +559,9 @@ def detect_montant_anomalies(
         anomalies_path.parent.mkdir(parents=True, exist_ok=True)
         lf.sink_parquet(anomalies_path, engine="streaming")
         lf = pl.scan_parquet(anomalies_path)
+
+        # Doit désormais correspondre à "height df avec titulaires" (plus de
+        # démultiplication). Lu depuis les métadonnées du parquet : quasi gratuit.
+        logger.info(f"height df à la fin: {lf.select(pl.len()).collect().item()}")
 
     return lf
