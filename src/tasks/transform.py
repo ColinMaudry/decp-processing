@@ -287,8 +287,6 @@ def sort_columns(lf: pl.LazyFrame, config_columns):
 
 
 def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
-    logger = get_logger(level=LOG_LEVEL)
-
     # Unité de base pour le comptage : dernière version d'un marché attribué (donc pas forcément attributaire initial)
     lf_naf_cpv = (
         lf_naf_cpv.select(
@@ -319,117 +317,46 @@ def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
             .str.strip_chars()
             .str.to_uppercase()
             .alias("activite_nomenclature"),
-            pl.col("codeCPV").str.strip_chars().alias("cpv_code"),
+            pl.col("codeCPV").str.strip_chars().alias("cpv"),
         ]
     )
 
-    cpv_naf_counts = lf_naf_cpv.group_by(
-        "cpv_code", "activite_code", "activite_nomenclature"
-    ).agg(pl.count().alias("nb_marches"))
-
-    # Fusion temporaire du code NAF et de sa nomenclature par simplicité
-    lf_naf_cpv = lf_naf_cpv.with_columns(
-        pl.concat_str(
-            pl.col("activite_nomenclature"), pl.lit("__"), pl.col("activite_code")
-        ).alias("activite")
-    ).drop("activite_code", "activite_nomenclature")
-
-    # Groupage par NAF, CPV, avec compte des CPV
-    lf_naf_cpv = lf_naf_cpv.group_by(["activite", "cpv_code"]).agg(
-        pl.count().alias("compte")
+    # Nombre de marchés par paire (NAF, CPV). C'est aussi la base du calcul de
+    # probabilité : inutile de matérialiser une matrice dense NAF×CPV (majoritairement
+    # nulle) ni de dérouler le produit cartésien en Python. On reste sur les seules
+    # paires réellement observées.
+    counts = lf_naf_cpv.group_by("activite_nomenclature", "activite_code", "cpv").agg(
+        pl.len().alias("nb_marches")
     )
 
-    # Pas de pivot en Lazy, donc on repasse en DataFrame
-    df_occurences_cpv = lf_naf_cpv.collect(engine="streaming")
-
-    # Aucune paire NAF/CPV exploitable : on évite le pivot vide (to_numpy planterait)
-    # et on écrit une table de probabilités vide.
-    if df_occurences_cpv.is_empty():
-        logger.warning(
-            "Aucune paire NAF/CPV exploitable : table de probabilités NAF/CPV vide."
-        )
-        save_to_files(
-            pl.DataFrame(
-                schema={
-                    "activite_nomenclature": pl.String,
-                    "activite_code": pl.String,
-                    "cpv": pl.String,
-                    "score": pl.Float64,
-                    "rank": pl.UInt32,
-                    "nb_marches": pl.UInt32,
-                }
-            ),
-            DIST_DIR / "probabilites_naf_cpv",
-            "csv",
-        )
-        return
-
-    df_occurences_cpv = df_occurences_cpv.pivot(
-        index="activite", on="cpv_code", values="compte", aggregate_function=None
+    # Probabilité conditionnelle P(cpv | naf) = nb_marches(naf, cpv) / nb_marches(naf)
+    total_par_naf = (
+        pl.col("nb_marches").sum().over("activite_nomenclature", "activite_code")
     )
-    df_occurences_cpv = df_occurences_cpv.fill_null(0)
 
-    # Extraire les NAF et CPVliste_activite
-    liste_activite = df_occurences_cpv["activite"]
-    cpv_occurrence_only = df_occurences_cpv.drop("activite")
-    cpv_occurrence_only_np = cpv_occurrence_only.to_numpy()
-
-    # Normalisation par ligne (somme = 1) et DataFrame de probabilités
-    row_sums = cpv_occurrence_only_np.sum(axis=1, keepdims=True)
-    prob_matrix = cpv_occurrence_only_np / row_sums  # Probabilité conditionnelle
-    df_proba = pl.DataFrame(
-        prob_matrix,
-        schema=[str(col) for col in cpv_occurrence_only.columns],  # CPV comme colonnes
-    ).with_columns(liste_activite)
-    df_proba = df_proba.select(cs.by_name("activite"), cs.exclude("activite"))
-
-    # (en option) Matrice de similarité
-    # similarity_matrix = cosine_similarity(prob_matrix)
-    # df_similarity = pl.DataFrame(
-    #     similarity_matrix,
-    #     schema=liste_activite.to_list()
-    # ).with_columns(pl.Series("activite", liste_activite))
-
-    # Formatage des résultats en tableau utilisable
-    results = []
-    cpv_cols = df_proba.select(
-        ~cs.by_name("activite")
-    ).columns  # Tous les CPV (hors 'activite')
-
-    for row in df_proba.iter_rows(named=True):
-        activite = row["activite"]
-        scores = {cpv: row[cpv] for cpv in cpv_cols}
-        # Trier par score décroissant
-        for cpv, score in scores.items():
-            results.append({"activite": activite, "cpv": cpv, "score": score})
-
-    df_results = pl.DataFrame(results)
-    df_results = df_results.with_columns(
-        pl.col("score")
-        .rank(method="dense", descending=True)
-        .over("activite")
-        .alias("rank")
-    )
-    df_results = df_results.filter(pl.col("rank") <= 10)
-    df_results = df_results.filter(pl.col("score") > 0)
-    df_results = df_results.sort(by=["activite", "score"], descending=[False, True])
     df_results = (
-        df_results.with_columns(
-            pl.col("activite").str.split("__").list[0].alias("activite_nomenclature")
+        counts.with_columns((pl.col("nb_marches") / total_par_naf).alias("score"))
+        .with_columns(
+            pl.col("score")
+            .rank(method="dense", descending=True)
+            .over("activite_nomenclature", "activite_code")
+            .alias("rank")
         )
-        .with_columns(pl.col("activite").str.split("__").list[1].alias("activite_code"))
-        .drop("activite")
-    )
-    df_results = df_results.select(
-        cs.starts_with("activite"), ~cs.starts_with("activite")
-    )
-
-    # Nombre de marchés par CPV
-    df_results = df_results.join(
-        cpv_naf_counts.collect(),
-        left_on=["cpv", "activite_code", "activite_nomenclature"],
-        right_on=["cpv_code", "activite_code", "activite_nomenclature"],
-        how="left",
+        # On ne garde que les 10 meilleurs CPV par NAF (score > 0 par construction).
+        .filter((pl.col("rank") <= 10) & (pl.col("score") > 0))
+        .select(
+            "activite_nomenclature",
+            "activite_code",
+            "cpv",
+            "score",
+            "rank",
+            "nb_marches",
+        )
+        .sort(
+            ["activite_nomenclature", "activite_code", "score"],
+            descending=[False, False, True],
+        )
+        .collect(engine="streaming")
     )
 
     save_to_files(df_results, DIST_DIR / "probabilites_naf_cpv", "csv")

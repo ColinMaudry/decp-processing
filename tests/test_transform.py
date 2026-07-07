@@ -410,6 +410,61 @@ class TestCalculateNafCpvMatching:
         assert pair.height == 1
         assert pair["nb_marches"].item() == n
 
+    def test_scores_ranks_et_nb_marches(self, monkeypatch):
+        """Verrouille le calcul de la probabilité conditionnelle P(cpv|naf),
+        du rang et du nombre de marchés par paire NAF/CPV.
+
+        NAF A (01.11Z) : 3 marchés CPV 03110000, 1 marché CPV 03120000 → total 4
+        NAF B (02.22Z) : 2 marchés CPV 03110000 → total 2
+        """
+        captured = self._capture_output(monkeypatch)
+        rows = (
+            [(f"A{i}", "03110000", "01.11Z") for i in range(3)]  # NAF A / CPV 0311 ×3
+            + [("A3", "03120000", "01.11Z")]  # NAF A / CPV 0312 ×1
+            + [(f"B{i}", "03110000", "02.22Z") for i in range(2)]  # NAF B / CPV 0311 ×2
+        )
+        lf = pl.LazyFrame(
+            {
+                "uid": [r[0] for r in rows],
+                "codeCPV": [r[1] for r in rows],
+                "activite_code": [r[2] for r in rows],
+                "activite_nomenclature": ["NAFREV2"] * len(rows),
+                "donneesActuelles": [True] * len(rows),
+            }
+        )
+
+        calculate_naf_cpv_matching(lf)
+        df = captured["df"]
+
+        def get(code, cpv):
+            row = df.filter((pl.col("activite_code") == code) & (pl.col("cpv") == cpv))
+            return row.to_dicts()[0]
+
+        a_0311 = get("01.11Z", "03110000")
+        assert a_0311["score"] == 0.75
+        assert a_0311["rank"] == 1
+        assert a_0311["nb_marches"] == 3
+
+        a_0312 = get("01.11Z", "03120000")
+        assert a_0312["score"] == 0.25
+        assert a_0312["rank"] == 2
+        assert a_0312["nb_marches"] == 1
+
+        b_0311 = get("02.22Z", "03110000")
+        assert b_0311["score"] == 1.0
+        assert b_0311["rank"] == 1
+        assert b_0311["nb_marches"] == 2
+
+        # Colonnes et ordre exacts attendus en sortie
+        assert df.columns == [
+            "activite_nomenclature",
+            "activite_code",
+            "cpv",
+            "score",
+            "rank",
+            "nb_marches",
+        ]
+
 
 class TestJoinPopulation:
     def test_join_population_via_siren(self):
