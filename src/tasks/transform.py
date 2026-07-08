@@ -194,29 +194,23 @@ def consolidate_across_datasets(lf: pl.LazyFrame) -> pl.LazyFrame:
 
     # 1) Consolidation scalaire : une ligne par version. Pour chaque champ, on prend la
     # première valeur non-nulle dans l'ordre de priorité (complétude, puis récence, puis
-    # sourceDataset pour un départage déterministe). Le tri est appliqué PAR GROUPE via
-    # sort_by dans l'agrégation, et non par un tri global du frame large : group_by +
-    # sort_by se streament et divisent par ~2 le pic mémoire de cette étape.
+    # sourceDataset pour un départage déterministe). On trie globalement une fois puis
+    # group_by(maintain_order).first : plus rapide qu'un sort_by répété par champ, à pic
+    # mémoire équivalent. La barrière de matérialisation en aval (concat_parquet_files)
+    # isole ce tri de l'enrichissement SIRENE pour éviter que les pics s'additionnent.
     scalar_payload = [c for c in scalar_cols if c != "sourceDataset"]
-    priority = ["_completeness", "datePublicationDonnees", "sourceDataset"]
-    priority_desc = [True, True, False]
-
-    def _coalesce(col: str) -> pl.Expr:
-        return (
-            pl.col(col)
-            .sort_by(priority, descending=priority_desc, nulls_last=True)
-            .drop_nulls()
-            .first()
-            .alias(col)
-        )
-
     scalar = (
         lf.select(VERSION_KEY + scalar_cols + ["_completeness"])
-        .group_by(VERSION_KEY)
+        .sort(
+            VERSION_KEY + ["_completeness", "datePublicationDonnees", "sourceDataset"],
+            descending=[False, False, False, True, True, False],
+            nulls_last=True,
+        )
+        .group_by(VERSION_KEY, maintain_order=True)
         .agg(
-            *[_coalesce(c) for c in scalar_payload],
+            *[pl.col(c).drop_nulls().first().alias(c) for c in scalar_payload],
             pl.col("sourceDataset").n_unique().alias("_n_datasets"),
-            _coalesce("sourceDataset").alias("_first_dataset"),
+            pl.col("sourceDataset").drop_nulls().first().alias("_first_dataset"),
         )
         .with_columns(
             sourceDataset=pl.when(pl.col("_n_datasets") > 1)
@@ -303,7 +297,16 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
     # dateNotification). Cf. issue #186. Exemple de doublon : 20005584600014157140791205100
     lf_concat = consolidate_across_datasets(lf_concat)
 
-    return lf_concat
+    # Barrière de matérialisation : on écrit le résultat de la consolidation sur disque
+    # et on repart d'un scan. Sans cette barrière, la consolidation (tri lourd) reste
+    # fusionnée dans un même graphe lazy avec l'enrichissement SIRENE en aval → les pics
+    # mémoire s'additionnent et provoquent un OOM. Avec la barrière, la consolidation
+    # s'exécute seule, libère sa mémoire, puis l'aval repart d'un scan à froid.
+    consolidated_path = DATA_DIR / "temp" / "decp_consolidated.parquet"
+    consolidated_path.parent.mkdir(parents=True, exist_ok=True)
+    lf_concat.sink_parquet(consolidated_path, engine="streaming")
+
+    return pl.scan_parquet(consolidated_path)
 
 
 def extract_unique_acheteurs_siret(lf: pl.LazyFrame):

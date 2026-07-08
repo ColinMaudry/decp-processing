@@ -9,6 +9,7 @@
 - Consolidation d'une même version de marché présente dans plusieurs jeux de données source : fusion des champs (complétude puis récence) et des titulaires, avec estampille de la source `decp_colmo` pour les lignes issues de ce mélange ([#186](https://github.com/ColinMaudry/decp-processing/issues/186))
 - Ajout du code CPV à l'`uid` (`acheteur_id` + `id` + `_` + `codeCPV`) pour distinguer les contrats différents qui partagent le même `id` acheteur ⚠️ modifie les valeurs d'`uid` publiées ([#186](https://github.com/ColinMaudry/decp-processing/issues/186))
 - Réduction de l'empreinte mémoire du traitement (détection des anomalies de montant, calcul des doublons entre sources, probabilités NAF/CPV)
+- Barrière de matérialisation sur disque après la consolidation des marchés, pour éviter que son pic mémoire s'additionne avec celui de l'enrichissement SIRENE (OOM) ([#186](https://github.com/ColinMaudry/decp-processing/issues/186))
 
 #### 2.12.1 2026-06-07
 
