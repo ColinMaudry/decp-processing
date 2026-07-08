@@ -192,22 +192,31 @@ def consolidate_across_datasets(lf: pl.LazyFrame) -> pl.LazyFrame:
         )
     )
 
-    # 1) Consolidation scalaire : une ligne par version. On trie chaque groupe par
-    # priorité (complétude puis récence) puis on prend la première valeur non-nulle
-    # de chaque champ (coalesce champ par champ dans l'ordre de priorité).
+    # 1) Consolidation scalaire : une ligne par version. Pour chaque champ, on prend la
+    # première valeur non-nulle dans l'ordre de priorité (complétude, puis récence, puis
+    # sourceDataset pour un départage déterministe). Le tri est appliqué PAR GROUPE via
+    # sort_by dans l'agrégation, et non par un tri global du frame large : group_by +
+    # sort_by se streament et divisent par ~2 le pic mémoire de cette étape.
     scalar_payload = [c for c in scalar_cols if c != "sourceDataset"]
+    priority = ["_completeness", "datePublicationDonnees", "sourceDataset"]
+    priority_desc = [True, True, False]
+
+    def _coalesce(col: str) -> pl.Expr:
+        return (
+            pl.col(col)
+            .sort_by(priority, descending=priority_desc, nulls_last=True)
+            .drop_nulls()
+            .first()
+            .alias(col)
+        )
+
     scalar = (
         lf.select(VERSION_KEY + scalar_cols + ["_completeness"])
-        .sort(
-            VERSION_KEY + ["_completeness", "datePublicationDonnees"],
-            descending=[False, False, False, True, True],
-            nulls_last=True,
-        )
-        .group_by(VERSION_KEY, maintain_order=True)
+        .group_by(VERSION_KEY)
         .agg(
-            *[pl.col(c).drop_nulls().first().alias(c) for c in scalar_payload],
+            *[_coalesce(c) for c in scalar_payload],
             pl.col("sourceDataset").n_unique().alias("_n_datasets"),
-            pl.col("sourceDataset").drop_nulls().first().alias("_first_dataset"),
+            _coalesce("sourceDataset").alias("_first_dataset"),
         )
         .with_columns(
             sourceDataset=pl.when(pl.col("_n_datasets") > 1)
