@@ -155,15 +155,20 @@ def consolidate_across_datasets(lf: pl.LazyFrame) -> pl.LazyFrame:
     # collision d'id intra-dataset (contrats distincts partageant uid+date+cpv, ex.
     # lots d'une même opération) qu'il ne faut surtout pas fusionner. La multiplicité
     # d'objets ne provenant que du croisement de datasets est, elle, du bruit à fusionner.
-    lf = lf.with_columns(
-        _max_obj_per_ds=pl.col("objet")
-        .n_unique()
-        .over(VERSION_KEY + ["sourceDataset"])
-        .max()
-        .over(VERSION_KEY)
+    #
+    # Calculé par agrégation (group_by) sur une projection étroite plutôt que par
+    # window functions sur le frame large : les fenêtres matérialisent tout en mémoire,
+    # alors que group_by + join se streament et ne portent que les colonnes utiles.
+    multi_obj_flag = (
+        lf.select(VERSION_KEY + ["sourceDataset", "objet"])
+        .group_by(VERSION_KEY + ["sourceDataset"])
+        .agg(pl.col("objet").n_unique().alias("_nobj"))
+        .group_by(VERSION_KEY)
+        .agg((pl.col("_nobj").max() > 1).alias("_multi_obj"))
     )
-    passthrough = lf.filter(pl.col("_max_obj_per_ds") > 1)
-    lf = lf.filter(pl.col("_max_obj_per_ds") <= 1)
+    lf = lf.join(multi_obj_flag, on=VERSION_KEY, how="left", nulls_equal=True)
+    passthrough = lf.filter(pl.col("_multi_obj")).drop("_multi_obj")
+    lf = lf.filter(~pl.col("_multi_obj")).drop("_multi_obj")
 
     # Les versions non consolidées gardent leur source, on retire seulement les
     # doublons exacts (l'ancien dédoublonnage, en préservant les objets distincts).
