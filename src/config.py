@@ -287,6 +287,15 @@ for dataset in tracked_datasets_complete:
         TRACKED_DATASETS.append(dataset)
 
 
+# Source attribuée aux lignes consolidées à partir de plusieurs datasets
+# (coalesce inter-dataset d'une même version de marché). Comme ces lignes sont
+# un mélange de sources, on ne peut pas honnêtement conserver un dataset d'origine.
+DECP_COLMO_DATASET = "decp_colmo"
+DECP_COLMO_RESOURCE_URL = (
+    "https://www.data.gouv.fr/api/1/datasets/r/11cea8e8-df3e-4ed1-932b-781e2635e432"
+)
+
+
 def check_s3_config() -> list:
     return [
         name

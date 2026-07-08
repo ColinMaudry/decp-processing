@@ -3,7 +3,14 @@ from pathlib import Path
 import polars as pl
 import polars.selectors as cs
 
-from src.config import DATA_DIR, DIST_DIR, LOG_LEVEL, POPULATION_COMMUNES_CSV
+from src.config import (
+    DATA_DIR,
+    DECP_COLMO_DATASET,
+    DECP_COLMO_RESOURCE_URL,
+    DIST_DIR,
+    LOG_LEVEL,
+    POPULATION_COMMUNES_CSV,
+)
 from src.tasks.output import save_to_files
 from src.tasks.utils import (
     calculate_duplicates_across_source,
@@ -115,6 +122,123 @@ def sort_modifications(lff: pl.LazyFrame) -> pl.LazyFrame:
     return lff
 
 
+# Clé identifiant une VERSION de marché (pas un marché) : dateNotification
+# discrimine les versions (= modification_id), codeCPV discrimine les contrats
+# distincts qui partagent le même uid (collisions d'id, cf. issue #186).
+VERSION_KEY = ["uid", "dateNotification", "codeCPV"]
+
+
+def consolidate_across_datasets(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """Consolide une même version de marché rapportée par plusieurs datasets.
+
+    Un même marché-version peut apparaître dans plusieurs datasets avec des données
+    divergentes (objet bruité, complétude différente — titulaire null vs SIRET). On
+    fusionne ces occurrences sur la clé de version (uid, dateNotification, codeCPV) :
+
+    - champs scalaires : coalesce champ par champ sur la valeur non-nulle, en
+      privilégiant la ligne la plus complète (moins de nulls) puis, à égalité, la
+      datePublicationDonnees la plus récente ;
+    - titulaires : union des titulaires distincts non-nuls (les cotraitants sont
+      conservés ; une ligne sans titulaire est écartée si un titulaire existe) ;
+    - source : si la version provient de >1 dataset, elle est estampillée decp_colmo
+      (mélange de sources), sinon le dataset d'origine est conservé.
+
+    Remplace le dédoublonnage exact historique (qu'elle subsume) et doit tourner
+    AVANT sort_modifications (attribution de modification_id).
+    """
+    all_cols = lf.collect_schema().names()
+    tit_cols = [c for c in all_cols if c.startswith("titulaire")]
+    scalar_cols = [c for c in all_cols if c not in tit_cols and c not in VERSION_KEY]
+
+    # Garde-fou anti perte de données : on ne consolide qu'une version dont AUCUN
+    # dataset ne contient à lui seul plusieurs objets distincts. Sinon c'est une vraie
+    # collision d'id intra-dataset (contrats distincts partageant uid+date+cpv, ex.
+    # lots d'une même opération) qu'il ne faut surtout pas fusionner. La multiplicité
+    # d'objets ne provenant que du croisement de datasets est, elle, du bruit à fusionner.
+    lf = lf.with_columns(
+        _max_obj_per_ds=pl.col("objet")
+        .n_unique()
+        .over(VERSION_KEY + ["sourceDataset"])
+        .max()
+        .over(VERSION_KEY)
+    )
+    passthrough = lf.filter(pl.col("_max_obj_per_ds") > 1)
+    lf = lf.filter(pl.col("_max_obj_per_ds") <= 1)
+
+    # Les versions non consolidées gardent leur source, on retire seulement les
+    # doublons exacts (l'ancien dédoublonnage, en préservant les objets distincts).
+    passthrough = passthrough.select(all_cols).unique(
+        subset=VERSION_KEY + ["objet", "titulaire_id", "titulaire_typeIdentifiant"],
+        maintain_order=False,
+    )
+
+    # Score de complétude par ligne : nombre de champs renseignés, hors clé, hors
+    # colonnes de source (toujours présentes) et hors datePublicationDonnees (départage
+    # séparément la récence).
+    comp_cols = [
+        c
+        for c in all_cols
+        if c not in VERSION_KEY
+        and c not in ("sourceDataset", "sourceFile", "datePublicationDonnees")
+    ]
+    lf = lf.with_columns(
+        _completeness=pl.sum_horizontal(
+            [pl.col(c).is_not_null().cast(pl.Int32) for c in comp_cols]
+        )
+    )
+
+    # 1) Consolidation scalaire : une ligne par version. On trie chaque groupe par
+    # priorité (complétude puis récence) puis on prend la première valeur non-nulle
+    # de chaque champ (coalesce champ par champ dans l'ordre de priorité).
+    scalar_payload = [c for c in scalar_cols if c != "sourceDataset"]
+    scalar = (
+        lf.select(VERSION_KEY + scalar_cols + ["_completeness"])
+        .sort(
+            VERSION_KEY + ["_completeness", "datePublicationDonnees"],
+            descending=[False, False, False, True, True],
+            nulls_last=True,
+        )
+        .group_by(VERSION_KEY, maintain_order=True)
+        .agg(
+            *[pl.col(c).drop_nulls().first().alias(c) for c in scalar_payload],
+            pl.col("sourceDataset").n_unique().alias("_n_datasets"),
+            pl.col("sourceDataset").drop_nulls().first().alias("_first_dataset"),
+        )
+        .with_columns(
+            sourceDataset=pl.when(pl.col("_n_datasets") > 1)
+            .then(pl.lit(DECP_COLMO_DATASET))
+            .otherwise(pl.col("_first_dataset"))
+        )
+        .with_columns(
+            sourceFile=pl.when(pl.col("sourceDataset") == DECP_COLMO_DATASET)
+            .then(pl.lit(DECP_COLMO_RESOURCE_URL))
+            .otherwise(pl.col("sourceFile"))
+        )
+        .drop("_n_datasets", "_first_dataset")
+    )
+
+    # 2) Titulaires : on écarte les lignes sans titulaire quand un titulaire existe
+    # pour la version, puis on garde les titulaires distincts (union des cotraitants).
+    tit = (
+        lf.select(VERSION_KEY + tit_cols)
+        .with_columns(
+            _has_real=pl.col("titulaire_id").is_not_null().any().over(VERSION_KEY)
+        )
+        .filter(pl.col("titulaire_id").is_not_null() | ~pl.col("_has_real"))
+        .drop("_has_real")
+        .unique(subset=VERSION_KEY + tit_cols)
+    )
+
+    # 3) Recombinaison : une ligne par (version × titulaire). nulls_equal pour apparier
+    # les clés dont dateNotification/codeCPV sont nuls.
+    consolidated = scalar.join(
+        tit, on=VERSION_KEY, how="left", nulls_equal=True
+    ).select(all_cols)
+
+    # On réunit les versions consolidées et les versions laissées intactes (garde-fou).
+    return pl.concat([consolidated, passthrough], how="vertical")
+
+
 def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
     """Concatenation par morceaux (chunks) pour éviter de charger trop de fichiers en mémoire
     # et pour éviter "OSError: Too many open files"
@@ -157,14 +281,13 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
     logger.info("Calcul des % de doublons entre sources...")
     calculate_duplicates_across_source(lf_concat)
 
-    logger.info("Suppression des lignes en doublon...")
+    logger.info("Consolidation des versions de marché entre datasets...")
 
-    # Exemple de doublon : 20005584600014157140791205100
-
-    lf_concat = lf_concat.unique(
-        subset=["uid", "titulaire_id", "titulaire_typeIdentifiant", "dateNotification"],
-        maintain_order=False,
-    )
+    # Fusionne une même version de marché rapportée par plusieurs datasets (coalesce
+    # des champs, union des titulaires, estampille decp_colmo). Subsume l'ancien
+    # dédoublonnage exact sur (uid, titulaire_id, titulaire_typeIdentifiant,
+    # dateNotification). Cf. issue #186. Exemple de doublon : 20005584600014157140791205100
+    lf_concat = consolidate_across_datasets(lf_concat)
 
     return lf_concat
 

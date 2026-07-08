@@ -1,10 +1,11 @@
 import polars as pl
 from polars.testing import assert_frame_equal
 
-from src.config import BASE_DIR
+from src.config import BASE_DIR, DECP_COLMO_DATASET, DECP_COLMO_RESOURCE_URL
 from src.tasks.transform import (
     apply_modifications,
     calculate_naf_cpv_matching,
+    consolidate_across_datasets,
     join_population,
     prepare_etablissements,
     prepare_unites_legales,
@@ -491,3 +492,301 @@ class TestJoinPopulation:
         result = join_population(lf, tmp_path / "inexistant.csv").collect()
 
         assert result["acheteur_population"].to_list() == [None]
+
+
+class TestConsolidateAcrossDatasets:
+    """Consolidation d'une version de marché à travers plusieurs datasets.
+
+    Clé de version = (uid, dateNotification, codeCPV). Les champs scalaires sont
+    coalescés (complétude puis récence) ; les titulaires distincts non-nuls sont
+    conservés ; les lignes issues de >1 dataset sont estampillées decp_colmo.
+    """
+
+    @staticmethod
+    def _lf(rows: list[dict]) -> pl.LazyFrame:
+        """Construit un LazyFrame de test avec les colonnes du stade concaténation."""
+        return (
+            pl.DataFrame(
+                rows,
+                schema={
+                    "uid": pl.Utf8,
+                    "dateNotification": pl.Utf8,
+                    "codeCPV": pl.Utf8,
+                    "objet": pl.Utf8,
+                    "montant": pl.Float64,
+                    "titulaire_id": pl.Utf8,
+                    "titulaire_typeIdentifiant": pl.Utf8,
+                    "sourceDataset": pl.Utf8,
+                    "sourceFile": pl.Utf8,
+                    "datePublicationDonnees": pl.Utf8,
+                },
+            )
+            .with_columns(
+                pl.col("dateNotification").str.strptime(
+                    pl.Date, "%Y-%m-%d", strict=False
+                ),
+                pl.col("datePublicationDonnees").str.strptime(
+                    pl.Date, "%Y-%m-%d", strict=False
+                ),
+            )
+            .lazy()
+        )
+
+    def test_merges_same_version_across_datasets(self):
+        """Même (uid, dateNotification, codeCPV) dans 2 datasets, l'un sans titulaire :
+        fusion en 1 version, titulaire non-nul conservé, objet de la ligne la plus
+        complète, source = decp_colmo."""
+        lf = self._lf(
+            [
+                # dataset pauvre : pas de titulaire
+                {
+                    "uid": "A",
+                    "dateNotification": "2023-08-03",
+                    "codeCPV": "386",
+                    "objet": "23_2702 Fourniture",
+                    "montant": 4_800_000.0,
+                    "titulaire_id": None,
+                    "titulaire_typeIdentifiant": None,
+                    "sourceDataset": "pes_legacy",
+                    "sourceFile": "url_pes",
+                    "datePublicationDonnees": "2023-08-23",
+                },
+                # dataset riche : titulaire présent
+                {
+                    "uid": "A",
+                    "dateNotification": "2023-08-03",
+                    "codeCPV": "386",
+                    "objet": "Fourniture",
+                    "montant": 4_800_000.0,
+                    "titulaire_id": "S1",
+                    "titulaire_typeIdentifiant": "SIRET",
+                    "sourceDataset": "scrap",
+                    "sourceFile": "url_scrap",
+                    "datePublicationDonnees": "2023-08-23",
+                },
+            ]
+        )
+
+        result = consolidate_across_datasets(lf).collect()
+
+        assert result.height == 1
+        row = result.to_dicts()[0]
+        assert row["titulaire_id"] == "S1"
+        assert row["objet"] == "Fourniture"  # ligne la plus complète (avec titulaire)
+        assert row["sourceDataset"] == DECP_COLMO_DATASET
+        assert row["sourceFile"] == DECP_COLMO_RESOURCE_URL
+
+    def test_preserves_distinct_contracts_same_uid(self):
+        """Même uid + dateNotification mais codeCPV différents (collision d'id) :
+        les deux versions sont conservées, source inchangée."""
+        lf = self._lf(
+            [
+                {
+                    "uid": "A",
+                    "dateNotification": "2024-11-13",
+                    "codeCPV": "45210000",
+                    "objet": "travaux batiment",
+                    "montant": 100.0,
+                    "titulaire_id": "S1",
+                    "titulaire_typeIdentifiant": "SIRET",
+                    "sourceDataset": "aws",
+                    "sourceFile": "url_aws",
+                    "datePublicationDonnees": "2024-11-21",
+                },
+                {
+                    "uid": "A",
+                    "dateNotification": "2024-11-13",
+                    "codeCPV": "45311200",
+                    "objet": "electricite",
+                    "montant": 200.0,
+                    "titulaire_id": "S1",
+                    "titulaire_typeIdentifiant": "SIRET",
+                    "sourceDataset": "aws",
+                    "sourceFile": "url_aws",
+                    "datePublicationDonnees": "2024-11-21",
+                },
+            ]
+        )
+
+        result = consolidate_across_datasets(lf).collect().sort("codeCPV")
+
+        assert result.height == 2
+        assert result["codeCPV"].to_list() == ["45210000", "45311200"]
+        assert result["objet"].to_list() == ["travaux batiment", "electricite"]
+        assert result["sourceDataset"].to_list() == ["aws", "aws"]
+
+    def test_preserves_cotraitants(self):
+        """Une version avec 2 titulaires distincts (cotraitants) dans un seul dataset :
+        les 2 lignes titulaire sont conservées, pas d'estampille decp_colmo."""
+        lf = self._lf(
+            [
+                {
+                    "uid": "A",
+                    "dateNotification": "2024-11-13",
+                    "codeCPV": "452",
+                    "objet": "chantier",
+                    "montant": 100.0,
+                    "titulaire_id": "SPIE",
+                    "titulaire_typeIdentifiant": "SIRET",
+                    "sourceDataset": "aws",
+                    "sourceFile": "url_aws",
+                    "datePublicationDonnees": "2024-11-21",
+                },
+                {
+                    "uid": "A",
+                    "dateNotification": "2024-11-13",
+                    "codeCPV": "452",
+                    "objet": "chantier",
+                    "montant": 100.0,
+                    "titulaire_id": "COMMINGES",
+                    "titulaire_typeIdentifiant": "SIRET",
+                    "sourceDataset": "aws",
+                    "sourceFile": "url_aws",
+                    "datePublicationDonnees": "2024-11-21",
+                },
+            ]
+        )
+
+        result = consolidate_across_datasets(lf).collect().sort("titulaire_id")
+
+        assert result.height == 2
+        assert result["titulaire_id"].to_list() == ["COMMINGES", "SPIE"]
+        assert result["sourceDataset"].to_list() == ["aws", "aws"]
+
+    def test_single_dataset_unchanged(self):
+        """Un marché présent dans un seul dataset n'est ni fusionné ni ré-estampillé."""
+        lf = self._lf(
+            [
+                {
+                    "uid": "A",
+                    "dateNotification": "2024-01-01",
+                    "codeCPV": "452",
+                    "objet": "obj",
+                    "montant": 100.0,
+                    "titulaire_id": "S1",
+                    "titulaire_typeIdentifiant": "SIRET",
+                    "sourceDataset": "aws",
+                    "sourceFile": "url_aws",
+                    "datePublicationDonnees": "2024-01-05",
+                },
+            ]
+        )
+
+        result = consolidate_across_datasets(lf).collect()
+
+        assert result.height == 1
+        row = result.to_dicts()[0]
+        assert row["sourceDataset"] == "aws"
+        assert row["sourceFile"] == "url_aws"
+        assert row["objet"] == "obj"
+
+    def test_conflict_resolution_completeness_then_recency(self):
+        """Conflit sur un champ scalaire non-nul : la ligne la plus complète gagne ;
+        à complétude égale, la datePublicationDonnees la plus récente gagne."""
+        lf = self._lf(
+            [
+                # Groupe X : complétude différente -> la plus complète gagne malgré une
+                # datePublicationDonnees plus ancienne.
+                {
+                    "uid": "X",
+                    "dateNotification": "2023-01-01",
+                    "codeCPV": "111",
+                    "objet": "X complet",
+                    "montant": 100.0,
+                    "titulaire_id": "S1",
+                    "titulaire_typeIdentifiant": "SIRET",
+                    "sourceDataset": "aws",
+                    "sourceFile": "url_aws",
+                    "datePublicationDonnees": "2023-01-01",
+                },
+                {
+                    "uid": "X",
+                    "dateNotification": "2023-01-01",
+                    "codeCPV": "111",
+                    "objet": "X pauvre",
+                    "montant": None,
+                    "titulaire_id": None,
+                    "titulaire_typeIdentifiant": None,
+                    "sourceDataset": "scrap",
+                    "sourceFile": "url_scrap",
+                    "datePublicationDonnees": "2023-06-01",
+                },
+                # Groupe Y : complétude égale -> la plus récente gagne.
+                {
+                    "uid": "Y",
+                    "dateNotification": "2023-01-01",
+                    "codeCPV": "222",
+                    "objet": "Y ancien",
+                    "montant": 10.0,
+                    "titulaire_id": "S2",
+                    "titulaire_typeIdentifiant": "SIRET",
+                    "sourceDataset": "aws",
+                    "sourceFile": "url_aws",
+                    "datePublicationDonnees": "2023-01-01",
+                },
+                {
+                    "uid": "Y",
+                    "dateNotification": "2023-01-01",
+                    "codeCPV": "222",
+                    "objet": "Y recent",
+                    "montant": 10.0,
+                    "titulaire_id": "S2",
+                    "titulaire_typeIdentifiant": "SIRET",
+                    "sourceDataset": "scrap",
+                    "sourceFile": "url_scrap",
+                    "datePublicationDonnees": "2023-06-01",
+                },
+            ]
+        )
+
+        result = consolidate_across_datasets(lf).collect().sort("uid")
+
+        rows = {r["uid"]: r for r in result.to_dicts()}
+        # X : complétude prime sur récence
+        assert rows["X"]["objet"] == "X complet"
+        assert rows["X"]["montant"] == 100.0
+        # Y : à complétude égale, récence tranche
+        assert rows["Y"]["objet"] == "Y recent"
+
+    def test_intra_dataset_distinct_objets_not_merged(self):
+        """Garde-fou anti perte de données : si un même dataset contient déjà plusieurs
+        objets distincts pour la même (uid, dateNotification, codeCPV), il s'agit de
+        contrats réellement distincts (collision d'id intra-dataset) — on ne fusionne
+        pas, on conserve les deux versions."""
+        lf = self._lf(
+            [
+                {
+                    "uid": "A",
+                    "dateNotification": "2025-11-17",
+                    "codeCPV": "45210000",
+                    "objet": "Consultation lots 9 12 16 21",
+                    "montant": 100.0,
+                    "titulaire_id": "S1",
+                    "titulaire_typeIdentifiant": "SIRET",
+                    "sourceDataset": "aws",
+                    "sourceFile": "url_aws",
+                    "datePublicationDonnees": "2025-11-20",
+                },
+                {
+                    "uid": "A",
+                    "dateNotification": "2025-11-17",
+                    "codeCPV": "45210000",
+                    "objet": "Reconsultation lots 3 et 18",
+                    "montant": 200.0,
+                    "titulaire_id": "S2",
+                    "titulaire_typeIdentifiant": "SIRET",
+                    "sourceDataset": "aws",
+                    "sourceFile": "url_aws",
+                    "datePublicationDonnees": "2025-11-20",
+                },
+            ]
+        )
+
+        result = consolidate_across_datasets(lf).collect().sort("objet")
+
+        assert result.height == 2
+        assert result["objet"].to_list() == [
+            "Consultation lots 9 12 16 21",
+            "Reconsultation lots 3 et 18",
+        ]
+        assert result["sourceDataset"].to_list() == ["aws", "aws"]
