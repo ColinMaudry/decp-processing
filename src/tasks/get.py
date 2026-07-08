@@ -145,18 +145,20 @@ def _close_ijson_coro(coro) -> None:
         pass
 
 
-def find_json_decp_format(chunk, decp_formats, resource: dict):
-    logger = get_logger(level=LOG_LEVEL)
+def find_json_decp_format(chunk, decp_formats):
+    """Alimente les coroutines ijson candidates avec ce chunk et renvoie le format
+    dont au moins un marché a été reconnu, ou None si aucun n'a matché sur ce chunk.
 
+    Les coroutines des formats non-retenus ne sont pas fermées ici : sur un flux
+    dont le premier chunk ne contient pas d'item complet (petit fichier tronqué par
+    le buffering de stream_replace_bytestring), l'appelant doit pouvoir réessayer
+    avec les chunks suivants."""
     for decp_format in decp_formats:
         decp_format.coroutine_ijson.send(chunk)
         if len(decp_format.liste_marches_ijson) > 0:
             # Le parser a trouvé au moins un marché correspondant à ce format, donc on a
             # trouvé le bon format.
             return decp_format
-    logger.warning(
-        f"⚠️  Pas de match trouvé parmis les schémas passés : {full_resource_name(resource)}"
-    )
     return None
 
 
@@ -210,15 +212,26 @@ def json_stream_to_parquet(
                 rb" ",
             )
 
-        # In first iteration, will find the right format
-        try:
-            chunk = next(stream_replace_iter)
-        except StopIteration:
+        # On accumule les chunks jusqu'à ce qu'un format matche : sur un petit fichier,
+        # le premier chunk peut être tronqué juste avant la fin du 1er marché par le
+        # buffering de stream_replace_bytestring, donc un seul essai donnerait un faux
+        # négatif.
+        decp_format = None
+        chunk_recu = False
+        for chunk in stream_replace_iter:
+            chunk_recu = True
+            decp_format = find_json_decp_format(chunk, decp_formats)
+            if decp_format is not None:
+                break
+
+        if not chunk_recu:
             logger.error(f"⚠️  Flux vide pour {url}")
             return set(), None
 
-        decp_format = find_json_decp_format(chunk, decp_formats, resource)
         if decp_format is None:
+            logger.warning(
+                f"⚠️  Pas de match trouvé parmis les schémas passés : {full_resource_name(resource)}"
+            )
             # Aucun format détecté : on ferme tous les coroutines pour éviter le bruit
             # « Exception ignored while closing generator » au moment du GC.
             for fmt in decp_formats:

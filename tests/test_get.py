@@ -4,6 +4,7 @@ from src.config import SIRET_LATLONG_SCHEMA
 from src.tasks.get import (
     bootstrap_siret_latlong,
     get_etablissements,
+    json_stream_to_parquet,
     xml_stream_to_parquet,
 )
 
@@ -50,6 +51,46 @@ def test_xml_stream_to_parquet_small_file_is_not_empty(tmp_path):
     assert df["acheteur_id"].to_list() == ["21130112200084"]
     # L'ISO-8859-15 doit être décodé correctement
     assert df["nature"].to_list() == ["Marché"]
+
+
+def test_json_stream_to_parquet_small_file_detects_format(tmp_path):
+    """Régression : un petit JSON DECP 2019 (< chunk_size) doit être détecté même si
+    le premier chunk est tronqué par le buffering de stream_replace_bytestring (BOM
+    + NaN->null), qui garde en réserve les derniers octets au cas où un motif serait
+    coupé entre deux chunks. Avant le fix, la détection de format n'essayait que ce
+    premier chunk tronqué et abandonnait avec le warning "Pas de match trouvé"."""
+    content = (
+        '{"$schema":"https://raw.githubusercontent.com/etalab/format-commande-publique'
+        '/master/sch%C3%A9mas/json/paquet.json","marches":[{"id":"2019031700",'
+        '"acheteur":{"id":"20005340300057","nom":"Région Normandie"},'
+        '"nature":"Marché","objet":"Maintenance et assistance du logiciel CINDOC",'
+        '"codeCPV":"72267100","procedure":"Marché négocié sans '
+        'publicité ni mise en concurrence préalable","lieuExecution":'
+        '{"code":"28000","typeCode":"Code postal","nom":"REGION NORMANDIE"},'
+        '"dureeMois":48,"dateNotification":"2019-09-09",'
+        '"datePublicationDonnees":"2019-10-04","montant":200000,'
+        '"formePrix":"Révisable","titulaires":[{"typeIdentifiant":"SIRET",'
+        '"id":"44882586900028","denominationSociale":"TECHNODOC"}],'
+        '"modifications":[],"_type":"Marché"}]}'
+    ).encode("utf-8")
+
+    json_path = tmp_path / "decp_small.json"
+    json_path.write_bytes(content)
+
+    output_path = tmp_path / "out"
+    resource = {
+        "dataset_code": "decp_minef",
+        "ori_filename": "decp_small.json",
+        "dataset_name": "test",
+    }
+
+    fields, decp_format = json_stream_to_parquet(str(json_path), output_path, resource)
+
+    assert decp_format is not None
+    assert decp_format.label == "DECP 2019"
+    df = pl.read_parquet(output_path.with_suffix(".parquet"))
+    assert df.height == 1
+    assert df["id"].to_list() == ["2019031700"]
 
 
 def test_bootstrap_siret_latlong_produces_extended_schema(tmp_path, monkeypatch):
