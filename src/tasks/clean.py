@@ -43,9 +43,30 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
     # Nettoyage des identifiants de marchés
     lf = lf.with_columns(pl.col("id").str.replace_all(r"[ ,\\./]", "_"))
 
-    # Ajout du champ uid
+    # Codes CPV, suppression du caractère de contrôle ("-[0-9]$"). Nettoyé ici, en
+    # amont, car l'uid intègre le codeCPV.
+    lf = lf.with_columns(
+        pl.col("codeCPV")
+        .str.split("-")
+        .list[0]
+        .str.pad_end(8, fill_char="0")
+        .str.head(8)
+        .alias("codeCPV")
+    )
+
+    # Ajout du champ uid = acheteur_id + id + "_" + codeCPV. Le code CPV distingue les
+    # contrats différents qui partagent le même (acheteur_id, id) : le champ source `id`
+    # est parfois réutilisé pour des marchés distincts (collisions, cf. issue #186).
+    # Construit AVANT apply_modifications, qui fait des window/fill sur l'uid.
     # TODO: à déplacer autre part, dans transform
-    lf = lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
+    lf = lf.with_columns(
+        (
+            pl.col("acheteur_id")
+            + pl.col("id")
+            + pl.lit("_")
+            + pl.col("codeCPV").fill_null("")
+        ).alias("uid")
+    )
 
     # Normalisation des titulaires
     # Cela permet de s'assurer que les titulaires mal formés ne vont pas être appliqués à d'autres marchés
@@ -107,16 +128,6 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
         pl.col("nature")
         .str.replace_many({"Marche": "Marché", "subsequent": "subséquent"})
         .alias("nature")
-    )
-
-    # Codes CPV, suppression du caractères de contrôle ("-[0-9]$")
-    lf = lf.with_columns(
-        pl.col("codeCPV")
-        .str.split("-")
-        .list[0]
-        .str.pad_end(8, fill_char="0")
-        .str.head(8)
-        .alias("codeCPV")
     )
 
     # Champs liste

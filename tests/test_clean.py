@@ -266,8 +266,12 @@ def test_clean_decp():
     # Empty id/acheteur_id should be filtered out
     assert df_result.filter(pl.col("id") == "").height == 0
 
-    # Check uid creation
-    assert df_result["uid"].to_list() == ["ach1id_1", "ach2id_2"]
+    # Check uid creation : acheteur_id + id + "_" + codeCPV (nettoyé) pour distinguer
+    # les contrats distincts partageant le même (acheteur_id, id) — cf. issue #186
+    assert df_result["uid"].to_list() == [
+        "ach1id_1_12345678",
+        "ach2id_2_87654100",
+    ]
 
     # Check montant replacement
     assert 12311111111.0 in df_result["montant"].to_list()
