@@ -530,3 +530,51 @@ class TestDetectMontantAnomalies:
             )
         )
         assert pairs == {("111", "62.01Z"), ("222", "43.21B")}
+
+    def test_collision_objets_differents_ne_demultiplient_pas(self):
+        """Deux contrats distincts partageant le même (uid, modification_id) — collision
+        d'identifiant (cf. #186) : objets et titulaires différents — ne doivent pas voir
+        leurs titulaires croisés par la re-jointure.
+
+        La re-jointure des titulaires doit s'appuyer sur l'identité complète de la version
+        de marché (toutes les colonnes non-titulaire), pas seulement (uid, modification_id) :
+        sinon les 2 contrats (2 lignes collapsées) × 2 titulaires produisent 4 lignes avec
+        des titulaires assignés au mauvais objet.
+        """
+        base = {
+            "modification_id": 0,
+            "donneesActuelles": True,
+            "acheteur_id": "21005400200012",
+            "type": "Services",
+            "codeCPV": "72000000",
+            "dureeMois": 12,
+            "formePrix": "Unitaire",
+            "acheteur_categorie": "Commune",
+            "titulaire_typeIdentifiant": "SIRET",
+        }
+        rows = [
+            {
+                **base,
+                "uid": "M1",
+                "objet": "Contrat A",
+                "montant": 100_000.0,
+                "titulaire_id": "111",
+                "titulaire_categorie": "GE",
+            },
+            {
+                **base,
+                "uid": "M1",
+                "objet": "Contrat B",
+                "montant": 200_000.0,
+                "titulaire_id": "222",
+                "titulaire_categorie": "PME",
+            },
+        ]
+        lf = pl.LazyFrame(rows)
+        csv_path = BASE_DIR / "tests/data/identifiants-communes-test.csv"
+        result = detect_montant_anomalies(lf, csv_path=csv_path).collect()
+
+        # Pas de produit cartésien : une ligne par contrat, titulaire correctement apparié
+        assert result.height == 2
+        pairs = set(zip(result["objet"].to_list(), result["titulaire_id"].to_list()))
+        assert pairs == {("Contrat A", "111"), ("Contrat B", "222")}

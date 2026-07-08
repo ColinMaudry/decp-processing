@@ -469,13 +469,16 @@ def detect_montant_anomalies(
     # éventuelle démultiplication des lignes titulaires (cf. fusion des cotraitants).
     logger.info(f"height df avec titulaires: {lf.select(pl.len()).collect().item()}")
 
-    # "uid" seul ne suffit pas à identifier une ligne : un marché modifié plusieurs
-    # fois a plusieurs lignes qui partagent le même uid (une par modification_id).
-    marche_key = (
-        ["uid", "modification_id"] if "modification_id" in schema_names else ["uid"]
-    )
+    # Identité complète d'une version de marché = toutes les colonnes non-titulaire.
+    # (uid, modification_id) ne suffit PAS à identifier une ligne : des contrats
+    # distincts peuvent partager le même (uid, modification_id) (collisions
+    # d'identifiant, cf. #186), et un marché modifié plusieurs fois partage son uid
+    # entre modifications. Réattacher les titulaires sur une clé trop grossière
+    # produirait un produit cartésien. On calcule donc un identifiant de version _vid
+    # (hash de toutes les colonnes non-titulaire) et on réattache les titulaires dessus.
+    lf = lf.with_columns(_vid=pl.struct(~cs.starts_with("titulaire")).hash())
 
-    lf_titulaires = lf.select(*marche_key, cs.starts_with("titulaire"))
+    lf_titulaires = lf.select("_vid", cs.starts_with("titulaire"))
 
     # On retire les colonnes titulaire_* (sauf titulaire_categorie, agrégée ci-dessous)
     # pour que le group_by fusionne bien les cotraitants d'une même version de marché.
@@ -548,10 +551,10 @@ def detect_montant_anomalies(
 
     if not calibrating:
         lf = lf.drop([c for c in intermediaire if c in lf.collect_schema().names()])
-        # On remet les données titulaires (par marché-version, pas juste par uid,
-        # sinon les cotraitants d'un marché modifié plusieurs fois se dupliquent
-        # sur chaque version).
-        lf = lf.join(lf_titulaires, how="left", on=marche_key)
+        # On remet les données titulaires en s'appuyant sur l'identité complète de la
+        # version de marché (_vid), et non sur (uid, modification_id) : cela évite le
+        # produit cartésien quand des contrats distincts partagent (uid, modification_id).
+        lf = lf.join(lf_titulaires, how="left", on="_vid").drop("_vid")
         # Checkpoint sur disque plutôt qu'en RAM : le résultat des anomalies est relu
         # en streaming par l'aval (stats, NAF/CPV, sink final) au lieu de conserver tout
         # le DataFrame déplié (titulaires réintégrés) en mémoire jusqu'à la fin du flow.
@@ -563,5 +566,8 @@ def detect_montant_anomalies(
         # Doit désormais correspondre à "height df avec titulaires" (plus de
         # démultiplication). Lu depuis les métadonnées du parquet : quasi gratuit.
         logger.info(f"height df à la fin: {lf.select(pl.len()).collect().item()}")
+
+    # _vid est interne : on le retire (déjà fait après la re-jointure hors calibrage).
+    lf = lf.drop("_vid", strict=False)
 
     return lf

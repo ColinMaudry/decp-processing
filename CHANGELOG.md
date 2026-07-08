@@ -10,6 +10,7 @@
 - Ajout du code CPV à l'`uid` (`acheteur_id` + `id` + `_` + `codeCPV`) pour distinguer les contrats différents qui partagent le même `id` acheteur ⚠️ modifie les valeurs d'`uid` publiées ([#186](https://github.com/ColinMaudry/decp-processing/issues/186))
 - Réduction de l'empreinte mémoire du traitement (détection des anomalies de montant, calcul des doublons entre sources, probabilités NAF/CPV)
 - Barrière de matérialisation sur disque après la consolidation des marchés, pour éviter que son pic mémoire s'additionne avec celui de l'enrichissement SIRENE (OOM) ([#186](https://github.com/ColinMaudry/decp-processing/issues/186))
+- Correction d'une démultiplication résiduelle des titulaires dans la détection d'anomalies : la re-jointure des titulaires s'appuie désormais sur l'identité complète de la version de marché, évitant le croisement des titulaires entre contrats distincts partageant le même (uid, modification_id) ([#186](https://github.com/ColinMaudry/decp-processing/issues/186))
 
 #### 2.12.1 2026-06-07
 
