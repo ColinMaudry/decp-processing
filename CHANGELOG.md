@@ -1,8 +1,8 @@
 ### 2.13.0
 
-- Ajout des données de Medialex
+- Ajout des données de [Medialex](https://www.data.gouv.fr/datasets/donnees-essentielles-medialex-fr)
 - Signalisation des montants suspects et aberrants ([#174](https://github.com/ColinMaudry/decp-processing/issues/174))
-- Ajout des codes et libellés NAF des titulaires
+- Ajout des codes et libellés NAF des titulaires (`titulaire_activite_code`, `titulaire_activite_libelle`)
 - Ajout de la population des acheteurs (communes), merci Datactivist pour [ce précieux jeu de données](https://www.data.gouv.fr/datasets/identifiants-des-collectivites-territoriales-et-leurs-etablissements)
 - Correction des probabilités NAF/CPV, qui étaient faussées dans le fichier publié `probabilites_naf_cpv.csv` ([#142](https://github.com/ColinMaudry/decp-processing/issues/142))
 - Correction d'une démultiplication des lignes titulaires (et de NAF croisés entre cotraitants) pour les marchés à plusieurs titulaires de codes NAF différents
