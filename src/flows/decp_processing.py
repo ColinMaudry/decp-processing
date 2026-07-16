@@ -32,7 +32,12 @@ from src.tasks.enrich import (
     geocode_sirene,
 )
 from src.tasks.get import get_clean
-from src.tasks.output import flatten_lists, generate_final_schema, sink_to_files
+from src.tasks.output import (
+    flatten_lists,
+    generate_final_schema,
+    restore_legacy_uid,
+    sink_to_files,
+)
 from src.tasks.publish import publish_to_datagouv, publish_to_s3
 from src.tasks.transform import (
     calculate_naf_cpv_matching,
@@ -154,6 +159,12 @@ def decp_processing(enable_cache_removal: bool = True):
     )
     lf: pl.LazyFrame = sort_columns(lf, BASE_DF_COLUMNS)
     generate_final_schema(lf)
+
+    # Republication de l'uid au format historique (acheteur_id + id, sans _codeCPV)
+    # le temps que les consommateurs s'adaptent à l'uid enrichi (#186). Placé après
+    # tous les regroupements/jointures sur l'uid enrichi et juste avant l'écriture
+    # finale. Réversible : supprimer cette ligne pour republier l'uid enrichi.
+    lf = restore_legacy_uid(lf)
 
     lf = flatten_lists(lf)
     sink_to_files(lf, work_dir / "decp")

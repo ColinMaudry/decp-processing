@@ -22,6 +22,21 @@ def flatten_lists(lf: pl.LazyFrame) -> pl.LazyFrame:
     return lf
 
 
+def restore_legacy_uid(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """Republie l'uid au format historique `acheteur_id + id`, sans le suffixe
+    `_codeCPV` intégré en interne (#186).
+
+    Transition : laisse aux consommateurs le temps de s'adapter au nouvel uid.
+    L'uid enrichi reste utilisé partout en amont (apply_modifications,
+    consolidation, sort_modifications) ; seul le champ *publié* est ramené à
+    l'ancien format. Reconstruire depuis les colonnes (plutôt que retirer un
+    suffixe) est exact même quand codeCPV est null (pas de '_' résiduel).
+
+    Réversible : supprimer l'appel à cette fonction pour republier l'uid enrichi.
+    """
+    return lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
+
+
 def save_to_files(df: pl.DataFrame, path: Path, file_format=None):
     if file_format is None:
         file_format = ["csv", "parquet"]
