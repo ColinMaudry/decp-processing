@@ -21,10 +21,10 @@ Nouvelle fonction `log_column_stats(lf: pl.LazyFrame, nb_lignes: int) -> None` d
 
 Un seul passage sur les données :
 
-1. `lf.collect_schema()` donne le nom et le type de chaque colonne.
-2. Les colonnes de type `List(Struct)` (ex. `titulaires`) ne supportent pas `n_unique()` de façon fiable en Polars — elles sont exclues du calcul de cardinalité (affichées `n/a`) mais gardent leur `% null`. Les autres colonnes (`List(String)` inclus) sont traitées normalement.
-3. Construction d'une seule requête lazy avec, pour chaque colonne, deux expressions : `pl.col(c).null_count().alias(f"{c}__null_count")` et, si le type le permet, `pl.col(c).n_unique().alias(f"{c}__n_unique")`.
-4. Un seul `.collect()` sur cette requête (une seule ligne de résultat, une passe sur les données).
+1. `lf.collect_schema()` donne la liste des colonnes. Vérifié empiriquement (Polars 1.36.1) : `n_unique()` fonctionne sur tous les types présents dans le pipeline, y compris `List(Struct)` (ex. `titulaires`) — pas d'exclusion nécessaire par type.
+2. Construction d'une seule requête lazy avec, pour chaque colonne, deux expressions : `pl.col(c).null_count().alias(f"{c}__null_count")` et `pl.col(c).n_unique().alias(f"{c}__n_unique")`.
+3. Un seul `.collect()` sur cette requête (une seule ligne de résultat, une passe sur les données).
+4. **Piège Polars** : `n_unique()` compte `null` comme une valeur distincte à part entière (ex. `[100, 200, None]` → `n_unique() == 3`, pas 2). Le nombre de valeurs distinctes _non-null_ est donc `n_unique - (1 si null_count > 0 sinon 0)` — même convention que le code existant (`nb_acheteurs_uniques = df_uid["acheteur_id"].n_unique() - 1` dans `generate_stats`).
 5. `% null` = `null_count / nb_lignes * 100` (colonne vide si `nb_lignes == 0`, cas déjà exclu ailleurs dans le pipeline).
 
 ## Format du log
@@ -41,7 +41,7 @@ titulaires                     n/a      2.31%
 ## Modifications
 
 - `src/tasks/utils.py` — nouvelle fonction `log_column_stats`, appelée dans `generate_stats`
-- `tests/test_utils.py` (ou fichier de test équivalent existant) — test unitaire sur un petit LazyFrame de démonstration couvrant : colonne avec nulls, colonne sans null, colonne `List(Struct)`
+- `tests/test_stats.py` (fichier de test existant pour les fonctions de stats) — test unitaire sur un petit LazyFrame de démonstration couvrant : colonne avec nulls, colonne sans null, colonne `List(Struct)`
 
 ## Hors scope
 
