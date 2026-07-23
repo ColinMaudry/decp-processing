@@ -185,6 +185,7 @@ def generate_stats(lf: pl.LazyFrame):
 
     # 2. Counts
     nb_lignes = lf.select(pl.len()).collect().item()
+    log_column_stats(lf, nb_lignes)
     nb_marches = len(df_uid)
 
     # 3. Unique counts
