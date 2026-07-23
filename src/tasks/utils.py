@@ -14,6 +14,7 @@ from prefect.logging import get_run_logger
 
 from src.config import (
     ALL_CONFIG,
+    BASE_DF_COLUMNS,
     CACHE_EXPIRATION_TIME_HOURS,
     DATE_NOW,
     DIST_DIR,
@@ -185,7 +186,10 @@ def generate_stats(lf: pl.LazyFrame):
 
     # 2. Counts
     nb_lignes = lf.select(pl.len()).collect().item()
-    log_column_stats(lf, nb_lignes)
+    # Uniquement les colonnes du schéma publié, pas les colonnes internes
+    # (ex. anneeNotification, anneePublicationDonnees) ajoutées ci-dessus pour
+    # les besoins de generate_stats.
+    log_column_stats(lf.select(BASE_DF_COLUMNS), nb_lignes)
     nb_marches = len(df_uid)
 
     # 3. Unique counts
