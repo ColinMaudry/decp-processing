@@ -21,6 +21,10 @@ todo.md
 stats.ipynb
 wiki
 *.lock
+# uv.lock est versionné : decp-processing est une application, pas une
+# bibliothèque. Sans lock, une résolution fraîche remonte fastapi en 0.139.x,
+# incompatible avec prefect 3.7.0.
+!uv.lock
 data/sirene*
 data/storage
 .worktrees

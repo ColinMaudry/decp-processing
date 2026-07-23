@@ -7,7 +7,7 @@ authors = [{ name = "Colin Maudry", email = "colin@colmo.tech" }]
 dependencies = [
   "python-dotenv",
   "pandas",                # nécessaire pour l'écriture en base de données
-  "polars==1.36.1",
+  "polars==1.43.0",
   "pyarrow",
   "frictionless",
   "ipykernel",
