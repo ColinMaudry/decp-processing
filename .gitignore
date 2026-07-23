@@ -24,3 +24,4 @@ wiki
 data/sirene*
 data/storage
 .worktrees
+!reference/*.csv
