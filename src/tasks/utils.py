@@ -119,6 +119,32 @@ def gen_artifact_row(
     return artifact_row
 
 
+def log_column_stats(lf: pl.LazyFrame, nb_lignes: int) -> None:
+    """Log, pour chaque colonne, son nombre de valeurs distinctes (hors null) et son % de valeurs nulles."""
+    columns = lf.collect_schema().names()
+
+    exprs = []
+    for col in columns:
+        exprs.append(pl.col(col).null_count().alias(f"{col}__null_count"))
+        exprs.append(pl.col(col).n_unique().alias(f"{col}__n_unique"))
+
+    stats_row = lf.select(exprs).collect().row(0, named=True)
+
+    header = f"{'colonne':<40}{'valeurs distinctes':>20}{'% null':>10}"
+    lines = [header, "-" * len(header)]
+
+    for col in sorted(columns):
+        null_count = stats_row[f"{col}__null_count"]
+        n_unique = stats_row[f"{col}__n_unique"]
+        n_unique_non_null = n_unique - 1 if null_count > 0 else n_unique
+        pct_null = (null_count / nb_lignes * 100) if nb_lignes > 0 else 0.0
+        lines.append(f"{col:<40}{n_unique_non_null:>20}{pct_null:>9.2f}%")
+
+    logger.info(
+        "Statistiques par colonne (valeurs distinctes / % null) :\n" + "\n".join(lines)
+    )
+
+
 # Statistiques pour toutes les données collectées ce jour
 def generate_stats(lf: pl.LazyFrame):
     now = datetime.now()
