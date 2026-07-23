@@ -127,6 +127,11 @@ def sort_modifications(lff: pl.LazyFrame) -> pl.LazyFrame:
 # distincts qui partagent le même uid (collisions d'id, cf. issue #186).
 VERSION_KEY = ["uid", "dateNotification", "codeCPV"]
 
+# Fichier intermédiaire de la barrière de matérialisation de la consolidation
+# (voir consolidate_across_datasets) ; supprimé par concat_parquet_files une fois
+# la consolidation sinkée.
+FLAGGED_TMP_PATH = DATA_DIR / "temp" / "decp_flagged.parquet"
+
 
 def consolidate_across_datasets(lf: pl.LazyFrame) -> pl.LazyFrame:
     """Consolide une même version de marché rapportée par plusieurs datasets.
@@ -167,6 +172,18 @@ def consolidate_across_datasets(lf: pl.LazyFrame) -> pl.LazyFrame:
         .agg((pl.col("_nobj").max() > 1).alias("_multi_obj"))
     )
     lf = lf.join(multi_obj_flag, on=VERSION_KEY, how="left", nulls_equal=True)
+
+    # Barrière de matérialisation : le frame flaggé alimente trois branches
+    # (passthrough, scalar, tit) réunies dans un même graphe par le concat final.
+    # Sans barrière, Polars soit met en cache le sous-plan partagé en RAM (dataset
+    # complet en pleine largeur, pendant que le tri de scalar tourne par-dessus),
+    # soit ré-exécute le sous-plan par branche → pics mémoire additionnés (OOM).
+    # Matérialisé sur disque, chaque branche redevient un scan bon marché avec sa
+    # projection étroite. Même mécanisme que la barrière aval de concat_parquet_files.
+    FLAGGED_TMP_PATH.parent.mkdir(parents=True, exist_ok=True)
+    lf.sink_parquet(FLAGGED_TMP_PATH, engine="streaming")
+    lf = pl.scan_parquet(FLAGGED_TMP_PATH)
+
     passthrough = lf.filter(pl.col("_multi_obj")).drop("_multi_obj")
     lf = lf.filter(~pl.col("_multi_obj")).drop("_multi_obj")
 
@@ -305,6 +322,10 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
     consolidated_path = DATA_DIR / "temp" / "decp_consolidated.parquet"
     consolidated_path.parent.mkdir(parents=True, exist_ok=True)
     lf_concat.sink_parquet(consolidated_path, engine="streaming")
+
+    # Le fichier flaggé intermédiaire (barrière interne de la consolidation)
+    # n'est plus référencé une fois la consolidation matérialisée.
+    FLAGGED_TMP_PATH.unlink(missing_ok=True)
 
     return pl.scan_parquet(consolidated_path)
 
