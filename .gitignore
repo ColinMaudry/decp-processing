@@ -27,3 +27,4 @@ wiki
 !uv.lock
 data/sirene*
 data/storage
+.worktrees
