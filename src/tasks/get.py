@@ -10,6 +10,7 @@ import ijson
 import orjson
 import polars as pl
 from botocore.config import Config
+from botocore.exceptions import ConnectionError as BotoConnectionError
 from lxml import etree
 from prefect.transactions import transaction
 from tenacity import (
@@ -561,6 +562,15 @@ def bootstrap_siret_latlong() -> pl.LazyFrame:
     return pl.scan_parquet(output_path)
 
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    retry=retry_if_exception_type(BotoConnectionError),
+)
+def _download_file(client, bucket: str, key: str, local_path: Path) -> None:
+    client.download_file(bucket, key, str(local_path))
+
+
 def get_from_s3(key: str, prefix: str = "") -> pl.LazyFrame | None:
     logger = get_logger(level=LOG_LEVEL)
 
@@ -585,12 +595,14 @@ def get_from_s3(key: str, prefix: str = "") -> pl.LazyFrame | None:
         config=Config(
             signature_version="s3v4",
             s3={"addressing_style": "path"},
+            connect_timeout=30,
+            read_timeout=30,
         ),
     )
 
     logger.info(f"Téléchargement de {full_s3_path}...")
     try:
-        client.download_file(S3_BUCKET, full_key, str(local_path))
+        _download_file(client, S3_BUCKET, full_key, local_path)
     except Exception as e:
         print(type(e).__name__, ":", e)
         if hasattr(e, "response"):
