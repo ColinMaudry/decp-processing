@@ -1,3 +1,10 @@
+#### 2.13.1
+
+- Ajout de naf_libelles.csv
+- Ajout de logs sur les stats des colonnes (% null, nombre de valeurs uniques)
+- Polars 1.36.1 => 1.43.0
+- Barrière de matérialisation des données dans la combinaison des données d'un marché entre les datasets
+
 ### 2.13.0
 
 - Ajout des données de [Medialex](https://www.data.gouv.fr/datasets/donnees-essentielles-medialex-fr)
