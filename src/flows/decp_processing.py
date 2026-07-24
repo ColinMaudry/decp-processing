@@ -111,7 +111,7 @@ def decp_processing(enable_cache_removal: bool = True):
     os.makedirs(work_dir)
 
     logger.info("Concaténation des dataframes...")
-    lf: pl.LazyFrame = concat_parquet_files(parquet_files)
+    lf: pl.LazyFrame = concat_parquet_files(parquet_files, output_dir=work_dir)
 
     logger.info("Tri des modifications...")
     lf = sort_modifications(lf)
@@ -144,7 +144,7 @@ def decp_processing(enable_cache_removal: bool = True):
     lf = detect_montant_anomalies(lf)
 
     logger.info("Génération des probabilités NAF/CPV...")
-    calculate_naf_cpv_matching(lf)
+    calculate_naf_cpv_matching(lf, output_dir=work_dir)
 
     logger.info("Ajout des codes et libellés NAF des titulaires...")
     lf = add_naf_libelle(lf)
@@ -152,13 +152,13 @@ def decp_processing(enable_cache_removal: bool = True):
     lf = lf.drop("titulaire_activite_nomenclature", strict=False)
 
     logger.info("Génération de l'artefact (statistiques) sur le base df...")
-    generate_stats(lf)
+    generate_stats(lf, output_dir=work_dir)
 
     logger.info(
         "Génération du schéma et enregistrement des DECP aux formats CSV, Parquet..."
     )
     lf: pl.LazyFrame = sort_columns(lf, BASE_DF_COLUMNS)
-    generate_final_schema(lf)
+    generate_final_schema(lf, output_dir=work_dir)
 
     # Republication de l'uid au format historique (acheteur_id + id, sans _codeCPV)
     # le temps que les consommateurs s'adaptent à l'uid enrichi (#186). Placé après

@@ -154,7 +154,7 @@ def save_to_databases(
     #     save_to_postgres(df, table_name)
 
 
-def generate_final_schema(lf):
+def generate_final_schema(lf, output_dir=DIST_DIR):
     """Création d'un TableSchema pour décrire les données publiées"""
 
     schema = lf.collect_schema()
@@ -199,7 +199,7 @@ def generate_final_schema(lf):
             del merged_schema["fields"][i]
 
     # création de dist/schema.json
-    with open(DIST_DIR / "schema.json", "w", encoding="utf-8") as file:
+    with open(output_dir / "schema.json", "w", encoding="utf-8") as file:
         json.dump(merged_schema, file, indent=4, ensure_ascii=False, sort_keys=False)
 
 

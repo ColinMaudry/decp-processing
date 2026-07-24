@@ -147,7 +147,7 @@ def log_column_stats(lf: pl.LazyFrame, nb_lignes: int) -> None:
 
 
 # Statistiques pour toutes les données collectées ce jour
-def generate_stats(lf: pl.LazyFrame):
+def generate_stats(lf: pl.LazyFrame, output_dir=DIST_DIR):
     now = datetime.now()
 
     lf = lf.with_columns(
@@ -173,7 +173,7 @@ def generate_stats(lf: pl.LazyFrame):
         .unique(subset=["uid"])
     )
 
-    generate_public_source_stats(lf_uid)
+    generate_public_source_stats(lf_uid, output_dir=output_dir)
 
     logger.info("Création de l'artefact et du JSON de statistiques...")
 
@@ -278,11 +278,11 @@ def generate_stats(lf: pl.LazyFrame):
     )
 
     # Création d'un JSON pour publication sur data.gouv.fr
-    with open(DIST_DIR / "statistiques_marches.json", "w") as f:
+    with open(output_dir / "statistiques_marches.json", "w") as f:
         json.dump(stats, f, indent=4)
 
 
-def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
+def generate_public_source_stats(lf_uid: pl.LazyFrame, output_dir=DIST_DIR) -> None:
     logger.info("Génération des statistiques sur les sources de données...")
     lf_uid = lf_uid.select("uid", "acheteur_id", "sourceDataset")
 
@@ -341,7 +341,7 @@ def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
 
     # jointure avec la matrice de présence
     df_matrice = pl.read_parquet(
-        DIST_DIR / "statistiques_doublons_sources.parquet",
+        output_dir / "statistiques_doublons_sources.parquet",
         columns=["sourceDataset", "unique"],
     )
     df_sources = df_sources.join(df_matrice, left_on="code", right_on="sourceDataset")
@@ -360,7 +360,7 @@ def generate_public_source_stats(lf_uid: pl.LazyFrame) -> None:
     df_sources = df_sources.sort(by="nb_marchés", descending=True, nulls_last=True)
 
     # dump CSV dans dist
-    df_sources.write_csv(DIST_DIR / "statistiques_sources.csv")
+    df_sources.write_csv(output_dir / "statistiques_sources.csv")
 
 
 def full_resource_name(r: dict):
@@ -397,7 +397,9 @@ def get_logger(level: str) -> logging.Logger:
         return logging.Logger(name="Fallback logger", level=level)
 
 
-def calculate_duplicates_across_source(lf: pl.LazyFrame) -> pl.DataFrame:
+def calculate_duplicates_across_source(
+    lf: pl.LazyFrame, output_dir=DIST_DIR
+) -> pl.DataFrame:
     """
     Cette fonction crée une matrice qui indique, pour chaque code de source
     (exemples : pes_marche_2024, xmarches) le pourcentage d'uids qui lui sont uniques
@@ -468,6 +470,6 @@ def calculate_duplicates_across_source(lf: pl.LazyFrame) -> pl.DataFrame:
         results.append(row_stats)
 
     result = pl.DataFrame(results)
-    result.write_parquet(DIST_DIR / "statistiques_doublons_sources.parquet")
+    result.write_parquet(output_dir / "statistiques_doublons_sources.parquet")
     # Le return est pour tester la fonction
     return result

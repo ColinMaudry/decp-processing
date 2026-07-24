@@ -264,7 +264,7 @@ def consolidate_across_datasets(lf: pl.LazyFrame) -> pl.LazyFrame:
     return pl.concat([consolidated, passthrough], how="vertical")
 
 
-def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
+def concat_parquet_files(parquet_files: list, output_dir=DIST_DIR) -> pl.LazyFrame:
     """Concatenation par morceaux (chunks) pour éviter de charger trop de fichiers en mémoire
     # et pour éviter "OSError: Too many open files"
 
@@ -304,7 +304,7 @@ def concat_parquet_files(parquet_files: list) -> pl.LazyFrame:
     lf_concat: pl.LazyFrame = pl.concat(lfs, how="vertical")
 
     logger.info("Calcul des % de doublons entre sources...")
-    calculate_duplicates_across_source(lf_concat)
+    calculate_duplicates_across_source(lf_concat, output_dir=output_dir)
 
     logger.info("Consolidation des versions de marché entre datasets...")
 
@@ -447,7 +447,7 @@ def sort_columns(lf: pl.LazyFrame, config_columns):
     return lf
 
 
-def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
+def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame, output_dir=DIST_DIR):
     # Unité de base pour le comptage : dernière version d'un marché attribué (donc pas forcément attributaire initial)
     lf_naf_cpv = (
         lf_naf_cpv.select(
@@ -522,7 +522,7 @@ def calculate_naf_cpv_matching(lf_naf_cpv: pl.LazyFrame):
         .collect(engine="streaming")
     )
 
-    save_to_files(df_results, DIST_DIR / "probabilites_naf_cpv", "csv")
+    save_to_files(df_results, output_dir / "probabilites_naf_cpv", "csv")
 
 
 def join_population(
