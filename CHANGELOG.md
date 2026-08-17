@@ -1,3 +1,7 @@
+#### 2.14.0 2026-08-17
+
+- Application du nouveau format d'`uid` afin de réduire la suppression de faux doublons (`acheteur_id` + `id` + `_` + `codeCPV`) ([#186](https://github.com/ColinMaudry/decp-processing/issues/186))
+
 #### 2.13.1
 
 - Ajout de naf_libelles.csv
