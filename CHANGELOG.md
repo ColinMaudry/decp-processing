@@ -1,12 +1,14 @@
 #### 2.15.0
 
-- Ajout des labels des entreprises `titulaire_labels` et `acheteur_labels` — Bio, RGE, ESS, Association ([#190](https://github.com/ColinMaudry/decp-processing/issues/190)). La couverture du label RGE est partielle : l'export de l'ADEME est plafonné à 30 000 lignes.
-- ⚠️ L'insertion de ces deux colonnes (`acheteur_labels` après `acheteur_categorie`, `titulaire_labels` après `titulaire_categorie`) **décale d'un rang toutes les colonnes suivantes** du CSV et du parquet publiés. Les réutilisations qui lisent les colonnes par position, et non par nom, doivent être adaptées.
+- Ajout des labels des entreprises `titulaire_labels` et `acheteur_labels` — Bio, RGE, ESS, Association ([#190](https://github.com/ColinMaudry/decp-processing/issues/190)).
 - Retry sur les téléchargements SIRENE du prétraitement mensuel (unités légales, établissements)
-- Garde-fou de volume sur les sources de labels : une source tronquée fait désormais échouer le prétraitement au lieu de publier des labels nuls silencieusement
 - Le prétraitement SIRENE régénère un fichier dont il manque des colonnes, au lieu de se fier à sa seule existence
 
-#### 2.13.1
+#### 2.14.0 2026-08-17
+
+- Application du nouveau format d'`uid` afin de réduire la suppression de faux doublons (`acheteur_id` + `id` + `_` + `codeCPV`) ([#186](https://github.com/ColinMaudry/decp-processing/issues/186))
+
+##### 2.13.1
 
 - Ajout de naf_libelles.csv
 - Ajout de logs sur les stats des colonnes (% null, nombre de valeurs uniques)
