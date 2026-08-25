@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import polars as pl
 from prefect import flow
 from prefect.transactions import transaction
@@ -12,6 +14,23 @@ from src.tasks.get import (
     get_unite_legales,
 )
 from src.tasks.utils import create_sirene_data_dir, get_logger
+
+
+def _parquet_est_a_jour(path: Path, colonnes_requises: set[str]) -> bool:
+    """Le parquet existe-t-il ET porte-t-il toutes les colonnes attendues ?
+
+    Une garde sur la seule existence du fichier laisse passer les fichiers
+    produits par une version antérieure du code : après l'ajout d'une colonne,
+    le fichier du mois en cours existe toujours, n'est donc pas régénéré, et
+    l'enrichissement échoue plus loin sur une ColumnNotFoundError. Vérifier le
+    contenu rend le prétraitement auto-réparant.
+
+    collect_schema() ne lit que les métadonnées du parquet : instantané, même
+    sur un fichier de plusieurs centaines de Mo.
+    """
+    if not path.exists():
+        return False
+    return colonnes_requises <= set(pl.scan_parquet(path).collect_schema().names())
 
 
 @flow(log_prints=True)
@@ -36,28 +55,39 @@ def sirene_preprocess():
         if not isinstance(lf_siret_latlong, pl.LazyFrame):
             lf_siret_latlong = bootstrap_siret_latlong()
 
+        # Les labels sont préparés EN PREMIER, bien qu'ils ne dépendent de rien :
+        # un échec ici déclenche le rollback de la transaction, donc la
+        # suppression de SIRENE_DATA_DIR. Placé en dernier, le moindre incident
+        # réseau de quelques minutes ferait jeter les stocks SIRENE téléchargés
+        # pendant des heures juste avant. Ne pas le remettre à sa place
+        # « logique ».
+        processed_labels_parquet_path = SIRENE_DATA_DIR / "labels_entreprises.parquet"
+        if not _parquet_est_a_jour(
+            processed_labels_parquet_path, {"label_bio", "label_rge"}
+        ):
+            logger.info("Téléchargement et préparation des labels d'entreprises...")
+            get_labels_entreprises(processed_labels_parquet_path)
+        else:
+            logger.info(str(processed_labels_parquet_path) + " existe, skipping.")
+
         # préparer les données unités légales
         processed_ul_parquet_path = SIRENE_DATA_DIR / "unites_legales.parquet"
-        if not processed_ul_parquet_path.exists():
+        if not _parquet_est_a_jour(
+            processed_ul_parquet_path, {"label_ess", "label_association"}
+        ):
             logger.info("Téléchargement et préparation des unités légales...")
             get_unite_legales(processed_ul_parquet_path)
         else:
             logger.info(str(processed_ul_parquet_path) + " existe, skipping.")
 
         # préparer les données établissements
+        # Aucune colonne n'a été ajoutée à ce fichier depuis sa création : la
+        # simple existence suffit comme garde.
         processed_etab_parquet_path = SIRENE_DATA_DIR / "etablissements.parquet"
         if not processed_etab_parquet_path.exists():
             logger.info("Téléchargement et préparation des établissements...")
             get_etablissements(processed_etab_parquet_path, lf_siret_latlong)
         else:
             logger.info(str(processed_etab_parquet_path) + " existe, skipping.")
-
-        # préparer les labels d'entreprises (bio, RGE)
-        processed_labels_parquet_path = SIRENE_DATA_DIR / "labels_entreprises.parquet"
-        if not processed_labels_parquet_path.exists():
-            logger.info("Téléchargement et préparation des labels d'entreprises...")
-            get_labels_entreprises(processed_labels_parquet_path)
-        else:
-            logger.info(str(processed_labels_parquet_path) + " existe, skipping.")
 
     logger.info("☑️  Fin du flow sirene_preprocess.")
