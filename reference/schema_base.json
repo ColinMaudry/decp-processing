@@ -317,6 +317,13 @@
     },
     {
       "type": "string",
+      "name": "acheteur_labels",
+      "title": "Labels de l'acheteur",
+      "description": "Labels de l'acheteur, séparés par des virgules : Bio (agriculture biologique), RGE (Reconnu Garant de l'Environnement), ESS (économie sociale et solidaire), Association. La couverture du label RGE est partielle.",
+      "short_title": "Labels acheteur"
+    },
+    {
+      "type": "string",
       "name": "acheteur_commune_code",
       "title": "Commune de l'acheteur (code)",
       "description": "Code de la commune où se trouve l'acheteur.",
@@ -385,6 +392,13 @@
       "description": "Catégorie de l'entreprise titulaire selon la classification de l'INSEE.",
       "short_title": "Catégorie titulaire",
       "enum": ["PME", "ETI", "GE"]
+    },
+    {
+      "type": "string",
+      "name": "titulaire_labels",
+      "title": "Labels du titulaire",
+      "description": "Labels de l'entreprise titulaire, séparés par des virgules : Bio (agriculture biologique), RGE (Reconnu Garant de l'Environnement), ESS (économie sociale et solidaire), Association. La couverture du label RGE est partielle.",
+      "short_title": "Labels titulaire"
     },
     {
       "type": "string",

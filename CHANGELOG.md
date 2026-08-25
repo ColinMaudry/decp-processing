@@ -4,6 +4,8 @@
 - Ajout de logs sur les stats des colonnes (% null, nombre de valeurs uniques)
 - Polars 1.36.1 => 1.43.0
 - Barrière de matérialisation des données dans la combinaison des données d'un marché entre les datasets
+- Ajout des labels des entreprises `titulaire_labels` et `acheteur_labels` — Bio, RGE, ESS, Association ([#190](https://github.com/ColinMaudry/decp-processing/issues/190)). La couverture du label RGE est partielle : l'export de l'ADEME est plafonné à 30 000 lignes.
+- Retry sur les téléchargements SIRENE du prétraitement mensuel (unités légales, établissements)
 
 ### 2.13.0
 
