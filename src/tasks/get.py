@@ -667,12 +667,15 @@ def get_labels_entreprises(
 
     reference_date est résolue ici et non dans la signature : un date.today()
     en argument par défaut serait évalué une seule fois, à l'import du module.
+
+    Les deux sources sont matérialisées avant la jointure : un plan Polars
+    unique tirant de deux sources HTTP distantes ne termine pas.
     """
     if reference_date is None:
         reference_date = date.today()
 
     prepare_labels_entreprises(
-        pl.scan_csv(LABELS_BIO_URL, separator=";", infer_schema_length=0),
-        pl.scan_parquet(LABELS_RGE_URL),
+        pl.read_csv(LABELS_BIO_URL, separator=";", infer_schema_length=0).lazy(),
+        pl.read_parquet(LABELS_RGE_URL).lazy(),
         reference_date,
     ).sink_parquet(processed_parquet_path)
