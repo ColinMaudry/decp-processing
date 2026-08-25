@@ -8,6 +8,7 @@ from polars.testing import assert_frame_equal
 from src.config import BASE_DIR
 from src.tasks.enrich import (
     add_etablissement_data,
+    add_labels,
     add_type_marche,
     add_unite_legale_data,
     geocode_missing_sirets,
@@ -289,6 +290,106 @@ class TestEnrich:
         assert_frame_equal(
             add_type_marche(lf).collect(), df_cible, check_column_order=False
         )
+
+
+class TestAddLabels:
+    @staticmethod
+    def _lf_sirets(**flags):
+        """Un SIRET titulaire portant les booléens ESS/association demandés."""
+        return pl.LazyFrame(
+            {
+                "titulaire_id": ["11111111111111"],
+                "label_ess": [flags.get("ess", False)],
+                "label_association": [flags.get("association", False)],
+            }
+        )
+
+    @staticmethod
+    def _lf_labels(**flags):
+        return pl.LazyFrame(
+            {
+                "siret": ["11111111111111"],
+                "label_bio": [flags.get("bio", False)],
+                "label_rge": [flags.get("rge", False)],
+            }
+        )
+
+    def test_ordre_des_quatre_labels(self):
+        """L'ordre publié est Bio, RGE, ESS, Association, quelle que soit
+        l'origine de chaque label."""
+        result = add_labels(
+            self._lf_sirets(ess=True, association=True),
+            self._lf_labels(bio=True, rge=True),
+            "titulaire_id",
+            "titulaire",
+        ).collect()
+
+        assert result["titulaire_labels"].to_list() == ["Bio, RGE, ESS, Association"]
+
+    def test_un_seul_label_pas_de_separateur(self):
+        result = add_labels(
+            self._lf_sirets(),
+            self._lf_labels(rge=True),
+            "titulaire_id",
+            "titulaire",
+        ).collect()
+
+        assert result["titulaire_labels"].to_list() == ["RGE"]
+
+    def test_aucun_label_donne_null(self):
+        """Régression : list.join sur une liste vide retourne "" en Polars 1.43,
+        pas null."""
+        result = add_labels(
+            self._lf_sirets(),
+            self._lf_labels(),
+            "titulaire_id",
+            "titulaire",
+        ).collect()
+
+        assert result["titulaire_labels"].to_list() == [None]
+
+    def test_siret_absent_du_fichier_de_labels(self):
+        """Un SIRET connu de SIRENE mais absent de labels_entreprises.parquet
+        conserve ses labels ESS/association et n'est pas perdu par la jointure."""
+        lf_labels = pl.LazyFrame(
+            {
+                "siret": ["99999999999999"],
+                "label_bio": [True],
+                "label_rge": [True],
+            }
+        )
+
+        result = add_labels(
+            self._lf_sirets(ess=True), lf_labels, "titulaire_id", "titulaire"
+        ).collect()
+
+        assert result.height == 1
+        assert result["titulaire_labels"].to_list() == ["ESS"]
+
+    def test_les_booleens_ne_survivent_pas(self):
+        result = add_labels(
+            self._lf_sirets(ess=True),
+            self._lf_labels(bio=True),
+            "titulaire_id",
+            "titulaire",
+        ).collect()
+
+        assert set(result.columns) == {"titulaire_id", "titulaire_labels"}
+
+    def test_chemin_acheteur(self):
+        lf_sirets = pl.LazyFrame(
+            {
+                "acheteur_id": ["11111111111111"],
+                "label_ess": [False],
+                "label_association": [True],
+            }
+        )
+
+        result = add_labels(
+            lf_sirets, self._lf_labels(bio=True), "acheteur_id", "acheteur"
+        ).collect()
+
+        assert result["acheteur_labels"].to_list() == ["Bio, Association"]
 
 
 class _FrozenDate:

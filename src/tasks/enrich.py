@@ -179,12 +179,53 @@ def add_unite_legale_data(
     return lf_sirets
 
 
+LABELS = [
+    ("label_bio", "Bio"),
+    ("label_rge", "RGE"),
+    ("label_ess", "ESS"),
+    ("label_association", "Association"),
+]
+
+
+def add_labels(
+    lf_sirets: pl.LazyFrame,
+    lf_labels: pl.LazyFrame,
+    siret_column: str,
+    type_siret: str,
+) -> pl.LazyFrame:
+    """Compose {type_siret}_labels à partir des quatre drapeaux booléens.
+
+    L'ordre publié — Bio, RGE, ESS, Association — n'est défini qu'ici, par
+    l'ordre de LABELS.
+    """
+    lf_sirets = lf_sirets.join(
+        lf_labels, how="left", left_on=siret_column, right_on="siret"
+    ).with_columns(
+        pl.col("label_bio").fill_null(False),
+        pl.col("label_rge").fill_null(False),
+    )
+
+    lf_sirets = lf_sirets.with_columns(
+        pl.concat_list(
+            [pl.when(pl.col(flag)).then(pl.lit(label)) for flag, label in LABELS]
+        )
+        .list.drop_nulls()
+        .list.join(", ")
+        # list.join retourne "" sur une liste vide, pas null
+        .replace("", None)
+        .alias(f"{type_siret}_labels")
+    )
+
+    return lf_sirets.drop([flag for flag, _ in LABELS])
+
+
 def enrich_from_sirene(lf: pl.LazyFrame):
     logger = get_logger(level=LOG_LEVEL)
 
     # Récupération des données SIRET/SIREN préparées dans sirene-preprocess()
     lf_etablissements = pl.scan_parquet(SIRENE_DATA_DIR / "etablissements.parquet")
     lf_unites_legales = pl.scan_parquet(SIRENE_DATA_DIR / "unites_legales.parquet")
+    lf_labels = pl.scan_parquet(SIRENE_DATA_DIR / "labels_entreprises.parquet")
 
     lf_base = lf.clone()
 
@@ -204,6 +245,11 @@ def enrich_from_sirene(lf: pl.LazyFrame):
     logger.info("Ajout des données établissements (acheteurs)...")
     lf_sirets_acheteurs = add_etablissement_data(
         lf_sirets_acheteurs, lf_etablissements, "acheteur_id", "acheteur"
+    )
+
+    logger.info("Ajout des labels (acheteurs)...")
+    lf_sirets_acheteurs = add_labels(
+        lf_sirets_acheteurs, lf_labels, "acheteur_id", "acheteur"
     )
 
     # Matérialisation de sirets_acheteurs pour rompre
@@ -228,6 +274,11 @@ def enrich_from_sirene(lf: pl.LazyFrame):
     logger.info("Ajout des données établissements (titulaires)...")
     lf_sirets_titulaires = add_etablissement_data(
         lf_sirets_titulaires, lf_etablissements, "titulaire_id", "titulaire"
+    )
+
+    logger.info("Ajout des labels (titulaires)...")
+    lf_sirets_titulaires = add_labels(
+        lf_sirets_titulaires, lf_labels, "titulaire_id", "titulaire"
     )
 
     #  # Matérialisation de sirets_titulaires pour rompre
