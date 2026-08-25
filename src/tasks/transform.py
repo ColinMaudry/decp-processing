@@ -358,6 +358,8 @@ def prepare_unites_legales(lf: pl.LazyFrame) -> pl.LazyFrame:
                 "statutDiffusionUniteLegale",  # P = non-diffusible
                 "categorieEntreprise",  # PME, ETI, GE
                 "categorieJuridiqueUniteLegale",  # 1000, etc.
+                "economieSocialeSolidaireUniteLegale",  # O = ESS
+                "identifiantAssociationUniteLegale",  # non nul = association
             ]
         )
         .filter(
@@ -388,12 +390,20 @@ def prepare_unites_legales(lf: pl.LazyFrame) -> pl.LazyFrame:
             .otherwise(pl.col("denominationUniteLegale"))
             .alias("denominationUniteLegale")
         )
+        .with_columns(
+            label_ess=(pl.col("economieSocialeSolidaireUniteLegale") == "O").fill_null(
+                False
+            ),
+            label_association=pl.col("identifiantAssociationUniteLegale").is_not_null(),
+        )
         .drop(
             [
                 "prenomUsuelUniteLegale",
                 "statutDiffusionUniteLegale",
                 "nomUniteLegale",
                 "nomUsageUniteLegale",
+                "economieSocialeSolidaireUniteLegale",
+                "identifiantAssociationUniteLegale",
             ]
         )
     )

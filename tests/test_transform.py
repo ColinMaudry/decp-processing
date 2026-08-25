@@ -17,7 +17,7 @@ class TestPrepareUnitesLegales:
     def test_prepare_unites_legales(self):
         lf = pl.LazyFrame(
             [
-                # Cas 1: Personne morale
+                # Cas 1: Personne morale, ESS, non-association
                 {
                     "siren": "111111111",
                     "denominationUniteLegale": "Org 1",
@@ -27,8 +27,10 @@ class TestPrepareUnitesLegales:
                     "statutDiffusionUniteLegale": "O",
                     "categorieEntreprise": "ETI",
                     "categorieJuridiqueUniteLegale": "1234",
+                    "economieSocialeSolidaireUniteLegale": "O",
+                    "identifiantAssociationUniteLegale": None,
                 },
-                # Cas 2: Personne physique avec nom d'usage
+                # Cas 2: Personne physique avec nom d'usage, non-ESS, association
                 {
                     "siren": "222222222",
                     "denominationUniteLegale": None,
@@ -38,8 +40,10 @@ class TestPrepareUnitesLegales:
                     "statutDiffusionUniteLegale": "O",
                     "categorieEntreprise": "PME",
                     "categorieJuridiqueUniteLegale": "1234",
+                    "economieSocialeSolidaireUniteLegale": "N",
+                    "identifiantAssociationUniteLegale": "W123456789",
                 },
-                # Cas 3: Personne physique sans nom d'usage
+                # Cas 3: Personne physique sans nom d'usage, colonne ESS nulle
                 {
                     "siren": "333333333",
                     "denominationUniteLegale": None,
@@ -48,8 +52,11 @@ class TestPrepareUnitesLegales:
                     "nomUsageUniteLegale": None,
                     "statutDiffusionUniteLegale": "O",
                     "categorieEntreprise": "PME",
+                    "categorieJuridiqueUniteLegale": None,
+                    "economieSocialeSolidaireUniteLegale": None,
+                    "identifiantAssociationUniteLegale": None,
                 },
-                # Cas 4: Nom non-diffusible
+                # Cas 4: Nom non-diffusible, ESS et association
                 {
                     "siren": "44444444",
                     "denominationUniteLegale": None,
@@ -58,50 +65,84 @@ class TestPrepareUnitesLegales:
                     "nomUsageUniteLegale": None,
                     "statutDiffusionUniteLegale": "P",
                     "categorieEntreprise": "PME",
+                    "categorieJuridiqueUniteLegale": None,
+                    "economieSocialeSolidaireUniteLegale": "O",
+                    "identifiantAssociationUniteLegale": "W987654321",
                 },
             ]
         )
 
-        # Expected DataFrame
         expected_df = pl.DataFrame(
             [
-                # Cas 1: denominationUniteLegale est préservé
                 {
                     "siren": "111111111",
                     "denominationUniteLegale": "Org 1",
                     "categorieEntreprise": "ETI",
                     "categorieJuridiqueUniteLegale": "1234",
+                    "label_ess": True,
+                    "label_association": False,
                 },
-                # Cas 2: denominationUniteLegale = prenom + nomUsage (Zacroit)
                 {
                     "siren": "222222222",
                     "denominationUniteLegale": "Ambroise Zacroit",
                     "categorieEntreprise": "PME",
                     "categorieJuridiqueUniteLegale": "1234",
+                    "label_ess": False,
+                    "label_association": True,
                 },
-                # Cas 3: denominationUniteLegale = prenom + nom (Croizat)
                 {
                     "siren": "333333333",
                     "denominationUniteLegale": "Ambroise Croizat",
                     "categorieEntreprise": "PME",
+                    "categorieJuridiqueUniteLegale": None,
+                    # Colonne source nulle => False, surtout pas null
+                    "label_ess": False,
+                    "label_association": False,
                 },
-                # Cas 4: denominationUniteLegale = non-diffusible
                 {
                     "siren": "44444444",
                     "denominationUniteLegale": "[Données personnelles non-diffusibles]",
                     "categorieEntreprise": "PME",
+                    "categorieJuridiqueUniteLegale": None,
+                    "label_ess": True,
+                    "label_association": True,
                 },
             ]
         )
 
-        # Application de la fonction
         result_df = prepare_unites_legales(lf).collect()
 
-        # Tri des df
         result_df = result_df.sort("siren")
         expected_df = expected_df.sort("siren")
 
-        assert_frame_equal(result_df, expected_df)
+        assert_frame_equal(result_df, expected_df, check_column_order=False)
+
+    def test_label_ess_et_association_jamais_nulls(self):
+        """Régression : `col == "O"` propage le null. Sans fill_null(False),
+        les 23,3 M d'unités légales à ESS nulle produiraient des labels nulls."""
+        lf = pl.LazyFrame(
+            [
+                {
+                    "siren": "555555555",
+                    "denominationUniteLegale": "Org 5",
+                    "prenomUsuelUniteLegale": None,
+                    "nomUniteLegale": None,
+                    "nomUsageUniteLegale": None,
+                    "statutDiffusionUniteLegale": "O",
+                    "categorieEntreprise": None,
+                    "categorieJuridiqueUniteLegale": None,
+                    "economieSocialeSolidaireUniteLegale": None,
+                    "identifiantAssociationUniteLegale": None,
+                }
+            ]
+        )
+
+        result = prepare_unites_legales(lf).collect()
+
+        assert result["label_ess"].null_count() == 0
+        assert result["label_association"].null_count() == 0
+        assert result["label_ess"].dtype == pl.Boolean
+        assert result["label_association"].dtype == pl.Boolean
 
 
 class TestPrepareEtablissements:
