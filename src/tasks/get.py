@@ -1,5 +1,6 @@
 import tempfile
 from collections.abc import Iterator
+from datetime import date
 from functools import partial
 from pathlib import Path
 from time import sleep
@@ -26,6 +27,8 @@ from src.config import (
     DECP_USE_CACHE,
     HTTP_CLIENT,
     HTTP_HEADERS,
+    LABELS_BIO_URL,
+    LABELS_RGE_URL,
     LOG_LEVEL,
     RESOURCE_CACHE_DIR,
     S3_ACCESS_KEY_ID,
@@ -46,7 +49,11 @@ from src.tasks.clean import (
 )
 from src.tasks.output import sink_to_files
 from src.tasks.publish import publish_to_s3
-from src.tasks.transform import prepare_etablissements, prepare_unites_legales
+from src.tasks.transform import (
+    prepare_etablissements,
+    prepare_labels_entreprises,
+    prepare_unites_legales,
+)
 from src.tasks.utils import (
     full_resource_name,
     gen_artifact_row,
@@ -646,3 +653,26 @@ def get_unite_legales(processed_parquet_path):
         .pipe(prepare_unites_legales)
         .sink_parquet(processed_parquet_path)
     )
+
+
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    retry=retry_if_exception_type((pl.exceptions.ComputeError, OSError)),
+)
+def get_labels_entreprises(
+    processed_parquet_path: Path, reference_date: date | None = None
+) -> None:
+    """Table SIRET -> labels externes (Bio, RGE).
+
+    reference_date est résolue ici et non dans la signature : un date.today()
+    en argument par défaut serait évalué une seule fois, à l'import du module.
+    """
+    if reference_date is None:
+        reference_date = date.today()
+
+    prepare_labels_entreprises(
+        pl.scan_csv(LABELS_BIO_URL, separator=";", infer_schema_length=0),
+        pl.scan_parquet(LABELS_RGE_URL),
+        reference_date,
+    ).sink_parquet(processed_parquet_path)

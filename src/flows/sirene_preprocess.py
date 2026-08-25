@@ -8,6 +8,7 @@ from src.tasks.get import (
     bootstrap_siret_latlong,
     get_etablissements,
     get_from_s3,
+    get_labels_entreprises,
     get_unite_legales,
 )
 from src.tasks.utils import create_sirene_data_dir, get_logger
@@ -50,5 +51,13 @@ def sirene_preprocess():
             get_etablissements(processed_etab_parquet_path, lf_siret_latlong)
         else:
             logger.info(str(processed_etab_parquet_path) + " existe, skipping.")
+
+        # préparer les labels d'entreprises (bio, RGE)
+        processed_labels_parquet_path = SIRENE_DATA_DIR / "labels_entreprises.parquet"
+        if not processed_labels_parquet_path.exists():
+            logger.info("Téléchargement et préparation des labels d'entreprises...")
+            get_labels_entreprises(processed_labels_parquet_path)
+        else:
+            logger.info(str(processed_labels_parquet_path) + " existe, skipping.")
 
     logger.info("☑️  Fin du flow sirene_preprocess.")
