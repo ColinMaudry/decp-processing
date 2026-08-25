@@ -669,7 +669,9 @@ def get_labels_entreprises(
     en argument par défaut serait évalué une seule fois, à l'import du module.
 
     Les deux sources sont matérialisées avant la jointure : un plan Polars
-    unique tirant de deux sources HTTP distantes ne termine pas.
+    unique tirant de deux sources HTTP distantes ne termine pas. Chaque scan
+    pris isolément se termine en moins d'une seconde ; c'est leur combinaison
+    dans un même plan qui bloque, pas scan_csv/scan_parquet en général.
     """
     if reference_date is None:
         reference_date = date.today()
