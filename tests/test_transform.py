@@ -1,3 +1,5 @@
+from datetime import date, datetime
+
 import polars as pl
 from polars.testing import assert_frame_equal
 
@@ -8,6 +10,9 @@ from src.tasks.transform import (
     consolidate_across_datasets,
     join_population,
     prepare_etablissements,
+    prepare_labels_bio,
+    prepare_labels_entreprises,
+    prepare_labels_rge,
     prepare_unites_legales,
     sort_modifications,
 )
@@ -831,3 +836,98 @@ class TestConsolidateAcrossDatasets:
             "Reconsultation lots 3 et 18",
         ]
         assert result["sourceDataset"].to_list() == ["aws", "aws"]
+
+
+class TestPrepareLabels:
+    def test_prepare_labels_bio_nettoie_les_sirets(self):
+        """Le fichier bio contient la chaîne littérale "None" (742 occurrences)
+        et des SIRET suffixés d'un caractère invisible U+202C."""
+        lf = pl.LazyFrame(
+            {
+                "SIRET": [
+                    "38459550000024",  # valide
+                    "None",  # chaîne littérale, pas un null
+                    "41812208100023‬",  # caractère de formatage invisible
+                    "38459550000024",  # doublon
+                    None,  # vrai null
+                    "1234",  # trop court
+                ]
+            }
+        )
+
+        result = prepare_labels_bio(lf).collect().sort("siret")
+
+        assert result["siret"].to_list() == ["38459550000024", "41812208100023"]
+        assert result["label_bio"].to_list() == [True, True]
+        assert result["label_bio"].dtype == pl.Boolean
+
+    def test_prepare_labels_rge_filtre_sur_la_validite(self):
+        lf = pl.LazyFrame(
+            {
+                "siret": [
+                    "11111111111111",
+                    "22222222222222",
+                    "33333333333333",
+                    "44444444444444",
+                ],
+                "lien_date_debut": [
+                    datetime(2020, 1, 1),  # en cours
+                    datetime(2020, 1, 1),  # expirée
+                    datetime(2027, 1, 1),  # pas encore commencée
+                    None,  # date manquante
+                ],
+                "lien_date_fin": [
+                    datetime(2099, 1, 1),
+                    datetime(2025, 1, 1),
+                    datetime(2099, 1, 1),
+                    datetime(2099, 1, 1),
+                ],
+            }
+        )
+
+        result = prepare_labels_rge(lf, reference_date=date(2026, 8, 25)).collect()
+
+        assert result["siret"].to_list() == ["11111111111111"]
+        assert result["label_rge"].to_list() == [True]
+
+    def test_prepare_labels_rge_deduplique_les_qualifications(self):
+        """30 000 qualifications pour 13 597 SIRET : une entreprise porte
+        plusieurs qualifications et ne doit produire qu'une ligne."""
+        lf = pl.LazyFrame(
+            {
+                "siret": ["11111111111111"] * 3,
+                "lien_date_debut": [datetime(2020, 1, 1)] * 3,
+                "lien_date_fin": [datetime(2099, 1, 1)] * 3,
+            }
+        )
+
+        result = prepare_labels_rge(lf, reference_date=date(2026, 8, 25)).collect()
+
+        assert result.height == 1
+
+    def test_prepare_labels_entreprises_combine_sans_nulls(self):
+        lf_bio = pl.LazyFrame({"SIRET": ["11111111111111", "22222222222222"]})
+        lf_rge = pl.LazyFrame(
+            {
+                "siret": ["22222222222222", "33333333333333"],
+                "lien_date_debut": [datetime(2020, 1, 1)] * 2,
+                "lien_date_fin": [datetime(2099, 1, 1)] * 2,
+            }
+        )
+
+        result = (
+            prepare_labels_entreprises(lf_bio, lf_rge, reference_date=date(2026, 8, 25))
+            .collect()
+            .sort("siret")
+        )
+
+        assert result["siret"].to_list() == [
+            "11111111111111",
+            "22222222222222",
+            "33333333333333",
+        ]
+        assert result["label_bio"].to_list() == [True, True, False]
+        assert result["label_rge"].to_list() == [False, True, True]
+        # Aucun null : un SIRET présent d'un seul côté doit valoir False de l'autre
+        assert result["label_bio"].null_count() == 0
+        assert result["label_rge"].null_count() == 0

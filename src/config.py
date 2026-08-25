@@ -124,6 +124,21 @@ ALL_CONFIG["SIRENE_DATA_DIR"] = SIRENE_DATA_DIR
 SIRENE_UNITES_LEGALES_URL = os.getenv("SIRENE_UNITES_LEGALES_URL", "")
 SIRENE_ETABLISSEMENTS_URL = os.getenv("SIRENE_ETABLISSEMENTS_URL", "")
 
+# Labels des entreprises (issue #190)
+# Contrairement aux URL SIRENE, une valeur par défaut est fournie : ces permaliens
+# sont stables et ne dépendent pas d'un millésime mensuel.
+LABELS_BIO_URL = os.getenv(
+    "LABELS_BIO_URL",
+    "https://www.data.gouv.fr/api/1/datasets/r/657789db-d349-4554-aef6-eabde4bd1c57",
+)
+ALL_CONFIG["LABELS_BIO_URL"] = LABELS_BIO_URL
+
+LABELS_RGE_URL = os.getenv(
+    "LABELS_RGE_URL",
+    "https://www.data.gouv.fr/api/1/datasets/r/b614571a-78f6-4177-a7ad-56b93233c997",
+)
+ALL_CONFIG["LABELS_RGE_URL"] = LABELS_RGE_URL
+
 # API de géocodage Géoplateforme
 GEOCODING_API_URL = os.getenv("GEOCODING_API_URL", "https://data.geopf.fr/geocodage")
 GEOCODING_MIN_SCORE = float(os.getenv("GEOCODING_MIN_SCORE", "0.5"))

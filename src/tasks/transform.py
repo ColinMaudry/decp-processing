@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 
 import polars as pl
@@ -405,6 +406,63 @@ def prepare_unites_legales(lf: pl.LazyFrame) -> pl.LazyFrame:
                 "economieSocialeSolidaireUniteLegale",
                 "identifiantAssociationUniteLegale",
             ]
+        )
+    )
+
+
+def prepare_labels_bio(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """SIRET des entreprises certifiées agriculture biologique.
+
+    Le fichier source contient la chaîne littérale "None" (742 occurrences,
+    qui passe donc les filtres de nullité) et des SIRET suffixés d'un caractère
+    de formatage invisible U+202C. Le retrait de tout ce qui n'est pas un
+    chiffre neutralise les deux cas.
+    """
+    return (
+        lf.select(pl.col("SIRET").str.replace_all(r"\D", "").alias("siret"))
+        .filter(pl.col("siret").str.len_chars() == 14)
+        .unique()
+        .with_columns(label_bio=pl.lit(True))
+    )
+
+
+def prepare_labels_rge(lf: pl.LazyFrame, reference_date: date) -> pl.LazyFrame:
+    """SIRET des entreprises dont une qualification RGE est valide à `reference_date`.
+
+    Le fichier source compte une ligne par qualification (30 000 lignes pour
+    13 597 SIRET), d'où la déduplication. Les lignes dont une date est nulle
+    sont écartées par la comparaison.
+    """
+    return (
+        lf.filter(
+            (pl.col("lien_date_debut").cast(pl.Date) <= reference_date)
+            & (pl.col("lien_date_fin").cast(pl.Date) >= reference_date)
+        )
+        .select("siret")
+        .unique()
+        .with_columns(label_rge=pl.lit(True))
+    )
+
+
+def prepare_labels_entreprises(
+    lf_bio: pl.LazyFrame, lf_rge: pl.LazyFrame, reference_date: date
+) -> pl.LazyFrame:
+    """Table SIRET -> labels externes (Bio, RGE), ~90 000 lignes.
+
+    Les booléens ne sont jamais nuls : un SIRET présent d'un seul côté vaut
+    False de l'autre.
+    """
+    return (
+        prepare_labels_bio(lf_bio)
+        .join(
+            prepare_labels_rge(lf_rge, reference_date),
+            on="siret",
+            how="full",
+            coalesce=True,
+        )
+        .with_columns(
+            pl.col("label_bio").fill_null(False),
+            pl.col("label_rge").fill_null(False),
         )
     )
 
