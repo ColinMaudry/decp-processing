@@ -26,12 +26,58 @@ def test_scan_etablissements_includes_geocoding_columns():
     assert not missing, f"Colonnes manquantes : {missing}"
 
 
-def test_les_recuperations_sirene_ont_un_retry():
-    """Régression : le réseau n'est sollicité qu'au sink_parquet, le décorateur
-    doit donc envelopper scan ET sink. Une fonction qui retourne un LazyFrame
-    ne peut pas être utilement décorée."""
-    for func in (get_unite_legales, get_etablissements):
-        assert hasattr(func, "retry"), f"{func.__name__} n'est pas décorée par tenacity"
+def test_get_unite_legales_a_un_retry():
+    assert hasattr(get_unite_legales, "retry"), (
+        "get_unite_legales n'est pas décorée par tenacity"
+    )
+
+
+def test_get_etablissements_materialise_dans_la_fonction_decoree(tmp_path, monkeypatch):
+    """Le retry n'a d'effet que si le sink_parquet est DANS la fonction décorée :
+    scan_parquet est paresseux, le réseau n'est sollicité qu'à la matérialisation.
+    Une fonction qui se contenterait de `return scan_etablissements().pipe(...)`
+    sans sink interne passerait le test hasattr(..., "retry") sans jamais matérialiser
+    quoi que ce soit — ce test vérifie donc le comportement, pas juste le décorateur."""
+    fake_lf = pl.LazyFrame(
+        [
+            {
+                "siret": "11111111111",
+                "codeCommuneEtablissement": "1053",
+                "activitePrincipaleEtablissement": "11.1A",
+                "nomenclatureActivitePrincipaleEtablissement": "NAFv2",
+                "enseigne1Etablissement": None,
+                "denominationUsuelleEtablissement": "Dénom usuelle",
+                "libelleVoieEtablissement": "Rue Test",
+                "typeVoieEtablissement": "RUE",
+                "numeroVoieEtablissement": "1",
+                "indiceRepetitionEtablissement": None,
+                "codePostalEtablissement": "01000",
+                "libelleCommuneEtablissement": "Bourg-en-Bresse",
+            }
+        ]
+    )
+    monkeypatch.setattr("src.tasks.get.scan_etablissements", lambda: fake_lf)
+
+    lf_siret_latlong = pl.LazyFrame(
+        {
+            "siret": ["00011111111111"],
+            "latitude": [45.75],
+            "longitude": [4.85],
+        }
+    )
+
+    out = tmp_path / "etablissements.parquet"
+    assert not out.exists()
+
+    get_etablissements(out, lf_siret_latlong)
+
+    assert out.exists(), (
+        "get_etablissements n'a rien matérialisé : le sink_parquet doit être "
+        "dans la fonction décorée, pas dans l'appelant."
+    )
+    df = pl.read_parquet(out)
+    assert df.height == 1
+    assert df["siret"].to_list() == ["00011111111111"]
 
 
 def test_xml_stream_to_parquet_small_file_is_not_empty(tmp_path):
