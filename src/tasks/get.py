@@ -655,6 +655,11 @@ def get_unite_legales(processed_parquet_path):
     )
 
 
+# Volume constaté en production : 100 768 lignes. Le seuil laisse une marge
+# large tout en attrapant un effondrement d'une des deux sources.
+LABELS_MIN_ROWS = 50_000
+
+
 @retry(
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=2, max=30),
@@ -676,8 +681,24 @@ def get_labels_entreprises(
     if reference_date is None:
         reference_date = date.today()
 
-    prepare_labels_entreprises(
+    labels = prepare_labels_entreprises(
         pl.read_csv(LABELS_BIO_URL, separator=";", infer_schema_length=0).lazy(),
         pl.read_parquet(LABELS_RGE_URL).lazy(),
         reference_date,
-    ).sink_parquet(processed_parquet_path)
+    ).collect()
+
+    # Garde-fou de volume : une source tronquée produirait un parquet
+    # parfaitement valide, et les DECP publiées porteraient des labels nuls sur
+    # la quasi-totalité des entreprises — indistinguable, pour un consommateur,
+    # de « aucune entreprise n'est labellisée ». On préfère l'échec franc.
+    # Le parquet n'est écrit qu'après la vérification, pour ne pas laisser sur
+    # le disque un fichier que la garde de sirene_preprocess jugerait valide.
+    if labels.height < LABELS_MIN_ROWS:
+        raise ValueError(
+            f"Volume de labels d'entreprises anormalement bas : {labels.height} "
+            f"lignes pour un minimum attendu de {LABELS_MIN_ROWS}. Une des deux "
+            f"sources ({LABELS_BIO_URL}, {LABELS_RGE_URL}) est probablement "
+            "tronquée ou indisponible."
+        )
+
+    labels.write_parquet(processed_parquet_path)

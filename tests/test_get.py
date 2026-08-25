@@ -2,6 +2,7 @@ import inspect
 from datetime import date
 
 import polars as pl
+import pytest
 
 from src.config import SIRET_LATLONG_SCHEMA
 from src.tasks.get import (
@@ -112,6 +113,8 @@ def test_get_labels_entreprises_materialise_dans_la_fonction_decoree(
 
     monkeypatch.setattr("src.tasks.get.LABELS_BIO_URL", str(bio_path))
     monkeypatch.setattr("src.tasks.get.LABELS_RGE_URL", str(rge_path))
+    # Les fixtures font 3 lignes : le garde-fou de volume n'est pas le sujet ici.
+    monkeypatch.setattr("src.tasks.get.LABELS_MIN_ROWS", 1)
 
     out = tmp_path / "labels.parquet"
     assert not out.exists()
@@ -132,6 +135,37 @@ def test_get_labels_entreprises_materialise_dans_la_fonction_decoree(
     assert row["label_rge"].item() is True
     assert df.filter(pl.col("siret") == "22222222222222")["label_rge"].item() is False
     assert df.filter(pl.col("siret") == "33333333333333")["label_bio"].item() is False
+
+
+def test_get_labels_entreprises_leve_si_volume_anormalement_bas(tmp_path, monkeypatch):
+    """Une source tronquée produit un parquet valide et des labels nuls partout,
+    indistinguables de « aucune entreprise n'est labellisée ». Le garde-fou
+    transforme ce mode de défaillance silencieux en échec franc, et n'écrit
+    rien sur le disque — un fichier écrit passerait ensuite pour valide auprès
+    de la garde de sirene_preprocess."""
+    bio_path = tmp_path / "bio.csv"
+    rge_path = tmp_path / "rge.parquet"
+    pl.DataFrame({"SIRET": ["11111111111111"]}).write_csv(bio_path, separator=";")
+    pl.DataFrame(
+        {
+            "siret": ["11111111111111"],
+            "lien_date_debut": ["2000-01-01"],
+            "lien_date_fin": ["2100-01-01"],
+        }
+    ).write_parquet(rge_path)
+
+    monkeypatch.setattr("src.tasks.get.LABELS_BIO_URL", str(bio_path))
+    monkeypatch.setattr("src.tasks.get.LABELS_RGE_URL", str(rge_path))
+    monkeypatch.setattr("src.tasks.get.LABELS_MIN_ROWS", 50_000)
+
+    out = tmp_path / "labels.parquet"
+
+    with pytest.raises(ValueError, match="anormalement bas"):
+        get_labels_entreprises(out, reference_date=date(2026, 1, 1))
+
+    assert not out.exists(), (
+        "le parquet ne doit pas être écrit quand le garde-fou se déclenche"
+    )
 
 
 def test_get_labels_entreprises_reference_date_resolue_a_l_appel():
