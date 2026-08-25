@@ -4,7 +4,9 @@ from src.config import SIRET_LATLONG_SCHEMA
 from src.tasks.get import (
     bootstrap_siret_latlong,
     get_etablissements,
+    get_unite_legales,
     json_stream_to_parquet,
+    scan_etablissements,
     xml_stream_to_parquet,
 )
 
@@ -16,12 +18,20 @@ REQUIRED_GEO_COLUMNS = {
 }
 
 
-def test_get_etablissements_includes_geocoding_columns():
-    lf = get_etablissements()
+def test_scan_etablissements_includes_geocoding_columns():
+    lf = scan_etablissements()
     assert isinstance(lf, pl.LazyFrame)
     columns = set(lf.collect_schema().names())
     missing = REQUIRED_GEO_COLUMNS - columns
     assert not missing, f"Colonnes manquantes : {missing}"
+
+
+def test_les_recuperations_sirene_ont_un_retry():
+    """Régression : le réseau n'est sollicité qu'au sink_parquet, le décorateur
+    doit donc envelopper scan ET sink. Une fonction qui retourne un LazyFrame
+    ne peut pas être utilement décorée."""
+    for func in (get_unite_legales, get_etablissements):
+        assert hasattr(func, "retry"), f"{func.__name__} n'est pas décorée par tenacity"
 
 
 def test_xml_stream_to_parquet_small_file_is_not_empty(tmp_path):

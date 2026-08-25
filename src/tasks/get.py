@@ -46,7 +46,7 @@ from src.tasks.clean import (
 )
 from src.tasks.output import sink_to_files
 from src.tasks.publish import publish_to_s3
-from src.tasks.transform import prepare_unites_legales
+from src.tasks.transform import prepare_etablissements, prepare_unites_legales
 from src.tasks.utils import (
     full_resource_name,
     gen_artifact_row,
@@ -441,7 +441,7 @@ def norm_titulaire(titulaire: dict):
     return titulaire
 
 
-def get_etablissements() -> pl.LazyFrame:
+def scan_etablissements() -> pl.LazyFrame:
     columns = [
         "siret",
         "codeCommuneEtablissement",
@@ -457,10 +457,25 @@ def get_etablissements() -> pl.LazyFrame:
         "libelleCommuneEtablissement",
     ]
 
-    lf_etablissements = pl.scan_parquet(SIRENE_ETABLISSEMENTS_URL)
-    lf_etablissements = lf_etablissements.select(columns)
+    return pl.scan_parquet(SIRENE_ETABLISSEMENTS_URL).select(columns)
 
-    return lf_etablissements
+
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    retry=retry_if_exception_type((pl.exceptions.ComputeError, OSError)),
+)
+def get_etablissements(
+    processed_parquet_path: Path, lf_siret_latlong: pl.LazyFrame
+) -> None:
+    """Le décorateur doit envelopper le scan ET le sink : le scan étant paresseux,
+    le réseau n'est sollicité qu'à l'exécution du sink_parquet."""
+    (
+        scan_etablissements()
+        .pipe(prepare_etablissements)
+        .join(lf_siret_latlong, on="siret", how="left")
+        .sink_parquet(processed_parquet_path)
+    )
 
 
 def get_insee_cog_data(url, schema_overrides, columns) -> pl.DataFrame:
@@ -620,6 +635,11 @@ def get_from_s3(key: str, prefix: str = "") -> pl.LazyFrame | None:
     return pl.scan_parquet(local_path)
 
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    retry=retry_if_exception_type((pl.exceptions.ComputeError, OSError)),
+)
 def get_unite_legales(processed_parquet_path):
     (
         pl.scan_parquet(SIRENE_UNITES_LEGALES_URL)

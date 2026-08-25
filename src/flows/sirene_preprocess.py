@@ -10,7 +10,6 @@ from src.tasks.get import (
     get_from_s3,
     get_unite_legales,
 )
-from src.tasks.transform import prepare_etablissements
 from src.tasks.utils import create_sirene_data_dir, get_logger
 
 
@@ -48,10 +47,7 @@ def sirene_preprocess():
         processed_etab_parquet_path = SIRENE_DATA_DIR / "etablissements.parquet"
         if not processed_etab_parquet_path.exists():
             logger.info("Téléchargement et préparation des établissements...")
-            lf: pl.LazyFrame = get_etablissements()
-            lf = prepare_etablissements(lf)
-            lf = lf.join(lf_siret_latlong, on="siret", how="left")
-            lf.sink_parquet(processed_etab_parquet_path)
+            get_etablissements(processed_etab_parquet_path, lf_siret_latlong)
         else:
             logger.info(str(processed_etab_parquet_path) + " existe, skipping.")
 
