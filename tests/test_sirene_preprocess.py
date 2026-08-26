@@ -31,7 +31,7 @@ def test_parquet_complet_est_a_jour(tmp_path):
 def test_colonnes_supplementaires_ne_genent_pas(tmp_path):
     """La garde vérifie une inclusion, pas une égalité : un fichier portant plus
     de colonnes que demandé reste valide."""
-    path = tmp_path / "labels_entreprises.parquet"
+    path = tmp_path / "labels_siret.parquet"
     pl.DataFrame(
         {
             "siret": ["11111111111111"],
@@ -42,3 +42,43 @@ def test_colonnes_supplementaires_ne_genent_pas(tmp_path):
     ).write_parquet(path)
 
     assert _parquet_est_a_jour(path, {"label_bio", "label_rge"})
+
+
+def test_parquet_portant_une_colonne_retiree_est_a_regenerer(tmp_path):
+    """Cas symétrique de la colonne ajoutée : label_ess a quitté
+    prepare_unites_legales pour la table de labels. Un unites_legales.parquet
+    d'une version antérieure le porte encore, et la jointure verrait alors deux
+    colonnes homonymes, dont l'une serait silencieusement suffixée
+    label_ess_right — des labels faux plutôt qu'une erreur."""
+    path = tmp_path / "unites_legales.parquet"
+    pl.DataFrame(
+        {
+            "siren": ["111111111"],
+            "denominationUniteLegale": ["Org 1"],
+            "categorieEntreprise": ["ETI"],
+            "label_ess": [True],
+        }
+    ).write_parquet(path)
+
+    assert not _parquet_est_a_jour(
+        path,
+        {"denominationUniteLegale", "categorieEntreprise"},
+        colonnes_interdites={"label_ess", "label_association"},
+    )
+
+
+def test_parquet_sans_les_colonnes_interdites_est_a_jour(tmp_path):
+    path = tmp_path / "unites_legales.parquet"
+    pl.DataFrame(
+        {
+            "siren": ["111111111"],
+            "denominationUniteLegale": ["Org 1"],
+            "categorieEntreprise": ["ETI"],
+        }
+    ).write_parquet(path)
+
+    assert _parquet_est_a_jour(
+        path,
+        {"denominationUniteLegale", "categorieEntreprise"},
+        colonnes_interdites={"label_ess", "label_association"},
+    )

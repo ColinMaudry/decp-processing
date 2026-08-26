@@ -1,5 +1,3 @@
-from datetime import date, datetime
-
 import polars as pl
 from polars.testing import assert_frame_equal
 
@@ -10,9 +8,8 @@ from src.tasks.transform import (
     consolidate_across_datasets,
     join_population,
     prepare_etablissements,
-    prepare_labels_bio,
-    prepare_labels_entreprises,
-    prepare_labels_rge,
+    prepare_labels_etablissements,
+    prepare_labels_unites_legales,
     prepare_unites_legales,
     sort_modifications,
 )
@@ -32,8 +29,6 @@ class TestPrepareUnitesLegales:
                     "statutDiffusionUniteLegale": "O",
                     "categorieEntreprise": "ETI",
                     "categorieJuridiqueUniteLegale": "1234",
-                    "economieSocialeSolidaireUniteLegale": "O",
-                    "identifiantAssociationUniteLegale": None,
                 },
                 # Cas 2: Personne physique avec nom d'usage, non-ESS, association
                 {
@@ -45,8 +40,6 @@ class TestPrepareUnitesLegales:
                     "statutDiffusionUniteLegale": "O",
                     "categorieEntreprise": "PME",
                     "categorieJuridiqueUniteLegale": "1234",
-                    "economieSocialeSolidaireUniteLegale": "N",
-                    "identifiantAssociationUniteLegale": "W123456789",
                 },
                 # Cas 3: Personne physique sans nom d'usage, colonne ESS nulle
                 {
@@ -58,8 +51,6 @@ class TestPrepareUnitesLegales:
                     "statutDiffusionUniteLegale": "O",
                     "categorieEntreprise": "PME",
                     "categorieJuridiqueUniteLegale": None,
-                    "economieSocialeSolidaireUniteLegale": None,
-                    "identifiantAssociationUniteLegale": None,
                 },
                 # Cas 4: Nom non-diffusible, ESS et association
                 {
@@ -71,8 +62,6 @@ class TestPrepareUnitesLegales:
                     "statutDiffusionUniteLegale": "P",
                     "categorieEntreprise": "PME",
                     "categorieJuridiqueUniteLegale": None,
-                    "economieSocialeSolidaireUniteLegale": "O",
-                    "identifiantAssociationUniteLegale": "W987654321",
                 },
             ]
         )
@@ -84,33 +73,24 @@ class TestPrepareUnitesLegales:
                     "denominationUniteLegale": "Org 1",
                     "categorieEntreprise": "ETI",
                     "categorieJuridiqueUniteLegale": "1234",
-                    "label_ess": True,
-                    "label_association": False,
                 },
                 {
                     "siren": "222222222",
                     "denominationUniteLegale": "Ambroise Zacroit",
                     "categorieEntreprise": "PME",
                     "categorieJuridiqueUniteLegale": "1234",
-                    "label_ess": False,
-                    "label_association": True,
                 },
                 {
                     "siren": "333333333",
                     "denominationUniteLegale": "Ambroise Croizat",
                     "categorieEntreprise": "PME",
                     "categorieJuridiqueUniteLegale": None,
-                    # Colonne source nulle => False, surtout pas null
-                    "label_ess": False,
-                    "label_association": False,
                 },
                 {
                     "siren": "44444444",
                     "denominationUniteLegale": "[Données personnelles non-diffusibles]",
                     "categorieEntreprise": "PME",
                     "categorieJuridiqueUniteLegale": None,
-                    "label_ess": True,
-                    "label_association": True,
                 },
             ]
         )
@@ -121,33 +101,6 @@ class TestPrepareUnitesLegales:
         expected_df = expected_df.sort("siren")
 
         assert_frame_equal(result_df, expected_df, check_column_order=False)
-
-    def test_label_ess_et_association_jamais_nulls(self):
-        """Régression : `col == "O"` propage le null. Sans fill_null(False),
-        les 23,3 M d'unités légales à ESS nulle produiraient des labels nulls."""
-        lf = pl.LazyFrame(
-            [
-                {
-                    "siren": "555555555",
-                    "denominationUniteLegale": "Org 5",
-                    "prenomUsuelUniteLegale": None,
-                    "nomUniteLegale": None,
-                    "nomUsageUniteLegale": None,
-                    "statutDiffusionUniteLegale": "O",
-                    "categorieEntreprise": None,
-                    "categorieJuridiqueUniteLegale": None,
-                    "economieSocialeSolidaireUniteLegale": None,
-                    "identifiantAssociationUniteLegale": None,
-                }
-            ]
-        )
-
-        result = prepare_unites_legales(lf).collect()
-
-        assert result["label_ess"].null_count() == 0
-        assert result["label_association"].null_count() == 0
-        assert result["label_ess"].dtype == pl.Boolean
-        assert result["label_association"].dtype == pl.Boolean
 
 
 class TestPrepareEtablissements:
@@ -839,87 +792,24 @@ class TestConsolidateAcrossDatasets:
 
 
 class TestPrepareLabels:
-    def test_prepare_labels_bio_nettoie_les_sirets(self):
-        """Le fichier bio contient la chaîne littérale "None" (742 occurrences)
-        et des SIRET suffixés d'un caractère invisible U+202C."""
-        lf = pl.LazyFrame(
-            {
-                "SIRET": [
-                    "38459550000024",  # valide
-                    "None",  # chaîne littérale, pas un null
-                    "41812208100023‬",  # caractère de formatage invisible
-                    "38459550000024",  # doublon
-                    None,  # vrai null
-                    "1234",  # trop court
-                ]
-            }
-        )
-
-        result = prepare_labels_bio(lf).collect().sort("siret")
-
-        assert result["siret"].to_list() == ["38459550000024", "41812208100023"]
-        assert result["label_bio"].to_list() == [True, True]
-        assert result["label_bio"].dtype == pl.Boolean
-
-    def test_prepare_labels_rge_filtre_sur_la_validite(self):
+    def test_prepare_labels_etablissements_liste_non_vide_vaut_label(self):
+        """Les colonnes sources sont des listes d'identifiants : c'est leur
+        non-vacuité qui fait le label, pas leur contenu."""
         lf = pl.LazyFrame(
             {
                 "siret": [
-                    "11111111111111",
-                    "22222222222222",
-                    "33333333333333",
-                    "44444444444444",
+                    "11111111111111",  # bio et RGE
+                    "22222222222222",  # bio seul
+                    "33333333333333",  # RGE seul
+                    "44444444444444",  # listes vides
+                    "55555555555555",  # listes nulles
                 ],
-                "lien_date_debut": [
-                    datetime(2020, 1, 1),  # en cours
-                    datetime(2020, 1, 1),  # expirée
-                    datetime(2027, 1, 1),  # pas encore commencée
-                    None,  # date manquante
-                ],
-                "lien_date_fin": [
-                    datetime(2099, 1, 1),
-                    datetime(2025, 1, 1),
-                    datetime(2099, 1, 1),
-                    datetime(2099, 1, 1),
-                ],
+                "liste_id_bio": [["B1"], ["B2", "B3"], [], [], None],
+                "liste_rge": [["R1"], [], ["R2"], [], None],
             }
         )
 
-        result = prepare_labels_rge(lf, reference_date=date(2026, 8, 25)).collect()
-
-        assert result["siret"].to_list() == ["11111111111111"]
-        assert result["label_rge"].to_list() == [True]
-
-    def test_prepare_labels_rge_deduplique_les_qualifications(self):
-        """30 000 qualifications pour 13 597 SIRET : une entreprise porte
-        plusieurs qualifications et ne doit produire qu'une ligne."""
-        lf = pl.LazyFrame(
-            {
-                "siret": ["11111111111111"] * 3,
-                "lien_date_debut": [datetime(2020, 1, 1)] * 3,
-                "lien_date_fin": [datetime(2099, 1, 1)] * 3,
-            }
-        )
-
-        result = prepare_labels_rge(lf, reference_date=date(2026, 8, 25)).collect()
-
-        assert result.height == 1
-
-    def test_prepare_labels_entreprises_combine_sans_nulls(self):
-        lf_bio = pl.LazyFrame({"SIRET": ["11111111111111", "22222222222222"]})
-        lf_rge = pl.LazyFrame(
-            {
-                "siret": ["22222222222222", "33333333333333"],
-                "lien_date_debut": [datetime(2020, 1, 1)] * 2,
-                "lien_date_fin": [datetime(2099, 1, 1)] * 2,
-            }
-        )
-
-        result = (
-            prepare_labels_entreprises(lf_bio, lf_rge, reference_date=date(2026, 8, 25))
-            .collect()
-            .sort("siret")
-        )
+        result = prepare_labels_etablissements(lf).collect().sort("siret")
 
         assert result["siret"].to_list() == [
             "11111111111111",
@@ -927,7 +817,93 @@ class TestPrepareLabels:
             "33333333333333",
         ]
         assert result["label_bio"].to_list() == [True, True, False]
-        assert result["label_rge"].to_list() == [False, True, True]
-        # Aucun null : un SIRET présent d'un seul côté doit valoir False de l'autre
-        assert result["label_bio"].null_count() == 0
+        assert result["label_rge"].to_list() == [True, False, True]
+
+    def test_prepare_labels_etablissements_aucun_null(self):
+        """Régression : list.len() retourne null sur une liste nulle. Sans
+        fill_null(0), les 44 M d'établissements sans identifiant produiraient
+        des labels nulls plutôt que False."""
+        lf = pl.LazyFrame(
+            {
+                "siret": ["11111111111111"],
+                "liste_id_bio": [["B1"]],
+                "liste_rge": [None],
+            },
+            schema={
+                "siret": pl.String,
+                "liste_id_bio": pl.List(pl.String),
+                "liste_rge": pl.List(pl.String),
+            },
+        )
+
+        result = prepare_labels_etablissements(lf).collect()
+
+        assert result["label_rge"].to_list() == [False]
         assert result["label_rge"].null_count() == 0
+        assert result["label_rge"].dtype == pl.Boolean
+
+    def test_prepare_labels_unites_legales_renomme_et_filtre(self):
+        """Les unités légales sans aucun label sont écartées : le left join de
+        add_labels les remet à False de toute façon, et elles pèsent 28 des
+        30 M de lignes de la source."""
+        lf = pl.LazyFrame(
+            {
+                "siren": ["111111111", "222222222", "333333333"],
+                "est_ess": [True, False, False],
+                "est_association": [True, False, False],
+                "est_qualiopi": [False, True, False],
+                "est_siae": [False, False, False],
+                "est_avocat": [False, False, False],
+                "est_achats_responsables": [False, False, False],
+            }
+        )
+
+        result = prepare_labels_unites_legales(lf).collect().sort("siren")
+
+        assert result["siren"].to_list() == ["111111111", "222222222"]
+        assert set(result.columns) == {
+            "siren",
+            "label_ess",
+            "label_association",
+            "label_qualiopi",
+            "label_siae",
+            "label_avocat",
+            "label_achats_responsables",
+        }
+        assert result["label_ess"].to_list() == [True, False]
+        assert result["label_qualiopi"].to_list() == [False, True]
+
+    def test_prepare_labels_unites_legales_aucun_null(self):
+        """Les booléens de la source ne sont jamais nuls aujourd'hui, mais un
+        null non neutralisé produirait un label nul publié."""
+        lf = pl.LazyFrame(
+            {
+                "siren": ["111111111"],
+                "est_ess": [None],
+                "est_association": [True],
+                "est_qualiopi": [None],
+                "est_siae": [None],
+                "est_avocat": [None],
+                "est_achats_responsables": [None],
+            },
+            schema={"siren": pl.String}
+            | {
+                col: pl.Boolean
+                for col in (
+                    "est_ess",
+                    "est_association",
+                    "est_qualiopi",
+                    "est_siae",
+                    "est_avocat",
+                    "est_achats_responsables",
+                )
+            },
+        )
+
+        result = prepare_labels_unites_legales(lf).collect()
+
+        assert result.height == 1
+        for col in result.columns:
+            if col != "siren":
+                assert result[col].null_count() == 0, col
+                assert result[col].dtype == pl.Boolean

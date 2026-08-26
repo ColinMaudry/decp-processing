@@ -319,7 +319,7 @@
       "type": "string",
       "name": "acheteur_labels",
       "title": "Labels de l'acheteur",
-      "description": "Labels de l'acheteur, séparés par des virgules : Bio (agriculture biologique), RGE (Reconnu Garant de l'Environnement), ESS (économie sociale et solidaire), Association. La couverture du label RGE est partielle.",
+      "description": "Labels de l'acheteur, séparés par des virgules : Bio (agriculture biologique), RGE (Reconnu Garant de l'Environnement), ESS (économie sociale et solidaire), Association, Qualiopi (certification qualité des organismes de formation), SIAE (structure d'insertion par l'activité économique), Avocat, Achats responsables. Source : Annuaire des Entreprises.",
       "short_title": "Labels acheteur"
     },
     {
@@ -397,7 +397,7 @@
       "type": "string",
       "name": "titulaire_labels",
       "title": "Labels du titulaire",
-      "description": "Labels de l'entreprise titulaire, séparés par des virgules : Bio (agriculture biologique), RGE (Reconnu Garant de l'Environnement), ESS (économie sociale et solidaire), Association. La couverture du label RGE est partielle.",
+      "description": "Labels de l'entreprise titulaire, séparés par des virgules : Bio (agriculture biologique), RGE (Reconnu Garant de l'Environnement), ESS (économie sociale et solidaire), Association, Qualiopi (certification qualité des organismes de formation), SIAE (structure d'insertion par l'activité économique), Avocat, Achats responsables. Source : Annuaire des Entreprises. Le label RGE signale une qualification référencée, sans garantie qu'elle soit encore valide.",
       "short_title": "Labels titulaire"
     },
     {

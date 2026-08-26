@@ -293,43 +293,65 @@ class TestEnrich:
 
 
 class TestAddLabels:
-    @staticmethod
-    def _lf_sirets(**flags):
-        """Un SIRET titulaire portant les booléens ESS/association demandés."""
-        return pl.LazyFrame(
-            {
-                "titulaire_id": ["11111111111111"],
-                "label_ess": [flags.get("ess", False)],
-                "label_association": [flags.get("association", False)],
-            }
-        )
+    SIRET = "11111111111111"
+    SIREN = "111111111"
 
-    @staticmethod
-    def _lf_labels(**flags):
+    @classmethod
+    def _lf_sirets(cls, siret_column="titulaire_id", siret=None):
+        """Les SIRET enrichis, qui n'apportent plus aucun label par eux-mêmes."""
+        return pl.LazyFrame({siret_column: [siret or cls.SIRET]})
+
+    @classmethod
+    def _lf_labels_siret(cls, siret=None, **flags):
         return pl.LazyFrame(
             {
-                "siret": ["11111111111111"],
+                "siret": [siret or cls.SIRET],
                 "label_bio": [flags.get("bio", False)],
                 "label_rge": [flags.get("rge", False)],
             }
         )
 
-    def test_ordre_des_quatre_labels(self):
-        """L'ordre publié est Bio, RGE, ESS, Association, quelle que soit
-        l'origine de chaque label."""
+    @classmethod
+    def _lf_labels_siren(cls, siren=None, **flags):
+        return pl.LazyFrame(
+            {
+                "siren": [siren or cls.SIREN],
+                "label_ess": [flags.get("ess", False)],
+                "label_association": [flags.get("association", False)],
+                "label_qualiopi": [flags.get("qualiopi", False)],
+                "label_siae": [flags.get("siae", False)],
+                "label_avocat": [flags.get("avocat", False)],
+                "label_achats_responsables": [flags.get("achats_responsables", False)],
+            }
+        )
+
+    def test_ordre_des_huit_labels(self):
+        """L'ordre publié est celui de LABELS, quelle que soit l'origine — et
+        donc la clé de jointure — de chaque label."""
         result = add_labels(
-            self._lf_sirets(ess=True, association=True),
-            self._lf_labels(bio=True, rge=True),
+            self._lf_sirets(),
+            self._lf_labels_siret(bio=True, rge=True),
+            self._lf_labels_siren(
+                ess=True,
+                association=True,
+                qualiopi=True,
+                siae=True,
+                avocat=True,
+                achats_responsables=True,
+            ),
             "titulaire_id",
             "titulaire",
         ).collect()
 
-        assert result["titulaire_labels"].to_list() == ["Bio, RGE, ESS, Association"]
+        assert result["titulaire_labels"].to_list() == [
+            "Bio, RGE, ESS, Association, Qualiopi, SIAE, Avocat, Achats responsables"
+        ]
 
     def test_un_seul_label_pas_de_separateur(self):
         result = add_labels(
             self._lf_sirets(),
-            self._lf_labels(rge=True),
+            self._lf_labels_siret(rge=True),
+            self._lf_labels_siren(),
             "titulaire_id",
             "titulaire",
         ).collect()
@@ -341,35 +363,51 @@ class TestAddLabels:
         pas null."""
         result = add_labels(
             self._lf_sirets(),
-            self._lf_labels(),
+            self._lf_labels_siret(),
+            self._lf_labels_siren(),
             "titulaire_id",
             "titulaire",
         ).collect()
 
         assert result["titulaire_labels"].to_list() == [None]
 
-    def test_siret_absent_du_fichier_de_labels(self):
-        """Un SIRET connu de SIRENE mais absent de labels_entreprises.parquet
-        conserve ses labels ESS/association et n'est pas perdu par la jointure."""
-        lf_labels = pl.LazyFrame(
-            {
-                "siret": ["99999999999999"],
-                "label_bio": [True],
-                "label_rge": [True],
-            }
-        )
-
+    def test_siret_absent_des_deux_tables_de_labels(self):
+        """Les tables de labels ne portent que les entreprises labellisées :
+        l'écrasante majorité des SIRET n'y figure pas, et ne doit ni être
+        perdue par la jointure ni ressortir avec des labels nuls."""
         result = add_labels(
-            self._lf_sirets(ess=True), lf_labels, "titulaire_id", "titulaire"
+            self._lf_sirets(),
+            self._lf_labels_siret(siret="99999999999999", bio=True),
+            self._lf_labels_siren(siren="999999999", ess=True),
+            "titulaire_id",
+            "titulaire",
         ).collect()
 
         assert result.height == 1
-        assert result["titulaire_labels"].to_list() == ["ESS"]
+        assert result["titulaire_labels"].to_list() == [None]
+
+    def test_label_siren_applique_a_tous_les_etablissements(self):
+        """Les labels d'unité légale se joignent sur les 9 premiers caractères
+        du SIRET : un établissement secondaire d'une unité légale labellisée
+        porte le label, alors qu'il est absent de la table SIRET."""
+        lf_sirets = pl.LazyFrame({"titulaire_id": ["11111111100042"]})
+
+        result = add_labels(
+            lf_sirets,
+            self._lf_labels_siret(siret="11111111100001", bio=True),
+            self._lf_labels_siren(qualiopi=True),
+            "titulaire_id",
+            "titulaire",
+        ).collect()
+
+        assert result["titulaire_labels"].to_list() == ["Qualiopi"]
 
     def test_les_booleens_ne_survivent_pas(self):
+        """Ni les drapeaux, ni la colonne SIREN intermédiaire de la jointure."""
         result = add_labels(
-            self._lf_sirets(ess=True),
-            self._lf_labels(bio=True),
+            self._lf_sirets(),
+            self._lf_labels_siret(bio=True),
+            self._lf_labels_siren(ess=True),
             "titulaire_id",
             "titulaire",
         ).collect()
@@ -377,16 +415,12 @@ class TestAddLabels:
         assert set(result.columns) == {"titulaire_id", "titulaire_labels"}
 
     def test_chemin_acheteur(self):
-        lf_sirets = pl.LazyFrame(
-            {
-                "acheteur_id": ["11111111111111"],
-                "label_ess": [False],
-                "label_association": [True],
-            }
-        )
-
         result = add_labels(
-            lf_sirets, self._lf_labels(bio=True), "acheteur_id", "acheteur"
+            self._lf_sirets(siret_column="acheteur_id"),
+            self._lf_labels_siret(bio=True),
+            self._lf_labels_siren(association=True),
+            "acheteur_id",
+            "acheteur",
         ).collect()
 
         assert result["acheteur_labels"].to_list() == ["Bio, Association"]

@@ -1,4 +1,3 @@
-from datetime import date
 from pathlib import Path
 
 import polars as pl
@@ -359,8 +358,6 @@ def prepare_unites_legales(lf: pl.LazyFrame) -> pl.LazyFrame:
                 "statutDiffusionUniteLegale",  # P = non-diffusible
                 "categorieEntreprise",  # PME, ETI, GE
                 "categorieJuridiqueUniteLegale",  # 1000, etc.
-                "economieSocialeSolidaireUniteLegale",  # O = ESS
-                "identifiantAssociationUniteLegale",  # non nul = association
             ]
         )
         .filter(
@@ -391,79 +388,71 @@ def prepare_unites_legales(lf: pl.LazyFrame) -> pl.LazyFrame:
             .otherwise(pl.col("denominationUniteLegale"))
             .alias("denominationUniteLegale")
         )
-        .with_columns(
-            label_ess=(pl.col("economieSocialeSolidaireUniteLegale") == "O").fill_null(
-                False
-            ),
-            label_association=pl.col("identifiantAssociationUniteLegale").is_not_null(),
-        )
         .drop(
             [
                 "prenomUsuelUniteLegale",
                 "statutDiffusionUniteLegale",
                 "nomUniteLegale",
                 "nomUsageUniteLegale",
-                "economieSocialeSolidaireUniteLegale",
-                "identifiantAssociationUniteLegale",
             ]
         )
     )
 
 
-def prepare_labels_bio(lf: pl.LazyFrame) -> pl.LazyFrame:
-    """SIRET des entreprises certifiées agriculture biologique.
+# Champ booléen de la source annuaire -> colonne produite. L'ordre de ce
+# dictionnaire n'a aucun effet sur l'ordre publié, fixé par LABELS dans enrich.
+LABELS_UNITES_LEGALES = {
+    "est_ess": "label_ess",
+    "est_association": "label_association",
+    "est_qualiopi": "label_qualiopi",
+    "est_siae": "label_siae",
+    "est_avocat": "label_avocat",
+    "est_achats_responsables": "label_achats_responsables",
+}
 
-    Le fichier source contient la chaîne littérale "None" (742 occurrences,
-    qui passe donc les filtres de nullité) et des SIRET suffixés d'un caractère
-    de formatage invisible U+202C. Le retrait de tout ce qui n'est pas un
-    chiffre neutralise les deux cas.
+
+def prepare_labels_unites_legales(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """SIREN -> labels d'unité légale, ~1,7 M de lignes.
+
+    Les ~28 M d'unités légales sans aucun label sont écartées : la jointure de
+    add_labels est un left join, qui les remet à False. Garder le stock complet
+    ne changerait donc rien au résultat, pour vingt fois le volume.
+
+    Les booléens de la source ne sont jamais nuls, mais un fill_null(False)
+    coûte moins cher qu'un label nul publié le jour où ils le deviennent.
     """
+    labels = list(LABELS_UNITES_LEGALES.values())
     return (
-        lf.select(pl.col("SIRET").str.replace_all(r"\D", "").alias("siret"))
-        .filter(pl.col("siret").str.len_chars() == 14)
-        .unique()
-        .with_columns(label_bio=pl.lit(True))
+        lf.select(
+            pl.col("siren"),
+            *[
+                pl.col(source).fill_null(False).alias(cible)
+                for source, cible in LABELS_UNITES_LEGALES.items()
+            ],
+        )
+        .filter(pl.any_horizontal(labels))
+        .unique(subset="siren")
     )
 
 
-def prepare_labels_rge(lf: pl.LazyFrame, reference_date: date) -> pl.LazyFrame:
-    """SIRET des entreprises dont une qualification RGE est valide à `reference_date`.
+def prepare_labels_etablissements(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """SIRET -> labels d'établissement (Bio, RGE), ~146 000 lignes.
 
-    Le fichier source compte une ligne par qualification (30 000 lignes pour
-    13 597 SIRET), d'où la déduplication. Les lignes dont une date est nulle
-    sont écartées par la comparaison.
+    Les deux colonnes sources sont des listes d'identifiants (Agence Bio pour
+    l'une, ADEME pour l'autre) : une liste non vide vaut label. `list.len()`
+    retourne null sur une liste nulle, d'où le fill_null.
+
+    Attention, `liste_rge` ne porte aucune date de validité : le label RGE
+    signifie « a une qualification RGE référencée », pas « valide aujourd'hui ».
     """
     return (
-        lf.filter(
-            (pl.col("lien_date_debut").cast(pl.Date) <= reference_date)
-            & (pl.col("lien_date_fin").cast(pl.Date) >= reference_date)
+        lf.select(
+            pl.col("siret"),
+            label_bio=pl.col("liste_id_bio").list.len().fill_null(0) > 0,
+            label_rge=pl.col("liste_rge").list.len().fill_null(0) > 0,
         )
-        .select("siret")
-        .unique()
-        .with_columns(label_rge=pl.lit(True))
-    )
-
-
-def prepare_labels_entreprises(
-    lf_bio: pl.LazyFrame, lf_rge: pl.LazyFrame, reference_date: date
-) -> pl.LazyFrame:
-    """Table SIRET -> labels externes (Bio, RGE), ~90 000 lignes.
-
-    Les booléens ne sont jamais nuls : un SIRET présent d'un seul côté vaut
-    False de l'autre.
-    """
-    return (
-        prepare_labels_bio(lf_bio)
-        .join(
-            prepare_labels_rge(lf_rge, reference_date),
-            on="siret",
-            how="full",
-            coalesce=True,
-        )
-        .with_columns(
-            pl.col("label_bio").fill_null(False),
-            pl.col("label_rge").fill_null(False),
-        )
+        .filter(pl.col("label_bio") | pl.col("label_rge"))
+        .unique(subset="siret")
     )
 
 

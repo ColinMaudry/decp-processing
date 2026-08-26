@@ -184,25 +184,52 @@ LABELS = [
     ("label_rge", "RGE"),
     ("label_ess", "ESS"),
     ("label_association", "Association"),
+    ("label_qualiopi", "Qualiopi"),
+    ("label_siae", "SIAE"),
+    ("label_avocat", "Avocat"),
+    ("label_achats_responsables", "Achats responsables"),
 ]
+
+# Nom de la colonne SIREN intermédiaire. add_unite_legale_data a déjà consommé
+# et renommé « siren » en {type_siret}_siren quand add_labels est appelé ; on
+# ne réutilise donc pas ce nom, mais add_labels reste autonome et ne dépend pas
+# de l'ordre des enrichissements.
+_SIREN_JOIN_COLUMN = "_siren_labels"
 
 
 def add_labels(
     lf_sirets: pl.LazyFrame,
-    lf_labels: pl.LazyFrame,
+    lf_labels_siret: pl.LazyFrame,
+    lf_labels_siren: pl.LazyFrame,
     siret_column: str,
     type_siret: str,
 ) -> pl.LazyFrame:
-    """Compose {type_siret}_labels à partir des quatre drapeaux booléens.
+    """Compose {type_siret}_labels à partir des huit drapeaux booléens.
 
-    L'ordre publié — Bio, RGE, ESS, Association — n'est défini qu'ici, par
-    l'ordre de LABELS.
+    Deux jointures, deux clés : Bio et RGE sont des propriétés d'établissement
+    (SIRET), les six autres des propriétés d'unité légale (SIREN).
+
+    Les deux tables de labels ne portent que les entreprises effectivement
+    labellisées, donc les deux jointures laissent des nulls sur l'écrasante
+    majorité des SIRET : d'où le fill_null(False) sur la totalité des drapeaux.
+
+    L'ordre publié n'est défini qu'ici, par l'ordre de LABELS.
     """
-    lf_sirets = lf_sirets.join(
-        lf_labels, how="left", left_on=siret_column, right_on="siret"
-    ).with_columns(
-        pl.col("label_bio").fill_null(False),
-        pl.col("label_rge").fill_null(False),
+    lf_sirets = (
+        lf_sirets.join(
+            lf_labels_siret, how="left", left_on=siret_column, right_on="siret"
+        )
+        .with_columns(
+            pl.col(siret_column).str.head(9).alias(_SIREN_JOIN_COLUMN),
+        )
+        .join(
+            lf_labels_siren,
+            how="left",
+            left_on=_SIREN_JOIN_COLUMN,
+            right_on="siren",
+        )
+        .drop(_SIREN_JOIN_COLUMN)
+        .with_columns(pl.col(flag).fill_null(False) for flag, _ in LABELS)
     )
 
     lf_sirets = lf_sirets.with_columns(
@@ -225,7 +252,8 @@ def enrich_from_sirene(lf: pl.LazyFrame):
     # Récupération des données SIRET/SIREN préparées dans sirene-preprocess()
     lf_etablissements = pl.scan_parquet(SIRENE_DATA_DIR / "etablissements.parquet")
     lf_unites_legales = pl.scan_parquet(SIRENE_DATA_DIR / "unites_legales.parquet")
-    lf_labels = pl.scan_parquet(SIRENE_DATA_DIR / "labels_entreprises.parquet")
+    lf_labels_siret = pl.scan_parquet(SIRENE_DATA_DIR / "labels_siret.parquet")
+    lf_labels_siren = pl.scan_parquet(SIRENE_DATA_DIR / "labels_siren.parquet")
 
     lf_base = lf.clone()
 
@@ -249,7 +277,11 @@ def enrich_from_sirene(lf: pl.LazyFrame):
 
     logger.info("Ajout des labels (acheteurs)...")
     lf_sirets_acheteurs = add_labels(
-        lf_sirets_acheteurs, lf_labels, "acheteur_id", "acheteur"
+        lf_sirets_acheteurs,
+        lf_labels_siret,
+        lf_labels_siren,
+        "acheteur_id",
+        "acheteur",
     )
 
     # Matérialisation de sirets_acheteurs pour rompre
@@ -278,7 +310,11 @@ def enrich_from_sirene(lf: pl.LazyFrame):
 
     logger.info("Ajout des labels (titulaires)...")
     lf_sirets_titulaires = add_labels(
-        lf_sirets_titulaires, lf_labels, "titulaire_id", "titulaire"
+        lf_sirets_titulaires,
+        lf_labels_siret,
+        lf_labels_siren,
+        "titulaire_id",
+        "titulaire",
     )
 
     #  # Matérialisation de sirets_titulaires pour rompre

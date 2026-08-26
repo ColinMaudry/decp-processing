@@ -1,6 +1,5 @@
 import tempfile
 from collections.abc import Iterator
-from datetime import date
 from functools import partial
 from pathlib import Path
 from time import sleep
@@ -22,13 +21,13 @@ from tenacity import (
 )
 
 from src.config import (
+    ANNUAIRE_ETABLISSEMENTS_URL,
+    ANNUAIRE_UNITES_LEGALES_URL,
     DATA_DIR,
     DECP_PROCESSING_PUBLISH,
     DECP_USE_CACHE,
     HTTP_CLIENT,
     HTTP_HEADERS,
-    LABELS_BIO_URL,
-    LABELS_RGE_URL,
     LOG_LEVEL,
     RESOURCE_CACHE_DIR,
     S3_ACCESS_KEY_ID,
@@ -51,7 +50,8 @@ from src.tasks.output import sink_to_files
 from src.tasks.publish import publish_to_s3
 from src.tasks.transform import (
     prepare_etablissements,
-    prepare_labels_entreprises,
+    prepare_labels_etablissements,
+    prepare_labels_unites_legales,
     prepare_unites_legales,
 )
 from src.tasks.utils import (
@@ -655,9 +655,39 @@ def get_unite_legales(processed_parquet_path):
     )
 
 
-# Volume constaté en production : 100 768 lignes. Le seuil laisse une marge
-# large tout en attrapant un effondrement d'une des deux sources.
-LABELS_MIN_ROWS = 50_000
+# Volumes constatés le 2026-08-26 : 146 436 SIRET labellisés (Bio ou RGE) et
+# 1 674 088 SIREN labellisés. Les seuils laissent une marge large tout en
+# attrapant l'effondrement d'une source.
+LABELS_SIRET_MIN_ROWS = 50_000
+LABELS_SIREN_MIN_ROWS = 500_000
+
+
+def _write_labels(
+    lf_labels: pl.LazyFrame,
+    processed_parquet_path: Path,
+    min_rows: int,
+    source_url: str,
+) -> None:
+    """Matérialise une table de labels, sous garde-fou de volume.
+
+    Une source tronquée produirait un parquet parfaitement valide, et les DECP
+    publiées porteraient des labels nuls sur la quasi-totalité des entreprises
+    — indistinguable, pour un consommateur, de « aucune entreprise n'est
+    labellisée ». On préfère l'échec franc.
+
+    Le parquet n'est écrit qu'après la vérification, pour ne pas laisser sur le
+    disque un fichier que la garde de sirene_preprocess jugerait valide.
+    """
+    labels = lf_labels.collect()
+
+    if labels.height < min_rows:
+        raise ValueError(
+            f"Volume de labels d'entreprises anormalement bas : {labels.height} "
+            f"lignes pour un minimum attendu de {min_rows}. La source "
+            f"({source_url}) est probablement tronquée ou indisponible."
+        )
+
+    labels.write_parquet(processed_parquet_path)
 
 
 @retry(
@@ -665,40 +695,31 @@ LABELS_MIN_ROWS = 50_000
     wait=wait_exponential(multiplier=1, min=2, max=30),
     retry=retry_if_exception_type((pl.exceptions.ComputeError, OSError)),
 )
-def get_labels_entreprises(
-    processed_parquet_path: Path, reference_date: date | None = None
-) -> None:
-    """Table SIRET -> labels externes (Bio, RGE).
+def get_labels_etablissements(processed_parquet_path: Path) -> None:
+    """Table SIRET -> labels d'établissement (Bio, RGE).
 
-    reference_date est résolue ici et non dans la signature : un date.today()
-    en argument par défaut serait évalué une seule fois, à l'import du module.
-
-    Les deux sources sont matérialisées avant la jointure : un plan Polars
-    unique tirant de deux sources HTTP distantes ne termine pas. Chaque scan
-    pris isolément se termine en moins d'une seconde ; c'est leur combinaison
-    dans un même plan qui bloque, pas scan_csv/scan_parquet en général.
+    Le scan HTTP porte sur un parquet de 1,7 Go, mais la projection de colonnes
+    limite le transfert aux trois colonnes utilisées.
     """
-    if reference_date is None:
-        reference_date = date.today()
+    _write_labels(
+        prepare_labels_etablissements(pl.scan_parquet(ANNUAIRE_ETABLISSEMENTS_URL)),
+        processed_parquet_path,
+        LABELS_SIRET_MIN_ROWS,
+        ANNUAIRE_ETABLISSEMENTS_URL,
+    )
 
-    labels = prepare_labels_entreprises(
-        pl.read_csv(LABELS_BIO_URL, separator=";", infer_schema_length=0).lazy(),
-        pl.read_parquet(LABELS_RGE_URL).lazy(),
-        reference_date,
-    ).collect()
 
-    # Garde-fou de volume : une source tronquée produirait un parquet
-    # parfaitement valide, et les DECP publiées porteraient des labels nuls sur
-    # la quasi-totalité des entreprises — indistinguable, pour un consommateur,
-    # de « aucune entreprise n'est labellisée ». On préfère l'échec franc.
-    # Le parquet n'est écrit qu'après la vérification, pour ne pas laisser sur
-    # le disque un fichier que la garde de sirene_preprocess jugerait valide.
-    if labels.height < LABELS_MIN_ROWS:
-        raise ValueError(
-            f"Volume de labels d'entreprises anormalement bas : {labels.height} "
-            f"lignes pour un minimum attendu de {LABELS_MIN_ROWS}. Une des deux "
-            f"sources ({LABELS_BIO_URL}, {LABELS_RGE_URL}) est probablement "
-            "tronquée ou indisponible."
-        )
-
-    labels.write_parquet(processed_parquet_path)
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    retry=retry_if_exception_type((pl.exceptions.ComputeError, OSError)),
+)
+def get_labels_unites_legales(processed_parquet_path: Path) -> None:
+    """Table SIREN -> labels d'unité légale (ESS, association, Qualiopi, SIAE,
+    avocat, achats responsables)."""
+    _write_labels(
+        prepare_labels_unites_legales(pl.scan_parquet(ANNUAIRE_UNITES_LEGALES_URL)),
+        processed_parquet_path,
+        LABELS_SIREN_MIN_ROWS,
+        ANNUAIRE_UNITES_LEGALES_URL,
+    )

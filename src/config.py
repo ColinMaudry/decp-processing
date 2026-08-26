@@ -125,19 +125,32 @@ SIRENE_UNITES_LEGALES_URL = os.getenv("SIRENE_UNITES_LEGALES_URL", "")
 SIRENE_ETABLISSEMENTS_URL = os.getenv("SIRENE_ETABLISSEMENTS_URL", "")
 
 # Labels des entreprises (issue #190)
+# Les deux ressources du jeu de données « Données des entreprises utilisées dans
+# l'Annuaire des Entreprises », qui agrège les labels de leurs sources primaires
+# respectives (Agence Bio, ADEME, ESS France, Ministère du Travail, Marché de
+# l'Inclusion, Conseil National des Barreaux).
 # Contrairement aux URL SIRENE, une valeur par défaut est fournie : ces permaliens
-# sont stables et ne dépendent pas d'un millésime mensuel.
-LABELS_BIO_URL = os.getenv(
-    "LABELS_BIO_URL",
-    "https://www.data.gouv.fr/api/1/datasets/r/657789db-d349-4554-aef6-eabde4bd1c57",
-)
-ALL_CONFIG["LABELS_BIO_URL"] = LABELS_BIO_URL
+# sont stables et redirigent vers le millésime du jour.
+#
+# Les deux ressources sont volumineuses (1,1 et 1,7 Go) mais scannées en
+# projection de colonnes : seules les colonnes de labels transitent réellement
+# sur le réseau, d'où des durées de l'ordre de la minute et non de l'heure.
 
-LABELS_RGE_URL = os.getenv(
-    "LABELS_RGE_URL",
-    "https://www.data.gouv.fr/api/1/datasets/r/b614571a-78f6-4177-a7ad-56b93233c997",
+# Une ligne par unité légale (30 M) : ESS, association, Qualiopi, SIAE, avocat,
+# achats responsables.
+ANNUAIRE_UNITES_LEGALES_URL = os.getenv(
+    "ANNUAIRE_UNITES_LEGALES_URL",
+    "https://www.data.gouv.fr/api/1/datasets/r/77f09ee6-8ccb-4eb8-ad10-382be6416065",
 )
-ALL_CONFIG["LABELS_RGE_URL"] = LABELS_RGE_URL
+ALL_CONFIG["ANNUAIRE_UNITES_LEGALES_URL"] = ANNUAIRE_UNITES_LEGALES_URL
+
+# Une ligne par établissement (44 M) : Bio et RGE, qui sont des propriétés
+# d'établissement et non d'unité légale.
+ANNUAIRE_ETABLISSEMENTS_URL = os.getenv(
+    "ANNUAIRE_ETABLISSEMENTS_URL",
+    "https://www.data.gouv.fr/api/1/datasets/r/58427078-8afb-4651-9469-c9043991d892",
+)
+ALL_CONFIG["ANNUAIRE_ETABLISSEMENTS_URL"] = ANNUAIRE_ETABLISSEMENTS_URL
 
 # API de géocodage Géoplateforme
 GEOCODING_API_URL = os.getenv("GEOCODING_API_URL", "https://data.geopf.fr/geocodage")
