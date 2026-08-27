@@ -3,7 +3,7 @@
 - Ajout des labels des entreprises `titulaire_labels` et `acheteur_labels` — Bio, RGE, ESS, Association, Qualiopi, SIAE, Avocat, Achats responsables ([#190](https://github.com/ColinMaudry/decp-processing/issues/190)).
 - Tous les labels proviennent du jeu de données [Données des entreprises utilisées dans l'Annuaire des Entreprises](https://www.data.gouv.fr/datasets/donnees-des-entreprises-utilisees-dans-lannuaire-des-entreprises/), qui agrège les sources primaires.
 - Retry sur les téléchargements SIRENE du prétraitement mensuel (unités légales, établissements)
-- Le prétraitement SIRENE régénère un fichier dont il manque des colonnes, au lieu de se fier à sa seule existence
+- Correction du type déclaré de `acheteur_id`, `titulaire_id` et `lieuExecution_code` dans le schéma publié (`schema.json`) : `string` au lieu de `integer`.
 
 #### 2.14.0 2026-08-17
 

@@ -22,7 +22,7 @@
       "short_title": null
     },
     {
-      "type": "integer",
+      "type": "string",
       "name": "acheteur_id",
       "title": "SIRET acheteur",
       "description": "Identifiant de l'établissement de l'acheteur (SIRET), référencé dans la base SIRENE de l'INSEE.",
@@ -36,7 +36,7 @@
       "short_title": "Acheteur"
     },
     {
-      "type": "integer",
+      "type": "string",
       "name": "titulaire_id",
       "title": "Identifiant titulaire",
       "description": "Identifiant du titulaire du marché. Voir 'Type identifiant' pour le référentiel utilisé",
@@ -261,7 +261,7 @@
       "short_title": null
     },
     {
-      "type": "integer",
+      "type": "string",
       "name": "lieuExecution_code",
       "title": "Code lieu exécution",
       "description": "Code du lieu d'exécution du marché public. Le type de code est renseigné par 'Type code lieu exécution'.",
