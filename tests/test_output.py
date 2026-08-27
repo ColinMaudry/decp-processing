@@ -40,3 +40,24 @@ def test_generate_final_schema_ecrit_dans_output_dir(tmp_path):
     # le fichier produit est un JSON valide avec une clé 'fields'
     with open(schema_path, encoding="utf-8") as f:
         assert "fields" in json.load(f)
+
+
+def test_generate_final_schema_suit_l_ordre_du_schema_de_base(tmp_path):
+    """L'ordre des champs publiés doit être celui de schema_base.json — celui
+    du Parquet et des colonnes affichées côté colibre.
+
+    Il était alphabétique, effet de bord du `sorted()` qu'exige
+    itertools.groupby pour fusionner les deux listes de champs.
+    """
+    from src.config import REFERENCE_DIR
+
+    lf = pl.LazyFrame({"objet": ["a"], "montant": [100.0], "uid": ["x"]})
+
+    generate_final_schema(lf, output_dir=tmp_path)
+
+    with open(tmp_path / "schema.json", encoding="utf-8") as f:
+        publies = [c["name"] for c in json.load(f)["fields"]]
+    with open(REFERENCE_DIR / "schema_base.json", encoding="utf-8") as f:
+        attendus = [c["name"] for c in json.load(f)["fields"]]
+
+    assert publies == attendus

@@ -1,8 +1,5 @@
 import json
 import sqlite3
-from collections import ChainMap
-from itertools import groupby
-from operator import itemgetter
 from pathlib import Path
 
 import polars as pl
@@ -182,21 +179,27 @@ def generate_final_schema(lf, output_dir=DIST_DIR):
     with open(REFERENCE_DIR / "schema_base.json", "r", encoding="utf-8") as file:
         base_json = json.load(file)
 
-    # fusion des deux
-    # https://www.paigeniedringhaus.com/blog/filter-merge-and-update-python-lists-based-on-object-attributes#merge-two-lists-together-by-matching-object-keys
-    merged_fields = groupby(
-        sorted(base_json["fields"] + frictonless_schema, key=itemgetter("name")),
-        itemgetter("name"),
-    )
+    # fusion des deux, dans l'ordre du schéma de base
+    #
+    # Cet ordre est celui du Parquet publié et des colonnes affichées par les
+    # consommateurs (colibre) : le schéma doit le refléter plutôt que d'exposer
+    # un classement alphabétique, qui était l'effet de bord du `sorted()`
+    # qu'exige itertools.groupby pour regrouper les deux listes par nom.
+    #
+    # Itérer sur `base_json["fields"]` restreint du même coup la sortie aux
+    # champs décrits dans le schéma de base : ceux que seules les données
+    # apportent (sans "title") n'y entrent jamais, là où l'ancien `del` en
+    # cours d'énumération en sautait un sur deux quand ils se suivaient.
+    types_deduits = {champ["name"]: champ for champ in frictonless_schema}
 
-    merged_schema = {"fields": [dict(ChainMap(*g)) for k, g in merged_fields]}
-
-    # Suppression des entrées du schéma qui n'étaient pas dans le schéma de base
-    for i, o in enumerate(merged_schema["fields"]):
-        if "title" in o:
-            continue
-        else:
-            del merged_schema["fields"][i]
+    merged_schema = {
+        "fields": [
+            # Le schéma de base prime : son "type" est écrit à la main, celui
+            # déduit de Polars ne sert que de repli.
+            {**types_deduits.get(champ["name"], {}), **champ}
+            for champ in base_json["fields"]
+        ]
+    }
 
     # création de dist/schema.json
     with open(output_dir / "schema.json", "w", encoding="utf-8") as file:
