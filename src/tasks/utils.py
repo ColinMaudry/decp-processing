@@ -16,7 +16,9 @@ from src.config import (
     ALL_CONFIG,
     BASE_DF_COLUMNS,
     CACHE_EXPIRATION_TIME_HOURS,
+    DATE_ECART_PUBLICATION_MAX_JOURS,
     DATE_NOW,
+    DATE_SIECLE_ANNEE_COURTE,
     DIST_DIR,
     RESOURCE_CACHE_DIR,
     SIRENE_DATA_DIR,
@@ -143,6 +145,62 @@ def log_column_stats(lf: pl.LazyFrame, nb_lignes: int) -> None:
 
     logger.info(
         "Statistiques par colonne (valeurs distinctes / % null) :\n" + "\n".join(lines)
+    )
+
+
+def _recompose_date_expr(annee: pl.Expr, mois: pl.Expr, jour: pl.Expr) -> pl.Expr:
+    """Assemble trois composants en pl.Date, null si la combinaison n'existe pas."""
+    return pl.format(
+        "{}-{}-{}",
+        annee.cast(pl.String).str.zfill(4),
+        mois.cast(pl.String).str.zfill(2),
+        jour.cast(pl.String).str.zfill(2),
+    ).str.strptime(pl.Date, format="%Y-%m-%d", strict=False)
+
+
+def relire_date_jjmmaa_expr(date_expr: pl.Expr) -> pl.Expr:
+    """Relit une date typée comme si sa source était au format JJ-MM-AA (#191).
+
+    `31-05-22` lu comme AAAA-MM-JJ donne l'an 31 : le composant lu comme jour
+    porte l'année.
+    """
+    return _recompose_date_expr(
+        DATE_SIECLE_ANNEE_COURTE + date_expr.dt.day(),
+        date_expr.dt.month(),
+        date_expr.dt.year(),
+    )
+
+
+def relire_date_aammjj_expr(date_expr: pl.Expr) -> pl.Expr:
+    """Relit une date typée comme si sa source était au format AA-MM-JJ (#191).
+
+    Ordre ISO, mais année sur deux chiffres : `22-05-13` donne l'an 22.
+    """
+    return _recompose_date_expr(
+        DATE_SIECLE_ANNEE_COURTE + date_expr.dt.year(),
+        date_expr.dt.month(),
+        date_expr.dt.day(),
+    )
+
+
+def date_non_future_expr(date_expr: pl.Expr) -> pl.Expr:
+    """Vrai quand la date existe et n'est pas postérieure à aujourd'hui."""
+    return date_expr.is_not_null() & (date_expr <= pl.lit(datetime.now().date()))
+
+
+def millesime_identifiant_expr(id_expr: pl.Expr) -> pl.Expr:
+    """Extrait le premier millésime 20xx présent dans un identifiant de marché."""
+    return id_expr.str.extract(r"(20[0-2][0-9])", 1).cast(pl.Int32)
+
+
+def date_coherente_avec_expr(candidate: pl.Expr, reference: pl.Expr) -> pl.Expr:
+    """Vrai quand candidate précède reference d'au plus DATE_ECART_PUBLICATION_MAX_JOURS."""
+    ecart = (reference - candidate).dt.total_days()
+    return (
+        candidate.is_not_null()
+        & reference.is_not_null()
+        & (ecart >= 0)
+        & (ecart <= DATE_ECART_PUBLICATION_MAX_JOURS)
     )
 
 

@@ -11,6 +11,7 @@ from src.tasks.clean import (
     clean_titulaires,
     extract_innermost_struct,
     fix_data_types,
+    relire_dates_mal_converties,
 )
 
 
@@ -297,3 +298,67 @@ def test_clean_decp():
 
     # Check codeCPV
     assert df_result["codeCPV"].to_list() == ["12345678", "87654100"]
+
+
+class TestRelireDatesMalConverties:
+    """Deux formats source produisent le même symptôme, cf. issue #191."""
+
+    @staticmethod
+    def _lf(notification, publication, identifiants):
+        return pl.LazyFrame(
+            {
+                "id": identifiants,
+                "dateNotification": notification,
+                "datePublicationDonnees": publication,
+            },
+            schema={
+                "id": pl.String,
+                "dateNotification": pl.String,
+                "datePublicationDonnees": pl.String,
+            },
+        )
+
+    def _relire(self, notification, publication, identifiant=None):
+        lf = self._lf([notification], [publication], [identifiant])
+        return relire_dates_mal_converties(lf).collect()["dateNotification"][0]
+
+    def test_jjmmaa_tranche_par_la_publication(self):
+        # 0031-05-22 : JJ-MM-AA donne 2022-05-31, AA-MM-JJ donnerait 2031-05-22,
+        # postérieur à la publication.
+        assert self._relire("0031-05-22", "2022-06-15") == "2022-05-31"
+
+    def test_aammjj_tranche_par_la_publication(self):
+        # 0022-05-13 : AA-MM-JJ donne 2022-05-13, JJ-MM-AA donnerait 2013-05-22,
+        # neuf ans avant la publication.
+        assert self._relire("0022-05-13", "2022-06-15") == "2022-05-13"
+
+    def test_millesime_tranche_sans_publication(self):
+        assert self._relire("0031-05-22", None, "2022V2207201") == "2022-05-31"
+
+    def test_deux_lectures_plausibles_ne_sont_pas_tranchees(self):
+        # JJ-MM-AA donne 2025-06-24, AA-MM-JJ donne 2024-06-25 : les deux précèdent
+        # la publication et aucun millésime ne départage.
+        assert self._relire("0024-06-25", "2026-01-10") == "0024-06-25"
+
+    def test_millesime_trop_eloigne_ne_tranche_pas(self):
+        assert self._relire("0031-05-22", None, "2010ABC01") == "0031-05-22"
+
+    def test_millesime_equidistant_ne_tranche_pas(self):
+        # JJ-MM-AA donne 2024, AA-MM-JJ donne 2026, tous deux à un an de 2025.
+        assert self._relire("0026-06-24", None, "2025ABC01") == "0026-06-24"
+
+    def test_le_millesime_ne_retient_pas_ce_que_la_publication_dement(self):
+        # Le millésime 2024 désignerait 2024-06-26, postérieur à la publication.
+        assert self._relire("0026-06-24", "2023-01-01", "2024ABC01") == "0026-06-24"
+
+    def test_relecture_dans_le_futur_refusee(self):
+        futur = datetime.date.today().year + 1
+        annee_courte = str(futur - 2000).zfill(2)
+        assert self._relire(f"0031-05-{annee_courte}", None, f"{futur}ABC01") == (
+            f"0031-05-{annee_courte}"
+        )
+
+    def test_dates_valides_et_nulles_intactes(self):
+        assert self._relire("2022-05-31", "2022-06-15") == "2022-05-31"
+        assert self._relire(None, "2022-06-15") is None
+        assert self._relire("pas-une-date", "2022-06-15") == "pas-une-date"

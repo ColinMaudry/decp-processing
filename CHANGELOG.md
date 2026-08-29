@@ -4,6 +4,7 @@
 - Tous les labels proviennent du jeu de données [Données des entreprises utilisées dans l'Annuaire des Entreprises](https://www.data.gouv.fr/datasets/donnees-des-entreprises-utilisees-dans-lannuaire-des-entreprises/), qui agrège les sources primaires.
 - Retry sur les téléchargements SIRENE du prétraitement mensuel (unités légales, établissements)
 - Correction du type déclaré de `acheteur_id`, `titulaire_id` et `lieuExecution_code` dans le schéma publié (`schema.json`) : `string` au lieu de `integer`.
+- Relecture des `dateNotification` issues d'une conversion ratée, départagée entre les deux formats source en cause (`JJ-MM-AA` lu comme `AAAA-MM-JJ`, et ordre ISO avec une année sur deux chiffres) par la date de publication puis par le millésime de l'identifiant du marché ([#191](https://github.com/ColinMaudry/decp-processing/issues/191))
 
 #### 2.14.0 2026-08-17
 

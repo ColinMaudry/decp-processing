@@ -239,6 +239,26 @@ ALL_CONFIG["ANOMALY_PAIRS_SUSPECT_THRESHOLD"] = ANOMALY_PAIRS_SUSPECT_THRESHOLD
 ALL_CONFIG["ANOMALY_PAIRS_ABERRANT_THRESHOLD"] = ANOMALY_PAIRS_ABERRANT_THRESHOLD
 ALL_CONFIG["ANOMALY_GROUPE_MIN_SIZE"] = ANOMALY_GROUPE_MIN_SIZE
 
+# === Détection des dates invraisemblables ===
+# https://github.com/ColinMaudry/decp-processing/issues/191
+
+# Année plancher en deçà de laquelle une date est jugée invraisemblable
+DATE_ANNEE_MIN = int(os.getenv("DATE_ANNEE_MIN", "2000"))
+ALL_CONFIG["DATE_ANNEE_MIN"] = DATE_ANNEE_MIN
+
+# Siècle ajouté à l'année sur deux chiffres d'une date relue
+DATE_SIECLE_ANNEE_COURTE = 2000
+
+# Écart notification/publication au-delà duquel une relecture est écartée (5 ans)
+DATE_ECART_PUBLICATION_MAX_JOURS = int(
+    os.getenv("DATE_ECART_PUBLICATION_MAX_JOURS", "1825")
+)
+
+# Écart maximal entre l'année d'une relecture et le millésime lu dans l'identifiant
+# du marché, second arbitre utilisé quand la date de publication manque
+DATE_ECART_MILLESIME_MAX_ANNEES = int(os.getenv("DATE_ECART_MILLESIME_MAX_ANNEES", "2"))
+ALL_CONFIG["DATE_ECART_PUBLICATION_MAX_JOURS"] = DATE_ECART_PUBLICATION_MAX_JOURS
+
 COLUMNS_TO_DROP = [
     # Pas encore incluses
     "actesSousTraitance",
