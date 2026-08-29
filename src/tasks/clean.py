@@ -4,9 +4,20 @@ import re
 import polars as pl
 from polars import selectors as cs
 
-from src.config import DecpFormat
+from src.config import (
+    DATE_ANNEE_MIN,
+    DATE_ECART_MILLESIME_MAX_ANNEES,
+    DecpFormat,
+)
 from src.tasks.transform import (
     apply_modifications,
+)
+from src.tasks.utils import (
+    date_coherente_avec_expr,
+    date_non_future_expr,
+    millesime_identifiant_expr,
+    relire_date_aammjj_expr,
+    relire_date_jjmmaa_expr,
 )
 
 
@@ -122,6 +133,8 @@ def clean_decp(lf: pl.LazyFrame, decp_format: DecpFormat) -> pl.LazyFrame:
         .list[0]
         .name.keep()
     )
+
+    lf = relire_dates_mal_converties(lf)
 
     # Nature
     lf = lf.with_columns(
@@ -273,6 +286,83 @@ def clean_titulaires(lf: pl.LazyFrame, decp_format: DecpFormat, column) -> pl.La
         )
 
     return lf
+
+
+def relire_dates_mal_converties(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """Relit les dateNotification dont la conversion source a échoué (#191).
+
+    Deux formats source distincts produisent une année antérieure à DATE_ANNEE_MIN :
+    JJ-MM-AA lu comme AAAA-MM-JJ, et l'ordre ISO avec une année sur deux chiffres.
+    Les deux relectures sont mises en concurrence et départagées par deux arbitres
+    successifs : la datePublicationDonnees, que la notification doit précéder, puis
+    à défaut le millésime lu dans l'identifiant du marché, dont la relecture retenue
+    doit être la plus proche.
+
+    Sans départage net, la date est laissée telle quelle. La colonne reste une
+    chaîne : le typage a lieu plus tard, dans fix_data_types.
+    """
+    notification = pl.col("dateNotification").str.strptime(
+        pl.Date, format="%Y-%m-%d", strict=False
+    )
+    publication = pl.col("datePublicationDonnees").str.strptime(
+        pl.Date, format="%Y-%m-%d", strict=False
+    )
+
+    douteuse = notification.is_not_null() & (notification.dt.year() < DATE_ANNEE_MIN)
+
+    # Une publication elle-même douteuse ne peut pas servir d'arbitre.
+    reference = (
+        pl.when(publication.dt.year() >= DATE_ANNEE_MIN)
+        .then(publication)
+        .otherwise(None)
+    )
+
+    jjmmaa = relire_date_jjmmaa_expr(notification)
+    aammjj = relire_date_aammjj_expr(notification)
+    jjmmaa_suit_publication = date_coherente_avec_expr(jjmmaa, reference)
+    aammjj_suit_publication = date_coherente_avec_expr(aammjj, reference)
+
+    pub_dit_jjmmaa = jjmmaa_suit_publication & ~aammjj_suit_publication
+    pub_dit_aammjj = aammjj_suit_publication & ~jjmmaa_suit_publication
+    pub_a_tranche = pub_dit_jjmmaa | pub_dit_aammjj
+
+    millesime = millesime_identifiant_expr(pl.col("id"))
+    ecart_jjmmaa = (jjmmaa.dt.year() - millesime).abs()
+    ecart_aammjj = (aammjj.dt.year() - millesime).abs()
+
+    # Le millésime ne retient pas une relecture que la publication dément.
+    id_dit_jjmmaa = (
+        (ecart_jjmmaa < ecart_aammjj)
+        & (ecart_jjmmaa <= DATE_ECART_MILLESIME_MAX_ANNEES)
+        & (reference.is_null() | jjmmaa_suit_publication)
+    )
+    id_dit_aammjj = (
+        (ecart_aammjj < ecart_jjmmaa)
+        & (ecart_aammjj <= DATE_ECART_MILLESIME_MAX_ANNEES)
+        & (reference.is_null() | aammjj_suit_publication)
+    )
+
+    relue = (
+        pl.when(
+            douteuse
+            & date_non_future_expr(jjmmaa)
+            & (pub_dit_jjmmaa | (~pub_a_tranche & id_dit_jjmmaa))
+        )
+        .then(jjmmaa)
+        .when(
+            douteuse
+            & date_non_future_expr(aammjj)
+            & (pub_dit_aammjj | (~pub_a_tranche & id_dit_aammjj))
+        )
+        .then(aammjj)
+        .otherwise(None)
+    )
+
+    return lf.with_columns(
+        dateNotification=pl.when(relue.is_not_null())
+        .then(relue.dt.strftime("%Y-%m-%d"))
+        .otherwise(pl.col("dateNotification"))
+    )
 
 
 def fix_data_types(lf: pl.LazyFrame) -> pl.LazyFrame:
