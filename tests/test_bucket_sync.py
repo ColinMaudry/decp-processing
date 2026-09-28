@@ -66,6 +66,15 @@ def test_download_resource_cache_sauf_existant(fake_s3, cache_dir, tmp_path):
     assert (cache_dir / "bbb.parquet").read_bytes() == b"bbb"  # pas écrasé
 
 
+def test_download_resource_cache_taille_differente(fake_s3, cache_dir):
+    fake_s3.objects["resource_cache/aaa.parquet"] = {"Body": b"longer content"}
+    (cache_dir / "aaa.parquet").write_bytes(b"short")
+
+    bucket_sync.download_resource_cache()
+
+    assert (cache_dir / "aaa.parquet").read_bytes() == b"longer content"
+
+
 def test_download_resource_cache_rien_si_vide(fake_s3, cache_dir):
     bucket_sync.download_resource_cache()  # bucket vide, ne doit pas lever
     assert list(cache_dir.iterdir()) == []

@@ -93,9 +93,9 @@ def download_resource_cache():
     """Télécharge le cache de ressources du bucket, en sautant les fichiers déjà présents."""
     logger = get_logger(level=LOG_LEVEL)
     client = _s3_client()
-    for key in _list_keys(client, f"{RESOURCE_CACHE_PREFIX}/"):
+    for key, size in _list_keys(client, f"{RESOURCE_CACHE_PREFIX}/").items():
         local_path = RESOURCE_CACHE_DIR / key.removeprefix(f"{RESOURCE_CACHE_PREFIX}/")
-        if local_path.exists():
+        if local_path.exists() and local_path.stat().st_size == size:
             continue
         logger.info(f"Téléchargement de {key}...")
         _download_file(client, key, local_path)
