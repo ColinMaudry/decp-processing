@@ -5,12 +5,15 @@ from src.flows.decp_processing import decp_processing
 from src.flows.get_cog import get_cog
 from src.flows.scrap import scrap
 from src.flows.sirene_preprocess import sirene_preprocess
+from src.tasks.bucket_sync import download_resource_cache, upload_resource_cache
 
 FUNCTIONS = {
     "sirene_preprocess": sirene_preprocess,
     "decp_processing": decp_processing,
     "get_cog": get_cog,
     "scrap": scrap,
+    "upload_resource_cache": upload_resource_cache,
+    "download_resource_cache": download_resource_cache,
 }
 
 if __name__ == "__main__":
