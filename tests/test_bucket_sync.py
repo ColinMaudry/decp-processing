@@ -78,3 +78,48 @@ def test_download_resource_cache_taille_differente(fake_s3, cache_dir):
 def test_download_resource_cache_rien_si_vide(fake_s3, cache_dir):
     bucket_sync.download_resource_cache()  # bucket vide, ne doit pas lever
     assert list(cache_dir.iterdir()) == []
+
+
+def test_upload_sirene_data(fake_s3, monkeypatch, tmp_path):
+    sirene_dir = tmp_path / "sirene_2026-09"
+    sirene_dir.mkdir()
+    (sirene_dir / "unites_legales.parquet").write_bytes(b"ul")
+    monkeypatch.setattr(bucket_sync, "SIRENE_DATA_DIR", sirene_dir)
+
+    bucket_sync.upload_sirene_data()
+
+    assert (
+        fake_s3.objects["sirene/sirene_2026-09/unites_legales.parquet"]["Body"] == b"ul"
+    )
+
+
+def test_download_sirene_data(fake_s3, monkeypatch, tmp_path):
+    sirene_dir = tmp_path / "sirene_2026-09"  # n'existe pas encore
+    monkeypatch.setattr(bucket_sync, "SIRENE_DATA_DIR", sirene_dir)
+    fake_s3.objects["sirene/sirene_2026-09/unites_legales.parquet"] = {"Body": b"ul"}
+
+    bucket_sync.download_sirene_data()
+
+    assert (sirene_dir / "unites_legales.parquet").read_bytes() == b"ul"
+
+
+def test_download_sirene_data_noop_si_bucket_vide(fake_s3, monkeypatch, tmp_path):
+    sirene_dir = tmp_path / "sirene_2026-09"
+    monkeypatch.setattr(bucket_sync, "SIRENE_DATA_DIR", sirene_dir)
+
+    bucket_sync.download_sirene_data()  # ne doit pas lever
+
+    assert not sirene_dir.exists()
+
+
+def test_download_sirene_data_noop_si_local_existe(fake_s3, monkeypatch, tmp_path):
+    sirene_dir = tmp_path / "sirene_2026-09"
+    sirene_dir.mkdir()
+    (sirene_dir / "unites_legales.parquet").write_bytes(b"deja-la")
+    monkeypatch.setattr(bucket_sync, "SIRENE_DATA_DIR", sirene_dir)
+    fake_s3.objects["sirene/sirene_2026-09/unites_legales.parquet"] = {"Body": b"ul"}
+
+    bucket_sync.download_sirene_data()
+
+    # rien de téléchargé
+    assert (sirene_dir / "unites_legales.parquet").read_bytes() == b"deja-la"

@@ -4,8 +4,13 @@ import polars as pl
 from prefect import flow
 from prefect.transactions import transaction
 
-from src.config import LOG_LEVEL, SIRENE_DATA_DIR
+from src.config import (
+    DECP_PROCESSING_PUBLISH,
+    LOG_LEVEL,
+    SIRENE_DATA_DIR,
+)
 from src.flows.get_cog import get_cog
+from src.tasks.bucket_sync import upload_sirene_data
 from src.tasks.get import (
     bootstrap_siret_latlong,
     get_etablissements,
@@ -122,5 +127,10 @@ def sirene_preprocess():
             get_etablissements(processed_etab_parquet_path, lf_siret_latlong)
         else:
             logger.info(str(processed_etab_parquet_path) + " existe, skipping.")
+
+    # Le dossier du mois est complet : le rendre disponible aux instances éphémères
+    # Scaleway, qui le télécharge depuis le bucket au lieu de le recréer.
+    if DECP_PROCESSING_PUBLISH:
+        upload_sirene_data()
 
     logger.info("☑️  Fin du flow sirene_preprocess.")

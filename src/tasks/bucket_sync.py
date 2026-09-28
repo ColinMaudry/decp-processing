@@ -12,6 +12,7 @@ from src.config import (
     S3_ENDPOINT_URL,
     S3_REGION,
     S3_SECRET_ACCESS_KEY,
+    SIRENE_DATA_DIR,
     check_s3_config,
 )
 from src.tasks.utils import get_logger
@@ -99,3 +100,46 @@ def download_resource_cache():
             continue
         logger.info(f"Téléchargement de {key}...")
         _download_file(client, key, local_path)
+
+
+def upload_sirene_data():
+    """Miroir local -> bucket du dossier SIRENE du mois (produit par sirene_preprocess)."""
+    logger = get_logger(level=LOG_LEVEL)
+    client = _s3_client()
+    prefix = f"{SIRENE_PREFIX}/{SIRENE_DATA_DIR.name}"
+
+    local_files = {p.name: p for p in SIRENE_DATA_DIR.glob("*.parquet")}
+    if not local_files:
+        logger.warning(f"{SIRENE_DATA_DIR} vide ou inexistant : rien à uploader.")
+        return
+
+    remote_keys = _list_keys(client, f"{prefix}/")
+    for name, path in local_files.items():
+        key = f"{prefix}/{name}"
+        if remote_keys.get(key) != path.stat().st_size:
+            logger.info(f"Upload {key}...")
+            _upload_file(client, path, key)
+    for key in remote_keys:
+        if key.removeprefix(f"{prefix}/") not in local_files:
+            logger.info(f"Suppression distante de {key}...")
+            client.delete_object(Bucket=S3_BUCKET, Key=key)
+
+
+def download_sirene_data():
+    """Télécharge le dossier SIRENE du mois depuis le bucket, s'il n'existe pas déjà localement."""
+    logger = get_logger(level=LOG_LEVEL)
+    if SIRENE_DATA_DIR.exists() and any(SIRENE_DATA_DIR.glob("*.parquet")):
+        logger.info(f"{SIRENE_DATA_DIR} déjà présent localement.")
+        return
+    client = _s3_client()
+    prefix = f"{SIRENE_PREFIX}/{SIRENE_DATA_DIR.name}"
+    keys = _list_keys(client, f"{prefix}/")
+    if not keys:
+        logger.info(
+            f"Pas de dossier SIRENE dans le bucket sous {prefix}. "
+            "decp_processing exécutera sirene_preprocess() en ligne."
+        )
+        return
+    for key in keys:
+        logger.info(f"Téléchargement de {key}...")
+        _download_file(client, key, SIRENE_DATA_DIR / key.removeprefix(f"{prefix}/"))
