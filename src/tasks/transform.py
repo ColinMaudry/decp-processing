@@ -461,6 +461,7 @@ MOTS_COURTS_TITRE = {
     "RIS",
     "GAZ",
     "ETS",
+    "TRI",
 }
 
 # Mots de plus de 3 lettres à mettre en minuscules (hors début de nom)
@@ -487,6 +488,8 @@ SIGLES = {
     "EHPAD",
     "URSSAF",
     "SMACL",
+    "BRGM",
+    "SPIE",
 }
 
 # Élisions (D'ELECTRICITE, L'ADMINISTRATION), en minuscules hors début de nom
@@ -580,6 +583,11 @@ ACCENTS = {
     "europeen": "européen",
     "regie": "régie",
     "ecole": "école",
+    "emeraude": "émeraude",
+    "aero": "aéro",
+    "creati": "créati",
+    "repar": "répar",
+    "drome": "drôme",
 }
 
 
