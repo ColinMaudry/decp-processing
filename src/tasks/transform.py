@@ -402,7 +402,9 @@ def prepare_unites_legales(lf: pl.LazyFrame) -> pl.LazyFrame:
 # Amélioration de la casse des noms SIRENE (issue #167). Les noms SIRENE sont
 # en majuscules sans accents ; on les passe en casse de titre, sauf :
 # - les mots de 3 lettres ou moins, présumés être des sigles (SA, SAS, CC, BTP...),
-#   qui restent en majuscules, sauf ceux de MOTS_COURTS_MINUSCULES ;
+#   qui restent en majuscules, sauf ceux de MOTS_COURTS_MINUSCULES et
+#   MOTS_COURTS_TITRE ;
+# - le « A » seul, qui devient « à » ;
 # - les sigles de plus de 3 lettres de SIGLES, qui restent en majuscules ;
 # - les mots de MOTS_MINUSCULES et MOTS_COURTS_MINUSCULES, en minuscules sauf en
 #   début de nom.
@@ -425,6 +427,20 @@ MOTS_COURTS_MINUSCULES = {
     "OF",
     "THE",
     "EAU",
+    "PAR",
+    "UNE",
+}
+
+# Mots de 3 lettres ou moins qui ne sont pas des sigles, à mettre en casse de titre
+MOTS_COURTS_TITRE = {
+    "SUD",
+    "EST",
+    "VAL",
+    "ILE",
+    "MER",
+    "AIR",
+    "VIE",
+    "ART",
 }
 
 # Mots de plus de 3 lettres à mettre en minuscules (hors début de nom)
@@ -432,12 +448,8 @@ MOTS_MINUSCULES = {
     "POUR",
     "COMMUNES",
     "SOCIETE",
-    "SOCIAL",
-    "SOCIALE",
     "SYNDICAT",
     "UNION",
-    "SERVICE",
-    "SERVICES",
     "INDIVISION",
     "RUE",
     "MAIRIE",
@@ -476,7 +488,6 @@ MOTS_MINUSCULES = {
     "COLLECTIF",
     "COLLECTIVE",
     "SCIENTIFIQUE",
-    "CONSTRUCTION",
 }
 
 # Sigles de plus de 3 lettres, à laisser en majuscules
@@ -526,6 +537,9 @@ ACCENTS = {
     "secretariat": "secrétariat",
     "ministere": "ministère",
     "immobiliere": "immobilière",
+    "pyrenee": "pyrénée",
+    "materiau": "matériau",
+    "reseau": "réseau",
 }
 
 
@@ -545,10 +559,20 @@ def ameliorer_casse_nom(nom: pl.Expr) -> pl.Expr:
     premier_mot = est_mot & (est_mot.cum_sum() == 1)
     suivi_apostrophe = token.shift(-1).str.starts_with("'").fill_null(False)
     apres_chiffre = token.shift(1).str.contains(r"\d$").fill_null(False)
+    # « A » isolé : en début de nom ou entre espaces, sans initiale épelée à côté
+    # (« S B A », « A D N »)
+    a_seul = (
+        (token == "A")
+        & token.shift(1).str.contains(r"^\s+$").fill_null(True)
+        & token.shift(-1).str.contains(r"^\s+$").fill_null(False)
+        & (token.shift(2).str.len_chars() != 1).fill_null(True)
+        & (token.shift(-2).str.len_chars() != 1).fill_null(True)
+    )
 
     minuscule = token.str.to_lowercase()
     for sans_accent, avec_accent in ACCENTS.items():
         minuscule = minuscule.str.replace(f"^{sans_accent}", avec_accent)
+    minuscule = pl.when(a_seul).then(pl.lit("à")).otherwise(minuscule)
     titre = pl.concat_str(
         minuscule.str.head(1).str.to_uppercase(), minuscule.str.slice(1)
     )
@@ -567,15 +591,21 @@ def ameliorer_casse_nom(nom: pl.Expr) -> pl.Expr:
             pl.when(
                 (token.str.len_chars() <= 3)
                 & ~token.is_in(MOTS_COURTS_MINUSCULES)
+                & ~token.is_in(MOTS_COURTS_TITRE)
                 & ~(token.is_in(ELISIONS) & suivi_apostrophe)
+                & ~a_seul
             )
             .then(token)
             .otherwise(titre)
         )
         .when(token.is_in(ELISIONS) & suivi_apostrophe)
         .then(minuscule)
-        .when(token.is_in(MOTS_COURTS_MINUSCULES) | token.is_in(MOTS_MINUSCULES))
+        .when(
+            token.is_in(MOTS_COURTS_MINUSCULES) | token.is_in(MOTS_MINUSCULES) | a_seul
+        )
         .then(minuscule)
+        .when(token.is_in(MOTS_COURTS_TITRE))
+        .then(titre)
         .when(token.str.len_chars() <= 3)
         .then(token)
         .otherwise(titre)

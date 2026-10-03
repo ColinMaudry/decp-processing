@@ -919,11 +919,19 @@ class TestAmeliorerCasseNom:
             "LA POSTE": "La Poste",
             "D'ARTAGNAN SAS": "D'Artagnan SAS",
             "SDIS 35 (SERVICE DEPARTEMENTAL D'INCENDIE ET DE SECOURS)": (
-                "SDIS 35 (service Départemental d'incendie et de secours)"
+                "SDIS 35 (Service Départemental d'incendie et de secours)"
             ),
             "CHU DE RENNES": "CHU de Rennes",
             "REGIONALE BTP": "Régionale BTP",
-            "1ER RESEAU": "1er Reseau",
+            "1ER RESEAU": "1er Réseau",
+            "EIFFAGE CONSTRUCTION SUD EST": "Eiffage Construction Sud Est",
+            "MATERIAUX DES PYRENEES": "Matériaux des Pyrénées",
+            "A TOUT FAIRE": "À Tout Faire",
+            "SERVICE A LA PERSONNE": "Service à la Personne",
+            "PLAN A": "Plan A",
+            "A2 RISK": "A2 Risk",
+            "A D N NETTOYAGE": "A D N Nettoyage",
+            "CITE A (ARCHITECTURE)": "Cite A (Architecture)",
             # Noms déjà en casse mixte : inchangés
             "[Données personnelles non-diffusibles]": (
                 "[Données personnelles non-diffusibles]"
