@@ -399,6 +399,194 @@ def prepare_unites_legales(lf: pl.LazyFrame) -> pl.LazyFrame:
     )
 
 
+# Amélioration de la casse des noms SIRENE (issue #167). Les noms SIRENE sont
+# en majuscules sans accents ; on les passe en casse de titre, sauf :
+# - les mots de 3 lettres ou moins, présumés être des sigles (SA, SAS, CC, BTP...),
+#   qui restent en majuscules, sauf ceux de MOTS_COURTS_MINUSCULES ;
+# - les sigles de plus de 3 lettres de SIGLES, qui restent en majuscules ;
+# - les mots de MOTS_MINUSCULES et MOTS_COURTS_MINUSCULES, en minuscules sauf en
+#   début de nom.
+# Les listes sont à compléter au fil du temps. Les mots y sont en majuscules sans
+# accents, tels qu'ils apparaissent dans SIRENE.
+
+# Mots de 3 lettres ou moins qui ne sont pas des sigles, à mettre en minuscules
+MOTS_COURTS_MINUSCULES = {
+    "DE",
+    "DU",
+    "DES",
+    "LE",
+    "LA",
+    "LES",
+    "AU",
+    "AUX",
+    "ET",
+    "EN",
+    "SUR",
+    "OF",
+    "THE",
+    "EAU",
+}
+
+# Mots de plus de 3 lettres à mettre en minuscules (hors début de nom)
+MOTS_MINUSCULES = {
+    "POUR",
+    "COMMUNES",
+    "SOCIETE",
+    "SOCIAL",
+    "SOCIALE",
+    "SYNDICAT",
+    "UNION",
+    "SERVICE",
+    "SERVICES",
+    "INDIVISION",
+    "RUE",
+    "MAIRIE",
+    "HOSPITALIER",
+    "HOSPITALIERS",
+    "PUBLIC",
+    "PUBLIQUE",
+    "AGENCE",
+    "TRAITEMENT",
+    "GRAND",
+    "UNIVERSITAIRE",
+    "MIXTE",
+    "PAYS",
+    "INCENDIE",
+    "SECOURS",
+    "GENDARMERIE",
+    "COMMISSARIAT",
+    "URBAINE",
+    "TERRITORIALE",
+    "TERRITOIRE",
+    "INTERCOMMUNALE",
+    "ASSAINISSEMENT",
+    "INSTITUT",
+    "GESTION",
+    "PRODUITS",
+    "ESTUAIRE",
+    "BASSIN",
+    "ACTION",
+    "POMPIERS",
+    "POLICE",
+    "LOGEMENT",
+    "NATIONALE",
+    "NATIONAL",
+    "IMMOBILIER",
+    "VALORISATION",
+    "COLLECTIF",
+    "COLLECTIVE",
+    "SCIENTIFIQUE",
+    "CONSTRUCTION",
+}
+
+# Sigles de plus de 3 lettres, à laisser en majuscules
+SIGLES = {
+    "SARL",
+    "SASU",
+    "EURL",
+    "SELARL",
+    "EARL",
+    "GAEC",
+    "SCOP",
+    "EPIC",
+    "EPCI",
+    "SDIS",
+    "SNCF",
+    "CNRS",
+    "CCAS",
+    "CIAS",
+    "EHPAD",
+    "URSSAF",
+}
+
+# Élisions (D'ELECTRICITE, L'ADMINISTRATION), en minuscules hors début de nom
+ELISIONS = {"D", "L", "QU"}
+
+# Suffixes d'ordinaux (1ER, 2EME), en minuscules quand ils suivent un chiffre
+ORDINAUX = {"ER", "ERE", "E", "EME", "ND", "NDE"}
+
+# Préfixes de mots à accentuer, en minuscules. Préfixes et non mots entiers
+# pour couvrir les formes fléchies (régionale, départementaux...).
+ACCENTS = {
+    "communaute": "communauté",
+    "societe": "société",
+    "etablissement": "établissement",
+    "region": "région",
+    "federation": "fédération",
+    "electricite": "électricité",
+    "amenagement": "aménagement",
+    "departement": "département",
+    "cooperative": "coopérative",
+    "metropole": "métropole",
+    "agglomeration": "agglomération",
+    "interet": "intérêt",
+    "sante": "santé",
+    "general": "général",
+    "hopita": "hôpita",
+    "secretariat": "secrétariat",
+    "ministere": "ministère",
+    "immobiliere": "immobilière",
+}
+
+
+def ameliorer_casse_nom(nom: pl.Expr) -> pl.Expr:
+    """Casse de titre et accents pour un nom SIRENE (voir MOTS_COURTS_MINUSCULES).
+
+    Seuls les noms intégralement en majuscules sont traités : les noms déjà en
+    casse mixte (dont « [Données personnelles non-diffusibles] ») sont conservés.
+
+    COMMUNAUTE DE COMMUNES DU PAYS D'ORTHE ET ARRIGANS SAS
+    -> Communauté de communes du pays d'Orthe et Arrigans SAS
+    """
+    # Découpage en suites de lettres (mots) et suites d'autres caractères
+    # (séparateurs), pour pouvoir traiter chaque mot isolément puis tout recoller
+    token = pl.element()
+    est_mot = token.str.contains(r"^\p{L}+$")
+    premier_mot = est_mot & (est_mot.cum_sum() == 1)
+    suivi_apostrophe = token.shift(-1).str.starts_with("'").fill_null(False)
+    apres_chiffre = token.shift(1).str.contains(r"\d$").fill_null(False)
+
+    minuscule = token.str.to_lowercase()
+    for sans_accent, avec_accent in ACCENTS.items():
+        minuscule = minuscule.str.replace(f"^{sans_accent}", avec_accent)
+    titre = pl.concat_str(
+        minuscule.str.head(1).str.to_uppercase(), minuscule.str.slice(1)
+    )
+
+    mot_casse = (
+        pl.when(~est_mot)
+        .then(token)
+        .when(token.is_in(ORDINAUX) & apres_chiffre)
+        .then(minuscule)
+        .when(token.is_in(SIGLES))
+        .then(token)
+        .when(premier_mot)
+        .then(
+            # Un premier mot de 3 lettres ou moins reste un sigle, sauf s'il
+            # est dans les listes de mots courants
+            pl.when(
+                (token.str.len_chars() <= 3)
+                & ~token.is_in(MOTS_COURTS_MINUSCULES)
+                & ~(token.is_in(ELISIONS) & suivi_apostrophe)
+            )
+            .then(token)
+            .otherwise(titre)
+        )
+        .when(token.is_in(ELISIONS) & suivi_apostrophe)
+        .then(minuscule)
+        .when(token.is_in(MOTS_COURTS_MINUSCULES) | token.is_in(MOTS_MINUSCULES))
+        .then(minuscule)
+        .when(token.str.len_chars() <= 3)
+        .then(token)
+        .otherwise(titre)
+    )
+
+    nom_casse = (
+        nom.str.extract_all(r"\p{L}+|[^\p{L}]+").list.eval(mot_casse).list.join("")
+    )
+    return pl.when(nom == nom.str.to_uppercase()).then(nom_casse).otherwise(nom)
+
+
 # Champ booléen de la source annuaire -> colonne produite. L'ordre de ce
 # dictionnaire n'a aucun effet sur l'ordre publié, fixé par LABELS dans enrich.
 LABELS_UNITES_LEGALES = {

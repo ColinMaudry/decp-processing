@@ -3,6 +3,7 @@ from polars.testing import assert_frame_equal
 
 from src.config import BASE_DIR, DECP_COLMO_DATASET, DECP_COLMO_RESOURCE_URL
 from src.tasks.transform import (
+    ameliorer_casse_nom,
     apply_modifications,
     calculate_naf_cpv_matching,
     consolidate_across_datasets,
@@ -907,3 +908,28 @@ class TestPrepareLabels:
             if col != "siren":
                 assert result[col].null_count() == 0, col
                 assert result[col].dtype == pl.Boolean
+
+
+class TestAmeliorerCasseNom:
+    def test_ameliorer_casse_nom(self):
+        noms = {
+            "COMMUNAUTE DE COMMUNES DU LIMOUXIN": "Communauté de communes du Limouxin",
+            "SOCIETE GENERALE D'ELECTRICITE": "Société Générale d'Électricité",
+            "GARAGE DU MIDI SARL": "Garage du Midi SARL",
+            "LA POSTE": "La Poste",
+            "D'ARTAGNAN SAS": "D'Artagnan SAS",
+            "SDIS 35 (SERVICE DEPARTEMENTAL D'INCENDIE ET DE SECOURS)": (
+                "SDIS 35 (service Départemental d'incendie et de secours)"
+            ),
+            "CHU DE RENNES": "CHU de Rennes",
+            "REGIONALE BTP": "Régionale BTP",
+            "1ER RESEAU": "1er Reseau",
+            # Noms déjà en casse mixte : inchangés
+            "[Données personnelles non-diffusibles]": (
+                "[Données personnelles non-diffusibles]"
+            ),
+            "Org 1": "Org 1",
+        }
+        df = pl.DataFrame({"nom": [*noms.keys(), None]})
+        result = df.select(ameliorer_casse_nom(pl.col("nom")))["nom"].to_list()
+        assert result == [*noms.values(), None]

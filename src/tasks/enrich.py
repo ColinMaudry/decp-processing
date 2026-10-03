@@ -14,6 +14,7 @@ from src.config import (
 )
 from src.tasks.get import bootstrap_siret_latlong, get_from_s3
 from src.tasks.transform import (
+    ameliorer_casse_nom,
     extract_unique_acheteurs_siret,
     extract_unique_titulaires_siret,
 )
@@ -30,6 +31,10 @@ def add_etablissement_data(
     # merge in fine avec le reste des données (how = inner)
     lf_sirets = lf_sirets.join(
         lf_etablissements, how="inner", left_on=siret_column, right_on="siret"
+    )
+    # Casse traitée après la jointure, pour ne traiter que les établissements des DECP
+    lf_sirets = lf_sirets.with_columns(
+        ameliorer_casse_nom(pl.col("etablissement_nom")).alias("etablissement_nom")
     )
 
     # On ne prend pas l'activité des acheteurs
@@ -105,6 +110,12 @@ def add_unite_legale_data(
     # Pas besoin de garder les SIRET qui ne matchent pas dans ce df intermédiaire, puisqu'on
     # merge in fine avec le reste des données
     lf_sirets = lf_sirets.join(unites_legales_lf, how="inner", on="siren")
+    # Casse traitée après la jointure, pour ne traiter que les unités légales des DECP
+    lf_sirets = lf_sirets.with_columns(
+        ameliorer_casse_nom(pl.col("denominationUniteLegale")).alias(
+            "denominationUniteLegale"
+        )
+    )
     lf_sirets = lf_sirets.rename(
         {
             "denominationUniteLegale": f"{type_siret}_nom",

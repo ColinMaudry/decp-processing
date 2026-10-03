@@ -5,6 +5,7 @@
 - Retry sur les téléchargements SIRENE du prétraitement mensuel (unités légales, établissements)
 - Correction du type déclaré de `acheteur_id`, `titulaire_id` et `lieuExecution_code` dans le schéma publié (`schema.json`) : `string` au lieu de `integer`.
 - Correction de l'ordre des champs dans le schéma publié
+- Meilleure casse et accentuation des noms d'acheteurs et de titulaires issus de SIRENE (unités légales et établissements) : « COMMUNAUTE DE COMMUNES DU LIMOUXIN » devient « Communauté de communes du Limouxin » ([#167](https://github.com/ColinMaudry/decp-processing/issues/167)).
 
 #### 2.14.0 2026-08-17
 
