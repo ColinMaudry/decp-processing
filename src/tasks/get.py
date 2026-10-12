@@ -137,6 +137,21 @@ def get_resource(
             (pl.lit("decp_minef_") + pl.col("source")).alias("sourceDataset")
         )
         lf = lf.drop("source")
+    elif r["dataset_code"] == "aife_dume":
+        # Les dumps JSON de l'API DECP indiquent la plateforme d'origine de chaque
+        # marché (ex : "AIFE_ATLINE" pour marches-securises.fr). Les dumps XML ne
+        # l'indiquent pas (champ source absent → null).
+        lf = lf.with_columns(
+            pl.when(pl.col("source").is_not_null() & (pl.col("source") != ""))
+            .then(
+                (pl.lit("aife_dume_") + pl.col("source"))
+                .str.replace("AIFE_", "")
+                .str.to_lowercase()
+            )
+            .otherwise(pl.lit("aife_dume"))
+            .alias("sourceDataset")
+        )
+        lf = lf.drop("source")
     else:
         lf = lf.rename({"source": "sourceDataset"})
         lf = lf.with_columns(pl.lit(r["dataset_code"]).alias("sourceDataset"))
