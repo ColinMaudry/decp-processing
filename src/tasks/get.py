@@ -1,3 +1,4 @@
+import io
 import tempfile
 from collections.abc import Iterator
 from functools import partial
@@ -29,6 +30,8 @@ from src.config import (
     HTTP_CLIENT,
     HTTP_HEADERS,
     LOG_LEVEL,
+    POPULATION_COMMUNES_CSV,
+    POPULATION_COMMUNES_URL,
     RESOURCE_CACHE_DIR,
     S3_ACCESS_KEY_ID,
     S3_BUCKET,
@@ -723,3 +726,74 @@ def get_labels_unites_legales(processed_parquet_path: Path) -> None:
         LABELS_SIREN_MIN_ROWS,
         ANNUAIRE_UNITES_LEGALES_URL,
     )
+
+
+# 34 968 communes (lignes type=COM) dans la version publiée le 2026-01-20. Le seuil
+# laisse une marge pour les fusions de communes tout en attrapant une source tronquée.
+POPULATION_COMMUNES_MIN_ROWS = 30_000
+
+
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    retry=retry_if_exception_type(httpx.HTTPError),
+    reraise=True,
+)
+def _download_population_communes() -> bytes:
+    response = HTTP_CLIENT.get(
+        POPULATION_COMMUNES_URL,
+        headers=HTTP_HEADERS,
+        follow_redirects=True,
+        timeout=60,
+    )
+    response.raise_for_status()
+    return response.content
+
+
+def _check_population_communes(content: bytes) -> None:
+    """Lève ValueError si le CSV n'a pas les colonnes utilisées par join_population
+    ou contient trop peu de communes renseignées (source tronquée ou modifiée)."""
+    df = pl.read_csv(io.BytesIO(content), infer_schema=False)
+    missing = {"SIREN", "type", "population"} - set(df.columns)
+    if missing:
+        raise ValueError(
+            f"Colonnes manquantes dans le fichier population des communes : {missing}"
+        )
+    nb_communes = df.filter(
+        (pl.col("type") == "COM") & pl.col("population").is_not_null()
+    ).height
+    if nb_communes < POPULATION_COMMUNES_MIN_ROWS:
+        raise ValueError(
+            f"Nombre de communes anormalement bas : {nb_communes} pour un minimum "
+            f"attendu de {POPULATION_COMMUNES_MIN_ROWS}."
+        )
+
+
+def get_population_communes(output_path: Path = POPULATION_COMMUNES_CSV) -> None:
+    """Télécharge le CSV population des communes (Datactivist) vers output_path.
+
+    Le fichier n'est remplacé qu'après vérification, par renommage atomique : une
+    copie valide n'est jamais écrasée par un téléchargement tronqué. Si le
+    téléchargement ou la vérification échoue, la copie locale existante est
+    conservée (les populations changent au plus une fois par an) ; sans copie
+    locale, l'erreur est levée, car sans population le Signal B et la
+    stratification par taille de commune seraient désactivés pour tous les marchés.
+    """
+    logger = get_logger(level=LOG_LEVEL)
+    try:
+        content = _download_population_communes()
+        _check_population_communes(content)
+    except (httpx.HTTPError, ValueError, pl.exceptions.PolarsError) as exc:
+        if not output_path.exists():
+            raise
+        logger.warning(
+            f"⚠️  Population des communes non mise à jour ({exc}). "
+            f"Utilisation de la copie locale {output_path}."
+        )
+        return
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = output_path.with_name(output_path.name + ".tmp")
+    tmp_path.write_bytes(content)
+    tmp_path.replace(output_path)
+    logger.info(f"Population des communes téléchargée : {output_path}")

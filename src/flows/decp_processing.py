@@ -31,7 +31,7 @@ from src.tasks.enrich import (
     enrich_from_sirene,
     geocode_sirene,
 )
-from src.tasks.get import get_clean
+from src.tasks.get import get_clean, get_population_communes
 from src.tasks.output import (
     flatten_lists,
     generate_final_schema,
@@ -60,6 +60,11 @@ def decp_processing(enable_cache_removal: bool = True):
     logger.info("🚀  Début du flow decp-processing")
 
     print_all_config()
+
+    # En tête de flow : sans copie locale, un échec doit arrêter le traitement
+    # avant les heures de téléchargement et de nettoyage des ressources.
+    logger.info("Téléchargement de la population des communes...")
+    get_population_communes()
 
     logger.info("Liste de toutes les ressources des datasets...")
     resources: list[dict] = list_resources(TRACKED_DATASETS)

@@ -241,14 +241,9 @@ def join_population(lf: pl.LazyFrame, population_csv_path: Path) -> pl.LazyFrame
 
     SIREN = 9 premiers caractères du SIRET (acheteur_id est une chaîne).
     Renvoie le LazyFrame avec une nouvelle colonne 'population' (null si non trouvé).
-    Si le fichier CSV est absent, la colonne 'population' est ajoutée avec des nulls.
+    Le fichier est téléchargé en début de flow par get_population_communes : son
+    absence est une erreur, pas un cas à masquer par une population nulle.
     """
-    if not population_csv_path.exists():
-        logger.warning(
-            f"Fichier population communes introuvable : {population_csv_path}. "
-            "La colonne 'population' sera nulle (Signal B désactivé)."
-        )
-        return lf.with_columns(pl.lit(None).cast(pl.Int64).alias("population"))
     population_lf = pl.scan_csv(population_csv_path)
     # Paris, Lyon et Marseille partagent leur SIREN avec leurs arrondissements
     # (type=ARR, population vide) : on ne garde que la ligne de la commune (type=COM)

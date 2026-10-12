@@ -180,13 +180,6 @@ DECP_USE_CACHE = os.getenv("DECP_USE_CACHE", "false").lower() == "true"
 # POSTGRESQL
 POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI", "")
 
-# Population des communes (SIREN → population, pour acheteur_population)
-POPULATION_COMMUNES_CSV = Path(
-    os.getenv(
-        "POPULATION_COMMUNES_CSV", str(BASE_DIR / "data" / "identifiants-communes.csv")
-    )
-)
-
 # Données de référence
 REFERENCE_DIR = BASE_DIR / "reference"
 ALL_CONFIG["REFERENCE_DIR"] = REFERENCE_DIR
@@ -199,12 +192,19 @@ BASE_DF_COLUMNS = [field["name"] for field in schema_fields]
 # === Détection des anomalies de montant ===
 # Voir docs/superpowers/specs/2026-04-25-montants-anormaux-rationalisation-design.md
 
-# Chemin du CSV population des communes (fourni hors pipeline)
-POPULATION_COMMUNES_CSV = Path(
-    os.getenv(
-        "POPULATION_COMMUNES_CSV", str(BASE_DIR / "data" / "identifiants-communes.csv")
-    )
+# Population des communes (SIREN → population) : fichier « identifiants-communes »
+# du jeu de données Datactivist « Identifiants des collectivités territoriales et
+# leurs établissements ». Téléchargé à chaque exécution par get_population_communes ;
+# le permalien data.gouv.fr redirige toujours vers la dernière version publiée.
+POPULATION_COMMUNES_URL = os.getenv(
+    "POPULATION_COMMUNES_URL",
+    "https://www.data.gouv.fr/api/1/datasets/r/863a5d6f-cc5c-40e0-a349-8a15719cb25e",
 )
+ALL_CONFIG["POPULATION_COMMUNES_URL"] = POPULATION_COMMUNES_URL
+POPULATION_COMMUNES_CSV = make_path_from_env(
+    "POPULATION_COMMUNES_CSV", DATA_DIR / "identifiants-communes.csv"
+)
+ALL_CONFIG["POPULATION_COMMUNES_CSV"] = POPULATION_COMMUNES_CSV
 
 # Seuils Signal A (écart MAD sur log du montant normalisé)
 ANOMALY_PAIRS_SUSPECT_THRESHOLD = float(

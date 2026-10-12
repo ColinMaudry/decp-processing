@@ -19,6 +19,7 @@ from src.config import BASE_DIR, DIST_DIR
 from src.tasks.anomaly import (
     detect_montant_anomalies,
 )
+from src.tasks.get import get_population_communes
 
 OUT_DIR = BASE_DIR / "data" / "calibration"
 
@@ -28,6 +29,7 @@ def calibrate(parquet_path: Path, pairs_grid: list[float]) -> None:
 
     lf = pl.scan_parquet(parquet_path)
 
+    get_population_communes()
     lf = detect_montant_anomalies(lf, calibrating=True)
 
     df = lf.collect(engine="streaming")
