@@ -1,5 +1,6 @@
 #### À venir
 
+- Données AIFE : prise en compte du champ source quand il est rempli (ex : _aife_dume_atline_ plutot que _aife_dume_)
 - Correction d'un dédoublonnage manquant : une même version de marché (même `uid`, `titulaire`, `dateNotification`) rapportée par plusieurs ressources d'un même jeu de données (ex. scrapes DUME mensuels) avec des `objet` ne différant que par du whitespace échappait au dédoublonnage
 - Détection des montants anormaux ([#174](https://github.com/ColinMaudry/decp-processing/issues/174)) : les groupes de pairs du Signal A sont désormais stratifiés par nombre de titulaires , pour ne plus comparer les marchés à plusieurs titulaires.
 
