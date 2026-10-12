@@ -1,7 +1,7 @@
 #### À venir
 
-- Détection des montants anormaux ([#174](https://github.com/ColinMaudry/decp-processing/issues/174)) : les groupes de pairs du Signal A sont désormais stratifiés par nombre de titulaires (1, 2-4, 5+), pour ne plus comparer les marchés à plusieurs titulaires (groupements, accords-cadres multi-attributaires) aux marchés mono-titulaires. Le Signal C s'applique désormais aux marchés dont **tous** les titulaires sont des PME (PME seule ou groupement de PME), et non plus seulement aux marchés attribués à une PME seule.
-- Correction de `acheteur_population`, vide sur toutes les lignes, et du Signal B des montants anormaux, jamais déclenché : le fichier des populations des communes n'était pas présent sur le serveur. Il est désormais téléchargé depuis data.gouv.fr au début de chaque traitement, et son absence arrête le traitement au lieu de produire des populations vides.
+- Correction d'un dédoublonnage manquant : une même version de marché (même `uid`, `titulaire`, `dateNotification`) rapportée par plusieurs ressources d'un même jeu de données (ex. scrapes DUME mensuels) avec des `objet` ne différant que par du whitespace échappait au dédoublonnage
+- Détection des montants anormaux ([#174](https://github.com/ColinMaudry/decp-processing/issues/174)) : les groupes de pairs du Signal A sont désormais stratifiés par nombre de titulaires , pour ne plus comparer les marchés à plusieurs titulaires.
 
 #### 2.15.0
 
