@@ -1,3 +1,4 @@
+import httpx
 import polars as pl
 import pytest
 
@@ -7,6 +8,7 @@ from src.tasks.get import (
     get_etablissements,
     get_labels_etablissements,
     get_labels_unites_legales,
+    get_population_communes,
     get_unite_legales,
     json_stream_to_parquet,
     scan_etablissements,
@@ -336,3 +338,65 @@ def test_bootstrap_siret_latlong_produces_extended_schema(tmp_path, monkeypatch)
     assert df["score"].is_null().all()
     assert df["geocoded_at"].is_null().all()
     assert df["siret"].n_unique() == df.height
+
+
+POPULATION_CSV = (
+    b"nom,SIREN,type,population\n"
+    b"Lyon,210054002,COM,520000\n"
+    b"Lyon 1er,210054002,ARR,\n"
+    b"Marseille,210130557,COM,870000\n"
+)
+
+
+def _serve_population(monkeypatch, content: bytes, min_rows: int) -> None:
+    transport = httpx.MockTransport(
+        lambda request: httpx.Response(200, content=content)
+    )
+    monkeypatch.setattr("src.tasks.get.HTTP_CLIENT", httpx.Client(transport=transport))
+    monkeypatch.setattr("src.tasks.get.POPULATION_COMMUNES_MIN_ROWS", min_rows)
+
+
+def test_get_population_communes_ecrit_le_fichier_telecharge(tmp_path, monkeypatch):
+    _serve_population(monkeypatch, POPULATION_CSV, min_rows=2)
+    out = tmp_path / "identifiants-communes.csv"
+    out.write_bytes(b"ancienne version")
+
+    get_population_communes(out)
+
+    assert out.read_bytes() == POPULATION_CSV
+    assert list(tmp_path.iterdir()) == [out]
+
+
+def test_get_population_communes_garde_la_copie_locale_si_source_tronquee(
+    tmp_path, monkeypatch
+):
+    """Une source tronquée ne doit jamais écraser une copie locale valide."""
+    _serve_population(monkeypatch, POPULATION_CSV, min_rows=3)
+    out = tmp_path / "identifiants-communes.csv"
+    out.write_bytes(b"copie valide")
+
+    get_population_communes(out)
+
+    assert out.read_bytes() == b"copie valide"
+    assert list(tmp_path.iterdir()) == [out]
+
+
+@pytest.mark.parametrize(
+    ("content", "message"),
+    [
+        (POPULATION_CSV, "anormalement bas"),
+        (b"nom,SIREN,population\nLyon,210054002,520000\n", "Colonnes manquantes"),
+    ],
+)
+def test_get_population_communes_leve_sans_copie_locale(
+    tmp_path, monkeypatch, content, message
+):
+    """Sans copie locale, mieux vaut l'échec franc qu'un traitement où toutes les
+    populations seraient nulles (Signal B et niveau L4 désactivés en silence)."""
+    _serve_population(monkeypatch, content, min_rows=3)
+    out = tmp_path / "identifiants-communes.csv"
+
+    with pytest.raises(ValueError, match=message):
+        get_population_communes(out)
+
+    assert not out.exists()

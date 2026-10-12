@@ -198,7 +198,9 @@ Ce signal pose une question différente : **le montant est-il raisonnable au reg
 montant_par_habitant = montant / population
 ```
 
-`population` est obtenue en croisant le SIREN de l'acheteur (`acheteur_id[:9]`) avec le fichier `identifiants-communes.csv`. Si ce fichier est absent ou que l'acheteur n'y figure pas, `montant_par_habitant` est `null` et le Signal B est inactif.
+`population` est obtenue en croisant le SIREN de l'acheteur (`acheteur_id[:9]`) avec le fichier `identifiants-communes.csv` publié par Datactivist sur data.gouv.fr ([Identifiants des collectivités territoriales et leurs établissements](https://www.data.gouv.fr/datasets/identifiants-des-collectivites-territoriales-et-leurs-etablissements), populations issues des comptes consolidés de l'OFGL). Seules les lignes de type `COM` sont utilisées : les arrondissements de Paris, Lyon et Marseille partagent le SIREN de leur commune. Si l'acheteur n'y figure pas, `montant_par_habitant` est `null` et le Signal B est inactif pour ce marché.
+
+Le fichier est téléchargé au début de chaque exécution du traitement (`get_population_communes` dans `src/tasks/get.py`), depuis l'URL `POPULATION_COMMUNES_URL` vers le chemin `POPULATION_COMMUNES_CSV` (par défaut `DECP_DATA_DIR/identifiants-communes.csv`). Le téléchargement est vérifié (colonnes `SIREN`, `type`, `population` présentes, au moins 30 000 communes) avant de remplacer la copie locale. En cas d'échec, la copie locale existante est conservée avec un avertissement dans les logs ; sans copie locale, le traitement s'arrête.
 
 Ce signal ne tient volontairement pas compte du nombre de titulaires : il mesure la dépense totale de l'acheteur, quelle que soit sa répartition entre titulaires.
 
