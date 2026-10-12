@@ -762,6 +762,55 @@ class TestConsolidateAcrossDatasets:
         ]
         assert result["sourceDataset"].to_list() == ["aws", "aws"]
 
+    def test_merges_whitespace_only_objet_variants_intra_dataset(self):
+        """Régression du marché 777907700000772827207_50531100 : même version
+        rapportée par deux ressources d'un même dataset (scrapes DUME mensuels),
+        mêmes titulaire et date de notification, objets ne différant que par du
+        whitespace (saut de ligne final, CR interne). Ce n'est pas une collision
+        d'id : les deux lignes doivent être fusionnées, pas laissées en doublon."""
+        lf = self._lf(
+            [
+                {
+                    "uid": "777907700000772827207_50531100",
+                    "dateNotification": "2026-01-01",
+                    "codeCPV": "50531100",
+                    "objet": (
+                        "Maintenance des installations de chauffage.\n"
+                        "\r\nL'exploitation comprend la production de chauffage.\n"
+                    ),
+                    "montant": 25100.0,
+                    "titulaire_id": "62722004901603",
+                    "titulaire_typeIdentifiant": "SIRET",
+                    "sourceDataset": "aife_dume",
+                    "sourceFile": "url_dume_janvier",
+                    "datePublicationDonnees": "2026-01-31",
+                },
+                {
+                    "uid": "777907700000772827207_50531100",
+                    "dateNotification": "2026-01-01",
+                    "codeCPV": "50531100",
+                    "objet": (
+                        "Maintenance des installations de chauffage.\n"
+                        "\nL'exploitation comprend la production de chauffage."
+                    ),
+                    "montant": 25100.0,
+                    "titulaire_id": "62722004901603",
+                    "titulaire_typeIdentifiant": "SIRET",
+                    "sourceDataset": "aife_dume",
+                    "sourceFile": "url_dume_fevrier",
+                    "datePublicationDonnees": "2026-02-28",
+                },
+            ]
+        )
+
+        result = consolidate_across_datasets(lf).collect()
+
+        assert result.height == 1
+        row = result.to_dicts()[0]
+        assert row["titulaire_id"] == "62722004901603"
+        # À complétude égale, la datePublicationDonnees la plus récente gagne
+        assert row["sourceFile"] == "url_dume_fevrier"
+
 
 class TestPrepareLabels:
     def test_prepare_labels_etablissements_liste_non_vide_vaut_label(self):

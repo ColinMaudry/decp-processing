@@ -126,6 +126,14 @@ def sort_modifications(lff: pl.LazyFrame) -> pl.LazyFrame:
 # distincts qui partagent le même uid (collisions d'id, cf. issue #186).
 VERSION_KEY = ["uid", "dateNotification", "codeCPV"]
 
+# Comparaison des objets après normalisation du whitespace (espaces de début/fin
+# supprimés, suites d'espaces internes réduites à une seule). Le même marché
+# rapporté par deux ressources d'un même dataset (ex. scrapes DUME mensuels)
+# arrive avec des objets ne différant que par du bruit de whitespace ; comparés
+# bruts, ils déclenchent le garde-fou anti-collision et échappent au
+# dédoublonnage. Ex : 777907700000772827207_50531100.
+OBJET_NORM = pl.col("objet").str.strip_chars().str.replace_all(r"\s+", " ")
+
 # Fichier intermédiaire de la barrière de matérialisation de la consolidation
 # (voir consolidate_across_datasets) ; supprimé par concat_parquet_files une fois
 # la consolidation sinkée.
@@ -155,18 +163,19 @@ def consolidate_across_datasets(lf: pl.LazyFrame) -> pl.LazyFrame:
     scalar_cols = [c for c in all_cols if c not in tit_cols and c not in VERSION_KEY]
 
     # Garde-fou anti perte de données : on ne consolide qu'une version dont AUCUN
-    # dataset ne contient à lui seul plusieurs objets distincts. Sinon c'est une vraie
-    # collision d'id intra-dataset (contrats distincts partageant uid+date+cpv, ex.
-    # lots d'une même opération) qu'il ne faut surtout pas fusionner. La multiplicité
-    # d'objets ne provenant que du croisement de datasets est, elle, du bruit à fusionner.
+    # dataset ne contient à lui seul plusieurs objets distincts (comparés en
+    # whitespace normalisé, cf. OBJET_NORM). Sinon c'est une vraie collision d'id
+    # intra-dataset (contrats distincts partageant uid+date+cpv, ex. lots d'une même
+    # opération) qu'il ne faut surtout pas fusionner. La multiplicité d'objets ne
+    # provenant que du croisement de datasets est, elle, du bruit à fusionner.
     #
     # Calculé par agrégation (group_by) sur une projection étroite plutôt que par
     # window functions sur le frame large : les fenêtres matérialisent tout en mémoire,
     # alors que group_by + join se streament et ne portent que les colonnes utiles.
     multi_obj_flag = (
-        lf.select(VERSION_KEY + ["sourceDataset", "objet"])
+        lf.select(VERSION_KEY + ["sourceDataset", OBJET_NORM.alias("_objet_norm")])
         .group_by(VERSION_KEY + ["sourceDataset"])
-        .agg(pl.col("objet").n_unique().alias("_nobj"))
+        .agg(pl.col("_objet_norm").n_unique().alias("_nobj"))
         .group_by(VERSION_KEY)
         .agg((pl.col("_nobj").max() > 1).alias("_multi_obj"))
     )
@@ -188,9 +197,15 @@ def consolidate_across_datasets(lf: pl.LazyFrame) -> pl.LazyFrame:
 
     # Les versions non consolidées gardent leur source, on retire seulement les
     # doublons exacts (l'ancien dédoublonnage, en préservant les objets distincts).
-    passthrough = passthrough.select(all_cols).unique(
-        subset=VERSION_KEY + ["objet", "titulaire_id", "titulaire_typeIdentifiant"],
-        maintain_order=False,
+    passthrough = (
+        passthrough.select(all_cols)
+        .with_columns(OBJET_NORM.alias("_objet_norm"))
+        .unique(
+            subset=VERSION_KEY
+            + ["_objet_norm", "titulaire_id", "titulaire_typeIdentifiant"],
+            maintain_order=False,
+        )
+        .drop("_objet_norm")
     )
 
     # Score de complétude par ligne : nombre de champs renseignés, hors clé, hors
