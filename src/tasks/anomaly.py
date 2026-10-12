@@ -67,6 +67,28 @@ def montant_normalise_expr() -> pl.Expr:
     )
 
 
+def merge_cotraitants(lf: pl.LazyFrame) -> pl.LazyFrame:
+    """Fusionne les lignes titulaires d'une même version de marché en une seule ligne.
+
+    En entrée : une ligne par (version de marché, titulaire). Les colonnes titulaire_*
+    sont retirées et remplacées par deux colonnes calculées sur l'ensemble des titulaires :
+    - tranche_titulaires : "1", "2-4" ou "5+" selon le nombre de titulaire_id distincts
+    - tous_titulaires_pme : vrai si tous les titulaires sont des PME (faux dès qu'un
+      titulaire n'a pas de catégorie connue)
+    """
+    nb_titulaires = pl.col("titulaire_id").n_unique()
+    return lf.group_by(~cs.starts_with("titulaire")).agg(
+        tranche_titulaires=pl.when(nb_titulaires >= 5)
+        .then(pl.lit("5+"))
+        .when(nb_titulaires >= 2)
+        .then(pl.lit("2-4"))
+        .otherwise(pl.lit("1")),
+        tous_titulaires_pme=(pl.col("titulaire_categorie") == "PME")
+        .fill_null(False)
+        .all(),
+    )
+
+
 def compute_peer_group_stats(
     lf: pl.LazyFrame,
     min_size: int,
@@ -75,18 +97,20 @@ def compute_peer_group_stats(
 ) -> pl.LazyFrame:
     """Calcule les statistiques médiane/MAD du log du montant normalisé par groupe de pairs.
 
-    Quatre niveaux de granularité, du plus spécifique au plus large :
-    - L4 : (cpv_2, type, acheteur_categorie, tranche_population)
-    - L3 : (cpv_2, type, acheteur_categorie)
-    - L2 : (type, acheteur_categorie)
-    - L1 : (type,)
+    Quatre niveaux de granularité, du plus spécifique au plus large, tous stratifiés
+    par tranche_titulaires (un marché n'est comparé qu'à des marchés ayant un nombre
+    de titulaires comparable) :
+    - L4 : (cpv_court, type, acheteur_categorie, tranche_population, tranche_titulaires)
+    - L3 : (cpv_court, type, acheteur_categorie, tranche_titulaires)
+    - L2 : (type, acheteur_categorie, tranche_titulaires)
+    - L1 : (type, tranche_titulaires)
 
     Pour chaque marché, on retient les stats du niveau le plus spécifique dont le groupe
     a au moins `min_size` marchés. Si aucun niveau ne suffit, mediane_log/mad_log/median_montant_norm
     restent null et niveau_groupe est null.
 
     Le LazyFrame en entrée doit contenir les colonnes : codeCPV_court, type, acheteur_categorie,
-    tranche_population, montant_normalise, log_montant_normalise.
+    tranche_population, tranche_titulaires, montant_normalise, log_montant_normalise.
 
     lf_peers : sous-ensemble de lf servant de base au calcul des médianes/MAD par groupe
         (typiquement les marchés actuels uniquement). Si None, lf sert à la fois de base
@@ -102,10 +126,22 @@ def compute_peer_group_stats(
         lf_peers = lf
 
     levels = [
-        ("L4", ["codeCPV_court", "type", "acheteur_categorie", "tranche_population"]),
-        ("L3", ["codeCPV_court", "type", "acheteur_categorie"]),
-        ("L2", ["type", "acheteur_categorie"]),
-        ("L1", ["type"]),
+        (
+            "L4",
+            [
+                "codeCPV_court",
+                "type",
+                "acheteur_categorie",
+                "tranche_population",
+                "tranche_titulaires",
+            ],
+        ),
+        (
+            "L3",
+            ["codeCPV_court", "type", "acheteur_categorie", "tranche_titulaires"],
+        ),
+        ("L2", ["type", "acheteur_categorie", "tranche_titulaires"]),
+        ("L1", ["type", "tranche_titulaires"]),
     ]
 
     for name, keys in levels:
@@ -234,7 +270,7 @@ def classify_anomalies(lf: pl.LazyFrame) -> pl.LazyFrame:
     """Applique la logique de classification suspect/aberrant et collecte toutes les raisons.
 
     Le LazyFrame en entrée doit contenir : ecart_pairs, montant_par_habitant, type,
-    titulaire_categorie, montant.
+    tous_titulaires_pme, montant.
 
     Renvoie le LazyFrame enrichi avec montant_anomalie (null/suspect/aberrant) et
     montant_anomalie_raisons (List[String] de toutes les raisons déclenchées, null si aucune).
@@ -285,10 +321,11 @@ def classify_anomalies(lf: pl.LazyFrame) -> pl.LazyFrame:
         .otherwise(None),
     )
 
-    # Le montant est aberrant si au-dessus d'un certain seuil et attribbué à une PME seule
+    # Signal C : un montant déjà suspect, très élevé et attribué uniquement à des PME
+    # (seule ou en groupement) est escaladé en aberrant
     lf = lf.with_columns(
         modulateur_titulaire=(pl.col("classification_initiale") == "suspect")
-        & (pl.col("single_pme"))
+        & (pl.col("tous_titulaires_pme"))
         & (pl.col("montant") > ANOMALY_TITULAIRE_PME_MONTANT_SEUIL),
     )
 
@@ -480,16 +517,9 @@ def detect_montant_anomalies(
 
     lf_titulaires = lf.select("_vid", cs.starts_with("titulaire"))
 
-    # On retire les colonnes titulaire_* (sauf titulaire_categorie, agrégée ci-dessous)
-    # pour que le group_by fusionne bien les cotraitants d'une même version de marché.
-    lf = lf.drop(cs.starts_with("titulaire") - cs.by_name("titulaire_categorie"))
-    df = (
-        lf.group_by(cs.exclude("titulaire_categorie"))
-        .agg(pl.col("titulaire_categorie"))
-        .with_columns(single_pme=pl.col("titulaire_categorie") == ["PME"])
-        .drop("titulaire_categorie")
-        .unique()
-    ).collect(engine="streaming")
+    # Fusion des cotraitants : une ligne par version de marché, pour que chaque marché
+    # pèse une seule fois dans les stats de pairs quel que soit son nombre de titulaires.
+    df = merge_cotraitants(lf).collect(engine="streaming")
 
     lf = df.lazy()
 
@@ -530,7 +560,8 @@ def detect_montant_anomalies(
         "median_montant_norm",
         "ecart_pairs",
         "montant_par_habitant",
-        "single_pme",
+        "tranche_titulaires",
+        "tous_titulaires_pme",
         "population",
     ]
 
