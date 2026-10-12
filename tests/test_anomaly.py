@@ -12,6 +12,7 @@ from src.tasks.anomaly import (
     compute_tranche_population_expr,
     detect_montant_anomalies,
     join_population,
+    merge_cotraitants,
     montant_normalise_expr,
 )
 
@@ -122,6 +123,42 @@ class TestJoinPopulation:
         assert result["population"].to_list() == [520000, 870000, None, None]
 
 
+class TestMergeCotraitants:
+    def test_tranche_et_tous_pme_par_version_de_marche(self):
+        def lignes(uid, titulaires):
+            return [
+                {
+                    "uid": uid,
+                    "montant": 1.0,
+                    "titulaire_id": tid,
+                    "titulaire_categorie": cat,
+                }
+                for tid, cat in titulaires
+            ]
+
+        lf = pl.LazyFrame(
+            lignes("solo_pme", [("a", "PME")])
+            + lignes("groupement_pme", [("a", "PME"), ("b", "PME")])
+            + lignes("groupement_mixte", [("a", "PME"), ("b", "GE")])
+            + lignes("categorie_inconnue", [("a", "PME"), ("b", None)])
+            + lignes("cinq_pme", [(str(i), "PME") for i in range(5)])
+            # Même titulaire répété : compte pour un seul titulaire
+            + lignes("doublon", [("a", "PME"), ("a", "PME")])
+        )
+        result = {
+            row["uid"]: (row["tranche_titulaires"], row["tous_titulaires_pme"])
+            for row in merge_cotraitants(lf).collect().to_dicts()
+        }
+        assert result == {
+            "solo_pme": ("1", True),
+            "groupement_pme": ("2-4", True),
+            "groupement_mixte": ("2-4", False),
+            "categorie_inconnue": ("2-4", False),
+            "cinq_pme": ("5+", True),
+            "doublon": ("1", True),
+        }
+
+
 class TestPeerGroupStats:
     def test_stats_l3_groupe_suffisant(self):
         import math
@@ -138,6 +175,7 @@ class TestPeerGroupStats:
                 "type": ["Travaux"] * 36,
                 "acheteur_categorie": ["Commune"] * 36,
                 "tranche_population": [None] * 36,
+                "tranche_titulaires": ["1"] * 36,
             }
         )
 
@@ -158,11 +196,32 @@ class TestPeerGroupStats:
                 "type": ["Fournitures"] * 5,
                 "acheteur_categorie": ["État"] * 5,
                 "tranche_population": [None] * 5,
+                "tranche_titulaires": ["1"] * 5,
             }
         )
         result = compute_peer_group_stats(lf, min_size=30).collect()
         assert result["niveau_groupe"].to_list() == [None] * 5
         assert result["mediane_log"].to_list() == [None] * 5
+
+    def test_stats_stratifiees_par_tranche_titulaires(self):
+        # Mêmes critères sauf le nombre de titulaires : chaque tranche a ses propres stats
+        lf = pl.LazyFrame(
+            {
+                "montant_normalise": [100_000.0] * 30 + [10_000_000.0] * 30,
+                "log_montant_normalise": [5.0] * 30 + [7.0] * 30,
+                "codeCPV_court": ["45"] * 60,
+                "type": ["Travaux"] * 60,
+                "acheteur_categorie": ["Commune"] * 60,
+                "tranche_population": [None] * 60,
+                "tranche_titulaires": ["1"] * 30 + ["5+"] * 30,
+            }
+        )
+        result = compute_peer_group_stats(lf, min_size=30).collect()
+        medianes = dict(
+            result.select("tranche_titulaires", "mediane_log").unique().iter_rows()
+        )
+        assert medianes == {"1": 5.0, "5+": 7.0}
+        assert (result["n_groupe"] == 30).all()
 
 
 class TestSignals:
@@ -206,7 +265,7 @@ class TestClassification:
                 "ecart_pairs": [4.5],
                 "montant_par_habitant": [None],
                 "type": ["Services"],
-                "single_pme": [False],
+                "tous_titulaires_pme": [False],
                 "montant": [100_000.0],
             },
             schema_overrides={"montant_par_habitant": pl.Float64},
@@ -223,7 +282,7 @@ class TestClassification:
                 "ecart_pairs": [10.0],
                 "montant_par_habitant": [None],
                 "type": ["Services"],
-                "single_pme": [False],
+                "tous_titulaires_pme": [False],
                 "montant": [100_000.0],
             },
             schema_overrides={"montant_par_habitant": pl.Float64},
@@ -240,7 +299,7 @@ class TestClassification:
                 "ecart_pairs": [10.0],
                 "montant_par_habitant": [25_000.0],  # Travaux aberrant > 20 000
                 "type": ["Travaux"],
-                "single_pme": [False],
+                "tous_titulaires_pme": [False],
                 "montant": [100_000_000.0],
             }
         )
@@ -256,7 +315,7 @@ class TestClassification:
                 "ecart_pairs": [4.5],
                 "montant_par_habitant": [None],
                 "type": ["Services"],
-                "single_pme": [True],
+                "tous_titulaires_pme": [True],
                 "montant": [60_000_000.0],
             },
             schema_overrides={"montant_par_habitant": pl.Float64},
@@ -273,7 +332,7 @@ class TestClassification:
                 "ecart_pairs": [4.5],
                 "montant_par_habitant": [None],
                 "type": ["Services"],
-                "single_pme": [True],
+                "tous_titulaires_pme": [True],
                 "montant": [10_000_000.0],  # < 50 M€
             },
             schema_overrides={"montant_par_habitant": pl.Float64},
@@ -290,7 +349,7 @@ class TestClassification:
                 "ecart_pairs": [2.0],
                 "montant_par_habitant": [100.0],
                 "type": ["Services"],
-                "single_pme": [False],
+                "tous_titulaires_pme": [False],
                 "montant": [50_000.0],
             }
         )
@@ -421,6 +480,7 @@ class TestDetectMontantAnomalies:
                 "dureeMois": 12,
                 "formePrix": "Unitaire",
                 "acheteur_categorie": "Commune",
+                "titulaire_id": f"T{i}",
                 "titulaire_categorie": "GE",
                 "donneesActuelles": True,
             }
@@ -437,6 +497,7 @@ class TestDetectMontantAnomalies:
                 "dureeMois": 12,
                 "formePrix": "Unitaire",
                 "acheteur_categorie": "Commune",
+                "titulaire_id": "TX",
                 "titulaire_categorie": "GE",
                 "donneesActuelles": True,
             }

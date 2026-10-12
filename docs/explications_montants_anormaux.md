@@ -12,9 +12,11 @@ Avant de détailler les règles, voici une explication en langage courant des ou
 
 L'idée de base est simple : **un montant n'est anormal que par rapport à des marchés comparables**. Un marché de travaux de voirie à 10 M€ n'est pas du tout la même chose qu'un marché de fournitures de bureau à 10 M€.
 
-On constitue donc un **groupe de pairs** : l'ensemble des marchés de la base qui partagent les mêmes caractéristiques que le marché analysé — même famille d'achat (CPV), même type (Travaux / Services / Fournitures), même catégorie d'acheteur, taille de commune similaire. C'est à l'intérieur de ce groupe qu'on juge si le montant est normal ou non.
+On constitue donc un **groupe de pairs** : l'ensemble des marchés de la base qui partagent les mêmes caractéristiques que le marché analysé — même famille d'achat (CPV), même type (Travaux / Services / Fournitures), même catégorie d'acheteur, taille de commune similaire, et **nombre de titulaires comparable** (1, 2 à 4, ou 5 et plus). C'est à l'intérieur de ce groupe qu'on juge si le montant est normal ou non.
 
-Pour que la comparaison soit fiable, un groupe doit contenir **au moins 30 marchés**. Si le groupe le plus précis est trop petit, on élargit progressivement les critères (on retire la taille de commune, puis la famille d'achat, etc.) jusqu'à trouver un groupe assez grand. Si même le groupe le plus large ne suffit pas, le Signal A n'est tout simplement pas calculé pour ce marché.
+Pourquoi le nombre de titulaires ? Un marché attribué à plusieurs titulaires (groupement d'entreprises, accord-cadre multi-attributaire dont le montant est un maximum commun) est en général plus gros qu'un marché attribué à une seule entreprise. Comparé à des marchés mono-titulaires, il paraîtrait anormal alors qu'il est ordinaire pour sa catégorie.
+
+Pour que la comparaison soit fiable, un groupe doit contenir **au moins 30 marchés**. Si le groupe le plus précis est trop petit, on élargit progressivement les critères (on retire la taille de commune, puis la famille d'achat, etc.) jusqu'à trouver un groupe assez grand. Le nombre de titulaires, lui, est conservé à tous les niveaux. Si même le groupe le plus large ne suffit pas, le Signal A n'est tout simplement pas calculé pour ce marché.
 
 ### Le montant normalisé (`montant_normalise`)
 
@@ -85,14 +87,25 @@ C'est ce score qui sert de seuil pour classer un marché comme suspect (> 4) ou 
 
 Trois signaux indépendants contribuent à la classification :
 
-| Signal | Colonne résultat       | Description courte                              |
-| ------ | ---------------------- | ----------------------------------------------- |
-| A      | `ecart_pairs`          | Écart du montant par rapport au groupe de pairs |
-| B      | `montant_par_habitant` | Montant rapporté à la population de l'acheteur  |
-| C      | `modulateur_titulaire` | Reclassement si PME avec montant > 50 M€        |
+| Signal | Colonne résultat       | Description courte                                                  |
+| ------ | ---------------------- | ------------------------------------------------------------------- |
+| A      | `ecart_pairs`          | Écart du montant par rapport au groupe de pairs                     |
+| B      | `montant_par_habitant` | Montant rapporté à la population de l'acheteur                      |
+| C      | `modulateur_titulaire` | Reclassement si tous les titulaires sont des PME et montant > 50 M€ |
 
 La classification finale est dans `montant_anomalie` (valeurs : `null`, `"suspect"`, `"aberrant"`).
-La raison principale est dans `montant_anomalie_raisons`.
+Toutes les raisons déclenchées sont dans `montant_anomalie_raisons`.
+
+---
+
+## Étape 0 — Une ligne par marché (`tranche_titulaires`, `tous_titulaires_pme`)
+
+Dans les données, un marché à plusieurs titulaires occupe une ligne par titulaire. Avant tout calcul, ces lignes sont fusionnées en **une seule ligne par version de marché** : un marché ne pèse ainsi qu'une fois dans les statistiques de son groupe, quel que soit son nombre de titulaires. Les informations sur les titulaires sont résumées en deux colonnes :
+
+- **`tranche_titulaires`** : nombre de titulaires distincts du marché, regroupé en `"1"`, `"2-4"` ou `"5+"` (utilisée par le Signal A)
+- **`tous_titulaires_pme`** : vrai si **tous** les titulaires ont `titulaire_categorie == "PME"` (utilisée par le Signal C). Faux dès qu'un titulaire n'est pas une PME ou que sa catégorie est inconnue (par exemple un titulaire étranger, non identifié par SIRET).
+
+Les lignes titulaires sont rattachées au marché à la fin du traitement : toutes les lignes d'un même marché reçoivent la même classification.
 
 ---
 
@@ -116,14 +129,18 @@ _(passage à l'échelle logarithmique — voir explication ci-dessus)_
 
 Chaque marché est comparé à un groupe de marchés similaires. Le groupe est construit selon quatre niveaux de granularité décroissante :
 
-| Niveau              | Critères de regroupement                                            |
-| ------------------- | ------------------------------------------------------------------- |
-| L4 (le plus précis) | `codeCPV_court`, `type`, `acheteur_categorie`, `tranche_population` |
-| L3                  | `codeCPV_court`, `type`, `acheteur_categorie`                       |
-| L2                  | `type`, `acheteur_categorie`                                        |
-| L1 (le plus large)  | `type` uniquement                                                   |
+| Niveau              | Critères de regroupement                                                                  |
+| ------------------- | ----------------------------------------------------------------------------------------- |
+| L4 (le plus précis) | `codeCPV_court`, `type`, `acheteur_categorie`, `tranche_population`, `tranche_titulaires` |
+| L3                  | `codeCPV_court`, `type`, `acheteur_categorie`, `tranche_titulaires`                       |
+| L2                  | `type`, `acheteur_categorie`, `tranche_titulaires`                                        |
+| L1 (le plus large)  | `type`, `tranche_titulaires`                                                              |
 
-Le niveau retenu est le plus précis dont le groupe contient **au moins 30 marchés** (configurable via `ANOMALY_GROUPE_MIN_SIZE` dans `src/config.py`).
+Le niveau retenu est le plus précis dont le groupe contient **au moins 30 marchés** (configurable via `ANOMALY_GROUPE_MIN_SIZE` dans `src/config.py`). Un marché dont l'un des critères d'un niveau est vide (par exemple `acheteur_categorie` inconnue, ou `tranche_population` absente pour un acheteur qui n'est pas une commune) n'a pas de groupe à ce niveau et passe directement au niveau suivant.
+
+> **`codeCPV_court`** est le début du code CPV : 4 caractères pour les travaux de construction (CPV commençant par `45`), 3 caractères sinon.
+
+> **`tranche_titulaires`** (voir l'étape 0) est présente à tous les niveaux : un marché à 5 titulaires n'est jamais comparé à des marchés mono-titulaires, même au niveau L1.
 
 > **`tranche_population`** est calculée à partir de la `population` de la commune de l'acheteur (jointure via les 9 premiers caractères du SIRET = SIREN) :
 >
@@ -183,6 +200,8 @@ montant_par_habitant = montant / population
 
 `population` est obtenue en croisant le SIREN de l'acheteur (`acheteur_id[:9]`) avec le fichier `identifiants-communes.csv`. Si ce fichier est absent ou que l'acheteur n'y figure pas, `montant_par_habitant` est `null` et le Signal B est inactif.
 
+Ce signal ne tient volontairement pas compte du nombre de titulaires : il mesure la dépense totale de l'acheteur, quelle que soit sa répartition entre titulaires.
+
 **Seuils (fixes) :**
 
 | Type de marché | Suspect (€/hab) | Aberrant (€/hab) |
@@ -197,15 +216,15 @@ Une commune de 10 000 habitants signe un marché de Travaux à 300 000 000 €.
 
 ---
 
-## Signal C — Modulateur titulaire PME (`modulateur_titulaire`)
+## Signal C — Modulateur titulaires PME (`modulateur_titulaire`)
 
 Ce signal ne génère pas de classification initiale mais **aggrave une classification existante** : il passe un marché déjà classé `"suspect"` en `"aberrant"` si les trois conditions suivantes sont réunies simultanément :
 
 - classification initiale = `"suspect"` (Signal A ou B)
-- `titulaire_categorie == "PME"`
+- `tous_titulaires_pme` est vrai : le marché est attribué à une PME seule ou à un groupement composé uniquement de PME (voir l'étape 0)
 - `montant > 50 000 000 €`
 
-**Logique :** une PME remportant un marché de plus de 50 M€ est économiquement incohérente — une PME ne dispose généralement pas de la capacité financière et humaine pour absorber un tel volume. Ce constat, combiné à un montant déjà jugé élevé par le Signal A ou B, justifie une classification plus sévère.
+**Logique :** qu'une PME, ou un groupement de PME, remporte un marché de plus de 50 M€ est économiquement incohérent : les PME ne disposent généralement pas de la capacité financière et humaine pour absorber un tel volume. Ce constat, combiné à un montant déjà jugé élevé par le Signal A ou B, justifie une classification plus sévère. Il suffit qu'un seul titulaire ne soit pas une PME (ou que sa catégorie soit inconnue) pour que le Signal C reste inactif.
 
 ---
 
@@ -213,23 +232,23 @@ Ce signal ne génère pas de classification initiale mais **aggrave une classifi
 
 1. **aberrant** si Signal A en zone aberrante OU Signal B en zone aberrante
 2. **suspect** si Signal A en zone suspecte OU Signal B en zone suspecte (et pas aberrant)
-3. Le Signal C remonte un **suspect → aberrant** si les conditions PME sont réunies
+3. Le Signal C remonte un **suspect → aberrant** si tous les titulaires sont des PME et que le montant dépasse 50 M€
 4. `null` si aucun signal n'est déclenché
 
 `montant_anomalie_raisons` est une **liste de chaînes** qui contient **toutes** les raisons déclenchées pour ce marché (pas seulement la principale). Elle est `null` quand il n'y a pas d'anomalie.
 
-| Valeur possible dans la liste          | Signification                                 |
-| -------------------------------------- | --------------------------------------------- |
-| `montant_par_habitant_aberrant`        | Signal B : montant/habitant en zone aberrante |
-| `montant_par_habitant_suspect`         | Signal B : montant/habitant en zone suspecte  |
-| `montant_vs_pairs_aberrant`            | Signal A : écart pairs en zone aberrante      |
-| `montant_vs_pairs_suspect`             | Signal A : écart pairs en zone suspecte       |
-| `titulaire_incoherent_pme_gros_marche` | Signal C : PME + montant > 50 M€              |
+| Valeur possible dans la liste          | Signification                                   |
+| -------------------------------------- | ----------------------------------------------- |
+| `montant_par_habitant_aberrant`        | Signal B : montant/habitant en zone aberrante   |
+| `montant_par_habitant_suspect`         | Signal B : montant/habitant en zone suspecte    |
+| `montant_vs_pairs_aberrant`            | Signal A : écart pairs en zone aberrante        |
+| `montant_vs_pairs_suspect`             | Signal A : écart pairs en zone suspecte         |
+| `titulaire_incoherent_pme_gros_marche` | Signal C : uniquement des PME + montant > 50 M€ |
 
 **Exemples :**
 
 - Un marché où à la fois le Signal A et le Signal B sont en zone aberrante aura `["montant_par_habitant_aberrant", "montant_vs_pairs_aberrant"]`.
-- Un marché PME suspect escaladé en aberrant par le Signal C aura `["montant_vs_pairs_suspect", "titulaire_incoherent_pme_gros_marche"]` — ce qui permet de retrouver le signal d'origine qui avait déclenché la suspicion.
+- Un marché attribué uniquement à des PME, suspect et escaladé en aberrant par le Signal C, aura `["montant_vs_pairs_suspect", "titulaire_incoherent_pme_gros_marche"]` — ce qui permet de retrouver le signal d'origine qui avait déclenché la suspicion.
 
 ---
 
@@ -259,5 +278,6 @@ Un marché de Services aberrant, 24 mois, non forfaitaire. La médiane mensuelle
 | `montant_rationalise`      | Float        | Montant à utiliser pour les agrégations                    |
 | `montant_anomalie`         | String       | `null`, `"suspect"` ou `"aberrant"`                        |
 | `montant_anomalie_raisons` | List[String] | Toutes les raisons déclenchées (`null` si aucune anomalie) |
+| `acheteur_population`      | Int32        | Population de la commune acheteuse (`null` si non trouvée) |
 
-Les colonnes intermédiaires de calcul (`population`, `tranche_population`, `montant_normalise`, `log_montant_normalise`, `codeCPV_court`, `n_groupe`, `niveau_groupe`, `mediane_log`, `mad_log`, `median_montant_norm`, `ecart_pairs`, `montant_par_habitant`) sont supprimées du LazyFrame final.
+Les colonnes intermédiaires de calcul (`population`, `tranche_population`, `tranche_titulaires`, `tous_titulaires_pme`, `montant_normalise`, `log_montant_normalise`, `codeCPV_court`, `n_groupe`, `niveau_groupe`, `mediane_log`, `mad_log`, `median_montant_norm`, `ecart_pairs`, `montant_par_habitant`) sont supprimées du LazyFrame final.

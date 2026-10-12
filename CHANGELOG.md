@@ -1,3 +1,7 @@
+#### À venir
+
+- Détection des montants anormaux ([#174](https://github.com/ColinMaudry/decp-processing/issues/174)) : les groupes de pairs du Signal A sont désormais stratifiés par nombre de titulaires (1, 2-4, 5+), pour ne plus comparer les marchés à plusieurs titulaires (groupements, accords-cadres multi-attributaires) aux marchés mono-titulaires. Le Signal C s'applique désormais aux marchés dont **tous** les titulaires sont des PME (PME seule ou groupement de PME), et non plus seulement aux marchés attribués à une PME seule.
+
 #### 2.15.0
 
 - Ajout des labels des entreprises `titulaire_labels` et `acheteur_labels` — Bio, RGE, ESS, Association, Qualiopi, SIAE, Avocat, Achats responsables ([#190](https://github.com/ColinMaudry/decp-processing/issues/190)).
