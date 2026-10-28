@@ -39,6 +39,15 @@ ALL_CONFIG["LOG_LEVEL"] = LOG_LEVEL
 MAX_PREFECT_WORKERS = int(os.getenv("MAX_PREFECT_WORKERS", 4))
 ALL_CONFIG["MAX_PREFECT_WORKERS"] = MAX_PREFECT_WORKERS
 
+# Taille minimale d'un fichier source pour être traité, par format.
+# Établies empiriquement (2026-10) : le plus petit JSON "vide" des datasets trackés
+# fait 55 o, le plus petit XML contenant un marché fait 1077 o (squelette sans
+# marché : ~91 o). Sous ces seuils, le fichier ne peut pas contenir de marché.
+# Un fichier sous le seuil ne doit pas être ingéré : il produirait un parquet
+# de 0 ligne en cache, qui n'en ressortirait jamais (voir get_clean).
+MIN_FILESIZE = {"json": 180, "xml": 1000}
+ALL_CONFIG["MIN_FILESIZE"] = MIN_FILESIZE
+
 # Durée avant l'expiration du cache des ressources (en heure). Défaut : 168 (7 jours)
 CACHE_EXPIRATION_TIME_HOURS = int(os.getenv("CACHE_EXPIRATION_TIME_HOURS", 168))
 ALL_CONFIG["CACHE_EXPIRATION_TIME_HOURS"] = CACHE_EXPIRATION_TIME_HOURS

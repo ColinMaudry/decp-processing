@@ -265,6 +265,35 @@ def test_xml_stream_to_parquet_small_file_is_not_empty(tmp_path):
     assert df["nature"].to_list() == ["Marché"]
 
 
+def test_xml_stream_to_parquet_acheteur_texte_plat(tmp_path):
+    """Régression issue #199 : depuis janvier 2024, l'AIFE publie des dumps XML
+    avec l'identifiant acheteur en texte plat (<acheteur>24850019100023</acheteur>)
+    au lieu de l'imbrication <acheteur><id>...</id></acheteur>. Sans le cas
+    particulier dans parse_element, acheteur_id ressortait null et clean_decp
+    supprimait 100 % des marchés de ces dumps."""
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        "<marches>\n"
+        " <marche>\n"
+        "  <id>2023_52_M_OT0000</id>\n"
+        "  <acheteur>24850019100023</acheteur>\n"
+        "  <nature>Marché</nature>\n"
+        "  <objet>Plan de communication</objet>\n"
+        "  <dateNotification>2024-01-31</dateNotification>\n"
+        " </marche>\n"
+        "</marches>\n"
+    ).encode("utf-8")
+    xml_path = tmp_path / "decp_flat_buyer.xml"
+    xml_path.write_bytes(xml)
+
+    output_path = tmp_path / "out"
+    xml_stream_to_parquet(str(xml_path), output_path, fix_chars=False)
+
+    df = pl.read_parquet(output_path.with_suffix(".parquet"))
+    assert df.height == 1
+    assert df["acheteur_id"].to_list() == ["24850019100023"]
+
+
 def test_json_stream_to_parquet_small_file_detects_format(tmp_path):
     """Régression : un petit JSON DECP 2019 (< chunk_size) doit être détecté même si
     le premier chunk est tronqué par le buffering de stream_replace_bytestring (BOM

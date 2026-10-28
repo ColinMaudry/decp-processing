@@ -15,6 +15,7 @@ from src.config import (
     DIST_DIR,
     LOG_LEVEL,
     MAX_PREFECT_WORKERS,
+    MIN_FILESIZE,
     PREFECT_API_URL,
     RESOURCE_CACHE_DIR,
     SIRENE_DATA_DIR,
@@ -79,8 +80,10 @@ def decp_processing(enable_cache_removal: bool = True):
     batch_size = 100
     parquet_files = []
 
-    # Filtrer les ressources à traiter, en ne gardant que les fichiers > 180 octets
-    resources_to_process = [r for r in resources if r["filesize"] > 180]
+    # Filtrer les ressources à traiter : taille minimale selon le format (MIN_FILESIZE)
+    resources_to_process = [
+        r for r in resources if r["filesize"] > MIN_FILESIZE.get(r["format"], 180)
+    ]
 
     for i in range(0, len(resources_to_process), batch_size):
         process_batch(
