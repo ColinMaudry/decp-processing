@@ -302,7 +302,12 @@ def concat_parquet_files(parquet_files: list, output_dir=DIST_DIR) -> pl.LazyFra
     for i, chunk in enumerate(chunks):
         logger.info(f"Concatenation du chunk {i + 1}/{len(chunks)}")
         lfs = [pl.scan_parquet(file) for file in chunk]
-        lf_chunk = pl.concat(lfs, how="vertical")
+        # "diagonal" : les parquets en cache proviennent d'exécutions successives du
+        # pipeline, dont l'ordre des colonnes a pu changer (ex : sourceDataset renommé
+        # in place par get_resource avant 2026-10, ajouté en fin de schéma ensuite
+        # par les branches aife_dume/decp_minef). L'alignement se fait par nom ;
+        # les colonnes absentes d'un côté sont remplies en null.
+        lf_chunk = pl.concat(lfs, how="diagonal")
 
         # On sauvegarde chaque chunk concaténé
         chunk_path = DATA_DIR / "temp" / f"chunk_{i}.parquet"
@@ -315,7 +320,9 @@ def concat_parquet_files(parquet_files: list, output_dir=DIST_DIR) -> pl.LazyFra
     # Concatenation finale des fichiers intermédiaires
     logger.info("Concatenation finale...")
     lfs = [pl.scan_parquet(file) for file in intermediate_files if Path(file).exists()]
-    lf_concat: pl.LazyFrame = pl.concat(lfs, how="vertical")
+    # "diagonal" : les chunks peuvent avoir des ordres de colonnes différents
+    # (mélanges de parquets en cache d'exécutions différentes, voir plus haut)
+    lf_concat: pl.LazyFrame = pl.concat(lfs, how="diagonal")
 
     logger.info("Calcul des % de doublons entre sources...")
     calculate_duplicates_across_source(lf_concat, output_dir=output_dir)
