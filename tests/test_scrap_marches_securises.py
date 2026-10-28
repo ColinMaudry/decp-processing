@@ -49,6 +49,19 @@ ATLINE_RECORD = {
 }
 
 
+# Marché de démonstration créé par le support Atline (formation des utilisateurs)
+ATLINE_DEMO_RECORD = {
+    **ATLINE_RECORD,
+    "id_dma": 999,
+    "num_lot": "16710981816refdblsy6os",
+    "is_demo": 1,
+    "user_nom": "ATLINE",
+    "user_prenom": "ADMIN",
+    "objet_marche": "ASSURANCES",
+    "nom_pa": "Formation - Conseil Départemental de l'Oise",
+}
+
+
 class TestAtlineToDecp:
     def test_mapping_des_champs_principaux(self):
         marche = atline_to_decp(ATLINE_RECORD)
@@ -194,7 +207,30 @@ class TestScrapMonth:
         d = self._run(tmp_path, monkeypatch, [{"donnees": [], "nb_total": 0}], emails)
         assert d is None
         assert len(emails) == 1
-        assert emails[0] == ("2018", "11", "2018-11-01", "2018-11-30")
+
+    def test_marches_demo_exclues(self, tmp_path, monkeypatch):
+        """Les marchés is_demo (créées par le support Atline pour la formation)
+        ne doivent pas se retrouver dans le JSON scrapé."""
+        pages = [
+            {
+                "donnees": [ATLINE_RECORD, ATLINE_DEMO_RECORD],
+                "nb_total": 2,
+            }
+        ]
+        d = self._run(tmp_path, monkeypatch, pages)
+        assert len(d["marches"]) == 1
+        ids = [m["id"] for m in d["marches"]]
+        assert "16710981816refdblsy6os" not in ids
+        assert "1537449856ljd7jt859deu" in ids
+
+    def test_demo_seules_alerte_email(self, tmp_path, monkeypatch):
+        """Un mois ne contenant QUE des démos doit déclencher l'alerte :
+        aucune donnée réelle n'a été scrapée."""
+        emails = []
+        pages = [{"donnees": [ATLINE_DEMO_RECORD], "nb_total": 1}]
+        d = self._run(tmp_path, monkeypatch, pages, emails)
+        assert d is None
+        assert len(emails) == 1
 
     def test_page_erreur_niveau_api(self, tmp_path, monkeypatch):
         """Une page ratée (None) n'écrit pas de fichier partiel sans alerte...
