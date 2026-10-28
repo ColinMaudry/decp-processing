@@ -58,6 +58,7 @@ from src.tasks.transform import (
     prepare_unites_legales,
 )
 from src.tasks.utils import (
+    check_parquet_file,
     full_resource_name,
     gen_artifact_row,
     get_logger,
@@ -345,6 +346,12 @@ def parse_element(elem):
 
     # Si l'élément n'a pas d'enfants → retourne son texte (nettoyé)
     if len(elem) == 0:
+        # Format AIFE apparu en 2024 : <acheteur>24850019100023</acheteur> (texte
+        # plat) au lieu de <acheteur><id>...</id></acheteur>. On produit le même
+        # dict que le format imbriqué : _simple_json_normalize en tire ensuite
+        # acheteur_id (le champ attendu par le schéma DECP 2022).
+        if elem.tag == "acheteur" and elem.text and elem.text.strip():
+            return {"id": elem.text.strip()}
         return elem.text.strip() if elem.text else ""
 
     # Collecte les enfants sous forme de listes (même si un seul enfant)
@@ -527,17 +534,23 @@ def get_clean(
         checksum = resource["checksum"]
         parquet_path = RESOURCE_CACHE_DIR / f"{checksum}"
 
-        # Si la ressource n'est pas en cache ou que l'utilisation du cache est désactivée
+        # Cache-miss si la ressource n'est pas en cache, si l'utilisation du cache
+        # est désactivée, ou si le parquet en cache est vide (0 ligne). Ce dernier
+        # cas vient typiquement d'un bug de traitement (ex : les petits fichiers
+        # XML avant le fix dee1df9 qui restaient dans le buffer et produisaient un
+        # parquet de 0 ligne) : le parquet vide restait en cache indéfiniment et
+        # la ressource n'était jamais re-téléchargée.
         if (
             DECP_USE_CACHE is False
             or f"{checksum}.parquet" not in available_parquet_files
+            or not check_parquet_file(parquet_path.with_suffix(".parquet"))
         ):
             # Récupération des données source...
             lf, decp_format = get_resource(resource, resources_artifact)
 
             # Nettoyage des données source et typage des colonnes...
             # si la ressource est dans un format supporté
-            if lf is not None and not Path(parquet_path).exists():
+            if lf is not None:
                 lf: pl.LazyFrame = clean_decp(lf, decp_format)
                 sink_to_files(
                     lf, parquet_path, file_format="parquet", compression="zstd"
