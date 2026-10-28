@@ -1,7 +1,8 @@
 [project]
+
+version = "2.17.0"
 name = "decp-processing"
 description = "Traitement des données des marchés publics français."
-version = "2.15.0"
 requires-python = ">= 3.11"
 authors = [{ name = "Colin Maudry", email = "colin@colmo.tech" }]
 dependencies = [
@@ -11,7 +12,7 @@ dependencies = [
   "pyarrow",
   "frictionless",
   "ipykernel",
-"prefect==3.9.1",
+  "prefect==3.9.1",
   "prefect[email]==3.9.1",
   "orjson",
   "ijson==3.4.0",

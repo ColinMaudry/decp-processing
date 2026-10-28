@@ -1,8 +1,15 @@
-#### À venir
+#### 2.17.0
+
+- Meilleure casse et accentuation des noms d'acheteurs et de titulaires issus de SIRENE (unités légales et établissements) ([#167](https://github.com/ColinMaudry/decp-processing/issues/167)).
+- Passage de Prefect 3.7.0 à 3.9.1
+
+#### 2.16.0
 
 - Données AIFE : prise en compte du champ source quand il est rempli (ex : _aife_dume_atline_ plutot que _aife_dume_)
 - Correction d'un dédoublonnage manquant : une même version de marché (même `uid`, `titulaire`, `dateNotification`) rapportée par plusieurs ressources d'un même jeu de données (ex. scrapes DUME mensuels) avec des `objet` ne différant que par du whitespace échappait au dédoublonnage
 - Détection des montants anormaux ([#174](https://github.com/ColinMaudry/decp-processing/issues/174)) : les groupes de pairs du Signal A sont désormais stratifiés par nombre de titulaires , pour ne plus comparer les marchés à plusieurs titulaires.
+- Rattrapage des petits fichiers publiés par l'AIFE et mis en cache ([#199](https://github.com/ColinMaudry/decp-processing/issues/199))
+- Réparation du scrap marches-securises [#198](https://github.com/ColinMaudry/decp-processing/issues/198)
 
 #### 2.15.0
 
@@ -10,8 +17,6 @@
 - Retry sur les téléchargements SIRENE du prétraitement mensuel (unités légales, établissements)
 - Correction du type déclaré de `acheteur_id`, `titulaire_id` et `lieuExecution_code` dans le schéma publié (`schema.json`) : `string` au lieu de `integer`.
 - Correction de l'ordre des champs dans le schéma publié
-- Meilleure casse et accentuation des noms d'acheteurs et de titulaires issus de SIRENE (unités légales et établissements) ([#167](https://github.com/ColinMaudry/decp-processing/issues/167)).
-- Passage de Prefect 3.7.0 à 3.9.1
 
 #### 2.14.0 2026-08-17
 
