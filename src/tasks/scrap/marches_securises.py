@@ -188,6 +188,7 @@ def scrap_marches_securises_month(year: str, month: str, dist_dir: Path):
     end_date = date(start_date.year, start_date.month, last_day)
 
     marches = []
+    nb_demo = 0
     page = 1
     with httpx.Client() as client:
         token = get_atline_token(client)
@@ -202,11 +203,22 @@ def scrap_marches_securises_month(year: str, month: str, dist_dir: Path):
             if data is None:
                 break
             donnees = data.get("donnees", [])
-            marches.extend(atline_to_decp(record) for record in donnees)
+            # Les marchés de démonstration (créés par le support Atline pour la
+            # formation des utilisateurs) ne sont pas des données réelles :
+            # l'AIFE ne les republie pas non plus.
+            nb_demo += sum(1 for r in donnees if r.get("is_demo"))
+            marches.extend(
+                atline_to_decp(record)
+                for record in donnees
+                if not record.get("is_demo")
+            )
             nb_total = data.get("nb_total", 0)
-            if not donnees or len(marches) >= nb_total:
+            if not donnees or len(marches) + nb_demo >= nb_total:
                 break
             page += 1
+
+    if nb_demo > 0:
+        logger.info(f"{nb_demo} marchés de démonstration exclus ({month}/{year})")
 
     if len(marches) > 0:
         for marche in marches:
