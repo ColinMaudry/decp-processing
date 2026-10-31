@@ -38,6 +38,7 @@ from src.tasks.output import (
     flatten_lists,
     generate_final_schema,
     sink_to_files,
+    swap_dist,
 )
 from src.tasks.publish import publish_to_datagouv, publish_to_s3
 from src.tasks.transform import (
@@ -176,12 +177,7 @@ def decp_processing(enable_cache_removal: bool = True):
     # make_data_tables()
 
     # Bascule atomique : on remplace DIST_DIR seulement maintenant que work_dir est complet
-    dist_dir_old = DIST_DIR.parent / f"{DIST_DIR.name}_old"
-    if DIST_DIR.exists():
-        DIST_DIR.rename(dist_dir_old)
-    work_dir.rename(DIST_DIR)
-    if dist_dir_old.exists():
-        shutil.rmtree(dist_dir_old)
+    swap_dist(work_dir, DIST_DIR)
 
     if decp_publish:
         logger.info("Publication sur data.gouv.fr...")

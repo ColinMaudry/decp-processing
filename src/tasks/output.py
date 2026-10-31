@@ -1,4 +1,5 @@
 import json
+import shutil
 import sqlite3
 from pathlib import Path
 
@@ -8,6 +9,18 @@ from prefect import task
 
 from src.config import DIST_DIR, LOG_LEVEL, POSTGRESQL_DB_URI, REFERENCE_DIR
 from src.tasks.utils import get_logger
+
+
+def swap_dist(work_dir: Path, dist_dir: Path) -> None:
+    """Bascule atomique : remplace dist_dir par work_dir, une fois work_dir complet."""
+    if not work_dir.exists():
+        raise FileNotFoundError(f"Dossier de travail introuvable : {work_dir}")
+    dist_dir_old = dist_dir.parent / f"{dist_dir.name}_old"
+    if dist_dir.exists():
+        dist_dir.rename(dist_dir_old)
+    work_dir.rename(dist_dir)
+    if dist_dir_old.exists():
+        shutil.rmtree(dist_dir_old)
 
 
 def flatten_lists(lf: pl.LazyFrame) -> pl.LazyFrame:

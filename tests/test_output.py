@@ -1,8 +1,9 @@
 import json
 
 import polars as pl
+import pytest
 
-from src.tasks.output import generate_final_schema, restore_legacy_uid
+from src.tasks.output import generate_final_schema, restore_legacy_uid, swap_dist
 
 
 def test_restore_legacy_uid_reconstruit_acheteur_id_plus_id():
@@ -61,3 +62,31 @@ def test_generate_final_schema_suit_l_ordre_du_schema_de_base(tmp_path):
         attendus = [c["name"] for c in json.load(f)["fields"]]
 
     assert publies == attendus
+
+
+def test_swap_dist_remplace_l_existant(tmp_path):
+    dist, wip = tmp_path / "dist", tmp_path / "dist_wip"
+    dist.mkdir()
+    (dist / "ancien.txt").write_text("a")
+    wip.mkdir()
+    (wip / "nouveau.txt").write_text("n")
+    swap_dist(wip, dist)
+    assert sorted(p.name for p in dist.iterdir()) == ["nouveau.txt"]
+    assert not wip.exists() and not (tmp_path / "dist_old").exists()
+
+
+def test_swap_dist_premier_run(tmp_path):
+    wip = tmp_path / "dist_wip"
+    wip.mkdir()
+    (wip / "f").write_text("x")
+    swap_dist(wip, tmp_path / "dist")
+    assert (tmp_path / "dist" / "f").read_text() == "x"
+
+
+def test_swap_dist_sans_wip_ne_touche_rien(tmp_path):
+    dist = tmp_path / "dist"
+    dist.mkdir()
+    (dist / "f").write_text("x")
+    with pytest.raises(FileNotFoundError):
+        swap_dist(tmp_path / "dist_wip", dist)
+    assert (dist / "f").read_text() == "x"
