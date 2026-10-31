@@ -354,6 +354,8 @@ git commit -m "Logique du lanceur : cycle de vie de l'instance et du run distant
 
 Câblage : `with concurrency(f"volume-{env}", raise_on_lease_renewal_failure=False)` ; `ScalewayProvider()` ; `user_data = render_user_data(...)` avec `INSTANCE_ENV_VARS` lus dans `os.environ` + `DECP_DATA_DIR=/data`, `PREFECT_HOME=/data/.prefect`, `DECP_DIST_DIR=/work/dist` ; `trigger = run_deployment(deployment, timeout=0, as_subflow=True).id` ; `get_state` via `get_client().read_flow_run(id).state` (SCHEDULED/PENDING → PENDING, RUNNING → RUNNING, COMPLETED → COMPLETED, tout état final autre → FAILED) ; `cancel` via `set_flow_run_state(id, Cancelling())` ; `sync_dist` via `rsync -a --delete -e "ssh -i <clé> -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" root@<ip>:/work/dist/ <wip>/` (subprocess, 2 retries) ; `fetch_boot_log` via `ssh … tail -n 100 /var/log/cloud-init-output.log` (erreurs ignorées) ; `launcher_run_id` = id du run courant.
 
+La création d'instance passée à `execute_remote_run` est enveloppée d'un retry `tenacity` (2 nouvelles tentatives, 60 s d'écart) : `provider=` reçoit un adaptateur dont `create_instance` est décoré, les autres méthodes déléguant telles quelles.
+
 - [ ] **Step 2: Brancher l'email d'échec**
 
 Ajouter `@run_on_scaleway.on_failure` au-dessus de `notify_exception_by_email` (import du flow dans `decp_processing.py`, ou déplacement du hook dans `src/flows/notify.py` importé par les deux flows : choisir l'option sans import circulaire).
