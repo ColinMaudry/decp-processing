@@ -1,3 +1,4 @@
+import asyncio
 import calendar
 import json
 import time
@@ -164,16 +165,22 @@ def notify_no_data(year: str, month: str, start_date: str, end_date: str):
     logger = get_logger(level=LOG_LEVEL)
     try:
         email_server_credentials = EmailServerCredentials.load("email-notifier")
-        email_send_message(
-            email_server_credentials=email_server_credentials,
-            subject=f"[decp-processing] Scrap marches-securises.fr vide : {month}/{year}",
-            msg=(
-                f"Le scrap de marches-securises.fr n'a retourné aucun marché pour "
-                f"la fenêtre {start_date} -> {end_date}.\n\n"
-                f"Vérifier l'API https://wsp.atline.fr/donnees_essentielles_oe_list "
-                f"(token, paramètres, disponibilité du service)."
-            ),
-            email_to=email_server_credentials.username,
+        # email_send_message est une task prefect : appelée directement depuis un
+        # contexte synchrone hors flow, elle retourne une coroutine jamais attendue
+        # — l'envoi n'a pas lieu alors qu'aucune erreur ne remonte. On exécute
+        # la fonction sous-jacente de façon bloquante.
+        asyncio.run(
+            email_send_message.fn(
+                email_server_credentials=email_server_credentials,
+                subject=f"[decp-processing] Scrap marches-securises.fr vide : {month}/{year}",
+                msg=(
+                    f"Le scrap de marches-securises.fr n'a retourné aucun marché pour "
+                    f"la fenêtre {start_date} -> {end_date}.\n\n"
+                    f"Vérifier l'API https://wsp.atline.fr/donnees_essentielles_oe_list "
+                    f"(token, paramètres, disponibilité du service)."
+                ),
+                email_to=email_server_credentials.username,
+            )
         )
     except Exception as e:
         logger.error(f"Échec d'envoi de l'alerte email scrap vide : {e}")
