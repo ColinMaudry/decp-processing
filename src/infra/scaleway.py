@@ -59,11 +59,17 @@ class ScalewayProvider:
     def __repr__(self) -> str:
         return f"ScalewayProvider(zone={self.zone!r})"
 
-    def _attendre(self, server_id: str) -> Server:
-        """Attend un état stable (running/stopped) ; surchargeable pour les tests."""
-        return self.instance_api.wait_instance_server(
+    def _attendre(self, server_id: str, etat_attendu: str = "running") -> Server:
+        """Attend l'état stable `etat_attendu` ; surchargeable pour les tests."""
+        server = self.instance_api.wait_instance_server(
             server_id=server_id, zone=self.zone
         ).server
+        if server.state != etat_attendu:
+            raise RuntimeError(
+                f"L'instance {server.id} n'a pas atteint l'état {etat_attendu} "
+                f"(état : {server.state})"
+            )
+        return server
 
     def create_instance(
         self,
@@ -101,25 +107,28 @@ class ScalewayProvider:
         api.server_action(
             server_id=server.id, zone=self.zone, action=ServerAction.POWERON
         )
-        server = self._attendre(server.id)
-        if server.state != "running":
-            raise RuntimeError(
-                f"L'instance {server.id} n'a pas démarré (état : {server.state})"
-            )
+        self._attendre(server.id)
         # L'IP dynamique n'est connue qu'après démarrage.
         server = api.get_server(server_id=server.id, zone=self.zone).server
         return _instance(server)
 
     def delete_instance(self, instance_id: str, data_volume_id: str) -> None:
+        """Détruit l'instance ; idempotent sur l'état du serveur.
+
+        POWEROFF n'est envoyé que sur un serveur `running` : l'API le refuse
+        sur un serveur déjà `stopped` (échec de destruction précédent, arrêt
+        manuel), ce qui bloquerait les runs suivants. Le volume de données
+        n'est détaché qu'une fois l'état `stopped` confirmé.
+        """
         api = self.instance_api
-        boot = api.get_server(server_id=instance_id, zone=self.zone).server.volumes.get(
-            "0"
-        )
+        server = api.get_server(server_id=instance_id, zone=self.zone).server
+        boot = server.volumes.get("0")
         boot_id = boot.id if boot is not None else None
-        api.server_action(
-            server_id=instance_id, zone=self.zone, action=ServerAction.POWEROFF
-        )
-        self._attendre(instance_id)
+        if server.state == "running":
+            api.server_action(
+                server_id=instance_id, zone=self.zone, action=ServerAction.POWEROFF
+            )
+        self._attendre(instance_id, etat_attendu="stopped")
         api.detach_server_volume(
             server_id=instance_id, volume_id=data_volume_id, zone=self.zone
         )

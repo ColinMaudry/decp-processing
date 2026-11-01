@@ -36,3 +36,23 @@ def test_user_data_ne_formate_que_si_vierge():
 def test_user_data_refuse_une_valeur_avec_quote():
     with pytest.raises(ValueError):
         render_user_data(**{**ARGS, "env_vars": {"X": "a'b"}})
+
+
+def test_user_data_refuse_une_cle_avec_quote():
+    with pytest.raises(ValueError, match="Clé interdite"):
+        render_user_data(**{**ARGS, "env_vars": {**ARGS["env_vars"], "MA'CLE": "v"}})
+
+
+def test_user_data_refuse_une_cle_avec_saut_de_ligne():
+    with pytest.raises(ValueError, match="Clé interdite"):
+        render_user_data(**{**ARGS, "env_vars": {**ARGS["env_vars"], "MA\nCLE": "v"}})
+
+
+@pytest.mark.parametrize(
+    "cle_reservee", ["ENV", "BRANCH", "VOLUME_ID", "SSH_PUBLIC_KEY", "ENV_FILE"]
+)
+def test_user_data_refuse_une_cle_reservee(cle_reservee):
+    with pytest.raises(ValueError, match="Clé réservée"):
+        render_user_data(
+            **{**ARGS, "env_vars": {**ARGS["env_vars"], cle_reservee: "v"}}
+        )

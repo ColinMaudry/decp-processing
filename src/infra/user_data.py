@@ -3,6 +3,9 @@ from string import Template
 
 MODELE = Path(__file__).with_name("cloud-init.sh")
 
+# Clés du modèle que env_vars ne doit pas écraser : elles sont rendues à part.
+CLES_RESERVEES = frozenset({"ENV", "BRANCH", "VOLUME_ID", "SSH_PUBLIC_KEY", "ENV_FILE"})
+
 
 def render_user_data(
     *,
@@ -13,6 +16,11 @@ def render_user_data(
     env_vars: dict[str, str],
 ) -> str:
     """Rend le script cloud-init (user-data) de l'instance éphémère Scaleway."""
+    for cle in env_vars:
+        if cle in CLES_RESERVEES:
+            raise ValueError(f"Clé réservée interdite dans env_vars : {cle}")
+        if "'" in cle or "\n" in cle:
+            raise ValueError(f"Clé interdite (quote ou saut de ligne) : {cle}")
     valeurs = {
         "ENV": env,
         "BRANCH": branch,

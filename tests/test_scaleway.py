@@ -7,8 +7,18 @@ from scaleway.instance.v1 import ServerAction
 from src.infra.scaleway import Instance, ScalewayProvider
 
 
-def test_delete_instance_detache_avant_terminate():
+def _api_pour_delete(state="running"):
+    """API factice dont get_server reflète `state` et l'attente renvoie stopped."""
     api = MagicMock()
+    serveur = _serveur(state)
+    serveur.volumes = {"0": MagicMock(id="vol-boot")}
+    api.get_server.return_value.server = serveur
+    api.wait_instance_server.return_value.server = _serveur("stopped")
+    return api
+
+
+def test_delete_instance_detache_avant_terminate():
+    api = _api_pour_delete()
     p = ScalewayProvider(instance_api=api, block_api=MagicMock(), zone="fr-par-1")
     p.delete_instance("srv", "vol-data")
     calls = [c[0] for c in api.method_calls]
@@ -26,12 +36,46 @@ def test_delete_instance_detache_avant_terminate():
 
 
 def test_delete_instance_supprime_volume_boot():
-    api = MagicMock()
-    api.get_server.return_value.server.volumes = {"0": MagicMock(id="vol-boot")}
+    api = _api_pour_delete()
     block = MagicMock()
     p = ScalewayProvider(instance_api=api, block_api=block, zone="fr-par-1")
     p.delete_instance("srv", "vol-data")
     block.delete_volume.assert_called_once_with(volume_id="vol-boot", zone="fr-par-1")
+
+
+def test_delete_instance_deja_stopped_detruit_sans_poweroff():
+    api = _api_pour_delete(state="stopped")
+    p = ScalewayProvider(instance_api=api, block_api=MagicMock(), zone="fr-par-1")
+    p.delete_instance("srv", "vol-data")
+    actions = [c.kwargs["action"] for c in api.method_calls if c[0] == "server_action"]
+    assert ServerAction.POWEROFF not in actions
+    assert ServerAction.TERMINATE in actions
+    api.detach_server_volume.assert_called_once_with(
+        server_id="srv", volume_id="vol-data", zone="fr-par-1"
+    )
+
+
+def test_delete_instance_running_poweroff_puis_stopped_avant_detachement():
+    api = _api_pour_delete(state="running")
+    p = ScalewayProvider(instance_api=api, block_api=MagicMock(), zone="fr-par-1")
+    p.delete_instance("srv", "vol-data")
+    noms = [c[0] for c in api.method_calls]
+    i_poweroff = [
+        i
+        for i, c in enumerate(api.method_calls)
+        if c[0] == "server_action" and c.kwargs["action"] == ServerAction.POWEROFF
+    ][0]
+    assert i_poweroff < noms.index("wait_instance_server")
+    assert noms.index("wait_instance_server") < noms.index("detach_server_volume")
+
+
+def test_delete_instance_rejete_un_serveur_revenu_running():
+    api = _api_pour_delete(state="running")
+    api.wait_instance_server.return_value.server = _serveur("running")
+    p = ScalewayProvider(instance_api=api, block_api=MagicMock(), zone="fr-par-1")
+    with pytest.raises(RuntimeError, match="stopped"):
+        p.delete_instance("srv", "vol-data")
+    api.detach_server_volume.assert_not_called()
 
 
 def _serveur(state="running"):

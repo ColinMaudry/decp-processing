@@ -12,6 +12,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Callable
+from urllib.parse import urlparse
 from uuid import UUID
 
 from prefect import flow, get_client
@@ -28,7 +29,12 @@ from src.config import (
     SCALEWAY_SSH_KEY_PATH,
 )
 from src.flows.notify import notify_exception_by_email
-from src.infra.remote_run import RemoteRunConfig, RunState, execute_remote_run
+from src.infra.remote_run import (
+    RemoteRunConfig,
+    RemoteRunError,
+    RunState,
+    execute_remote_run,
+)
 from src.infra.scaleway import Instance, ScalewayProvider
 from src.infra.user_data import render_user_data
 
@@ -55,7 +61,7 @@ class ProviderAvecRetry:
     def __init__(self, provider: ScalewayProvider):
         self._provider = provider
 
-    @retry(stop=stop_after_attempt(3), wait=wait_fixed(60))
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(60), reraise=True)
     def create_instance(self, **kwargs) -> Instance:
         return self._provider.create_instance(**kwargs)
 
@@ -93,7 +99,7 @@ def _public_key() -> str:
 def _make_sync_dist() -> Callable[[str, Path], None]:
     """Rapatrie /work/dist de l'instance vers un répertoire wip local."""
 
-    @retry(stop=stop_after_attempt(3), wait=wait_fixed(60))
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(60), reraise=True)
     def sync_dist(ip: str, wip: Path) -> None:
         remote_shell = " ".join(
             shlex.quote(part)
@@ -175,6 +181,35 @@ def _cancel(run_id: str) -> None:
         client.set_flow_run_state(UUID(run_id), Cancelling())
 
 
+def valider_env_instance() -> None:
+    """Vérifie AVANT toute création d'instance que le worker pourra joindre l'API.
+
+    Le worker de l'instance éphémère joint l'API Prefect via `PREFECT_API_URL`
+    et s'authentifie par `PREFECT_API_AUTH_STRING`, copiés depuis le `.env` du
+    serveur actuel. Une URL absente ou locale (localhost, 127.0.0.1) rendrait
+    l'API injoignable depuis l'instance : le premier run serait perdu après
+    un délai de démarrage de 20 minutes et une destruction. Fail-fast.
+    """
+    api_url = os.environ.get("PREFECT_API_URL", "")
+    if not api_url.startswith(("http://", "https://")):
+        raise RemoteRunError(
+            "PREFECT_API_URL est absente du .env du serveur ou ne commence pas "
+            "par http:// ou https:// : le worker de l'instance éphémère ne "
+            "pourrait pas joindre l'API Prefect."
+        )
+    if urlparse(api_url).hostname in ("localhost", "127.0.0.1"):
+        raise RemoteRunError(
+            "PREFECT_API_URL pointe vers localhost ou 127.0.0.1, injoignable "
+            "depuis l'instance éphémère : renseignez une URL publique."
+        )
+    if not os.environ.get("PREFECT_API_AUTH_STRING"):
+        raise RemoteRunError(
+            "PREFECT_API_AUTH_STRING est absente du .env du serveur : le worker "
+            "de l'instance éphémère ne pourrait pas s'authentifier auprès de "
+            "l'API Prefect."
+        )
+
+
 @flow(log_prints=True)
 def run_on_scaleway(
     env: str,
@@ -186,6 +221,7 @@ def run_on_scaleway(
     max_duration_hours: int = 4,
 ) -> None:
     """Exécute `deployment` (branche `branch`) sur une instance éphémère."""
+    valider_env_instance()
     launcher_run_id = str(get_run_context().flow_run.id)
     with concurrency(f"volume-{env}", raise_on_lease_renewal_failure=False):
         provider = ScalewayProvider()

@@ -1,6 +1,11 @@
 #!/bin/bash
 set -euxo pipefail
-DEV=$$(ls /dev/disk/by-id/*${VOLUME_ID}* | head -1)
+set -- /dev/disk/by-id/*${VOLUME_ID}*
+if [ ! -e "$$1" ]; then
+    echo "Aucun périphérique /dev/disk/by-id ne correspond au volume ${VOLUME_ID}" >&2
+    exit 1
+fi
+DEV=$$1
 blkid "$$DEV" || mkfs.ext4 -L decp-data "$$DEV"
 mkdir -p /data /work
 echo "$$DEV /data ext4 defaults,nofail 0 2" >> /etc/fstab

@@ -426,16 +426,19 @@ git commit -m "Déploiements lanceur + exécution Scaleway, script d'installatio
 
 Tâche d'exploitation, sans code. Chaque étape a un résultat vérifiable ; s'arrêter au premier écart.
 
+> **Fusionner la branche dans `dev` en plus de `main` avant l'étape 7** : sinon l'instance dev exécute l'ancien code (prefect 3.7.0).
+
 - [ ] **Step 1: Sauvegarder la base Prefect** — `pg_dump prefect > /root/prefect-$(date +%F).sql` sur le serveur ; fichier non vide.
 - [ ] **Step 2: Venv du serveur depuis `uv.lock`** — dans le checkout `main` du serveur : `uv sync --frozen`, puis pointer `prefect-server` et `prefect-worker.service` sur ce venv ; `prefect version` affiche 3.9.1, `python -c "import polars; print(polars.__version__)"` affiche la version de `uv.lock`.
 - [ ] **Step 3: Redémarrer serveur puis worker** ; l'UI répond, le worker `local` est « online » ; lancer un scrap et constater `Completed`.
 - [ ] **Step 4: `.env` du serveur** — ajouter `SCW_*`, `SCALEWAY_SSH_KEY_PATH` ; générer la paire de clés si absente.
 - [ ] **Step 5: `uv run python script/scaleway_setup.py`** deux fois ; la seconde ne crée rien.
 - [ ] **Step 6: `uv run python src/deployments.py`** ; les huit déploiements du tableau de Task 6 apparaissent dans l'UI.
-- [ ] **Step 7: Run dev de bout en bout** — déclencher `decp-processing-dev` : instance créée, worker `scaleway-dev` online, run `Completed`, `/srv/shared/decp/dev/dist` mis à jour, instance absente de `scw instance server list` et aucun volume `*-boot` restant ; noter pic mémoire (`free -g` via ssh pendant le run), durée et coût.
-- [ ] **Step 8: Pré-remplir le volume prod** — lancer une instance via `sirene-preprocess` (prod) ou une instance manuelle avec le volume prod monté, et y copier depuis le serveur actuel `resource_cache/`, `sirene_*/`, `.prefect/storage/` (~5 Go) par rsync ; vérifier les tailles.
-- [ ] **Step 9: Run prod manuel** — déclencher `decp-processing` : `Completed`, publication data.gouv.fr et S3, `/srv/shared/decp/prod/dist` à jour, decp.info sert les nouvelles données, instance détruite.
-- [ ] **Step 10: Documentation** — `CHANGELOG.md` (exécution sur instance éphémère, Prefect 3.9.1) ; commit.
+- [ ] **Step 7: Vérifications préalables au run dev** — vérifier `prefect.maudry.com/api` joignable depuis l'extérieur avec `PREFECT_API_AUTH_STRING` (curl depuis une autre machine), et que l'API Scaleway accepte les tags `env:prod`/`flow-run:<uuid>` lors d'une création de test.
+- [ ] **Step 8: Run dev de bout en bout** — déclencher `decp-processing-dev` : instance créée, worker `scaleway-dev` online, run `Completed`, `/srv/shared/decp/dev/dist` mis à jour, instance absente de `scw instance server list` et aucun volume `*-boot` restant ; noter pic mémoire (`free -g` via ssh pendant le run), durée et coût.
+- [ ] **Step 9: Pré-remplir le volume prod** — lancer une instance via `sirene-preprocess` (prod) ou une instance manuelle avec le volume prod monté, et y copier depuis le serveur actuel `resource_cache/`, `sirene_*/`, `.prefect/storage/` (~5 Go) par rsync ; vérifier les tailles.
+- [ ] **Step 10: Run prod manuel** — déclencher `decp-processing` : `Completed`, publication data.gouv.fr et S3, `/srv/shared/decp/prod/dist` à jour, decp.info sert les nouvelles données, instance détruite.
+- [ ] **Step 11: Documentation** — `CHANGELOG.md` (exécution sur instance éphémère, Prefect 3.9.1) ; commit.
 
 ```bash
 git add CHANGELOG.md
