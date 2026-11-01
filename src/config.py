@@ -365,3 +365,30 @@ class DecpFormat:
     prefixe_json_marches: str
     liste_marches_ijson: sendable_list | None = None
     coroutine_ijson: Coroutine | None = None
+
+
+# === Serveur éphémère Scaleway (issue #189) ===
+
+# Clé privée SSH du serveur actuel, utilisée pour se connecter à l'instance
+# éphémère (rsync du répertoire dist et lecture du boot log). dotenv n'expanse
+# pas `~` : le résultat est donc expansé explicitement.
+SCALEWAY_SSH_KEY_PATH = make_path_from_env(
+    "SCALEWAY_SSH_KEY_PATH", Path("~/.ssh/id_ed25519")
+).expanduser()
+
+# Volume de données Scaleway contenant le cache, par environnement.
+SCALEWAY_DATA_VOLUME_NAMES = {"prod": "decp-data-prod", "dev": "decp-data-dev"}
+
+# Variables d'environnement du serveur actuel transmises à l'instance éphémère
+# via le user-data. Leurs valeurs sont des secrets : elles sont masquées dans
+# les logs (secret_strings) et ne doivent jamais être journalisées.
+INSTANCE_ENV_VARS = [
+    "PREFECT_API_URL",
+    "PREFECT_API_AUTH_STRING",
+    "DATAGOUVFR_API_KEY",
+    "S3_ENDPOINT_URL",
+    "S3_BUCKET",
+    "S3_ACCESS_KEY_ID",
+    "S3_SECRET_ACCESS_KEY",
+    "S3_REGION",
+]

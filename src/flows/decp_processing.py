@@ -6,8 +6,6 @@ from concurrent.futures import ThreadPoolExecutor
 import polars as pl
 from prefect import flow, task
 from prefect.artifacts import create_table_artifact
-from prefect.context import get_run_context
-from prefect_email import EmailServerCredentials, email_send_message
 
 from src.config import (
     BASE_DF_COLUMNS,
@@ -17,12 +15,12 @@ from src.config import (
     LOG_LEVEL,
     MAX_PREFECT_WORKERS,
     MIN_FILESIZE,
-    PREFECT_API_URL,
     RESOURCE_CACHE_DIR,
     SIRENE_DATA_DIR,
     SOLO_DATASETS,
     TRACKED_DATASETS,
 )
+from src.flows.notify import notify_exception_by_email
 from src.flows.sirene_preprocess import sirene_preprocess
 from src.tasks.anomaly import detect_montant_anomalies
 from src.tasks.dataset_utils import list_resources
