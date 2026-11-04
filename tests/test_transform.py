@@ -913,13 +913,13 @@ class TestPrepareLabels:
 class TestAmeliorerCasseNom:
     def test_ameliorer_casse_nom(self):
         noms = {
-            "COMMUNAUTE DE COMMUNES DU LIMOUXIN": "Communauté de communes du Limouxin",
+            "COMMUNAUTE DE COMMUNES DU LIMOUXIN": "Communauté de Communes du Limouxin",
             "SOCIETE GENERALE D'ELECTRICITE": "Société Générale d'Électricité",
             "GARAGE DU MIDI SARL": "Garage du Midi SARL",
             "LA POSTE": "La Poste",
             "D'ARTAGNAN SAS": "D'Artagnan SAS",
             "SDIS 35 (SERVICE DEPARTEMENTAL D'INCENDIE ET DE SECOURS)": (
-                "SDIS 35 (Service Départemental d'incendie et de secours)"
+                "SDIS 35 (Service Départemental d'Incendie et de Secours)"
             ),
             "CHU DE RENNES": "CHU de Rennes",
             "REGIONALE BTP": "Régionale BTP",

@@ -1,11 +1,11 @@
 #### 2.15.0
 
 - Ajout des labels des entreprises `titulaire_labels` et `acheteur_labels` — Bio, RGE, ESS, Association, Qualiopi, SIAE, Avocat, Achats responsables ([#190](https://github.com/ColinMaudry/decp-processing/issues/190)).
-- Tous les labels proviennent du jeu de données [Données des entreprises utilisées dans l'Annuaire des Entreprises](https://www.data.gouv.fr/datasets/donnees-des-entreprises-utilisees-dans-lannuaire-des-entreprises/), qui agrège les sources primaires.
 - Retry sur les téléchargements SIRENE du prétraitement mensuel (unités légales, établissements)
 - Correction du type déclaré de `acheteur_id`, `titulaire_id` et `lieuExecution_code` dans le schéma publié (`schema.json`) : `string` au lieu de `integer`.
 - Correction de l'ordre des champs dans le schéma publié
-- Meilleure casse et accentuation des noms d'acheteurs et de titulaires issus de SIRENE (unités légales et établissements) : « COMMUNAUTE DE COMMUNES DU LIMOUXIN » devient « Communauté de communes du Limouxin » ([#167](https://github.com/ColinMaudry/decp-processing/issues/167)).
+- Meilleure casse et accentuation des noms d'acheteurs et de titulaires issus de SIRENE (unités légales et établissements) ([#167](https://github.com/ColinMaudry/decp-processing/issues/167)).
+- Passage de Prefect 3.7.0 à 3.9.1
 
 #### 2.14.0 2026-08-17
 
