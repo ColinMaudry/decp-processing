@@ -2,6 +2,9 @@
 
 - Meilleure casse et accentuation des noms d'acheteurs et de titulaires issus de SIRENE (unités légales et établissements) ([#167](https://github.com/ColinMaudry/decp-processing/issues/167)).
 - Passage de Prefect 3.7.0 à 3.9.1
+- Le téléchargement des fichiers du COG (INSEE) passe par httpx avant lecture polars : le client HTTP de polars 2 refuse les réponses sans `Content-Length`, que insee.fr envoie
+- Correction du hook d'alerte email `notify_exception_by_email` : la définition dupliquée dans `decp_processing.py` (laissée par l'extraction vers `notify.py`) référençait des imports supprimés, et `notify.py` avait perdu le correctif d'envoi effectif (`asyncio.run`)
+- Divers : migration des derniers usages de l'API polars 1 (`pl.count()`, `check_dtype`) vers polars 2, tests de jointures insensibles à l'ordre des lignes
 
 #### 2.16.0
 

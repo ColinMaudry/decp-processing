@@ -513,15 +513,28 @@ def get_etablissements(
 def get_insee_cog_data(url, schema_overrides, columns) -> pl.DataFrame:
     logger = get_logger(level=LOG_LEVEL)
 
+    # insee.fr répond en chunked (sans Content-Length), ce que le client HTTP
+    # object-store de polars 2 refuse. Téléchargement httpx, lecture locale.
     try:
-        df_insee = pl.read_csv(url, schema_overrides=schema_overrides, columns=columns)
-    except ConnectionResetError:
-        logger.error("Connection error, retrying in 2 seconds...")
+        content = _download_bytes(url)
+        df_insee = pl.read_csv(
+            io.BytesIO(content), schema_overrides=schema_overrides, columns=columns
+        )
+    except (httpx.HTTPError, OSError) as exc:
+        logger.error(f"Erreur de téléchargement ({exc}), nouvelle tentative...")
         sleep(2)
         df_insee = get_insee_cog_data(
             url, schema_overrides=schema_overrides, columns=columns
         )
     return df_insee
+
+
+def _download_bytes(url: str) -> bytes:
+    response = HTTP_CLIENT.get(
+        url, headers=HTTP_HEADERS, follow_redirects=True, timeout=60
+    )
+    response.raise_for_status()
+    return response.content
 
 
 def get_clean(

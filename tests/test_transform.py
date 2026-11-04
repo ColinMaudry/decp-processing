@@ -342,7 +342,7 @@ class TestHandleModificationsMarche:
         assert_frame_equal(
             result,
             expected,
-            check_dtype=False,
+            check_dtypes=False,
             check_exact=True,
             check_column_order=False,
             check_row_order=True,

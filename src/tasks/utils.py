@@ -371,7 +371,7 @@ def full_resource_name(r: dict):
 def check_parquet_file(path) -> bool:
     try:
         lf = pl.scan_parquet(path)
-        height = lf.select(pl.count()).collect().item()
+        height = lf.select(pl.len()).collect().item()
         result = height > 0
         del lf
         return result

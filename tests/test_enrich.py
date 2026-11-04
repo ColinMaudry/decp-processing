@@ -65,6 +65,7 @@ class TestEnrich:
             ).collect(),
             lf_output.collect(),
             check_column_order=False,
+            check_row_order=False,
         )
 
     def test_add_etablissement_data(self):
@@ -99,6 +100,7 @@ class TestEnrich:
             ).collect(),
             lf_output.collect(),
             check_column_order=False,
+            check_row_order=False,
         )
 
     def test_select_sirets_excludes_success_and_recent_failures_and_not_in_sirene(self):
