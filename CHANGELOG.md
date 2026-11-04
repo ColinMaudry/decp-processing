@@ -2,7 +2,7 @@
 
 - Meilleure casse et accentuation des noms d'acheteurs et de titulaires issus de SIRENE (unités légales et établissements) ([#167](https://github.com/ColinMaudry/decp-processing/issues/167)).
 - Passage de Prefect 3.7.0 à 3.9.1
-- Le téléchargement des fichiers du COG (INSEE) passe par httpx avant lecture polars : le client HTTP de polars 2 refuse les réponses sans `Content-Length`, que insee.fr envoie
+- Invocation de serveurs éphémères pour le traitement ([#189](https://github.com/ColinMaudry/decp-processing/issues/189))
 - Correction du hook d'alerte email `notify_exception_by_email` : la définition dupliquée dans `decp_processing.py` (laissée par l'extraction vers `notify.py`) référençait des imports supprimés, et `notify.py` avait perdu le correctif d'envoi effectif (`asyncio.run`)
 - Divers : migration des derniers usages de l'API polars 1 (`pl.count()`, `check_dtype`) vers polars 2, tests de jointures insensibles à l'ordre des lignes
 
@@ -43,7 +43,7 @@
 - Consolidation d'une même version de marché présente dans plusieurs jeux de données source : fusion des champs (complétude puis récence) et des titulaires, avec estampille de la source `decp_colmo` pour les lignes issues de ce mélange ([#186](https://github.com/ColinMaudry/decp-processing/issues/186))
 - Ajout du code CPV à l'`uid` interne (`acheteur_id` + `id` + `_` + `codeCPV`) pour distinguer les contrats différents qui partagent le même `id` acheteur et éviter qu'ils ne s'écrasent mutuellement pendant le traitement. ⚠️ Ce changement n'est pour l'instant appliqué qu'en **interne** : l'`uid` publié conserve l'ancien format (`acheteur_id` + `id`). Le nouveau format sera publié plus tard, en **août**, pour laisser aux réutilisateurs le temps de s'adapter ([#186](https://github.com/ColinMaudry/decp-processing/issues/186))
 - Réduction de l'empreinte mémoire du traitement (détection des anomalies de montant, calcul des doublons entre sources, probabilités NAF/CPV)
-- Barrière de matérialisation sur disque après la consolidation des marchés, pour éviter que son pic mémoire s'additionne avec celui de l'enrichissement SIRENE (OOM) ([#186](https://github.com/ColinMaudry/decp-processing/issues/186))
+- Barrière de matériali189-scaleway-ephemeresation sur disque après la consolidation des marchés, pour éviter que son pic mémoire s'additionne avec celui de l'enrichissement SIRENE (OOM) ([#186](https://github.com/ColinMaudry/decp-processing/issues/186))
 - Correction d'une démultiplication résiduelle des titulaires dans la détection d'anomalies : la re-jointure des titulaires s'appuie désormais sur l'identité complète de la version de marché, évitant le croisement des titulaires entre contrats distincts partageant le même (uid, modification_id) ([#186](https://github.com/ColinMaudry/decp-processing/issues/186))
 - Durcissement de get_from_s3, avec `timeout` et `retry`
 
