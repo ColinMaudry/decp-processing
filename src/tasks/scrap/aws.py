@@ -20,7 +20,11 @@ from src.tasks.publish import publish_scrap_to_datagouv
 from src.tasks.utils import get_logger
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=30))
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    reraise=True,
+)
 def _get_replacements() -> dict:
     return httpx.get(
         "https://www.data.gouv.fr/api/1/datasets/r/3bdd5a64-c28e-4c6a-84fd-5a28bcaa53e9",

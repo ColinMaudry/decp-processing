@@ -22,7 +22,26 @@ from src.config import (
 from src.tasks.utils import get_logger
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=30))
+class DatagouvIndisponibleError(RuntimeError):
+    """data.gouv.fr répond par une redirection (page d'indisponibilité, ex. sorry.data.gouv.fr)."""
+
+
+def _raise_for_status(response) -> None:
+    # httpx ne suit pas les redirects : sans ce garde-fou, un 302 vers la page
+    # "sorry" de data.gouv.fr ressortirait comme une HTTPStatusError générique
+    if response.has_redirect_location:
+        raise DatagouvIndisponibleError(
+            f"data.gouv.fr indisponible : {response.status_code} redirige vers "
+            f"'{response.headers.get('location')}' pour {response.url}"
+        )
+    response.raise_for_status()
+
+
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    reraise=True,
+)
 def update_resource(dataset_id, resource_id, file_path, api_key):
     url = f"{DATAGOUVFR_API}/datasets/{dataset_id}/resources/{resource_id}/upload/"
     headers = {"X-API-KEY": api_key}
@@ -32,7 +51,8 @@ def update_resource(dataset_id, resource_id, file_path, api_key):
             files={"file": f},
             headers=headers,
             timeout=DECP_PROCESSING_PUBLISH_TIMEOUT,
-        ).raise_for_status()
+        )
+    _raise_for_status(response)
     return response.json()
 
 
@@ -86,13 +106,18 @@ def publish_to_datagouv():
             logger.info("OK")
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=30))
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    reraise=True,
+)
 def get_resource_id(dataset_id, filepath) -> str or None:
     response = get(
         f"{DATAGOUVFR_API}/datasets/{dataset_id}/",
         headers={"X-API-KEY": DATAGOUVFR_API_KEY},
         timeout=30,
-    ).raise_for_status()
+    )
+    _raise_for_status(response)
     resources = response.json()["resources"]
     description = ""
     for resource in resources:
@@ -114,7 +139,8 @@ def publish_new_resource(dataset_id, file_path, description):
         },
         headers=headers,
         timeout=DECP_PROCESSING_PUBLISH_TIMEOUT,
-    ).raise_for_status()
+    )
+    _raise_for_status(response)
     new_resource_id = response.json()["id"]
 
     # Màj des métadonnées
@@ -124,12 +150,17 @@ def publish_new_resource(dataset_id, file_path, description):
         json={"title": str(file_path).split("/")[-1], "description": description},
         headers=headers,
         timeout=30,
-    ).raise_for_status()
+    )
+    _raise_for_status(response)
 
     return response.json()
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=30))
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    reraise=True,
+)
 def publish_to_s3(file: Path, prefix: str = "") -> None:
     logger = get_logger(level=LOG_LEVEL)
     missing = check_s3_config()

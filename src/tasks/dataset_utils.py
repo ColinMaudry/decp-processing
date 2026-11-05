@@ -9,7 +9,11 @@ from src.config import DATAGOUVFR_API_KEY, EXCLUDED_RESOURCES, LOG_LEVEL
 from src.tasks.utils import get_logger
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=30))
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    reraise=True,
+)
 def _get_page(url: str) -> dict:
     return (
         get(
