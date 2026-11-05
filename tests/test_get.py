@@ -9,6 +9,7 @@ from src.tasks.get import (
     get_labels_etablissements,
     get_labels_unites_legales,
     get_population_communes,
+    get_resource,
     get_unite_legales,
     json_stream_to_parquet,
     scan_etablissements,
@@ -332,6 +333,51 @@ def test_json_stream_to_parquet_small_file_detects_format(tmp_path):
     df = pl.read_parquet(output_path.with_suffix(".parquet"))
     assert df.height == 1
     assert df["id"].to_list() == ["2019031700"]
+
+
+def test_edf_json_resource_est_parse_et_valide(tmp_path, monkeypatch):
+    """Issue #195 : le JSON DECP d'EDF SA (marches en tableau direct, champs
+    caviardés « Donnée protégée ») doit être détecté et ingéré en lignes valides."""
+    monkeypatch.setattr("src.tasks.get.DATA_DIR", tmp_path)
+    resource = {
+        "dataset_id": "test_edf",
+        "dataset_name": "DECP EDF SA (jeu de test)",
+        "dataset_code": "edf",
+        "id": "decp_edf_test",
+        "ori_filename": "decp-edf-test.json",
+        "checksum": "1111111111111111111111111111111111",
+        "filename": "test_edf_decp-edf-test",
+        "url": "./tests/data/decp_test_edf.json",
+        "format": "json",
+        "created_at": "2026-11-03T13:22:35Z",
+        "last_modified": "2026-11-03T13:22:35Z",
+        "filesize": 4000,
+        "views": 1,
+    }
+
+    lf, decp_format = get_resource(resource, [])
+
+    assert decp_format is not None
+    assert decp_format.label == "DECP 2019"  # « marches » en tableau direct
+    df = lf.collect()
+    assert df.height == 3  # 2 marchés, dont 1 avec une modification
+    for col in [
+        "id",
+        "acheteur_id",
+        "montant",
+        "dateNotification",
+        "sourceDataset",
+        "sourceFile",
+    ]:
+        assert col in df.columns, f"colonne manquante : {col}"
+    assert df["acheteur_id"].to_list() == ["55208131766522"] * 3
+    assert df["id"].to_list().count("C102138150") == 2  # marché + sa modification
+    assert df["sourceDataset"].to_list() == ["edf"] * 3
+    assert df["sourceFile"].unique().to_list() == [
+        "https://www.data.gouv.fr/datasets/test_edf/#/resources/decp_edf_test"
+    ]
+    assert df["dateNotification"].is_not_null().all()
+    assert df["montant"].is_not_null().all()
 
 
 def test_bootstrap_siret_latlong_produces_extended_schema(tmp_path, monkeypatch):

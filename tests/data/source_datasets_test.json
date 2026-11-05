@@ -39,5 +39,24 @@
         "metrics": { "views": 10 }
       }
     ]
+  },
+  {
+    "id": "test_edf",
+    "name": "DECP EDF SA (jeu de test, issue #195)",
+    "owner_org_name": "Electricité de France",
+    "code": "edf",
+    "resources": [
+      {
+        "id": "decp_edf_test",
+        "title": "decp-edf-test.json",
+        "checksum": { "value": "1111111111111111111111111111111111" },
+        "latest": "./tests/data/decp_test_edf.json",
+        "format": "json",
+        "created_at": "2026-11-03T13:22:35Z",
+        "last_modified": "2026-11-03T13:22:35Z",
+        "filesize": 4000,
+        "metrics": { "views": 1 }
+      }
+    ]
   }
 ]

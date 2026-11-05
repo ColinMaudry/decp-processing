@@ -5,6 +5,7 @@
 - Invocation de serveurs éphémères pour le traitement ([#189](https://github.com/ColinMaudry/decp-processing/issues/189))
 - Correction du hook d'alerte email `notify_exception_by_email` : la définition dupliquée dans `decp_processing.py` (laissée par l'extraction vers `notify.py`) référençait des imports supprimés, et `notify.py` avait perdu le correctif d'envoi effectif (`asyncio.run`)
 - Divers : migration des derniers usages de l'API polars 1 (`pl.count()`, `check_dtype`) vers polars 2, tests de jointures insensibles à l'ordre des lignes
+- Ajout des données d'EDF (mais beaucoup sont caviardées) ([#195](https://github.com/ColinMaudry/decp-processing/issues/195))
 
 #### 2.16.0
 

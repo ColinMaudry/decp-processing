@@ -390,5 +390,11 @@
     "name": "Données essentielles - medialex.fr",
     "code": "medialex",
     "owner_org_name": "Medialex"
+  },
+  {
+    "id": "66ebd483ed5f9344a0c1a4af",
+    "name": "Données Essentielles de la Commande Publique (DECP) d'EDF SA",
+    "owner_org_name": "Electricité de France",
+    "code": "edf"
   }
 ]
