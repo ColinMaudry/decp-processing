@@ -61,13 +61,15 @@ def publish_to_datagouv():
 
     dataset_id = "608c055b35eb4e6ee20eb325"
 
+    # Le CSV consolidé est publié compressé : dist/decp.csv.gz est produit par
+    # sink_to_files() (gzip reproductible) — upload ~10x plus rapide que decp.csv.
     uploads = [
         {
             "file": str(DIST_DIR / "decp.parquet"),
             "resource_id": "11cea8e8-df3e-4ed1-932b-781e2635e432",
         },
         {
-            "file": str(DIST_DIR / "decp.csv"),
+            "file": str(DIST_DIR / "decp.csv.gz"),
             "resource_id": "22847056-61df-452d-837d-8b8ceadbfc52",
         },
         # https://github.com/ColinMaudry/decp-processing/issues/124

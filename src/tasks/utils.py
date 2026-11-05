@@ -1,3 +1,4 @@
+import gzip
 import json
 import logging
 import re
@@ -24,6 +25,17 @@ from src.config import (
     DecpFormat,
     logger,
 )
+
+
+def gzip_file_reproducible(src: Path, dst: Path, compresslevel: int = 9) -> Path:
+    """Compresse `src` en gzip de façon reproductible (mtime=0, filename="") :
+    mêmes octets, donc même checksum, pour un même contenu."""
+    with open(src, "rb") as f_in, open(dst, "wb") as f_out:
+        with gzip.GzipFile(
+            filename="", mode="wb", compresslevel=compresslevel, fileobj=f_out, mtime=0
+        ) as f_gz:
+            shutil.copyfileobj(f_in, f_gz, length=1024 * 1024)
+    return dst
 
 
 def stream_replace_bytestring(iterator, old_bytestring: bytes, new_bytestring: bytes):

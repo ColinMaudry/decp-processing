@@ -8,7 +8,7 @@ from polars import selectors as cs
 from prefect import task
 
 from src.config import DIST_DIR, LOG_LEVEL, POSTGRESQL_DB_URI, REFERENCE_DIR
-from src.tasks.utils import get_logger
+from src.tasks.utils import get_logger, gzip_file_reproducible
 
 
 def swap_dist(work_dir: Path, dist_dir: Path) -> None:
@@ -47,6 +47,14 @@ def restore_legacy_uid(lf: pl.LazyFrame) -> pl.LazyFrame:
     return lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
 
 
+def _gzip_decp_csv(path: Path) -> None:
+    """`decp.csv` fait plusieurs Go : on produit aussi `decp.csv.gz` à côté
+    (gzip reproductible, checksum stable), publié à sa place sur data.gouv.fr."""
+    csv_path = Path(f"{path}.csv")
+    if path.name == "decp" and csv_path.exists():
+        gzip_file_reproducible(csv_path, Path(f"{path}.csv.gz"))
+
+
 def save_to_files(df: pl.DataFrame, path: Path, file_format=None):
     if file_format is None:
         file_format = ["csv", "parquet"]
@@ -56,6 +64,7 @@ def save_to_files(df: pl.DataFrame, path: Path, file_format=None):
         tmp_path.rename(path.with_suffix(".parquet"))
     if "csv" in file_format:
         df.write_csv(f"{path}.csv")
+        _gzip_decp_csv(path)
 
 
 def sink_to_files(
@@ -83,6 +92,8 @@ def sink_to_files(
     elif "csv" in file_format:
         # Fallback if only CSV is requested
         lf.sink_csv(f"{path}.csv", engine="streaming")
+
+    _gzip_decp_csv(path)
 
     # Si ça peut réduire un peu l'empreinte mémoire
     del lf
