@@ -171,12 +171,22 @@ def _make_trigger(deployment: str, env: str):
 
 
 def _get_state(run_id: str) -> RunState:
-    with get_client() as client:
+    # Client synchrone : ces helpers sont appelés depuis la boucle synchrone
+    # de `execute_remote_run` (le client async de Prefect 3.9 exige un
+    # contexte `async with` et lèverait une RuntimeError).
+    with get_client(sync_client=True) as client:
         state = client.read_flow_run(UUID(run_id)).state
     if state is None:
         return RunState.PENDING
     nom = state.name
-    if nom in ("Scheduled", "Pending", "AwaitingRetry", "Retrying", "Cancelling"):
+    if nom in (
+        "Scheduled",
+        "Pending",
+        "AwaitingRetry",
+        "Retrying",
+        "Cancelling",
+        "Late",
+    ):
         return RunState.PENDING
     if nom == "Running":
         return RunState.RUNNING
@@ -186,7 +196,7 @@ def _get_state(run_id: str) -> RunState:
 
 
 def _cancel(run_id: str) -> None:
-    with get_client() as client:
+    with get_client(sync_client=True) as client:
         client.set_flow_run_state(UUID(run_id), Cancelling())
 
 
