@@ -16,6 +16,7 @@ Ressources créées :
   utilisées par le lanceur (`prefect.concurrency.sync.concurrency`).
 """
 
+import asyncio
 import sys
 from pathlib import Path
 
@@ -105,29 +106,29 @@ def assurer_volume(api: BlockV1Alpha1API, zone: str, nom: str) -> str:
     return volume.id
 
 
-def assurer_pool(client, nom: str):
+async def assurer_pool(client, nom: str):
     """Retourne le work pool `nom` (type process), créé s'il n'existe pas."""
     try:
-        return client.read_work_pool(nom)
+        return await client.read_work_pool(nom)
     except ObjectNotFound:
-        pool = client.create_work_pool(WorkPoolCreate(name=nom, type="process"))
+        pool = await client.create_work_pool(WorkPoolCreate(name=nom, type="process"))
         print(f"Work pool créé : {nom}")
         return pool
 
 
-def assurer_limite(client, nom: str):
+async def assurer_limite(client, nom: str):
     """Retourne la limite de concurrence globale `nom` (valeur 1), créée sinon."""
     try:
-        return client.read_global_concurrency_limit_by_name(nom)
+        return await client.read_global_concurrency_limit_by_name(nom)
     except ObjectNotFound:
-        client.create_global_concurrency_limit(
+        await client.create_global_concurrency_limit(
             GlobalConcurrencyLimitCreate(name=nom, limit=LIMITE_VOLUME)
         )
         print(f"Limite de concurrence créée : {nom} ({LIMITE_VOLUME})")
-        return client.read_global_concurrency_limit_by_name(nom)
+        return await client.read_global_concurrency_limit_by_name(nom)
 
 
-def main() -> None:
+async def main() -> None:
     client_scw = Client.from_config_file_and_env()
     zone = client_scw.default_zone
     if not zone:
@@ -138,9 +139,11 @@ def main() -> None:
     block_api = BlockV1Alpha1API(client_scw)
     ids_volumes = {nom: assurer_volume(block_api, zone, nom) for nom in NOMS_VOLUMES}
 
-    with get_client() as client_prefect:
-        pools = {nom: assurer_pool(client_prefect, nom) for nom in NOMS_POOLS}
-        limites = {nom: assurer_limite(client_prefect, nom) for nom in NOMS_LIMITES}
+    async with get_client() as client_prefect:
+        pools = {nom: await assurer_pool(client_prefect, nom) for nom in NOMS_POOLS}
+        limites = {
+            nom: await assurer_limite(client_prefect, nom) for nom in NOMS_LIMITES
+        }
 
     print("\nÉtat final :")
     for nom, id_volume in ids_volumes.items():
@@ -152,4 +155,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

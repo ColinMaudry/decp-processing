@@ -376,6 +376,15 @@ SCALEWAY_SSH_KEY_PATH = make_path_from_env(
     "SCALEWAY_SSH_KEY_PATH", Path("~/.ssh/id_ed25519")
 ).expanduser()
 
+# Clé publique correspondante, injectée dans le user-data de l'instance
+# éphémère. Par défaut : le fichier .pub voisin de la clé privée. Elle est lue
+# directement, sans passer par `ssh-keygen -y` (qui exige une clé privée sans
+# passphrase dans un environnement non interactif).
+SCALEWAY_SSH_PUBLIC_KEY_PATH = make_path_from_env(
+    "SCALEWAY_SSH_PUBLIC_KEY_PATH",
+    SCALEWAY_SSH_KEY_PATH.parent / f"{SCALEWAY_SSH_KEY_PATH.name}.pub",
+).expanduser()
+
 # Volume de données Scaleway contenant le cache, par environnement.
 SCALEWAY_DATA_VOLUME_NAMES = {"prod": "decp-data-prod", "dev": "decp-data-dev"}
 

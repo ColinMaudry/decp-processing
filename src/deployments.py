@@ -156,7 +156,7 @@ if __name__ == "__main__":
 
     flow.from_source(
         source=GitRepository(
-            url="https://github.com/ColinMaudray/decp-processing.git", branch="main"
+            url="https://github.com/ColinMaudry/decp-processing.git", branch="main"
         ),
         entrypoint="src/flows/scrap.py:scrap",
     ).deploy(

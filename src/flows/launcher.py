@@ -27,6 +27,7 @@ from src.config import (
     INSTANCE_ENV_VARS,
     SCALEWAY_DATA_VOLUME_NAMES,
     SCALEWAY_SSH_KEY_PATH,
+    SCALEWAY_SSH_PUBLIC_KEY_PATH,
 )
 from src.flows.notify import notify_exception_by_email
 from src.infra.remote_run import (
@@ -86,14 +87,22 @@ def _ssh_command(ip: str) -> list[str]:
 
 
 def _public_key() -> str:
-    """Clé publique correspondant à SCALEWAY_SSH_KEY_PATH."""
-    proc = subprocess.run(
-        ["ssh-keygen", "-y", "-f", str(SCALEWAY_SSH_KEY_PATH)],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    return proc.stdout.strip()
+    """Clé publique de l'instance éphémère, lue depuis le fichier .pub."""
+    chemin = SCALEWAY_SSH_PUBLIC_KEY_PATH
+    try:
+        cle = chemin.read_text(encoding="utf-8").strip()
+    except OSError as e:
+        raise RuntimeError(
+            f"Impossible de lire la clé publique {chemin} : définissez "
+            "SCALEWAY_SSH_PUBLIC_KEY_PATH dans le .env du serveur (par défaut, "
+            "le fichier .pub voisin de SCALEWAY_SSH_KEY_PATH)."
+        ) from e
+    if not cle.startswith(("ssh-", "ecdsa-sha2-")):
+        raise RuntimeError(
+            f"{chemin} ne contient pas une clé publique OpenSSH (commence par "
+            f"{cle[:20]!r}) : il faut le fichier .pub, pas la clé privée."
+        )
+    return cle
 
 
 def _make_sync_dist() -> Callable[[str, Path], None]:
