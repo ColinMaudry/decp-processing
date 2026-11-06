@@ -17,22 +17,18 @@ def _api_pour_delete(state="running"):
     return api
 
 
-def test_delete_instance_detache_avant_terminate():
+def test_delete_instance_detache_avant_destruction():
     api = _api_pour_delete()
     p = ScalewayProvider(instance_api=api, block_api=MagicMock(), zone="fr-par-1")
     p.delete_instance("srv", "vol-data")
     calls = [c[0] for c in api.method_calls]
-    assert (
-        calls.index("detach_server_volume")
-        < [
-            i
-            for i, c in enumerate(api.method_calls)
-            if c[0] == "server_action" and c.kwargs["action"] == ServerAction.TERMINATE
-        ][0]
-    )
+    assert calls.index("detach_server_volume") < calls.index("delete_server")
     api.detach_server_volume.assert_called_once_with(
         server_id="srv", volume_id="vol-data", zone="fr-par-1"
     )
+    # terminate est refusé par l'API sur un serveur stopped : jamais envoyé.
+    actions = [c.kwargs["action"] for c in api.method_calls if c[0] == "server_action"]
+    assert ServerAction.TERMINATE not in actions
 
 
 def test_delete_instance_supprime_volume_boot():
@@ -49,7 +45,7 @@ def test_delete_instance_deja_stopped_detruit_sans_poweroff():
     p.delete_instance("srv", "vol-data")
     actions = [c.kwargs["action"] for c in api.method_calls if c[0] == "server_action"]
     assert ServerAction.POWEROFF not in actions
-    assert ServerAction.TERMINATE in actions
+    api.delete_server.assert_called_once_with(server_id="srv", zone="fr-par-1")
     api.detach_server_volume.assert_called_once_with(
         server_id="srv", volume_id="vol-data", zone="fr-par-1"
     )
@@ -122,10 +118,15 @@ def test_create_instance_ordre_et_parametres():
     assert kw["dynamic_ip_required"] is True
     assert kw["image"] == "debian_bookworm"
     assert kw["commercial_type"] == "POP2-HM-8C-64G"
-    assert kw["volumes"]["0"].boot is True
-    assert kw["volumes"]["0"].name == "decp-boot"
+    # Volume boot : template minimal (boot/name interdits par l'API Scaleway
+    # sur un volume SBS créé depuis une image) ; volume de données : id seul,
+    # size None (le SDK met 0 par défaut, refusé avec id).
+    assert kw["volumes"]["0"].volume_type == "sbs_volume"
     assert kw["volumes"]["0"].size == 40_000_000_000
+    assert kw["volumes"]["0"].boot is None
+    assert kw["volumes"]["0"].name is None
     assert kw["volumes"]["1"].id == "vol-data"
+    assert kw["volumes"]["1"].size is None
     assert inst == Instance(
         id="srv",
         ip="1.2.3.4",

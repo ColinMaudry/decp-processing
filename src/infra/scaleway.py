@@ -3,6 +3,7 @@
 Aucune logique Prefect ici. Le user-data n'est jamais journalisé.
 """
 
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -88,13 +89,23 @@ class ScalewayProvider:
             dynamic_ip_required=True,
             image="debian_bookworm",
             volumes={
+                # Volume boot : template minimal exigé par l'API (le CLI
+                # Scaleway envoie pareil) — `boot` et `name` en plus déclenchent
+                # « cannot create a raw SBS volume ». Le label debian_bookworm
+                # résout vers une image à root volume SBS.
                 "0": VolumeServerTemplate(
                     volume_type="sbs_volume",
                     size=TAILLE_VOLUME_BOOT,
-                    boot=True,
-                    name=f"{name}-boot",
+                    # boot=False par défaut dans le SDK : il faut None pour
+                    # l'exclure du payload.
+                    boot=None,
                 ),
-                "1": VolumeServerTemplate(id=data_volume_id, volume_type="sbs_volume"),
+                # Volume de données existant : id seul. `size` doit être None
+                # explicitement (le SDK met 0 par défaut et l'API refuse
+                # « id » et « size » sur un même volume).
+                "1": VolumeServerTemplate(
+                    id=data_volume_id, volume_type="sbs_volume", size=None
+                ),
             },
             tags=tags,
         ).server
@@ -119,6 +130,10 @@ class ScalewayProvider:
         sur un serveur déjà `stopped` (échec de destruction précédent, arrêt
         manuel), ce qui bloquerait les runs suivants. Le volume de données
         n'est détaché qu'une fois l'état `stopped` confirmé.
+
+        La destruction passe par `delete_server` (DELETE) : l'action
+        `terminate` est refusée par l'API sur un serveur `stopped`
+        (« invalid state 'stopped' for the action 'terminate' »).
         """
         api = self.instance_api
         server = api.get_server(server_id=instance_id, zone=self.zone).server
@@ -132,15 +147,20 @@ class ScalewayProvider:
         api.detach_server_volume(
             server_id=instance_id, volume_id=data_volume_id, zone=self.zone
         )
-        api.server_action(
-            server_id=instance_id, zone=self.zone, action=ServerAction.TERMINATE
-        )
+        api.delete_server(server_id=instance_id, zone=self.zone)
         if boot_id is not None:
-            try:
-                self.block_api.delete_volume(volume_id=boot_id, zone=self.zone)
-            except ScalewayException as e:
-                if e.status_code != 404:
-                    raise
+            # Le volume boot SBS reste « in_use » quelques secondes après la
+            # suppression du serveur : retry borné sur le 412.
+            for tentative in range(3):
+                try:
+                    self.block_api.delete_volume(volume_id=boot_id, zone=self.zone)
+                    break
+                except ScalewayException as e:
+                    if e.status_code == 404:
+                        break
+                    if e.status_code != 412 or tentative == 2:
+                        raise
+                    time.sleep(5)
 
     def list_instances(self, tags: list[str]) -> list[Instance]:
         servers = self.instance_api.list_servers(zone=self.zone, tags=tags).servers
