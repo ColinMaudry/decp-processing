@@ -16,7 +16,7 @@ cat > /etc/decp.env <<'EOF'
 ${ENV_FILE}
 EOF
 chmod 600 /etc/decp.env
-apt-get update && apt-get install -y git rsync curl libpq-dev gcc
+apt-get update && apt-get install -y git rsync curl libpq-dev gcc python3-dev
 curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh
 git clone --depth 1 --branch ${BRANCH} https://github.com/ColinMaudry/decp-processing.git /opt/decp-processing
 cd /opt/decp-processing && uv sync --frozen
