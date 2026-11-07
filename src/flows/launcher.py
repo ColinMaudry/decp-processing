@@ -179,20 +179,29 @@ def _get_state(run_id: str) -> RunState:
     if state is None:
         return RunState.PENDING
     nom = state.name
+    # États transitoires de Prefect : « Submitting » notamment est une fenêtre
+    # de quelques secondes entre la soumission et le démarrage — le mapper sur
+    # FAILED (défaut précédent) a détruit une instance pendant un run sain.
     if nom in (
         "Scheduled",
+        "Late",
         "Pending",
+        "Submitting",
         "AwaitingRetry",
         "Retrying",
         "Cancelling",
-        "Late",
+        "Suspended",
     ):
         return RunState.PENDING
     if nom == "Running":
         return RunState.RUNNING
     if nom == "Completed":
         return RunState.COMPLETED
-    return RunState.FAILED
+    if nom in ("Failed", "Crashed", "Cancelled"):
+        return RunState.FAILED
+    # État inconnu (future version de Prefect) : attendre plutôt que tuer —
+    # les délais bornés (start_timeout, max_duration) garantissent la fin.
+    return RunState.PENDING
 
 
 def _cancel(run_id: str) -> None:

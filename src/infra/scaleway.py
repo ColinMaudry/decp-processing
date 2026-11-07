@@ -149,17 +149,25 @@ class ScalewayProvider:
         )
         api.delete_server(server_id=instance_id, zone=self.zone)
         if boot_id is not None:
-            # Le volume boot SBS reste « in_use » quelques secondes après la
-            # suppression du serveur : retry borné sur le 412.
-            for tentative in range(3):
+            # Le volume boot SBS reste « in_use » un moment après la
+            # suppression du serveur : dizaines de secondes pour un serveur
+            # ayant tourné (détachement asynchrone côté Scaleway). On
+            # réessaie pendant 60 s ; au-delà on échoue bruyamment plutôt
+            # que de laisser un volume facturé fuiter en silence.
+            for tentative in range(12):
                 try:
                     self.block_api.delete_volume(volume_id=boot_id, zone=self.zone)
                     break
                 except ScalewayException as e:
                     if e.status_code == 404:
                         break
-                    if e.status_code != 412 or tentative == 2:
-                        raise
+                    if e.status_code != 412 or tentative == 11:
+                        raise RuntimeError(
+                            f"Le volume boot {boot_id} n'a pas pu être supprimé "
+                            "(encore « in_use » 60 s après la suppression du "
+                            "serveur) : supprimez-le dans la console Scaleway "
+                            "pour éviter la facturation."
+                        ) from e
                     time.sleep(5)
 
     def list_instances(self, tags: list[str]) -> list[Instance]:

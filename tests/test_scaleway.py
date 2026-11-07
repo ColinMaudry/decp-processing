@@ -1,8 +1,10 @@
 from datetime import datetime, timezone
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
 from scaleway.instance.v1 import ServerAction
+from scaleway_core.api import ScalewayException
 
 from src.infra.scaleway import Instance, ScalewayProvider
 
@@ -49,6 +51,41 @@ def test_delete_instance_deja_stopped_detruit_sans_poweroff():
     api.detach_server_volume.assert_called_once_with(
         server_id="srv", volume_id="vol-data", zone="fr-par-1"
     )
+
+
+def test_delete_instance_persiste_sur_volume_boot_in_use(monkeypatch):
+    """Le volume boot reste « in_use » un moment après la suppression du
+    serveur : la suppression doit être réessayée jusqu'à 60 s, pas plus."""
+    api = _api_pour_delete()
+    block = MagicMock()
+    reponse_412 = SimpleNamespace(
+        status_code=412,
+        text='{"message": "in_use"}',
+        json=lambda: {"message": "in_use"},
+    )
+    effets = [ScalewayException(reponse_412)] * 3
+    block.delete_volume.side_effect = effets + [None]
+    monkeypatch.setattr("src.infra.scaleway.time.sleep", lambda _: None)
+    p = ScalewayProvider(instance_api=api, block_api=block, zone="fr-par-1")
+    p.delete_instance("srv", "vol-data")
+    assert block.delete_volume.call_count == 4
+    block.delete_volume.assert_called_with(volume_id="vol-boot", zone="fr-par-1")
+
+
+def test_delete_instance_echoue_bruyamment_apres_60s(monkeypatch):
+    api = _api_pour_delete()
+    block = MagicMock()
+    reponse_412 = SimpleNamespace(
+        status_code=412,
+        text='{"message": "in_use"}',
+        json=lambda: {"message": "in_use"},
+    )
+    block.delete_volume.side_effect = ScalewayException(reponse_412)
+    monkeypatch.setattr("src.infra.scaleway.time.sleep", lambda _: None)
+    p = ScalewayProvider(instance_api=api, block_api=block, zone="fr-par-1")
+    with pytest.raises(RuntimeError, match="vol-boot"):
+        p.delete_instance("srv", "vol-data")
+    assert block.delete_volume.call_count == 12
 
 
 def test_delete_instance_running_poweroff_puis_stopped_avant_detachement():
