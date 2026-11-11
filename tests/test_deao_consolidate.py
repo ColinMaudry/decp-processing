@@ -301,6 +301,15 @@ def test_uid_doublon():
     assert res.stats["uid_doublon"] == 1
 
 
+def test_uid_doublon_choix_deterministe():
+    a = avis(idAvis="I", lotIntitule="Lot A", objet="a")
+    b = avis(idAvis="I", lotIntitule="Lot B", objet="b")
+    for lignes in ([a, b], [b, a]):
+        res = consolidate(frame(lignes), RUN, 90)
+        # même ligne conservée quel que soit l'ordre d'entrée : le plus petit intitulé
+        assert res.df["lotIntitule"].to_list() == ["Lot A"]
+
+
 def test_consolidate_fixtures():
     df, _ = parse_day({p.name: p.read_bytes() for p in FIXTURES.glob("*.xml")})
     out = consolidate(df, RUN, 90).df

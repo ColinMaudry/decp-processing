@@ -276,8 +276,9 @@ La date du run est un paramètre de la fonction (injectable en test).
 
 ### 4. Contrôle
 
-Unicité de `uid` vérifiée ; en cas de doublons : avertissement avec comptage, conservation
-de la ligne de `idDernierAvis` le plus récent.
+Unicité de `uid` vérifiée ; en cas de doublons (même chaîne, même `lotId`, donc même
+dernier avis) : avertissement avec comptage, conservation de la ligne au plus petit
+`lotIntitule`, puis `objet`, puis `description` (choix déterministe).
 
 ## Enrichissement acheteur (`enrich.py`)
 

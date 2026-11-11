@@ -209,14 +209,19 @@ def consolidate(avis: pl.DataFrame, run_date: date, delai_jours: int) -> Consoli
     )
 
     avant = df.height
-    df = df.sort(["_dateDernierAvis", "idDernierAvis"], nulls_last=False).unique(
-        "uid", keep="last", maintain_order=True
-    )
+    # Doublons d'uid = même chaîne et même lotId : le dernier avis est le même pour
+    # toutes ces lignes, on départage donc par le contenu (plus petit lotIntitule,
+    # puis objet, puis description) pour un résultat indépendant de l'ordre d'entrée.
+    df = df.sort(
+        ["uid", "lotIntitule", "objet", "description"],
+        nulls_last=True,
+        maintain_order=True,
+    ).unique("uid", keep="first", maintain_order=True)
     stats["uid_doublon"] += avant - df.height
     if stats["uid_doublon"]:
         logger.warning(
             f"{stats['uid_doublon']} lignes en doublon d'uid supprimées "
-            "(conservation du idDernierAvis le plus récent)"
+            "(conservation de la ligne au plus petit lotIntitule/objet/description)"
         )
 
     df = df.select(OUTPUT_COLUMNS).sort("uid")
