@@ -22,7 +22,12 @@ from src.tasks.deao.consolidate import consolidate
 from src.tasks.deao.enrich import enrich_acheteurs
 from src.tasks.deao.geocode_cache import ADRESSE_GEOCODE_SCHEMA, geocoder_adresses
 from src.tasks.deao.report import lignes_rapport, publier_rapport
-from src.tasks.deao.schema import PUBLISHED_FIELDS, empty_avis_frame, write_table_schema
+from src.tasks.deao.schema import (
+    AVIS_LOT_SCHEMA,
+    PUBLISHED_FIELDS,
+    empty_avis_frame,
+    write_table_schema,
+)
 from src.tasks.deao.sources.boamp.acquire import acquire_boamp
 from src.tasks.output import sink_to_files
 from src.tasks.publish import publish_deao_to_datagouv, should_publish_deao
@@ -53,7 +58,14 @@ def lire_partitions() -> pl.DataFrame:
     fichiers = sorted(DEAO_PARTITIONS_DIR.rglob("*.parquet"))
     if not fichiers:
         return empty_avis_frame()
-    return pl.scan_parquet(fichiers).collect()
+    # Schéma imposé : une partition écrite avant un changement de contrat est lue
+    # avec null pour une colonne ajoutée depuis, et sans une colonne retirée.
+    return pl.scan_parquet(
+        fichiers,
+        schema=AVIS_LOT_SCHEMA,
+        missing_columns="insert",
+        extra_columns="ignore",
+    ).collect()
 
 
 def selection_publiee(df: pl.DataFrame) -> pl.DataFrame:
@@ -126,6 +138,13 @@ def deao_processing(run_date: str | None = None) -> None:
         logger.info(
             "Publication DEAO désactivée (DECP_PROCESSING_PUBLISH, DEAO_DATASET_ID "
             f"ou {df.height} lignes < DEAO_MIN_ROWS_TO_PUBLISH)."
+        )
+
+    # R20 : les jours sains sont écrits et publiés, mais le run échoue visiblement.
+    if stats["jour_en_erreur"] > 0:
+        raise RuntimeError(
+            f"{stats['jour_en_erreur']} jour(s) BOAMP en erreur (listing, "
+            "téléchargement ou parsing) : ils seront retentés au prochain run."
         )
 
     logger.info("☑️  Fin du flow deao_processing.")

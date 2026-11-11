@@ -136,7 +136,7 @@ def process_batch(items: list[tuple[date, Action, bool]]) -> Counter:
     return total
 
 
-@task(retries=2)
+@task
 def process_batch_task(items: list[tuple[date, Action, bool]]) -> Counter:
     return process_batch(items)
 

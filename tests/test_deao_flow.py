@@ -9,7 +9,7 @@ import polars as pl
 import pytest
 
 from src.tasks.deao.geocode_cache import ADRESSE_GEOCODE_SCHEMA
-from src.tasks.deao.schema import PUBLISHED_FIELDS
+from src.tasks.deao.schema import AVIS_LOT_SCHEMA, PUBLISHED_FIELDS, conform_avis
 from src.tasks.deao.sources.boamp import acquire, fetch
 from tests.deao_fakes import fake_s3  # noqa: F401
 from tests.test_deao_enrich import COG, _lf_etab, _lf_ul
@@ -110,3 +110,41 @@ def test_deao_processing_geocodage_indisponible_continue(flow_env, monkeypatch):
     assert pl.read_parquet(flow_env / "deao.parquet").height == 31
     lignes = {ligne["indicateur"]: ligne["valeur"] for ligne in rapports[0]}
     assert lignes["geocodage_en_erreur"] == 1
+
+
+def test_deao_processing_jour_en_erreur_publie_puis_echoue(flow_env, monkeypatch):
+    """R20 : les jours sains sont écrits (et publiés), puis le run échoue."""
+    jour_ko = fetch.day_index_urls(date(2026, 10, 1))[0]
+    http_get = fetch.http_get
+
+    def http_get_avec_panne(url):
+        if url == jour_ko:
+            return httpx.Response(500, text="")
+        return http_get(url)
+
+    monkeypatch.setattr(fetch, "http_get", http_get_avec_panne)
+    publications = []
+    monkeypatch.setattr(flow_module, "should_publish_deao", lambda n: True)
+    monkeypatch.setattr(flow_module, "publish_deao_to_datagouv", publications.append)
+    with pytest.raises(RuntimeError, match="1 jour"):
+        flow_module.deao_processing(run_date="2026-10-15")
+    assert pl.read_parquet(flow_env / "deao.parquet").height == 31
+    assert publications == [flow_env]
+
+
+def test_lire_partitions_tolere_un_changement_de_contrat(tmp_path, monkeypatch):
+    """Des partitions écrites avant un changement de contrat (colonne ajoutée ou
+    retirée) n'arrêtent pas la lecture : colonne absente → null, en trop → ignorée."""
+    monkeypatch.setattr(flow_module, "DEAO_PARTITIONS_DIR", tmp_path)
+    mois = tmp_path / "boamp" / "2026" / "10"
+    mois.mkdir(parents=True)
+    ancienne = conform_avis(pl.DataFrame({"idAvis": ["26-0"]})).drop("sourceFile")
+    ancienne.with_columns(pl.lit("x").alias("retiree")).write_parquet(
+        mois / "01.parquet"
+    )
+    conform_avis(
+        pl.DataFrame({"idAvis": ["26-1"], "sourceFile": ["https://x/26-1.xml"]})
+    ).write_parquet(mois / "02.parquet")
+    df = flow_module.lire_partitions()
+    assert df.schema == pl.Schema(AVIS_LOT_SCHEMA)
+    assert df.sort("idAvis")["sourceFile"].to_list() == [None, "https://x/26-1.xml"]
