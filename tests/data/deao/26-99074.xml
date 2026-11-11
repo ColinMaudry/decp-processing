@@ -1,0 +1,476 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jo:ann xmlns:jo="http://boamp.journal-officiel.gouv.fr/XML/3.2.5">
+
+   <DONNEES>
+      <EFORMS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         <ContractNotice xmlns:cac="urn:boamp:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:boamp:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:efac="http://data.europa.eu/p27/eforms-ubl-extension-aggregate-components/1" xmlns:efbc="http://data.europa.eu/p27/eforms-ubl-extension-basic-components/1" xmlns:efext="http://data.europa.eu/p27/eforms-ubl-extensions/1" xmlns:ext="urn:boamp:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+            <ext:UBLExtensions>
+               <ext:UBLExtension>
+                  <ext:ExtensionContent>
+                     <efext:EformsExtension>
+                        <efac:Changes>
+                           <efbc:ChangedNoticeIdentifier>17114689-cb66-44e1-b420-be7e501a33b0-01</efbc:ChangedNoticeIdentifier>
+                           <efac:Change>
+                              <efbc:ChangeDescription languageID="FRA">Remise des offres:  Au lieu du 19/10/2026 à 16h30 au plus tard. Lire 30/10/2026 à 16h30 au plus tard.</efbc:ChangeDescription>
+                              <efac:ChangedSection>
+                                 <efbc:ChangedSectionIdentifier>PROCEDURE</efbc:ChangedSectionIdentifier>
+                              </efac:ChangedSection>
+                           </efac:Change>
+                           <efac:Change>
+                              <efbc:ChangeDescription languageID="FRA">Date d'ouverture des offres:  Au lieu du 19/10/2026 à 16h30 au plus tard. Lire 30/10/2026 à 16h30 au plus tard.</efbc:ChangeDescription>
+                              <efac:ChangedSection>
+                                 <efbc:ChangedSectionIdentifier>PROCEDURE</efbc:ChangedSectionIdentifier>
+                              </efac:ChangedSection>
+                           </efac:Change>
+                        </efac:Changes>
+                        <efac:NoticeSubType>
+                           <cbc:SubTypeCode listName="notice-subtype">16</cbc:SubTypeCode>
+                        </efac:NoticeSubType>
+                        <efac:Organizations>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0001</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">Avenue-Web Systèmes</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:CityName>Seyssinet-Pariset</cbc:CityName>
+                                    <cbc:PostalZone>38170</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRK24</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID schemeName="eu">13B833E5-926F-1D3D-58DDB2E5418BEE2B</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>+33480041260</cbc:Telephone>
+                                    <cbc:ElectronicMail>publications-joue@aws-france.com</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cbc:WebsiteURI>http://www.pro-marchespublics.com</cbc:WebsiteURI>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0002</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">COMMUNAUTÉ DE COMMUNES LOCHES SUD TOURAINE</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>12 Avenue de la Liberté</cbc:StreetName>
+                                    <cbc:CityName>Loches</cbc:CityName>
+                                    <cbc:PostalZone>37600</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRB04</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID schemeName="eu">2345</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Name>HENAULT Gérard</cbc:Name>
+                                    <cbc:JobTitle>Président</cbc:JobTitle>
+                                    <cbc:Telephone>0247919391</cbc:Telephone>
+                                    <cbc:ElectronicMail>florence.magnol@lochessudtouraine.com</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0003</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">COMMUNAUTÉ DE COMMUNES LOCHES SUD TOURAINE</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>12 Avenue de la Liberté</cbc:StreetName>
+                                    <cbc:CityName>Loches</cbc:CityName>
+                                    <cbc:PostalZone>37600</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRB04</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID schemeName="eu">13B83403-0307-51E0-8918E2BE1EB71351</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Name>service marchés publics</cbc:Name>
+                                    <cbc:Telephone>0247919391</cbc:Telephone>
+                                    <cbc:ElectronicMail>florence.magnol@lochessudtouraine.com</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0004</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">Tribunal administratif d'Orléans</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>28 Rue de la Bretonnerie</cbc:StreetName>
+                                    <cbc:CityName>Orléans</cbc:CityName>
+                                    <cbc:PostalZone>45057</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRB06</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID schemeName="eu">13B83412-ED38-E69A-966AAC2043F70D74</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>0238775900</cbc:Telephone>
+                                    <cbc:Telefax>0238538516</cbc:Telefax>
+                                    <cbc:ElectronicMail>greffe.ta-orleans@juradm.fr</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0005</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">Tribunal administratif d'Orléans</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>28 Rue de la Bretonnerie</cbc:StreetName>
+                                    <cbc:CityName>Orléans</cbc:CityName>
+                                    <cbc:PostalZone>45057</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRB06</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID schemeName="eu">13B83420-ACCF-C21A-D189160B19C96B55</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>0238775900</cbc:Telephone>
+                                    <cbc:Telefax>0238538516</cbc:Telefax>
+                                    <cbc:ElectronicMail>greffe.ta-orleans@juradm.fr</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                        </efac:Organizations>
+                     </efext:EformsExtension>
+                  </ext:ExtensionContent>
+               </ext:UBLExtension>
+            </ext:UBLExtensions>
+            <cbc:UBLVersionID>2.3</cbc:UBLVersionID>
+            <cbc:CustomizationID>eforms-sdk-1.12</cbc:CustomizationID>
+            <cbc:ID schemeName="notice-id">53d43f07-bbcd-4221-a838-ede3e3fe50b8</cbc:ID>
+            <cbc:ContractFolderID>e9cff6a3-7be8-4da3-8a90-661c70dd1b56</cbc:ContractFolderID>
+            <cbc:IssueDate>2026-10-13+02:00</cbc:IssueDate>
+            <cbc:IssueTime>14:10:39+02:00</cbc:IssueTime>
+            <cbc:VersionID>01</cbc:VersionID>
+            <cbc:RegulatoryDomain>32014L0024</cbc:RegulatoryDomain>
+            <cbc:NoticeTypeCode listName="competition">cn-standard</cbc:NoticeTypeCode>
+            <cbc:NoticeLanguageCode>FRA</cbc:NoticeLanguageCode>
+            <cac:ContractingParty>
+               <cbc:BuyerProfileURI>http://www.pro-marchespublics.com</cbc:BuyerProfileURI>
+               <cac:ContractingPartyType>
+                  <cbc:PartyTypeCode listName="buyer-legal-type">body-pl</cbc:PartyTypeCode>
+               </cac:ContractingPartyType>
+               <cac:ContractingActivity>
+                  <cbc:ActivityTypeCode listName="authority-activity">gen-pub</cbc:ActivityTypeCode>
+               </cac:ContractingActivity>
+               <cac:Party>
+                  <cac:PartyIdentification>
+                     <cbc:ID schemeName="organization">ORG-0002</cbc:ID>
+                  </cac:PartyIdentification>
+                  <cac:ServiceProviderParty>
+                     <cbc:ServiceTypeCode listName="organisation-role">ted-esen</cbc:ServiceTypeCode>
+                     <cac:Party>
+                        <cac:PartyIdentification>
+                           <cbc:ID schemeName="organization">ORG-0001</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:Party>
+                  </cac:ServiceProviderParty>
+               </cac:Party>
+            </cac:ContractingParty>
+            <cac:TenderingTerms>
+               <cac:TendererQualificationRequest>
+                  <cac:SpecificTendererRequirement>
+                     <cbc:TendererRequirementTypeCode listName="exclusion-grounds-source">epo-procurement-document</cbc:TendererRequirementTypeCode>
+                  </cac:SpecificTendererRequirement>
+               </cac:TendererQualificationRequest>
+            </cac:TenderingTerms>
+            <cac:TenderingProcess>
+               <cbc:ProcedureCode languageID="FRA" listName="procurement-procedure-type">open</cbc:ProcedureCode>
+               <cac:ProcessJustification>
+                  <cbc:ProcessReasonCode listName="accelerated-procedure">false</cbc:ProcessReasonCode>
+               </cac:ProcessJustification>
+            </cac:TenderingProcess>
+            <cac:ProcurementProject>
+               <cbc:ID>2026/4/3/54/00/00/00</cbc:ID>
+               <cbc:Name languageID="FRA">Marchés de mise à disposition de contenants, transport et traitement des Déchets Dangereux Ménagers (DDM) des huit déchèteries du territoire de la communauté de communes Loches Sud Touraine</cbc:Name>
+               <cbc:Description languageID="FRA">Pour l'année 2025, le tonnage concerné par la présente consultation est d'environ 137 tonnes de déchets ménagers spéciaux, 10 tonnes de batteries et 80 tonnes d'éco DDS issus des huit déchèteries du territoire</cbc:Description>
+               <cbc:ProcurementTypeCode listName="contract-nature">services</cbc:ProcurementTypeCode>
+               <cac:MainCommodityClassification>
+                  <cbc:ItemClassificationCode listName="cpv">90520000</cbc:ItemClassificationCode>
+               </cac:MainCommodityClassification>
+               <cac:AdditionalCommodityClassification>
+                  <cbc:ItemClassificationCode listName="cpv">90500000</cbc:ItemClassificationCode>
+               </cac:AdditionalCommodityClassification>
+               <cac:AdditionalCommodityClassification>
+                  <cbc:ItemClassificationCode listName="cpv">90510000</cbc:ItemClassificationCode>
+               </cac:AdditionalCommodityClassification>
+               <cac:RealizedLocation>
+                  <cac:Address>
+                     <cbc:CountrySubentityCode listName="nuts">FRB04</cbc:CountrySubentityCode>
+                     <cac:Country>
+                        <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                     </cac:Country>
+                  </cac:Address>
+               </cac:RealizedLocation>
+            </cac:ProcurementProject>
+            <cac:ProcurementProjectLot>
+               <cbc:ID schemeName="Lot">LOT-0000</cbc:ID>
+               <cac:TenderingTerms>
+                  <cbc:FundingProgramCode listName="eu-funded">no-eu-funds</cbc:FundingProgramCode>
+                  <cac:CallForTendersDocumentReference>
+                     <cbc:ID>28354</cbc:ID>
+                     <cbc:DocumentType>non-restricted-document</cbc:DocumentType>
+                     <cbc:LanguageID>FRA</cbc:LanguageID>
+                     <cbc:DocumentStatusCode listName="linguistic-status">official</cbc:DocumentStatusCode>
+                     <cac:Attachment>
+                        <cac:ExternalReference>
+                           <cbc:URI>https://nr.aws-achat.info//avis/index.cfm?fuseaction=dematEnt.login&amp;amp;type=DCE&amp;amp;IDM=28354</cbc:URI>
+                        </cac:ExternalReference>
+                     </cac:Attachment>
+                  </cac:CallForTendersDocumentReference>
+                  <cac:TendererQualificationRequest>
+                     <cac:SpecificTendererRequirement>
+                        <cbc:TendererRequirementTypeCode listName="selection-criteria-source">epo-procurement-document</cbc:TendererRequirementTypeCode>
+                     </cac:SpecificTendererRequirement>
+                  </cac:TendererQualificationRequest>
+                  <cac:TendererQualificationRequest>
+                     <cac:SpecificTendererRequirement>
+                        <cbc:TendererRequirementTypeCode listName="reserved-procurement">none</cbc:TendererRequirementTypeCode>
+                     </cac:SpecificTendererRequirement>
+                  </cac:TendererQualificationRequest>
+                  <cac:ContractExecutionRequirement>
+                     <cbc:ExecutionRequirementCode listName="einvoicing">required</cbc:ExecutionRequirementCode>
+                  </cac:ContractExecutionRequirement>
+                  <cac:ContractExecutionRequirement>
+                     <cbc:ExecutionRequirementCode listName="ecatalog-submission">not-allowed</cbc:ExecutionRequirementCode>
+                  </cac:ContractExecutionRequirement>
+                  <cac:ContractExecutionRequirement>
+                     <cbc:ExecutionRequirementCode listName="esignature-submission">false</cbc:ExecutionRequirementCode>
+                  </cac:ContractExecutionRequirement>
+                  <cac:ContractExecutionRequirement>
+                     <cbc:ExecutionRequirementCode listName="reserved-execution">no</cbc:ExecutionRequirementCode>
+                  </cac:ContractExecutionRequirement>
+                  <cac:AwardingTerms>
+                     <cac:AwardingCriterion>
+                        <cac:SubordinateAwardingCriterion>
+                           <ext:UBLExtensions>
+                              <ext:UBLExtension>
+                                 <ext:ExtensionContent>
+                                    <efext:EformsExtension>
+                                       <efac:AwardCriterionParameter>
+                                          <efbc:ParameterCode listName="number-weight">per-exa</efbc:ParameterCode>
+                                          <efbc:ParameterNumeric>50</efbc:ParameterNumeric>
+                                       </efac:AwardCriterionParameter>
+                                    </efext:EformsExtension>
+                                 </ext:ExtensionContent>
+                              </ext:UBLExtension>
+                           </ext:UBLExtensions>
+                           <cbc:AwardingCriterionTypeCode listName="award-criterion-type">quality</cbc:AwardingCriterionTypeCode>
+                           <cbc:Description languageID="FRA">Valeur technique</cbc:Description>
+                        </cac:SubordinateAwardingCriterion>
+                        <cac:SubordinateAwardingCriterion>
+                           <ext:UBLExtensions>
+                              <ext:UBLExtension>
+                                 <ext:ExtensionContent>
+                                    <efext:EformsExtension>
+                                       <efac:AwardCriterionParameter>
+                                          <efbc:ParameterCode listName="number-weight">per-exa</efbc:ParameterCode>
+                                          <efbc:ParameterNumeric>10</efbc:ParameterNumeric>
+                                       </efac:AwardCriterionParameter>
+                                    </efext:EformsExtension>
+                                 </ext:ExtensionContent>
+                              </ext:UBLExtension>
+                           </ext:UBLExtensions>
+                           <cbc:AwardingCriterionTypeCode listName="award-criterion-type">quality</cbc:AwardingCriterionTypeCode>
+                           <cbc:Description languageID="FRA">Performances en matière de protection de l'environnement</cbc:Description>
+                        </cac:SubordinateAwardingCriterion>
+                        <cac:SubordinateAwardingCriterion>
+                           <ext:UBLExtensions>
+                              <ext:UBLExtension>
+                                 <ext:ExtensionContent>
+                                    <efext:EformsExtension>
+                                       <efac:AwardCriterionParameter>
+                                          <efbc:ParameterCode listName="number-weight">per-exa</efbc:ParameterCode>
+                                          <efbc:ParameterNumeric>40</efbc:ParameterNumeric>
+                                       </efac:AwardCriterionParameter>
+                                    </efext:EformsExtension>
+                                 </ext:ExtensionContent>
+                              </ext:UBLExtension>
+                           </ext:UBLExtensions>
+                           <cbc:AwardingCriterionTypeCode listName="award-criterion-type">price</cbc:AwardingCriterionTypeCode>
+                           <cbc:Description languageID="FRA">Prix des prestations</cbc:Description>
+                        </cac:SubordinateAwardingCriterion>
+                     </cac:AwardingCriterion>
+                  </cac:AwardingTerms>
+                  <cac:AdditionalInformationParty>
+                     <cac:PartyIdentification>
+                        <cbc:ID schemeName="touchpoint">ORG-0003</cbc:ID>
+                     </cac:PartyIdentification>
+                  </cac:AdditionalInformationParty>
+                  <cac:TenderRecipientParty>
+                     <cbc:EndpointID>https://nr.aws-achat.info//avis/index.cfm?fuseaction=demat.termes&amp;amp;IDM=28354</cbc:EndpointID>
+                  </cac:TenderRecipientParty>
+                  <cac:TenderValidityPeriod>
+                     <cbc:DurationMeasure unitCode="MONTH">6</cbc:DurationMeasure>
+                  </cac:TenderValidityPeriod>
+                  <cac:AppealTerms>
+                     <cac:AppealInformationParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID schemeName="organization">ORG-0005</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:AppealInformationParty>
+                     <cac:AppealReceiverParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID schemeName="organization">ORG-0004</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:AppealReceiverParty>
+                  </cac:AppealTerms>
+                  <cac:Language>
+                     <cbc:ID>FRA</cbc:ID>
+                  </cac:Language>
+                  <cac:PostAwardProcess>
+                     <cbc:ElectronicOrderUsageIndicator>false</cbc:ElectronicOrderUsageIndicator>
+                     <cbc:ElectronicPaymentUsageIndicator>false</cbc:ElectronicPaymentUsageIndicator>
+                  </cac:PostAwardProcess>
+               </cac:TenderingTerms>
+               <cac:TenderingProcess>
+                  <ext:UBLExtensions>
+                     <ext:UBLExtension>
+                        <ext:ExtensionContent>
+                           <efext:EformsExtension>
+                              <efbc:AccessToolName>AW Solutions</efbc:AccessToolName>
+                           </efext:EformsExtension>
+                        </ext:ExtensionContent>
+                     </ext:UBLExtension>
+                  </ext:UBLExtensions>
+                  <cbc:SubmissionMethodCode listName="esubmission">required</cbc:SubmissionMethodCode>
+                  <cbc:GovernmentAgreementConstraintIndicator>true</cbc:GovernmentAgreementConstraintIndicator>
+                  <cac:TenderSubmissionDeadlinePeriod>
+                     <cbc:EndDate>2026-10-30+01:00</cbc:EndDate>
+                     <cbc:EndTime>16:30:00+01:00</cbc:EndTime>
+                  </cac:TenderSubmissionDeadlinePeriod>
+                  <cac:OpenTenderEvent>
+                     <cbc:OccurrenceDate>2026-10-30+01:00</cbc:OccurrenceDate>
+                     <cbc:OccurrenceTime>16:30:00+01:00</cbc:OccurrenceTime>
+                  </cac:OpenTenderEvent>
+                  <cac:AuctionTerms>
+                     <cbc:AuctionConstraintIndicator>false</cbc:AuctionConstraintIndicator>
+                  </cac:AuctionTerms>
+                  <cac:ContractingSystem>
+                     <cbc:ContractingSystemTypeCode listName="framework-agreement">none</cbc:ContractingSystemTypeCode>
+                  </cac:ContractingSystem>
+                  <cac:ContractingSystem>
+                     <cbc:ContractingSystemTypeCode listName="dps-usage">none</cbc:ContractingSystemTypeCode>
+                  </cac:ContractingSystem>
+               </cac:TenderingProcess>
+               <cac:ProcurementProject>
+                  <cbc:ID schemeName="InternalID">S-PF-28354</cbc:ID>
+                  <cbc:Name languageID="FRA">Marchés de mise à disposition de contenants, transport et traitement des Déchets Dangereux Ménagers (DDM) des huit déchèteries du territoire de la communauté de communes Loches Sud Touraine</cbc:Name>
+                  <cbc:Description languageID="FRA">Pour l'année 2025, le tonnage concerné par la présente consultation est d'environ 137 tonnes de déchets ménagers spéciaux, 10 tonnes de batteries et 80 tonnes d'éco DDS issus des huit déchèteries du territoire</cbc:Description>
+                  <cbc:ProcurementTypeCode listName="contract-nature">services</cbc:ProcurementTypeCode>
+                  <cac:ProcurementAdditionalType>
+                     <cbc:ProcurementTypeCode listName="environmental-impact">other</cbc:ProcurementTypeCode>
+                  </cac:ProcurementAdditionalType>
+                  <cac:MainCommodityClassification>
+                     <cbc:ItemClassificationCode listName="cpv">90520000</cbc:ItemClassificationCode>
+                  </cac:MainCommodityClassification>
+                  <cac:AdditionalCommodityClassification>
+                     <cbc:ItemClassificationCode listName="cpv">90500000</cbc:ItemClassificationCode>
+                  </cac:AdditionalCommodityClassification>
+                  <cac:AdditionalCommodityClassification>
+                     <cbc:ItemClassificationCode listName="cpv">90510000</cbc:ItemClassificationCode>
+                  </cac:AdditionalCommodityClassification>
+                  <cac:RealizedLocation>
+                     <cac:Address>
+                        <cbc:StreetName>12 Avenue de la Liberté</cbc:StreetName>
+                        <cbc:CityName>Loches</cbc:CityName>
+                        <cbc:PostalZone>37600</cbc:PostalZone>
+                        <cbc:CountrySubentityCode listName="nuts">FRB04</cbc:CountrySubentityCode>
+                        <cac:Country>
+                           <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                        </cac:Country>
+                     </cac:Address>
+                  </cac:RealizedLocation>
+                  <cac:PlannedPeriod>
+                     <cbc:StartDate>2027-01-02+01:00</cbc:StartDate>
+                     <cbc:EndDate>2028-01-02+01:00</cbc:EndDate>
+                  </cac:PlannedPeriod>
+                  <cac:ContractExtension>
+                     <cbc:MaximumNumberNumeric>4</cbc:MaximumNumberNumeric>
+                  </cac:ContractExtension>
+               </cac:ProcurementProject>
+            </cac:ProcurementProjectLot>
+         </ContractNotice>
+      </EFORMS>
+   </DONNEES>
+   <GESTION>
+      <REFERENCE>
+         <IDWEB>26-99074</IDWEB>
+         <TYPE_AVIS>
+            <FAMILLE>
+               <JOUE/>
+            </FAMILLE>
+            <PERIMETRE>
+               <DIRECTIVE-24/>
+            </PERIMETRE>
+            <NATURE>
+               <APPEL_OFFRE>
+                  <STANDARD/>
+               </APPEL_OFFRE>
+            </NATURE>
+            <STATUT>
+               <RECTIFICATIF/>
+            </STATUT>
+         </TYPE_AVIS>
+         <ANNONCE_ANTERIEUR>
+            <IDWEB>26-87868</IDWEB>
+         </ANNONCE_ANTERIEUR>
+      </REFERENCE>
+      <INDEXATION>
+         <SCHEMA>3.2.5</SCHEMA>
+         <NOMORGANISME>COMMUNAUTÉ DE COMMUNES LOCHES SUD TOURAINE</NOMORGANISME>
+         <TYPE_PROCEDURE>
+            <OUVERT/>
+         </TYPE_PROCEDURE>
+         <DATE_PUBLICATION>2026-10-14</DATE_PUBLICATION>
+         <DATE_LIMITE_REPONSE>2026-10-30T16:30:00+01:00</DATE_LIMITE_REPONSE>
+         <DATE_FIN_DIFFUSION>2026-10-30</DATE_FIN_DIFFUSION>
+         <DESCRIPTEURS>
+            <DESCRIPTEUR>
+               <CODE>405</CODE>
+               <LIBELLE>Déchetterie (exploitation)</LIBELLE>
+            </DESCRIPTEUR>
+         </DESCRIPTEURS>
+         <NATURE_MARCHE>
+            <SERVICES/>
+         </NATURE_MARCHE>
+         <CRITERES_SOCIAUX_ENV>
+            <ENVIRONNEMENTAUX/>
+         </CRITERES_SOCIAUX_ENV>
+         <DEP_PUBLICATION>37</DEP_PUBLICATION>
+         <RESUME_OBJET>Marchés de mise à disposition de contenants, transport et traitement des Déchets Dangereux Ménagers (DDM) des huit déchèteries du territoire de la communauté de communes Loches Sud Touraine</RESUME_OBJET>
+      </INDEXATION>
+   </GESTION>
+   </jo:ann>

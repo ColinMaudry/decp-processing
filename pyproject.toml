@@ -26,6 +26,7 @@ dependencies = [
   "tenacity",
   "dume_api",
   "scaleway",
+  "zstandard>=0.25.0",
 ]
 
 [project.optional-dependencies]

@@ -1,0 +1,762 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jo:ann xmlns:jo="http://boamp.journal-officiel.gouv.fr/XML/3.2.5">
+
+   <DONNEES>
+      <EFORMS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         <ContractAwardNotice xmlns:cac="urn:boamp:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:boamp:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:efac="http://data.europa.eu/p27/eforms-ubl-extension-aggregate-components/1" xmlns:efbc="http://data.europa.eu/p27/eforms-ubl-extension-basic-components/1" xmlns:efext="http://data.europa.eu/p27/eforms-ubl-extensions/1" xmlns:ext="urn:boamp:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+            <ext:UBLExtensions>
+               <ext:UBLExtension>
+                  <ext:ExtensionContent>
+                     <efext:EformsExtension>
+                        <efac:NoticeResult>
+                           <efbc:OverallMaximumFrameworkContractsAmount currencyID="EUR">1002725.94</efbc:OverallMaximumFrameworkContractsAmount>
+                           <efac:LotResult>
+                              <cbc:ID schemeName="result">RES-0001</cbc:ID>
+                              <cbc:TenderResultCode listName="winner-selection-status">selec-w</cbc:TenderResultCode>
+                              <efac:LotTender>
+                                 <cbc:ID schemeName="tender">TEN-0001</cbc:ID>
+                              </efac:LotTender>
+                              <efac:FrameworkAgreementValues>
+                                 <cbc:MaximumValueAmount currencyID="EUR">1002725.94</cbc:MaximumValueAmount>
+                              </efac:FrameworkAgreementValues>
+                              <efac:ReceivedSubmissionsStatistics>
+                                 <efbc:StatisticsCode listName="received-submission-type">tenders</efbc:StatisticsCode>
+                                 <efbc:StatisticsNumeric>6</efbc:StatisticsNumeric>
+                              </efac:ReceivedSubmissionsStatistics>
+                              <efac:SettledContract>
+                                 <cbc:ID schemeName="contract">CON-0001</cbc:ID>
+                              </efac:SettledContract>
+                              <efac:TenderLot>
+                                 <cbc:ID schemeName="Lot">LOT-0001</cbc:ID>
+                              </efac:TenderLot>
+                           </efac:LotResult>
+                           <efac:LotResult>
+                              <cbc:ID schemeName="result">RES-0002</cbc:ID>
+                              <cbc:TenderResultCode listName="winner-selection-status">selec-w</cbc:TenderResultCode>
+                              <efac:LotTender>
+                                 <cbc:ID schemeName="tender">TEN-0002</cbc:ID>
+                              </efac:LotTender>
+                              <efac:FrameworkAgreementValues>
+                                 <cbc:MaximumValueAmount currencyID="EUR">1002725.94</cbc:MaximumValueAmount>
+                              </efac:FrameworkAgreementValues>
+                              <efac:ReceivedSubmissionsStatistics>
+                                 <efbc:StatisticsCode listName="received-submission-type">tenders</efbc:StatisticsCode>
+                                 <efbc:StatisticsNumeric>7</efbc:StatisticsNumeric>
+                              </efac:ReceivedSubmissionsStatistics>
+                              <efac:SettledContract>
+                                 <cbc:ID schemeName="contract">CON-0002</cbc:ID>
+                              </efac:SettledContract>
+                              <efac:TenderLot>
+                                 <cbc:ID schemeName="Lot">LOT-0002</cbc:ID>
+                              </efac:TenderLot>
+                           </efac:LotResult>
+                           <efac:LotTender>
+                              <cbc:ID schemeName="tender">TEN-0001</cbc:ID>
+                              <efbc:TenderVariantIndicator>false</efbc:TenderVariantIndicator>
+                              <cac:LegalMonetaryTotal>
+                                 <cbc:PayableAmount currencyID="EUR">427285.31</cbc:PayableAmount>
+                              </cac:LegalMonetaryTotal>
+                              <efac:SubcontractingTerm>
+                                 <efbc:TermCode listName="applicability">not-known</efbc:TermCode>
+                              </efac:SubcontractingTerm>
+                              <efac:TenderingParty>
+                                 <cbc:ID schemeName="tendering-party">TPA-0001</cbc:ID>
+                              </efac:TenderingParty>
+                              <efac:TenderLot>
+                                 <cbc:ID schemeName="Lot">LOT-0001</cbc:ID>
+                              </efac:TenderLot>
+                              <efac:TenderReference>
+                                 <cbc:ID>TEN-0001</cbc:ID>
+                              </efac:TenderReference>
+                           </efac:LotTender>
+                           <efac:LotTender>
+                              <cbc:ID schemeName="tender">TEN-0002</cbc:ID>
+                              <efbc:TenderVariantIndicator>false</efbc:TenderVariantIndicator>
+                              <cac:LegalMonetaryTotal>
+                                 <cbc:PayableAmount currencyID="EUR">575440.63</cbc:PayableAmount>
+                              </cac:LegalMonetaryTotal>
+                              <efac:SubcontractingTerm>
+                                 <efbc:TermCode listName="applicability">not-known</efbc:TermCode>
+                              </efac:SubcontractingTerm>
+                              <efac:TenderingParty>
+                                 <cbc:ID schemeName="tendering-party">TPA-0002</cbc:ID>
+                              </efac:TenderingParty>
+                              <efac:TenderLot>
+                                 <cbc:ID schemeName="Lot">LOT-0002</cbc:ID>
+                              </efac:TenderLot>
+                              <efac:TenderReference>
+                                 <cbc:ID>TEN-0002</cbc:ID>
+                              </efac:TenderReference>
+                           </efac:LotTender>
+                           <efac:SettledContract>
+                              <cbc:ID schemeName="contract">CON-0001</cbc:ID>
+                              <cbc:IssueDate>2026-10-12+02:00</cbc:IssueDate>
+                              <cbc:Title languageID="FRA">Territoire Nord Lot 1</cbc:Title>
+                              <efbc:ContractFrameworkIndicator>false</efbc:ContractFrameworkIndicator>
+                              <efac:ContractReference>
+                                 <cbc:ID>26m0305</cbc:ID>
+                              </efac:ContractReference>
+                              <efac:LotTender>
+                                 <cbc:ID schemeName="tender">TEN-0001</cbc:ID>
+                              </efac:LotTender>
+                           </efac:SettledContract>
+                           <efac:SettledContract>
+                              <cbc:ID schemeName="contract">CON-0002</cbc:ID>
+                              <cbc:IssueDate>2026-10-12+02:00</cbc:IssueDate>
+                              <cbc:Title languageID="FRA">Territoire Nord Lot 2</cbc:Title>
+                              <efbc:ContractFrameworkIndicator>false</efbc:ContractFrameworkIndicator>
+                              <efac:ContractReference>
+                                 <cbc:ID>26m0306</cbc:ID>
+                              </efac:ContractReference>
+                              <efac:LotTender>
+                                 <cbc:ID schemeName="tender">TEN-0002</cbc:ID>
+                              </efac:LotTender>
+                           </efac:SettledContract>
+                           <efac:TenderingParty>
+                              <cbc:ID schemeName="tendering-party">TPA-0001</cbc:ID>
+                              <efac:Tenderer>
+                                 <cbc:ID schemeName="organization">ORG-0007</cbc:ID>
+                              </efac:Tenderer>
+                           </efac:TenderingParty>
+                           <efac:TenderingParty>
+                              <cbc:ID schemeName="tendering-party">TPA-0002</cbc:ID>
+                              <efac:Tenderer>
+                                 <cbc:ID schemeName="organization">ORG-0008</cbc:ID>
+                              </efac:Tenderer>
+                           </efac:TenderingParty>
+                        </efac:NoticeResult>
+                        <efac:NoticeSubType>
+                           <cbc:SubTypeCode listName="notice-subtype">29</cbc:SubTypeCode>
+                        </efac:NoticeSubType>
+                        <efac:Organizations>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0001</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">Avenue-Web Systèmes</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:CityName>Seyssinet-Pariset</cbc:CityName>
+                                    <cbc:PostalZone>38170</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRK24</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID schemeName="eu">13B7C87C-FB4D-BF79-B624932D50AB3DAD</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>+33480041260</cbc:Telephone>
+                                    <cbc:ElectronicMail>publications-joue@aws-france.com</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efbc:GroupLeadIndicator>true</efbc:GroupLeadIndicator>
+                              <efac:Company>
+                                 <cbc:WebsiteURI>https://www.toulouse-metropole.fr/</cbc:WebsiteURI>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0002</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">Toulouse Métropole</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>Direction de la commande publique</cbc:StreetName>
+                                    <cbc:AdditionalStreetName>1 rue Jacques Matthieu Delpech</cbc:AdditionalStreetName>
+                                    <cbc:CityName>Toulouse</cbc:CityName>
+                                    <cbc:PostalZone>31100</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRJ23</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID schemeName="eu">57038</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Name>MOUDENC Jean-Luc</cbc:Name>
+                                    <cbc:JobTitle>Président</cbc:JobTitle>
+                                    <cbc:Telephone>0581917200</cbc:Telephone>
+                                    <cbc:ElectronicMail>correspondre@aws-france.com</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efbc:GroupLeadIndicator>false</efbc:GroupLeadIndicator>
+                              <efac:Company>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0003</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">TOULOUSE METROPOLE</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:Postbox>35821</cbc:Postbox>
+                                    <cbc:StreetName>Toulouse Métropole - Siège</cbc:StreetName>
+                                    <cbc:AdditionalStreetName>6 Rue Rene Leduc, null</cbc:AdditionalStreetName>
+                                    <cbc:CityName>Toulouse</cbc:CityName>
+                                    <cbc:PostalZone>31505</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRJ23</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID schemeName="eu">13B7C8B8-E851-3308-5EDDFD0BC41CE28E</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>0561223196</cbc:Telephone>
+                                    <cbc:ElectronicMail>laurent.martinez@toulouse-metropole.fr</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efbc:GroupLeadIndicator>false</efbc:GroupLeadIndicator>
+                              <efac:Company>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0004</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">Commune de TOULOUSE</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>Mairie de Toulouse</cbc:StreetName>
+                                    <cbc:AdditionalStreetName>1 Place Du Capitole, null</cbc:AdditionalStreetName>
+                                    <cbc:CityName>Toulouse</cbc:CityName>
+                                    <cbc:PostalZone>31040</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRJ23</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID schemeName="eu">13B7C8C9-B327-EF6D-2F15B006983609D7</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>0561223196</cbc:Telephone>
+                                    <cbc:ElectronicMail>laurent.martinez@toulouse-metropole.fr</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0005</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">Tribunal administratif de Toulouse</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:Postbox>7007</cbc:Postbox>
+                                    <cbc:StreetName>68, rue Raymond Iv</cbc:StreetName>
+                                    <cbc:CityName>Toulouse</cbc:CityName>
+                                    <cbc:PostalZone>31068</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRJ23</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID schemeName="eu">13B7C8E2-A172-8997-83101209DA7D1CD5</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>0562735757</cbc:Telephone>
+                                    <cbc:Telefax>0562735740</cbc:Telefax>
+                                    <cbc:ElectronicMail>greffe.ta-toulouse@juradm.fr</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0006</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">Tribunal administratif de Toulouse</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:Postbox>7007</cbc:Postbox>
+                                    <cbc:StreetName>68, rue Raymond Iv</cbc:StreetName>
+                                    <cbc:CityName>Toulouse</cbc:CityName>
+                                    <cbc:PostalZone>31068</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRJ23</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID schemeName="eu">13B7C900-9EE7-10D2-926358BA32E2CB85</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>0562735757</cbc:Telephone>
+                                    <cbc:Telefax>0562735740</cbc:Telefax>
+                                    <cbc:ElectronicMail>greffe.ta-toulouse@juradm.fr</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efbc:ListedOnRegulatedMarketIndicator>false</efbc:ListedOnRegulatedMarketIndicator>
+                              <efac:UltimateBeneficialOwner>
+                                 <cbc:ID schemeName="ubo">UBO-0007</cbc:ID>
+                              </efac:UltimateBeneficialOwner>
+                              <efac:Company>
+                                 <efbc:CompanySizeCode listName="economic-operator-size">large</efbc:CompanySizeCode>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0007</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">DECA PROPRETE MIDI-PYRENEES I</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>495 Rue De L'Ormiere</cbc:StreetName>
+                                    <cbc:CityName>Montastruc-La-Conseillere</cbc:CityName>
+                                    <cbc:PostalZone>31380</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRJ23</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID schemeName="eu">1835946-1-1-1</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efbc:ListedOnRegulatedMarketIndicator>false</efbc:ListedOnRegulatedMarketIndicator>
+                              <efac:UltimateBeneficialOwner>
+                                 <cbc:ID schemeName="ubo">UBO-0008</cbc:ID>
+                              </efac:UltimateBeneficialOwner>
+                              <efac:Company>
+                                 <efbc:CompanySizeCode listName="economic-operator-size">large</efbc:CompanySizeCode>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0008</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">ATALIAN PROPRETE</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>56 Rue Ampere</cbc:StreetName>
+                                    <cbc:CityName>Paris 17</cbc:CityName>
+                                    <cbc:PostalZone>75017</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FR101</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID schemeName="eu">1835946-1-2-1</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:UltimateBeneficialOwner>
+                              <cbc:ID schemeName="ubo">UBO-0007</cbc:ID>
+                              <efac:Nationality>
+                                 <cbc:NationalityID>FRA</cbc:NationalityID>
+                              </efac:Nationality>
+                           </efac:UltimateBeneficialOwner>
+                           <efac:UltimateBeneficialOwner>
+                              <cbc:ID schemeName="ubo">UBO-0008</cbc:ID>
+                              <efac:Nationality>
+                                 <cbc:NationalityID>FRA</cbc:NationalityID>
+                              </efac:Nationality>
+                           </efac:UltimateBeneficialOwner>
+                        </efac:Organizations>
+                     </efext:EformsExtension>
+                  </ext:ExtensionContent>
+               </ext:UBLExtension>
+            </ext:UBLExtensions>
+            <cbc:UBLVersionID>2.3</cbc:UBLVersionID>
+            <cbc:CustomizationID>eforms-sdk-1.12</cbc:CustomizationID>
+            <cbc:ID schemeName="notice-id">26467b56-be66-47d7-8e03-ec46503de092</cbc:ID>
+            <cbc:ContractFolderID>92e794b3-e643-471e-a19a-54369c24fcc9</cbc:ContractFolderID>
+            <cbc:IssueDate>2026-10-13+02:00</cbc:IssueDate>
+            <cbc:IssueTime>14:10:37+02:00</cbc:IssueTime>
+            <cbc:VersionID>01</cbc:VersionID>
+            <cbc:RegulatoryDomain>32014L0024</cbc:RegulatoryDomain>
+            <cbc:NoticeTypeCode listName="result">can-standard</cbc:NoticeTypeCode>
+            <cbc:NoticeLanguageCode>FRA</cbc:NoticeLanguageCode>
+            <cac:ContractingParty>
+               <cbc:BuyerProfileURI>https://www.agysoft.marches-publics.info</cbc:BuyerProfileURI>
+               <cac:ContractingPartyType>
+                  <cbc:PartyTypeCode listName="buyer-legal-type">la</cbc:PartyTypeCode>
+               </cac:ContractingPartyType>
+               <cac:ContractingActivity>
+                  <cbc:ActivityTypeCode listName="authority-activity">gen-pub</cbc:ActivityTypeCode>
+               </cac:ContractingActivity>
+               <cac:Party>
+                  <cac:PartyIdentification>
+                     <cbc:ID schemeName="organization">ORG-0002</cbc:ID>
+                  </cac:PartyIdentification>
+                  <cac:ServiceProviderParty>
+                     <cbc:ServiceTypeCode listName="organisation-role">ted-esen</cbc:ServiceTypeCode>
+                     <cac:Party>
+                        <cac:PartyIdentification>
+                           <cbc:ID schemeName="organization">ORG-0001</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:Party>
+                  </cac:ServiceProviderParty>
+               </cac:Party>
+            </cac:ContractingParty>
+            <cac:ContractingParty>
+               <cbc:BuyerProfileURI>https://www.agysoft.marches-publics.info</cbc:BuyerProfileURI>
+               <cac:ContractingPartyType>
+                  <cbc:PartyTypeCode listName="buyer-legal-type">la</cbc:PartyTypeCode>
+               </cac:ContractingPartyType>
+               <cac:ContractingActivity>
+                  <cbc:ActivityTypeCode listName="authority-activity">gen-pub</cbc:ActivityTypeCode>
+               </cac:ContractingActivity>
+               <cac:Party>
+                  <cac:PartyIdentification>
+                     <cbc:ID schemeName="organization">ORG-0003</cbc:ID>
+                  </cac:PartyIdentification>
+               </cac:Party>
+            </cac:ContractingParty>
+            <cac:ContractingParty>
+               <cbc:BuyerProfileURI>https://www.agysoft.marches-publics.info</cbc:BuyerProfileURI>
+               <cac:ContractingPartyType>
+                  <cbc:PartyTypeCode listName="buyer-legal-type">la</cbc:PartyTypeCode>
+               </cac:ContractingPartyType>
+               <cac:ContractingActivity>
+                  <cbc:ActivityTypeCode listName="authority-activity">gen-pub</cbc:ActivityTypeCode>
+               </cac:ContractingActivity>
+               <cac:Party>
+                  <cac:PartyIdentification>
+                     <cbc:ID schemeName="organization">ORG-0004</cbc:ID>
+                  </cac:PartyIdentification>
+               </cac:Party>
+            </cac:ContractingParty>
+            <cac:TenderingProcess>
+               <cbc:ProcedureCode languageID="FRA" listName="procurement-procedure-type">open</cbc:ProcedureCode>
+               <cac:ProcessJustification>
+                  <cbc:ProcessReasonCode listName="accelerated-procedure">false</cbc:ProcessReasonCode>
+               </cac:ProcessJustification>
+            </cac:TenderingProcess>
+            <cac:ProcurementProject>
+               <cbc:ID>26MC0232AOO</cbc:ID>
+               <cbc:Name languageID="FRA">26MC0232OO - NETTOYAGE DES LOCAUX DE LA VILLE DE TOULOUSE ET TOULOUSE METROPOLE - TERRITOIRE NORD - 2 LOTS</cbc:Name>
+               <cbc:Description languageID="FRA">La procédure de passation utilisée est : l'appel d'offres ouvert. Elle est soumise aux dispositions des articles L. 2124-2, R. 2124-2 1° et R. 2161-2 à R. 2161-5 du Code de la commande publique.
+L'accord-cadre avec maximum est passé en application des articles L2125-1 1°, R. 2162-1 à R. 2162-6, R. 2162-13 et R. 2162-14 du Code de la commande publique. Il donnera lieu à l'émission de bons de commande.
+Elle est soumise aux dispositions des articles L. 2124-2, R. 2124-2 1° et R. 2161-2 à R. 2161-5 du Code de la commande publique concernant la partie à DPGF.
+Cette consultation s'effectue dans le cadre d'un groupement de commandes conformément aux articles L. 2113-6 à L. 2113-8 du Code de la commande publique avec les organismes suivants :
+- Commune de TOULOUSE
+Lieu(x) d'exécution : Bâtiments de la Ville de Toulouse et Toulouse Métropole
+Cet accord-cadre « composite » fixe toutes les conditions d'exécution des prestations. Il correspond pour partie à un marché ordinaire avec DPGF et pour partie à un accord-cadre à bons de commande.
+Pour la partie accord-cadre à bon de commande les montants maximum sont les suivants :
+Pour le lot N°1 :
+Toulouse Métropole : 90 000.00 euro(s)  HT / Annuel
+Ville de Toulouse : 70 000.00 euro(s)  HT/ Annuel
+Pour le lot N°2 :
+Toulouse Métropole : 90 000.00 euro(s)  HT/ Annuel
+Ville de Toulouse : 120 000.00 euro(s)  HT/ Annuel
+Les montants maximums des deux lots seront identiques pour chaque période de reconduction.
+La partie « marché ordinaire » concerne les prestations suivantes :
+- une  partie forfaitaire, portant sur les prestations de nettoyage classique et récurrent des bâtiments définis dans le CCTP et ses annexes, et selon les prix renseignés dans l'acte d'engagement et les DPGF.
+Les prestations seront rémunérées à la fois par application de prix forfaitaire(s) pour les prestations relevant de la partie « marché ordinaire » conformément aux prix indiqués dans la décomposition des prix forfaitaires (DPGF), et par application des prix unitaires pour les prestations relevant de la partie « accord-cadre à bons de commande » conformément aux prix indiqués dans le bordereau des prix unitaires (BPU).
+Pour la partie marché ordinaire, les montants estimatifs annuels sont :
+- pour le lot 1 : 500 000,00 euro(s)  HT / Annuel
+- pour le lot 2 : 700 000,00 euro(s)  HT / Annuel
+La consultation inclut un nombre d'heure d'insertion professionnelle :
+- Lot N°1 - Nombre d'heures d'insertion minimales de 300H par an
+- Lot N°2 - Nombre d'heures d'insertion minimales de 300H par an</cbc:Description>
+               <cbc:ProcurementTypeCode listName="contract-nature">services</cbc:ProcurementTypeCode>
+               <cbc:Note languageID="FRA">Lot N°1 : N°marché Tm 26m0305 et Vt 26v0333
+Lot N°2 : N°marché Tm 26m0306 et Vt 26v0334</cbc:Note>
+               <cac:RequestedTenderTotal>
+                  <cbc:EstimatedOverallContractAmount currencyID="EUR">1200000</cbc:EstimatedOverallContractAmount>
+               </cac:RequestedTenderTotal>
+               <cac:MainCommodityClassification>
+                  <cbc:ItemClassificationCode listName="cpv">90911200</cbc:ItemClassificationCode>
+               </cac:MainCommodityClassification>
+               <cac:AdditionalCommodityClassification>
+                  <cbc:ItemClassificationCode listName="cpv">90911200</cbc:ItemClassificationCode>
+               </cac:AdditionalCommodityClassification>
+            </cac:ProcurementProject>
+            <cac:ProcurementProjectLot>
+               <cbc:ID schemeName="Lot">LOT-0001</cbc:ID>
+               <cac:TenderingTerms>
+                  <cbc:FundingProgramCode listName="eu-funded">no-eu-funds</cbc:FundingProgramCode>
+                  <cac:AwardingTerms>
+                     <cac:AwardingCriterion>
+                        <cac:SubordinateAwardingCriterion>
+                           <ext:UBLExtensions>
+                              <ext:UBLExtension>
+                                 <ext:ExtensionContent>
+                                    <efext:EformsExtension>
+                                       <efac:AwardCriterionParameter>
+                                          <efbc:ParameterCode listName="number-weight">per-exa</efbc:ParameterCode>
+                                          <efbc:ParameterNumeric>55</efbc:ParameterNumeric>
+                                       </efac:AwardCriterionParameter>
+                                    </efext:EformsExtension>
+                                 </ext:ExtensionContent>
+                              </ext:UBLExtension>
+                           </ext:UBLExtensions>
+                           <cbc:AwardingCriterionTypeCode listName="award-criterion-type">quality</cbc:AwardingCriterionTypeCode>
+                           <cbc:Description languageID="FRA">Valeur Technique</cbc:Description>
+                        </cac:SubordinateAwardingCriterion>
+                        <cac:SubordinateAwardingCriterion>
+                           <ext:UBLExtensions>
+                              <ext:UBLExtension>
+                                 <ext:ExtensionContent>
+                                    <efext:EformsExtension>
+                                       <efac:AwardCriterionParameter>
+                                          <efbc:ParameterCode listName="number-weight">per-exa</efbc:ParameterCode>
+                                          <efbc:ParameterNumeric>5</efbc:ParameterNumeric>
+                                       </efac:AwardCriterionParameter>
+                                    </efext:EformsExtension>
+                                 </ext:ExtensionContent>
+                              </ext:UBLExtension>
+                           </ext:UBLExtensions>
+                           <cbc:AwardingCriterionTypeCode listName="award-criterion-type">quality</cbc:AwardingCriterionTypeCode>
+                           <cbc:Description languageID="FRA">Performance Environnementale</cbc:Description>
+                        </cac:SubordinateAwardingCriterion>
+                        <cac:SubordinateAwardingCriterion>
+                           <ext:UBLExtensions>
+                              <ext:UBLExtension>
+                                 <ext:ExtensionContent>
+                                    <efext:EformsExtension>
+                                       <efac:AwardCriterionParameter>
+                                          <efbc:ParameterCode listName="number-weight">per-exa</efbc:ParameterCode>
+                                          <efbc:ParameterNumeric>40</efbc:ParameterNumeric>
+                                       </efac:AwardCriterionParameter>
+                                    </efext:EformsExtension>
+                                 </ext:ExtensionContent>
+                              </ext:UBLExtension>
+                           </ext:UBLExtensions>
+                           <cbc:AwardingCriterionTypeCode listName="award-criterion-type">price</cbc:AwardingCriterionTypeCode>
+                           <cbc:Description languageID="FRA">Prix</cbc:Description>
+                        </cac:SubordinateAwardingCriterion>
+                     </cac:AwardingCriterion>
+                  </cac:AwardingTerms>
+                  <cac:AppealTerms>
+                     <cac:AppealInformationParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID schemeName="organization">ORG-0006</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:AppealInformationParty>
+                     <cac:AppealReceiverParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID schemeName="organization">ORG-0005</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:AppealReceiverParty>
+                  </cac:AppealTerms>
+               </cac:TenderingTerms>
+               <cac:TenderingProcess>
+                  <cbc:GovernmentAgreementConstraintIndicator>true</cbc:GovernmentAgreementConstraintIndicator>
+                  <cac:NoticeDocumentReference>
+                     <cbc:ID>419079-2026</cbc:ID>
+                  </cac:NoticeDocumentReference>
+                  <cac:AuctionTerms>
+                     <cbc:AuctionConstraintIndicator>false</cbc:AuctionConstraintIndicator>
+                  </cac:AuctionTerms>
+                  <cac:ContractingSystem>
+                     <cbc:ContractingSystemTypeCode listName="framework-agreement">fa-wo-rc</cbc:ContractingSystemTypeCode>
+                  </cac:ContractingSystem>
+                  <cac:ContractingSystem>
+                     <cbc:ContractingSystemTypeCode listName="dps-usage">none</cbc:ContractingSystemTypeCode>
+                  </cac:ContractingSystem>
+               </cac:TenderingProcess>
+               <cac:ProcurementProject>
+                  <cbc:ID schemeName="InternalID">01</cbc:ID>
+                  <cbc:Name languageID="FRA">Territoire Nord Lot 1</cbc:Name>
+                  <cbc:Description languageID="FRA">Territoire Nord Lot 1&amp;amp;lt;br/&amp;amp;gt;</cbc:Description>
+                  <cbc:ProcurementTypeCode listName="contract-nature">services</cbc:ProcurementTypeCode>
+                  <cac:ProcurementAdditionalType>
+                     <cbc:ProcurementTypeCode listName="environmental-impact">other</cbc:ProcurementTypeCode>
+                  </cac:ProcurementAdditionalType>
+                  <cac:ProcurementAdditionalType>
+                     <cbc:ProcurementTypeCode listName="social-objective">other</cbc:ProcurementTypeCode>
+                  </cac:ProcurementAdditionalType>
+                  <cac:MainCommodityClassification>
+                     <cbc:ItemClassificationCode listName="cpv">90911200</cbc:ItemClassificationCode>
+                  </cac:MainCommodityClassification>
+                  <cac:AdditionalCommodityClassification>
+                     <cbc:ItemClassificationCode listName="cpv">90911200</cbc:ItemClassificationCode>
+                  </cac:AdditionalCommodityClassification>
+                  <cac:ContractExtension>
+                     <cbc:OptionsDescription languageID="FRA">Le contrat prévoit la possibilité de confier ultérieurement au titulaire du marché un ou plusieurs marchés ayant pour objet la réalisation de prestations similaires</cbc:OptionsDescription>
+                     <cbc:MaximumNumberNumeric>3</cbc:MaximumNumberNumeric>
+                     <cac:Renewal>
+                        <cac:Period>
+                           <cbc:Description languageID="FRA">Le contrat  est susceptible d'être reconduit dans les conditions du cahier des charges.
+L'accord-cadre est conclu à compter du 01/01/2027 ou de la date de notification si elle est postérieure. Néanmoins, certains sites figurant à l'annexe 14 débuteront à une date ultérieure, laquelle est précisée dans ladite annexe. Pour tous les sites mentionnés, la fin de la période initiale est fixée au 31/12/2027</cbc:Description>
+                        </cac:Period>
+                     </cac:Renewal>
+                  </cac:ContractExtension>
+               </cac:ProcurementProject>
+            </cac:ProcurementProjectLot>
+            <cac:ProcurementProjectLot>
+               <cbc:ID schemeName="Lot">LOT-0002</cbc:ID>
+               <cac:TenderingTerms>
+                  <cbc:FundingProgramCode listName="eu-funded">no-eu-funds</cbc:FundingProgramCode>
+                  <cac:AwardingTerms>
+                     <cac:AwardingCriterion>
+                        <cac:SubordinateAwardingCriterion>
+                           <ext:UBLExtensions>
+                              <ext:UBLExtension>
+                                 <ext:ExtensionContent>
+                                    <efext:EformsExtension>
+                                       <efac:AwardCriterionParameter>
+                                          <efbc:ParameterCode listName="number-weight">per-exa</efbc:ParameterCode>
+                                          <efbc:ParameterNumeric>55</efbc:ParameterNumeric>
+                                       </efac:AwardCriterionParameter>
+                                    </efext:EformsExtension>
+                                 </ext:ExtensionContent>
+                              </ext:UBLExtension>
+                           </ext:UBLExtensions>
+                           <cbc:AwardingCriterionTypeCode listName="award-criterion-type">quality</cbc:AwardingCriterionTypeCode>
+                           <cbc:Description languageID="FRA">Valeur Technique</cbc:Description>
+                        </cac:SubordinateAwardingCriterion>
+                        <cac:SubordinateAwardingCriterion>
+                           <ext:UBLExtensions>
+                              <ext:UBLExtension>
+                                 <ext:ExtensionContent>
+                                    <efext:EformsExtension>
+                                       <efac:AwardCriterionParameter>
+                                          <efbc:ParameterCode listName="number-weight">per-exa</efbc:ParameterCode>
+                                          <efbc:ParameterNumeric>5</efbc:ParameterNumeric>
+                                       </efac:AwardCriterionParameter>
+                                    </efext:EformsExtension>
+                                 </ext:ExtensionContent>
+                              </ext:UBLExtension>
+                           </ext:UBLExtensions>
+                           <cbc:AwardingCriterionTypeCode listName="award-criterion-type">quality</cbc:AwardingCriterionTypeCode>
+                           <cbc:Description languageID="FRA">Performance Environnementale</cbc:Description>
+                        </cac:SubordinateAwardingCriterion>
+                        <cac:SubordinateAwardingCriterion>
+                           <ext:UBLExtensions>
+                              <ext:UBLExtension>
+                                 <ext:ExtensionContent>
+                                    <efext:EformsExtension>
+                                       <efac:AwardCriterionParameter>
+                                          <efbc:ParameterCode listName="number-weight">per-exa</efbc:ParameterCode>
+                                          <efbc:ParameterNumeric>40</efbc:ParameterNumeric>
+                                       </efac:AwardCriterionParameter>
+                                    </efext:EformsExtension>
+                                 </ext:ExtensionContent>
+                              </ext:UBLExtension>
+                           </ext:UBLExtensions>
+                           <cbc:AwardingCriterionTypeCode listName="award-criterion-type">price</cbc:AwardingCriterionTypeCode>
+                           <cbc:Description languageID="FRA">Prix</cbc:Description>
+                        </cac:SubordinateAwardingCriterion>
+                     </cac:AwardingCriterion>
+                  </cac:AwardingTerms>
+                  <cac:AppealTerms>
+                     <cac:AppealInformationParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID schemeName="organization">ORG-0006</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:AppealInformationParty>
+                     <cac:AppealReceiverParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID schemeName="organization">ORG-0005</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:AppealReceiverParty>
+                  </cac:AppealTerms>
+               </cac:TenderingTerms>
+               <cac:TenderingProcess>
+                  <cbc:GovernmentAgreementConstraintIndicator>true</cbc:GovernmentAgreementConstraintIndicator>
+                  <cac:NoticeDocumentReference>
+                     <cbc:ID>419079-2026</cbc:ID>
+                  </cac:NoticeDocumentReference>
+                  <cac:AuctionTerms>
+                     <cbc:AuctionConstraintIndicator>false</cbc:AuctionConstraintIndicator>
+                  </cac:AuctionTerms>
+                  <cac:ContractingSystem>
+                     <cbc:ContractingSystemTypeCode listName="framework-agreement">fa-wo-rc</cbc:ContractingSystemTypeCode>
+                  </cac:ContractingSystem>
+                  <cac:ContractingSystem>
+                     <cbc:ContractingSystemTypeCode listName="dps-usage">none</cbc:ContractingSystemTypeCode>
+                  </cac:ContractingSystem>
+               </cac:TenderingProcess>
+               <cac:ProcurementProject>
+                  <cbc:ID schemeName="InternalID">02</cbc:ID>
+                  <cbc:Name languageID="FRA">Territoire Nord Lot 2</cbc:Name>
+                  <cbc:Description languageID="FRA">Territoire Nord Lot 2&amp;amp;lt;br/&amp;amp;gt;</cbc:Description>
+                  <cbc:ProcurementTypeCode listName="contract-nature">services</cbc:ProcurementTypeCode>
+                  <cac:ProcurementAdditionalType>
+                     <cbc:ProcurementTypeCode listName="environmental-impact">other</cbc:ProcurementTypeCode>
+                  </cac:ProcurementAdditionalType>
+                  <cac:ProcurementAdditionalType>
+                     <cbc:ProcurementTypeCode listName="social-objective">other</cbc:ProcurementTypeCode>
+                  </cac:ProcurementAdditionalType>
+                  <cac:MainCommodityClassification>
+                     <cbc:ItemClassificationCode listName="cpv">90911200</cbc:ItemClassificationCode>
+                  </cac:MainCommodityClassification>
+                  <cac:AdditionalCommodityClassification>
+                     <cbc:ItemClassificationCode listName="cpv">90911200</cbc:ItemClassificationCode>
+                  </cac:AdditionalCommodityClassification>
+                  <cac:ContractExtension>
+                     <cbc:OptionsDescription languageID="FRA">Le contrat prévoit la possibilité de confier ultérieurement au titulaire du marché un ou plusieurs marchés ayant pour objet la réalisation de prestations similaires</cbc:OptionsDescription>
+                     <cbc:MaximumNumberNumeric>3</cbc:MaximumNumberNumeric>
+                     <cac:Renewal>
+                        <cac:Period>
+                           <cbc:Description languageID="FRA">Le contrat  est susceptible d'être reconduit dans les conditions du cahier des charges.
+L'accord-cadre est conclu à compter du 01/01/2027 ou de la date de notification si elle est postérieure. Néanmoins, certains sites figurant à l'annexe 14 débuteront à une date ultérieure, laquelle est précisée dans ladite annexe. Pour tous les sites mentionnés, la fin de la période initiale est fixée au 31/12/2027</cbc:Description>
+                        </cac:Period>
+                     </cac:Renewal>
+                  </cac:ContractExtension>
+               </cac:ProcurementProject>
+            </cac:ProcurementProjectLot>
+            <cac:TenderResult>
+               <cbc:AwardDate>2000-01-01Z</cbc:AwardDate>
+            </cac:TenderResult>
+         </ContractAwardNotice>
+      </EFORMS>
+   </DONNEES>
+   <GESTION>
+      <REFERENCE>
+         <IDWEB>26-99072</IDWEB>
+         <TYPE_AVIS>
+            <FAMILLE>
+               <JOUE/>
+            </FAMILLE>
+            <PERIMETRE>
+               <DIRECTIVE-24/>
+            </PERIMETRE>
+            <NATURE>
+               <ATTRIBUTION>
+                  <STANDARD/>
+               </ATTRIBUTION>
+            </NATURE>
+            <STATUT>
+               <INITIAL/>
+            </STATUT>
+         </TYPE_AVIS>
+         <ANNONCE_ANTERIEUR>
+            <IDWEB>26-59614</IDWEB>
+         </ANNONCE_ANTERIEUR>
+      </REFERENCE>
+      <INDEXATION>
+         <SCHEMA>3.2.5</SCHEMA>
+         <NOMORGANISME>Toulouse Métropole</NOMORGANISME>
+         <TITULAIRES>
+            <DENOMINATION>DECA PROPRETE MIDI-PYRENEES I</DENOMINATION>
+            <DENOMINATION>ATALIAN PROPRETE</DENOMINATION>
+         </TITULAIRES>
+         <TYPE_PROCEDURE>
+            <OUVERT/>
+         </TYPE_PROCEDURE>
+         <DATE_PUBLICATION>2026-10-14</DATE_PUBLICATION>
+         <DATE_FIN_DIFFUSION>2027-01-10</DATE_FIN_DIFFUSION>
+         <DESCRIPTEURS>
+            <DESCRIPTEUR>
+               <CODE>239</CODE>
+               <LIBELLE>Nettoyage de locaux</LIBELLE>
+            </DESCRIPTEUR>
+         </DESCRIPTEURS>
+         <NATURE_MARCHE>
+            <SERVICES/>
+         </NATURE_MARCHE>
+         <CRITERES_SOCIAUX_ENV>
+            <SOCIAUX/>
+            <ENVIRONNEMENTAUX/>
+         </CRITERES_SOCIAUX_ENV>
+         <DEP_PUBLICATION>31</DEP_PUBLICATION>
+         <RESUME_OBJET>26MC0232OO - NETTOYAGE DES LOCAUX DE LA VILLE DE TOULOUSE ET TOULOUSE METROPOLE - TERRITOIRE NORD - 2 LOTS</RESUME_OBJET>
+      </INDEXATION>
+   </GESTION>
+   </jo:ann>

@@ -1,0 +1,217 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jo:ann xmlns:jo="http://boamp.journal-officiel.gouv.fr/XML/3.2.5">
+
+   <DONNEES>
+      <FNSimple>
+         <organisme>
+            <nomOfficiel>SPL PARISEINE</nomOfficiel>
+            <typeIdentificationNational>
+               <siret/>
+            </typeIdentificationNational>
+            <codeIdentificationNational>83942912300020</codeIdentificationNational>
+            <ville>Paris</ville>
+            <cp>75004</cp>
+            <grpCommandes>
+               <non/>
+            </grpCommandes>
+         </organisme>
+         <initial>
+            <communication>
+               <urlDocConsul>https://marches.maximilien.fr/entreprise/consultation/947425?orgAcronyme=r8t</urlDocConsul>
+               <identifiantInterne>2601096</identifiantInterne>
+               <docSecurite>
+                  <oui/>
+               </docSecurite>
+               <urlSecurite>
+                  <non/>
+               </urlSecurite>
+               <nomContact>Direction juridique</nomContact>
+               <adresseMailContact>appel.offres@pariseine.fr</adresseMailContact>
+               <telContact>+33 144888400</telContact>
+            </communication>
+            <procedure>
+               <procedureAdapteeO/>
+               <capaciteExercice>-	Preuve d'une assurance pour les risques professionnels,
+-	Certificats de qualifications professionnelles relatifs aux prestations du présent marché. </capaciteExercice>
+               <capaciteEcoFin>-	Déclaration concernant le chiffre d'affaires global et le chiffre d'affaires concernant les prestations objet du marché, réalisés au cours des trois derniers exercices disponibles,
+</capaciteEcoFin>
+               <capaciteTech>-	Déclaration indiquant les effectifs moyens annuels du candidat et l'importance du personnel d'encadrement pour chacune des trois dernières années,
+-	Présentation des principaux travaux effectués au cours des 5 dernières années, indiquant le montant, la date et le destinataire public ou privé,</capaciteTech>
+               <techAchat>
+                  <autres/>
+               </techAchat>
+               <dateReceptionOffres>2026-10-22T12:00:00.000+02:00</dateReceptionOffres>
+               <presOffres>
+                  <interdite/>
+               </presOffres>
+               <nbCandidatReduit>
+                  <non/>
+               </nbCandidatReduit>
+               <attributionSansNegociation>
+                  <oui xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string"/>
+               </attributionSansNegociation>
+               <variantes>
+                  <non xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string"/>
+               </variantes>
+               <criteresAttrib>Critères énoncés dans les documents de la consultation</criteresAttrib>
+            </procedure>
+            <natureMarche>
+               <intitule>Travaux de réhabilitation de la tribune et aménagement d'une de vestiaires de la Pagode et des espaces extérieurs - Centre sportif Ladoumègue (Paris 19ème) </intitule>
+               <codeCPV>
+                  <objetPrincipal>
+                     <classPrincipale>45000000</classPrincipale>
+                  </objetPrincipal>
+               </codeCPV>
+               <natureMarche>
+                  <travaux/>
+               </natureMarche>
+               <description>Travaux de réhabilitation de la tribune et aménagement d'une de vestiaires de la Pagode et des espaces extérieurs - Centre sportif Ladoumègue (Paris 19ème) </description>
+               <lieuExecution>(75) Paris</lieuExecution>
+               <dureeMois>30</dureeMois>
+               <tranches>
+                  <non xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string"/>
+               </tranches>
+               <reservationMarche>
+                  <non/>
+               </reservationMarche>
+               <lotsMarche>
+                  <oui xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string"/>
+               </lotsMarche>
+            </natureMarche>
+            <lots>
+               <lot>
+                  <description>Installation de chantier, curage, démolition, désamiantage, gros-œuvre </description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>45262660</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <lieuExecutionLivraison>(75) Paris</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>Couverture, étanchéité </description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>45260000</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <lieuExecutionLivraison>(75) Paris</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>Enveloppe, façade</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>45443000</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <lieuExecutionLivraison>(75) Paris</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>Menuiseries extérieures, serrurerie</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>45421000</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <lieuExecutionLivraison>(75) Paris</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>Cloisons, doublages, faux plafonds, menuiseries intérieures, mobiliers, revêtements durs et sols souples, peinture, signalétique, nettoyage</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>45421000</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <lieuExecutionLivraison>(75) Paris</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>CVC, plomberie (CVP, PB)</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>45330000</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <lieuExecutionLivraison>(75) Paris</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>CFO, CFA, SSI</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>45311200</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <lieuExecutionLivraison>(75) Paris</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>Ascenseur</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>45350000</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <lieuExecutionLivraison>(75) Paris</lieuExecutionLivraison>
+               </lot>
+            </lots>
+            <informComplementaire>
+               <non/>
+            </informComplementaire>
+         </initial>
+      </FNSimple>
+   </DONNEES>
+   <GESTION>
+      <REFERENCE>
+         <IDWEB>26-92574</IDWEB>
+         <TYPE_AVIS>
+            <FAMILLE>
+               <FNS/>
+            </FAMILLE>
+            <PERIMETRE>
+               <FNSimple/>
+            </PERIMETRE>
+            <NATURE>
+               <APPEL_OFFRE/>
+            </NATURE>
+            <STATUT>
+               <INITIAL/>
+            </STATUT>
+         </TYPE_AVIS>
+      </REFERENCE>
+      <INDEXATION>
+         <SCHEMA>3.2.5</SCHEMA>
+         <NOMORGANISME>SPL PARISEINE</NOMORGANISME>
+         <TYPE_PROCEDURE>
+            <OUVERT/>
+         </TYPE_PROCEDURE>
+         <DATE_PUBLICATION>2026-09-24</DATE_PUBLICATION>
+         <DATE_LIMITE_REPONSE>2026-10-22T12:00:00.000+02:00</DATE_LIMITE_REPONSE>
+         <DATE_FIN_DIFFUSION>2026-10-22</DATE_FIN_DIFFUSION>
+         <DESCRIPTEURS>
+            <DESCRIPTEUR>
+               <CODE>87</CODE>
+               <LIBELLE>Démolition</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>479</CODE>
+               <LIBELLE>Amiante (désamiantage)</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>74</CODE>
+               <LIBELLE>Couverture</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>270</CODE>
+               <LIBELLE>Plomberie (travaux)</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>222</CODE>
+               <LIBELLE>Menuiserie</LIBELLE>
+            </DESCRIPTEUR>
+         </DESCRIPTEURS>
+         <NATURE_MARCHE>
+            <TRAVAUX/>
+         </NATURE_MARCHE>
+         <DEP_PUBLICATION>75</DEP_PUBLICATION>
+         <RESUME_OBJET>Travaux de réhabilitation de la tribune et aménagement d'une de vestiaires de la Pagode et des espaces extérieurs - Centre sportif Ladoumègue (Paris 19ème) </RESUME_OBJET>
+      </INDEXATION>
+   </GESTION>
+   </jo:ann>

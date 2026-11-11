@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jo:ann xmlns:jo="http://boamp.journal-officiel.gouv.fr/XML/3.2.5">
+
+   <DONNEES>
+      <FNSimple>
+         <organisme>
+            <nomOfficiel>SPL PARISEINE</nomOfficiel>
+            <typeIdentificationNational>
+               <siret/>
+            </typeIdentificationNational>
+            <codeIdentificationNational>83942912300020</codeIdentificationNational>
+            <ville>Paris</ville>
+            <cp>75004</cp>
+            <grpCommandes>
+               <non/>
+            </grpCommandes>
+         </organisme>
+         <rectificatif>
+            <avisInitial>
+               <idWeb>26-92574</idWeb>
+            </avisInitial>
+            <natureMarche>
+               <intitule>Travaux de réhabilitation de la tribune et aménagement d'une de vestiaires de la Pagode et des espaces extérieurs - Centre sportif Ladoumègue (Paris 19ème) </intitule>
+               <codeCPV>
+                  <objetPrincipal>
+                     <classPrincipale>45000000</classPrincipale>
+                  </objetPrincipal>
+               </codeCPV>
+               <natureMarche>
+                  <travaux/>
+               </natureMarche>
+               <description>Travaux de réhabilitation de la tribune et aménagement d'une de vestiaires de la Pagode et des espaces extérieurs - Centre sportif Ladoumègue (Paris 19ème) </description>
+               <criteresAttrib>Critères énoncés dans les documents de la consultation</criteresAttrib>
+            </natureMarche>
+            <infosRectif>La date limite de remise des plis est reportée au lundi 26 octobre 2026 à 12h00.</infosRectif>
+         </rectificatif>
+      </FNSimple>
+   </DONNEES>
+   <GESTION>
+      <REFERENCE>
+         <IDWEB>26-99891</IDWEB>
+         <TYPE_AVIS>
+            <FAMILLE>
+               <FNS/>
+            </FAMILLE>
+            <PERIMETRE>
+               <FNSimple/>
+            </PERIMETRE>
+            <NATURE>
+               <RECTIFICATIF/>
+            </NATURE>
+            <STATUT>
+               <RECTIFICATIF/>
+            </STATUT>
+         </TYPE_AVIS>
+         <ANNONCE_ANTERIEUR>
+            <IDWEB>26-92574</IDWEB>
+         </ANNONCE_ANTERIEUR>
+      </REFERENCE>
+      <INDEXATION>
+         <SCHEMA>3.2.5</SCHEMA>
+         <NOMORGANISME>SPL PARISEINE</NOMORGANISME>
+         <DATE_PUBLICATION>2026-10-14</DATE_PUBLICATION>
+         <DATE_FIN_DIFFUSION>2026-10-26</DATE_FIN_DIFFUSION>
+         <DESCRIPTEURS>
+            <DESCRIPTEUR>
+               <CODE>87</CODE>
+               <LIBELLE>Démolition</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>479</CODE>
+               <LIBELLE>Amiante (désamiantage)</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>74</CODE>
+               <LIBELLE>Couverture</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>270</CODE>
+               <LIBELLE>Plomberie (travaux)</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>222</CODE>
+               <LIBELLE>Menuiserie</LIBELLE>
+            </DESCRIPTEUR>
+         </DESCRIPTEURS>
+         <NATURE_MARCHE>
+            <TRAVAUX/>
+         </NATURE_MARCHE>
+         <DEP_PUBLICATION>75</DEP_PUBLICATION>
+         <RESUME_OBJET>Travaux de réhabilitation de la tribune et aménagement d'une de vestiaires de la Pagode et des espaces extérieurs - Centre sportif Ladoumègue (Paris 19ème) </RESUME_OBJET>
+      </INDEXATION>
+   </GESTION>
+   </jo:ann>

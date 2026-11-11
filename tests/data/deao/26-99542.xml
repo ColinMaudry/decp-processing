@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jo:ann xmlns:jo="http://boamp.journal-officiel.gouv.fr/XML/3.2.5">
+
+   <DONNEES>
+      <FNSimple xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         <organisme>
+            <nomOfficiel>CMAR Normandie</nomOfficiel>
+            <typeIdentificationNational>
+               <siret/>
+            </typeIdentificationNational>
+            <codeIdentificationNational>13002799800017</codeIdentificationNational>
+            <ville>Caen</ville>
+            <cp>14000</cp>
+            <grpCommandes>
+               <non/>
+            </grpCommandes>
+         </organisme>
+         <annulation>
+            <avisInitial>
+               <idWeb>26-99177</idWeb>
+               <datePublication>2026-10-13</datePublication>
+            </avisInitial>
+            <natureMarche>
+               <intitule>Système d'acquisition dynamique pour l'animation pédagogique et technique de formations continues courtes métiers pour les clients de la CMA Normandie</intitule>
+               <natureMarche>
+                  <services/>
+               </natureMarche>
+               <description>Catégorie de formation métiers : Esthétique massage visage et corps, Esthétique onglerie, Esthétique maquillage et regard, règlementaire coiffure, Coiffure, Fleuriste, Boulangerie, Pâtisserie, Photographie, Couture, Permis exploitation.</description>
+               <criteresAttrib>Techniques, pédagogiques</criteresAttrib>
+            </natureMarche>
+            <infosAnnulation>Publié via un mauvais canal de la plateforme de dématérialisation de l'acheteur, le présent avis est annulé et sera publié sur le bon canal dédié au système d'acquisition dynamique du profil acheteur.</infosAnnulation>
+         </annulation>
+      </FNSimple>
+   </DONNEES>
+   <GESTION>
+      <REFERENCE>
+         <IDWEB>26-99542</IDWEB>
+         <TYPE_AVIS>
+            <FAMILLE>
+               <FNS/>
+            </FAMILLE>
+            <PERIMETRE>
+               <FNSimple/>
+            </PERIMETRE>
+            <NATURE>
+               <ANNULATION/>
+            </NATURE>
+            <STATUT>
+               <INITIAL/>
+            </STATUT>
+         </TYPE_AVIS>
+         <ANNONCE_ANTERIEUR>
+            <IDWEB>26-99177</IDWEB>
+         </ANNONCE_ANTERIEUR>
+      </REFERENCE>
+      <INDEXATION>
+         <SCHEMA>3.2.5</SCHEMA>
+         <NOMORGANISME>CMAR Normandie</NOMORGANISME>
+         <DATE_PUBLICATION>2026-10-14</DATE_PUBLICATION>
+         <DATE_FIN_DIFFUSION>2028-12-31</DATE_FIN_DIFFUSION>
+         <DESCRIPTEURS>
+            <DESCRIPTEUR>
+               <CODE>410</CODE>
+               <LIBELLE>Formation</LIBELLE>
+            </DESCRIPTEUR>
+         </DESCRIPTEURS>
+         <NATURE_MARCHE>
+            <SERVICES/>
+         </NATURE_MARCHE>
+         <CRITERES_SOCIAUX_ENV>
+            <ENVIRONNEMENTAUX/>
+         </CRITERES_SOCIAUX_ENV>
+         <DEP_PUBLICATION>14</DEP_PUBLICATION>
+         <DEP_PUBLICATION>76</DEP_PUBLICATION>
+         <DEP_PUBLICATION>27</DEP_PUBLICATION>
+         <DEP_PUBLICATION>50</DEP_PUBLICATION>
+         <DEP_PUBLICATION>61</DEP_PUBLICATION>
+         <RESUME_OBJET>Système d'acquisition dynamique pour l'animation pédagogique et technique de formations continues courtes métiers pour les clients de la CMA Normandie</RESUME_OBJET>
+      </INDEXATION>
+   </GESTION>
+   </jo:ann>

@@ -10,7 +10,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+import boto3
 import polars as pl
+from botocore.config import Config
 from prefect import task
 from prefect.artifacts import create_table_artifact
 from prefect.exceptions import MissingContextError
@@ -23,11 +25,56 @@ from src.config import (
     DATE_NOW,
     DIST_DIR,
     RESOURCE_CACHE_DIR,
+    S3_ACCESS_KEY_ID,
+    S3_ENDPOINT_URL,
+    S3_REGION,
+    S3_SECRET_ACCESS_KEY,
     SIRENE_DATA_DIR,
     TRACKED_DATASETS,
     DecpFormat,
+    check_s3_config,
     logger,
 )
+
+
+def siret_valide(s: str | None) -> bool:
+    """SIRET valide : 14 chiffres, clé de Luhn correcte ; exception La Poste
+    (SIREN 356000000) dont la somme des chiffres doit être un multiple de 5."""
+    if not s or len(s) != 14 or not (s.isascii() and s.isdigit()):
+        return False
+    chiffres = [int(c) for c in s]
+    if s.startswith("356000000"):
+        return sum(chiffres) % 5 == 0
+    total = 0
+    for i, d in enumerate(reversed(chiffres)):
+        if i % 2 == 1:
+            d *= 2
+            if d > 9:
+                d -= 9
+        total += d
+    return total % 10 == 0
+
+
+def s3_client():
+    """Client boto3 S3 (même configuration que get_from_s3 et publish_to_s3)."""
+    missing = check_s3_config()
+    if missing:
+        raise ValueError(
+            f"Variables d'environnement S3 non définies : {', '.join(missing)}"
+        )
+    return boto3.client(
+        "s3",
+        endpoint_url=S3_ENDPOINT_URL,
+        region_name=S3_REGION,
+        aws_access_key_id=S3_ACCESS_KEY_ID,
+        aws_secret_access_key=S3_SECRET_ACCESS_KEY,
+        config=Config(
+            signature_version="s3v4",
+            s3={"addressing_style": "path"},
+            connect_timeout=30,
+            read_timeout=30,
+        ),
+    )
 
 
 def gzip_file_reproducible(src: Path, dst: Path, compresslevel: int = 9) -> Path:

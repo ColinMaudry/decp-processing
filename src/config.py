@@ -324,18 +324,20 @@ BOAMP_START_DATE = os.getenv("BOAMP_START_DATE", "2024-01-01")
 BOAMP_ARCHIVE_CUTOFF_YEAR = int(os.getenv("BOAMP_ARCHIVE_CUTOFF_YEAR", "2026"))
 
 # Nombre de derniers jours re-crawlés à chaque run (rattrapage des ajouts tardifs).
-BOAMP_RECRAWL_DAYS = int(os.getenv("BOAMP_RECRAWL_DAYS", "7"))
+BOAMP_RECRAWL_DAYS = int(os.getenv("BOAMP_RECRAWL_DAYS", "3"))
 
 # Filtrage par NATURE (cf. spec). Inclusions directes :
 BOAMP_INCLUDED_NATURES = {
     "APPEL_OFFRE",
     "QUALIFICATION",
     "RECTIFICATIF",
-    "MODIFICATION",
+    "ANNULATION",
 }
 # Inclusions conditionnelles : ces NATURE ne sont gardées que si le sous-élément
 # est MISE_EN_CONCURRENCE (avis valant appel à la concurrence).
 BOAMP_MISE_EN_CONCURRENCE_NATURES = {"PRE-INFORMATION", "PERIODIQUE"}
+# Pré-informations : conservées comme telles (statut "pre-information") par deao_processing.
+BOAMP_PRE_INFORMATION_NATURES = {"PRE-INFORMATION", "PERIODIQUE"}
 
 # URL publique d'un avis (construite depuis l'IDWEB).
 BOAMP_AVIS_URL_TEMPLATE = os.getenv(
@@ -353,6 +355,39 @@ ALL_CONFIG["BOAMP_DATA_DIR"] = BOAMP_DATA_DIR
 BOAMP_DATASET_ID = os.getenv("BOAMP_DATASET_ID", "")
 BOAMP_PARQUET_RESOURCE_ID = os.getenv("BOAMP_PARQUET_RESOURCE_ID", "")
 BOAMP_CSV_RESOURCE_ID = os.getenv("BOAMP_CSV_RESOURCE_ID", "")
+
+# ---------------------------------------------------------------------------
+# DEAO (flow deao_processing) — Données essentielles d'appels d'offres, issue #178
+# ---------------------------------------------------------------------------
+
+DEAO_DATA_DIR = make_path_from_env("DEAO_DATA_DIR", DATA_DIR / "deao")
+DEAO_DATA_DIR.mkdir(exist_ok=True, parents=True)
+DEAO_PARTITIONS_DIR = DEAO_DATA_DIR / "avis"
+DEAO_PARTITIONS_DIR.mkdir(exist_ok=True, parents=True)
+DEAO_DIST_DIR = make_path_from_env("DEAO_DIST_DIR", DIST_DIR / "deao")
+DEAO_DIST_DIR.mkdir(exist_ok=True, parents=True)
+ALL_CONFIG["DEAO_DATA_DIR"] = DEAO_DATA_DIR
+ALL_CONFIG["DEAO_DIST_DIR"] = DEAO_DIST_DIR
+
+# Préfixes S3 : archives quotidiennes des avis bruts (<préfixe>/<AAAA>/<MM>/<JJ>.tar.zst)
+# et résultats de géocodage.
+DEAO_S3_PREFIX = os.getenv("DEAO_S3_PREFIX", "boamp/raw")
+DEAO_GEOCODE_S3_PREFIX = os.getenv("DEAO_GEOCODE_S3_PREFIX", "deao")
+
+# Reconstruire depuis les archives plutôt que de reprendre les partitions existantes.
+DEAO_REBUILD = os.getenv("DEAO_REBUILD", "false").lower() == "true"
+
+# Délai (jours) après lequel un avis sans date limite est considéré clos.
+DEAO_STATUT_DELAI_JOURS = int(os.getenv("DEAO_STATUT_DELAI_JOURS", "90"))
+
+# Garde-fou : pas de publication en dessous de ce nombre de lignes.
+DEAO_MIN_ROWS_TO_PUBLISH = int(os.getenv("DEAO_MIN_ROWS_TO_PUBLISH", "50000"))
+
+# Publication data.gouv.fr.
+DEAO_DATASET_ID = os.getenv("DEAO_DATASET_ID", "")
+DEAO_PARQUET_RESOURCE_ID = os.getenv("DEAO_PARQUET_RESOURCE_ID", "")
+DEAO_CSV_RESOURCE_ID = os.getenv("DEAO_CSV_RESOURCE_ID", "")
+DEAO_SCHEMA_RESOURCE_ID = os.getenv("DEAO_SCHEMA_RESOURCE_ID", "")
 
 with open(
     make_path_from_env(

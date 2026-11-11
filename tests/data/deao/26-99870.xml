@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jo:ann xmlns:jo="http://boamp.journal-officiel.gouv.fr/XML/3.2.5">
+
+   <DONNEES>
+      <MAPA>
+         <organisme>
+            <correspondantPRM>
+               <nom>Service CP</nom>
+            </correspondantPRM>
+            <acheteurPublic>Communauté Lesneven Côte des Légendes</acheteurPublic>
+            <adr>
+               <voie>
+                  <nomvoie>12 Bvd des Frères Lumière</nomvoie>
+               </voie>
+               <cp>29260</cp>
+               <ville>Lesneven</ville>
+            </adr>
+            <coord>
+               <tel>+33 298211177</tel>
+               <mel>commandepublique@clcl.bzh</mel>
+               <url>https://www.clcl.bzh/</url>
+            </coord>
+            <urlProfilAcheteur>https://marches.megalis.bretagne.bzh/index.php?page=Entreprise.EntrepriseDetailsConsultation&amp;id=242438&amp;orgAcronyme=g6g</urlProfilAcheteur>
+         </organisme>
+         <initial>
+            <natureMarche>
+               <services/>
+            </natureMarche>
+            <description>
+               <objet>Pilotage et rédaction de la mise à jour du Plan-Climat-Air-Energie-Territorial (PCAET) de la collectivité</objet>
+               <lieuExecutionLivraison>
+                  <voie>
+                     <nomvoie>12 Bvd des Frères Lumière</nomvoie>
+                  </voie>
+                  <cp>29260</cp>
+                  <ville>Lesneven</ville>
+               </lieuExecutionLivraison>
+            </description>
+            <caracteristiques>
+               <variantes>
+                  <non xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string"/>
+               </variantes>
+               <principales>Pilotage et rédaction de la mise à jour du Plan-Climat-Air-Energie-Territorial (PCAET) de la collectivité</principales>
+            </caracteristiques>
+            <duree>
+               <nbMois>29</nbMois>
+            </duree>
+            <procedure>
+               <procedureAdaptee/>
+            </procedure>
+            <delais>
+               <receptionOffres>2026-11-19T11:30:00.000+01:00</receptionOffres>
+            </delais>
+            <renseignements>
+               <idMarche>C-2026-16</idMarche>
+            </renseignements>
+            <marcheUnique/>
+         </initial>
+      </MAPA>
+   </DONNEES>
+   <GESTION>
+      <REFERENCE>
+         <IDWEB>26-99870</IDWEB>
+         <TYPE_AVIS>
+            <FAMILLE>
+               <MAPA/>
+            </FAMILLE>
+            <PERIMETRE>
+               <MAPA/>
+            </PERIMETRE>
+            <NATURE>
+               <APPEL_OFFRE/>
+            </NATURE>
+            <STATUT>
+               <INITIAL/>
+            </STATUT>
+         </TYPE_AVIS>
+      </REFERENCE>
+      <INDEXATION>
+         <SCHEMA>3.2.5</SCHEMA>
+         <NOMORGANISME>Communauté Lesneven Côte des Légendes</NOMORGANISME>
+         <TYPE_PROCEDURE>
+            <PROCEDURE_ADAPTE/>
+         </TYPE_PROCEDURE>
+         <DATE_PUBLICATION>2026-10-14</DATE_PUBLICATION>
+         <DATE_LIMITE_REPONSE>2026-11-19T11:30:00.000+01:00</DATE_LIMITE_REPONSE>
+         <DATE_FIN_DIFFUSION>2027-01-11</DATE_FIN_DIFFUSION>
+         <DESCRIPTEURS>
+            <DESCRIPTEUR>
+               <CODE>455</CODE>
+               <LIBELLE>Ingénierie</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>118</CODE>
+               <LIBELLE>Etude</LIBELLE>
+            </DESCRIPTEUR>
+         </DESCRIPTEURS>
+         <NATURE_MARCHE>
+            <SERVICES/>
+         </NATURE_MARCHE>
+         <DEP_PUBLICATION>29</DEP_PUBLICATION>
+         <RESUME_OBJET>Pilotage et rédaction de la mise à jour du Plan-Climat-Air-Energie-Territorial (PCAET) de la collectivité</RESUME_OBJET>
+      </INDEXATION>
+   </GESTION>
+   </jo:ann>

@@ -1,0 +1,260 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jo:ann xmlns:jo="http://boamp.journal-officiel.gouv.fr/XML/3.2.5">
+
+   <DONNEES>
+      <EFORMS>
+         <PriorInformationNotice xmlns:cac="urn:boamp:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:boamp:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:efac="http://data.europa.eu/p27/eforms-ubl-extension-aggregate-components/1" xmlns:efbc="http://data.europa.eu/p27/eforms-ubl-extension-basic-components/1" xmlns:efext="http://data.europa.eu/p27/eforms-ubl-extensions/1" xmlns:ext="urn:boamp:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+            <ext:UBLExtensions>
+               <ext:UBLExtension>
+                  <ext:ExtensionContent>
+                     <efext:EformsExtension>
+                        <efac:NoticeSubType>
+                           <cbc:SubTypeCode listName="notice-subtype">4</cbc:SubTypeCode>
+                        </efac:NoticeSubType>
+                        <efac:Organizations>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cbc:WebsiteURI>https://v2.marches-securises.fr/</cbc:WebsiteURI>
+                                 <cbc:EndpointID>https://v2.marches-securises.fr</cbc:EndpointID>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID>ORG-0001</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">Commune d'Ouanary (973)</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>Mairie de Ouanary
+Bourg de Ouanary
+97 380 Ouanary
+Tél: 0594 28 47 18</cbc:StreetName>
+                                    <cbc:Department>Service Aménagement Marché et Prospection de la Mairie de Ouanary</cbc:Department>
+                                    <cbc:CityName>Ouanary</cbc:CityName>
+                                    <cbc:PostalZone>97380</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRY30</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID>21973314400014</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>+33 594284718</cbc:Telephone>
+                                    <cbc:ElectronicMail>amenagement.marches@mairie-ouanary.fr</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID>ORG-0003</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">tribunal Administratif</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:CityName>Cayenne</cbc:CityName>
+                                    <cbc:PostalZone>97300</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRY30</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID>17973000700020</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>+33 594254970</cbc:Telephone>
+                                    <cbc:ElectronicMail>greffe.ta-cayenne@juradm.fr</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                        </efac:Organizations>
+                     </efext:EformsExtension>
+                  </ext:ExtensionContent>
+               </ext:UBLExtension>
+            </ext:UBLExtensions>
+            <cbc:UBLVersionID>2.3</cbc:UBLVersionID>
+            <cbc:CustomizationID>eforms-sdk-1.13</cbc:CustomizationID>
+            <cbc:ID schemeName="notice-id">d9ffb019-2070-4187-b5c8-2aa652db9c90</cbc:ID>
+            <cbc:IssueDate>2026-10-07Z</cbc:IssueDate>
+            <cbc:IssueTime>13:23:01Z</cbc:IssueTime>
+            <cbc:VersionID>01</cbc:VersionID>
+            <cbc:PlannedDate>2026-10-23-03:00</cbc:PlannedDate>
+            <cbc:RegulatoryDomain>32014L0024</cbc:RegulatoryDomain>
+            <cbc:NoticeTypeCode listName="planning">pin-only</cbc:NoticeTypeCode>
+            <cbc:NoticeLanguageCode listName="language">FRA</cbc:NoticeLanguageCode>
+            <cac:ContractingParty>
+               <cbc:BuyerProfileURI>https://v2.marches-securises.fr/</cbc:BuyerProfileURI>
+               <cac:ContractingPartyType>
+                  <cbc:PartyTypeCode listName="buyer-legal-type">body-pl</cbc:PartyTypeCode>
+               </cac:ContractingPartyType>
+               <cac:ContractingActivity>
+                  <cbc:ActivityTypeCode listName="authority-activity">gen-pub</cbc:ActivityTypeCode>
+               </cac:ContractingActivity>
+               <cac:Party>
+                  <cac:PartyIdentification>
+                     <cbc:ID>ORG-0001</cbc:ID>
+                  </cac:PartyIdentification>
+               </cac:Party>
+            </cac:ContractingParty>
+            <cac:ProcurementProject>
+               <cbc:Name languageID="FRA">MAPA Ouvert avec négociation</cbc:Name>
+               <cbc:Description languageID="FRA">Objet du Marché : Lot Sécurisation des Berges du Cour d'Eau
+Le phénomène d'envasement et d'affaissement perdurant, le besoin d' aménagements par des travaux rendu nécessaires de confortement des berges du cour d'eau. La stabilisation passe par une approche technique de pose de cages de gabions permettant de contrer l'effet d'érosion par batillage et battage de palplanche</cbc:Description>
+               <cbc:ProcurementTypeCode listName="contract-nature">works</cbc:ProcurementTypeCode>
+               <cac:ProcurementAdditionalType>
+                  <cbc:ProcurementTypeCode listName="contract-nature">supplies</cbc:ProcurementTypeCode>
+               </cac:ProcurementAdditionalType>
+               <cac:MainCommodityClassification>
+                  <cbc:ItemClassificationCode listName="cpv">45246200</cbc:ItemClassificationCode>
+               </cac:MainCommodityClassification>
+               <cac:RealizedLocation>
+                  <cbc:Description languageID="FRA">Interdiction de soumissionner pour mauvaise exécution précédente
+Interdiction de soumissionner pour corruption informative
+Interdiction de soumissionner pour participation à l'élaboration du DCE
+Interdiction de soumissionner pour entente
+Interdiction de soumissionner pour conflit d'intérêt
+Délai raisonnable laissé à l'opérateur économique pour défendre sa candidature : 15 jours</cbc:Description>
+                  <cac:Address>
+                     <cbc:StreetName>Bourg de  Ouanary
+97380 Ouanary</cbc:StreetName>
+                     <cbc:CityName>Ouanary</cbc:CityName>
+                     <cbc:PostalZone>97380</cbc:PostalZone>
+                     <cbc:CountrySubentityCode listName="nuts">FRY30</cbc:CountrySubentityCode>
+                     <cac:Country>
+                        <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                     </cac:Country>
+                  </cac:Address>
+               </cac:RealizedLocation>
+            </cac:ProcurementProject>
+            <cac:ProcurementProjectLot>
+               <cbc:ID schemeName="Part">PAR-0001</cbc:ID>
+               <cac:TenderingTerms>
+                  <cac:FiscalLegislationDocumentReference>
+                     <cbc:ID>_DEFAULT_VALUE_CHANGE_ME_</cbc:ID>
+                     <cac:IssuerParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID>ORG-0001</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:IssuerParty>
+                  </cac:FiscalLegislationDocumentReference>
+                  <cac:CallForTendersDocumentReference>
+                     <cbc:ID>_DEFAULT_VALUE_CHANGE_ME_</cbc:ID>
+                     <cbc:DocumentType>non-restricted-document</cbc:DocumentType>
+                     <cac:Attachment>
+                        <cac:ExternalReference>
+                           <cbc:URI>https://www.marches-services.fr</cbc:URI>
+                        </cac:ExternalReference>
+                     </cac:Attachment>
+                  </cac:CallForTendersDocumentReference>
+                  <cac:TendererQualificationRequest>
+                     <cac:SpecificTendererRequirement>
+                        <cbc:TendererRequirementTypeCode listName="reserved-procurement">none</cbc:TendererRequirementTypeCode>
+                     </cac:SpecificTendererRequirement>
+                  </cac:TendererQualificationRequest>
+                  <cac:ContractExecutionRequirement>
+                     <cbc:ExecutionRequirementCode listName="reserved-execution">no</cbc:ExecutionRequirementCode>
+                  </cac:ContractExecutionRequirement>
+                  <cac:AdditionalInformationParty>
+                     <cac:PartyIdentification>
+                        <cbc:ID>ORG-0001</cbc:ID>
+                     </cac:PartyIdentification>
+                  </cac:AdditionalInformationParty>
+                  <cac:DocumentProviderParty>
+                     <cac:PartyIdentification>
+                        <cbc:ID>ORG-0001</cbc:ID>
+                     </cac:PartyIdentification>
+                  </cac:DocumentProviderParty>
+                  <cac:AppealTerms>
+                     <cac:AppealInformationParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID>ORG-0001</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:AppealInformationParty>
+                     <cac:AppealReceiverParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID>ORG-0003</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:AppealReceiverParty>
+                  </cac:AppealTerms>
+               </cac:TenderingTerms>
+               <cac:TenderingProcess>
+                  <cbc:GovernmentAgreementConstraintIndicator>true</cbc:GovernmentAgreementConstraintIndicator>
+                  <cac:ContractingSystem>
+                     <cbc:ContractingSystemTypeCode listName="framework-agreement">none</cbc:ContractingSystemTypeCode>
+                  </cac:ContractingSystem>
+               </cac:TenderingProcess>
+               <cac:ProcurementProject>
+                  <cbc:Name languageID="FRA">Lot Sécurisation des Berges</cbc:Name>
+                  <cbc:Description languageID="FRA">Sécurisation des Berges du Cour d'Eau</cbc:Description>
+                  <cbc:ProcurementTypeCode listName="contract-nature">works</cbc:ProcurementTypeCode>
+                  <cbc:SMESuitableIndicator>true</cbc:SMESuitableIndicator>
+                  <cac:RequestedTenderTotal>
+                     <cbc:EstimatedOverallContractAmount currencyID="EUR">1825795</cbc:EstimatedOverallContractAmount>
+                  </cac:RequestedTenderTotal>
+                  <cac:MainCommodityClassification>
+                     <cbc:ItemClassificationCode listName="cpv">45246200</cbc:ItemClassificationCode>
+                  </cac:MainCommodityClassification>
+                  <cac:RealizedLocation>
+                     <cac:Address>
+                        <cbc:CityName>Ouanary</cbc:CityName>
+                        <cbc:PostalZone>97380</cbc:PostalZone>
+                        <cbc:CountrySubentityCode listName="nuts">FRY30</cbc:CountrySubentityCode>
+                        <cac:Country>
+                           <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                        </cac:Country>
+                     </cac:Address>
+                  </cac:RealizedLocation>
+               </cac:ProcurementProject>
+            </cac:ProcurementProjectLot>
+         </PriorInformationNotice>
+      </EFORMS>
+   </DONNEES>
+   <GESTION>
+      <REFERENCE>
+         <IDWEB>26-97189</IDWEB>
+         <TYPE_AVIS>
+            <FAMILLE>
+               <JOUE/>
+            </FAMILLE>
+            <PERIMETRE>
+               <DIRECTIVE-24/>
+            </PERIMETRE>
+            <NATURE>
+               <PRE-INFORMATION>
+                  <STANDARD/>
+               </PRE-INFORMATION>
+            </NATURE>
+            <STATUT>
+               <INITIAL/>
+            </STATUT>
+         </TYPE_AVIS>
+      </REFERENCE>
+      <INDEXATION>
+         <SCHEMA>3.2.5</SCHEMA>
+         <NOMORGANISME>Commune d'Ouanary (973)</NOMORGANISME>
+         <DATE_PUBLICATION>2026-10-09</DATE_PUBLICATION>
+         <DATE_FIN_DIFFUSION>2026-10-29</DATE_FIN_DIFFUSION>
+         <DESCRIPTEURS>
+            <DESCRIPTEUR>
+               <CODE>78</CODE>
+               <LIBELLE>Curage</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>35</CODE>
+               <LIBELLE>Berge</LIBELLE>
+            </DESCRIPTEUR>
+         </DESCRIPTEURS>
+         <NATURE_MARCHE>
+            <TRAVAUX/>
+         </NATURE_MARCHE>
+         <CRITERES_SOCIAUX_ENV>
+            <SOCIAUX/>
+            <ENVIRONNEMENTAUX/>
+         </CRITERES_SOCIAUX_ENV>
+         <DEP_PUBLICATION>973</DEP_PUBLICATION>
+         <RESUME_OBJET>MAPA Ouvert avec négociation</RESUME_OBJET>
+      </INDEXATION>
+   </GESTION>
+   </jo:ann>

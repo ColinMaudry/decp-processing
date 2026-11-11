@@ -1,0 +1,267 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jo:ann xmlns:jo="http://boamp.journal-officiel.gouv.fr/XML/3.2.5">
+
+   <DONNEES>
+      <FNSimple xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         <organisme>
+            <nomOfficiel>CMAR Normandie</nomOfficiel>
+            <typeIdentificationNational>
+               <siret/>
+            </typeIdentificationNational>
+            <codeIdentificationNational>13002799800017</codeIdentificationNational>
+            <ville>Caen</ville>
+            <cp>14000</cp>
+            <grpCommandes>
+               <non/>
+            </grpCommandes>
+         </organisme>
+         <initial>
+            <communication>
+               <urlProfilAch>https://cmar-normandie.e-marchespublics.com/pack/annonce_marche_public_30245_1180167.html</urlProfilAch>
+               <identifiantInterne>2026-28-08</identifiantInterne>
+               <docSecurite>
+                  <oui/>
+               </docSecurite>
+               <urlSecurite>
+                  <non/>
+               </urlSecurite>
+               <nomContact>Mabille  Lydie</nomContact>
+               <adresseMailContact>lmabille@cma-normandie.fr</adresseMailContact>
+               <telContact>+33 617631706</telContact>
+            </communication>
+            <procedure>
+               <procedureAdapteeO/>
+               <capaciteExercice>Conditions définies dans les pièces du DCE (règlement de consultation)</capaciteExercice>
+               <techAchat>
+                  <sad/>
+               </techAchat>
+               <dateReceptionOffres>2026-11-16T16:00:00Z</dateReceptionOffres>
+               <presOffres>
+                  <interdite/>
+               </presOffres>
+               <nbCandidatReduit>
+                  <non/>
+               </nbCandidatReduit>
+               <attributionSansNegociation>
+                  <oui/>
+               </attributionSansNegociation>
+               <variantes>
+                  <non/>
+               </variantes>
+               <criteresAttrib>Techniques, pédagogiques</criteresAttrib>
+            </procedure>
+            <natureMarche>
+               <intitule>Système d'acquisition dynamique pour l'animation pédagogique et technique de formations continues courtes métiers pour les clients de la CMA Normandie</intitule>
+               <codeCPV>
+                  <objetPrincipal>
+                     <classPrincipale>80530000</classPrincipale>
+                  </objetPrincipal>
+               </codeCPV>
+               <natureMarche>
+                  <services/>
+               </natureMarche>
+               <description>Catégorie de formation métiers : Esthétique massage visage et corps, Esthétique onglerie, Esthétique maquillage et regard, règlementaire coiffure, Coiffure, Fleuriste, Boulangerie, Pâtisserie, Photographie, Couture, Permis exploitation.</description>
+               <lieuExecution>Normandie - sites de formation de la CMA Normandie - Caen, Coutances, Rouen, Le Havre, Rouxmesnil Bouteilles, Alençon, Evreux</lieuExecution>
+               <dureeMois>24</dureeMois>
+               <valeurEstimee devise="EUR">
+                  <valeur>132000</valeur>
+               </valeurEstimee>
+               <tranches>
+                  <non/>
+               </tranches>
+               <reservationMarche>
+                  <non/>
+               </reservationMarche>
+               <lotsMarche>
+                  <oui/>
+               </lotsMarche>
+            </natureMarche>
+            <lots>
+               <lot>
+                  <description>C1 : Formation métiers en esthétique massage visage et corps</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>98330000</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <estimationValeur devise="EUR">
+                     <valeur>36000</valeur>
+                  </estimationValeur>
+                  <lieuExecutionLivraison>NORMANDIE : Caen, Alençon, Evreux, Rouen, Rouxmesnil Bouteilles, Le Havre, Coutances</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>C2 : Formation métiers en esthétique onglerie</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>98321000</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <estimationValeur devise="EUR">
+                     <valeur>6000</valeur>
+                  </estimationValeur>
+                  <lieuExecutionLivraison>NORMANDIE : Caen, Alençon, Evreux, Rouen, Rouxmesnil Bouteilles, Le Havre, Coutances</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>C3 : Formation en esthétique maquillage et regard</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>98322140</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <estimationValeur devise="EUR">
+                     <valeur>6000</valeur>
+                  </estimationValeur>
+                  <lieuExecutionLivraison>NORMANDIE : Caen, Alençon, Evreux, Rouen, Rouxmesnil Bouteilles, Le Havre, Coutances</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>C4 : Formation règlementation coiffure et esthétique, posture de travail</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>98321000</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <estimationValeur devise="EUR">
+                     <valeur>4000</valeur>
+                  </estimationValeur>
+                  <lieuExecutionLivraison>NORMANDIE : Caen, Alençon, Evreux, Rouen, Rouxmesnil Bouteilles, Le Havre, Coutances</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>C5 : Formation coiffure</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>98321000</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <estimationValeur devise="EUR">
+                     <valeur>30000</valeur>
+                  </estimationValeur>
+                  <lieuExecutionLivraison>NORMANDIE : Caen, Alençon, Evreux, Rouen, Rouxmesnil Bouteilles, Le Havre, Coutances</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>C6 : Formation Fleuriste</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>03121200</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <estimationValeur devise="EUR">
+                     <valeur>8000</valeur>
+                  </estimationValeur>
+                  <lieuExecutionLivraison>NORMANDIE : Caen, Alençon, Evreux, Rouen, Rouxmesnil Bouteilles, Le Havre, Coutances</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>C7 : Formation boulangerie</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>15612500</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <estimationValeur devise="EUR">
+                     <valeur>8000</valeur>
+                  </estimationValeur>
+                  <lieuExecutionLivraison>NORMANDIE : Caen, Alençon, Evreux, Rouen, Rouxmesnil Bouteilles, Le Havre, Coutances</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>C8 : Formation pâtisserie</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>15812100</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <estimationValeur devise="EUR">
+                     <valeur>8000</valeur>
+                  </estimationValeur>
+                  <lieuExecutionLivraison>NORMANDIE : Caen, Alençon, Evreux, Rouen, Rouxmesnil Bouteilles, Le Havre, Coutances</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>C9 : Formation photographie</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>79961000</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <estimationValeur devise="EUR">
+                     <valeur>10000</valeur>
+                  </estimationValeur>
+                  <lieuExecutionLivraison>NORMANDIE : Caen, Alençon, Evreux, Rouen, Rouxmesnil Bouteilles, Le Havre, Coutances</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>C10: Formation couture</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>98393000</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <estimationValeur devise="EUR">
+                     <valeur>8000</valeur>
+                  </estimationValeur>
+                  <lieuExecutionLivraison>NORMANDIE : Caen, Alençon, Evreux, Rouen, Rouxmesnil Bouteilles, Le Havre, Coutances</lieuExecutionLivraison>
+               </lot>
+               <lot>
+                  <description>C11 : Permis exploitation</description>
+                  <codeCPV>
+                     <objetPrincipal>
+                        <classPrincipale>80510000</classPrincipale>
+                     </objetPrincipal>
+                  </codeCPV>
+                  <estimationValeur devise="EUR">
+                     <valeur>8000</valeur>
+                  </estimationValeur>
+                  <lieuExecutionLivraison>NORMANDIE : Caen, Alençon, Evreux, Rouen, Rouxmesnil Bouteilles, Le Havre, Coutances</lieuExecutionLivraison>
+               </lot>
+            </lots>
+            <informComplementaire>
+               <non/>
+               <autresInformComplementaire>Durée du SAD : 24 mois à compter du 1er marché spécifique</autresInformComplementaire>
+            </informComplementaire>
+         </initial>
+      </FNSimple>
+   </DONNEES>
+   <GESTION>
+      <REFERENCE>
+         <IDWEB>26-99177</IDWEB>
+         <TYPE_AVIS>
+            <FAMILLE>
+               <FNS/>
+            </FAMILLE>
+            <PERIMETRE>
+               <FNSimple/>
+            </PERIMETRE>
+            <NATURE>
+               <APPEL_OFFRE/>
+            </NATURE>
+            <STATUT>
+               <INITIAL/>
+            </STATUT>
+         </TYPE_AVIS>
+      </REFERENCE>
+      <INDEXATION>
+         <SCHEMA>3.2.5</SCHEMA>
+         <NOMORGANISME>CMAR Normandie</NOMORGANISME>
+         <TYPE_PROCEDURE>
+            <OUVERT/>
+         </TYPE_PROCEDURE>
+         <DATE_PUBLICATION>2026-10-13</DATE_PUBLICATION>
+         <DATE_LIMITE_REPONSE>2026-11-16T16:00:00Z</DATE_LIMITE_REPONSE>
+         <DATE_FIN_DIFFUSION>2026-11-16</DATE_FIN_DIFFUSION>
+         <DESCRIPTEURS>
+            <DESCRIPTEUR>
+               <CODE>410</CODE>
+               <LIBELLE>Formation</LIBELLE>
+            </DESCRIPTEUR>
+         </DESCRIPTEURS>
+         <NATURE_MARCHE>
+            <SERVICES/>
+         </NATURE_MARCHE>
+         <CRITERES_SOCIAUX_ENV>
+            <ENVIRONNEMENTAUX/>
+         </CRITERES_SOCIAUX_ENV>
+         <DEP_PUBLICATION>14</DEP_PUBLICATION>
+         <DEP_PUBLICATION>76</DEP_PUBLICATION>
+         <DEP_PUBLICATION>27</DEP_PUBLICATION>
+         <DEP_PUBLICATION>50</DEP_PUBLICATION>
+         <DEP_PUBLICATION>61</DEP_PUBLICATION>
+         <RESUME_OBJET>Système d'acquisition dynamique pour l'animation pédagogique et technique de formations continues courtes métiers pour les clients de la CMA Normandie</RESUME_OBJET>
+      </INDEXATION>
+   </GESTION>
+   </jo:ann>
