@@ -56,13 +56,18 @@ def siret_valide(s: str | None) -> bool:
 
 
 def s3_client():
-    """Client boto3 S3 (même configuration que get_from_s3 et publish_to_s3)."""
+    """Client boto3 S3 (même configuration que get_from_s3 et publish_to_s3).
+
+    Créé depuis une session boto3 dédiée : `boto3.client()` passe par la session
+    par défaut, qui n'est pas thread-safe, or s3_client() est appelé depuis les
+    threads de run_in_pool.
+    """
     missing = check_s3_config()
     if missing:
         raise ValueError(
             f"Variables d'environnement S3 non définies : {', '.join(missing)}"
         )
-    return boto3.client(
+    return boto3.session.Session().client(
         "s3",
         endpoint_url=S3_ENDPOINT_URL,
         region_name=S3_REGION,
