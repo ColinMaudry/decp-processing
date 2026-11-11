@@ -18,6 +18,7 @@ from src.config import (
     LOG_LEVEL,
     SIRENE_DATA_DIR,
 )
+from src.flows.sirene_preprocess import sirene_preprocess
 from src.tasks.deao.consolidate import consolidate
 from src.tasks.deao.enrich import enrich_acheteurs
 from src.tasks.deao.geocode_cache import ADRESSE_GEOCODE_SCHEMA, geocoder_adresses
@@ -29,12 +30,13 @@ from src.tasks.deao.schema import (
     write_table_schema,
 )
 from src.tasks.deao.sources.boamp.acquire import acquire_boamp
+from src.tasks.deao.sources.boamp.parse import source_file_expr
 from src.tasks.output import sink_to_files
 from src.tasks.publish import publish_deao_to_datagouv, should_publish_deao
 from src.tasks.utils import get_logger, print_all_config
 
-# Les références de module (BOAMP_START_DATE, DEAO_*, charger_referentiels,
-# geocoder_adresses, publier_rapport) sont lues à l'appel : les tests les substituent.
+# Les références de module (BOAMP_START_DATE, DEAO_*, SIRENE_DATA_DIR,
+# sirene_preprocess, charger_referentiels, geocoder_adresses, publier_rapport) sont lues à l'appel : les tests les substituent.
 
 
 def charger_referentiels() -> tuple[pl.LazyFrame, pl.LazyFrame, pl.DataFrame]:
@@ -103,6 +105,11 @@ def deao_processing(run_date: str | None = None) -> None:
     today = date.fromisoformat(run_date) if run_date else date.today()
     stats: Counter = Counter()
 
+    # SIRENE du mois absent : prétraitement en sous-flow, comme decp_processing.
+    if not SIRENE_DATA_DIR.exists():
+        logger.info(f"{SIRENE_DATA_DIR} absent, lancement de sirene_preprocess...")
+        sirene_preprocess()
+
     # En tête de flow : un référentiel absent arrête le run avant l'acquisition.
     lf_unites_legales, lf_etablissements, df_cog = charger_referentiels()
 
@@ -128,6 +135,7 @@ def deao_processing(run_date: str | None = None) -> None:
 
     logger.info(f"Écriture de {df.height} lignes dans {DEAO_DIST_DIR}...")
     DEAO_DIST_DIR.mkdir(parents=True, exist_ok=True)
+    df = df.with_columns(source_file_expr(today.year))
     sink_to_files(selection_publiee(df).lazy(), DEAO_DIST_DIR / "deao")
     write_table_schema(DEAO_DIST_DIR / "schema.json")
 

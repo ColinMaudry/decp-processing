@@ -65,6 +65,13 @@ def flow_env(monkeypatch, tmp_path, fake_s3, dila):  # noqa: F811
     monkeypatch.setattr(flow_module, "DEAO_DIST_DIR", dist)
     monkeypatch.setattr(flow_module, "BOAMP_START_DATE", "2026-09-12")
     monkeypatch.setattr(flow_module, "DEAO_REBUILD", False)
+    # SIRENE présent : pas de prétraitement déclenché
+    monkeypatch.setattr(flow_module, "SIRENE_DATA_DIR", tmp_path)
+    monkeypatch.setattr(
+        flow_module,
+        "sirene_preprocess",
+        lambda: pytest.fail("sirene_preprocess ne doit pas être appelé"),
+    )
     monkeypatch.setattr(
         flow_module, "charger_referentiels", lambda: (_lf_ul(), _lf_etab(), COG)
     )
@@ -148,3 +155,20 @@ def test_lire_partitions_tolere_un_changement_de_contrat(tmp_path, monkeypatch):
     df = flow_module.lire_partitions()
     assert df.schema == pl.Schema(AVIS_LOT_SCHEMA)
     assert df.sort("idAvis")["sourceFile"].to_list() == [None, "https://x/26-1.xml"]
+
+
+def test_deao_processing_lance_sirene_preprocess_si_absent(
+    flow_env, monkeypatch, tmp_path
+):
+    appels = []
+    monkeypatch.setattr(flow_module, "SIRENE_DATA_DIR", tmp_path / "sirene_absent")
+    monkeypatch.setattr(flow_module, "sirene_preprocess", lambda: appels.append(1))
+    flow_module.deao_processing(run_date="2026-10-15")
+    assert appels == [1]
+
+
+def test_deao_processing_source_file_flux_historique(flow_env):
+    flow_module.deao_processing(run_date="2027-01-15")
+    sources = pl.read_parquet(flow_env / "deao.parquet")["sourceFile"].drop_nulls()
+    assert sources.len() > 0
+    assert sources.str.contains("/FluxHistorique/Boamp_v240/2026/").all()

@@ -4,8 +4,9 @@ from pathlib import Path
 
 import polars as pl
 
+from src.config import BOAMP_BASE_URL
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA
-from src.tasks.deao.sources.boamp.parse import parse_day
+from src.tasks.deao.sources.boamp.parse import parse_day, source_file_expr
 from src.tasks.deao.sources.boamp.xml import idweb
 from src.tasks.deao.values import PARIS
 
@@ -88,3 +89,27 @@ def test_parse_day_compte_les_avis_sans_date_publication():
     df, c = parse_day({"26-99870.xml": xml_sans_date})
     assert c["sans_date_publication"] == 1
     assert df["sourceFile"].to_list() == [None]
+
+
+def test_source_file_expr_annees_passees_sous_flux_historique():
+    df = pl.DataFrame(
+        {
+            "sourceFile": [
+                f"{BOAMP_BASE_URL}/2025/11/05/25-1.xml",
+                f"{BOAMP_BASE_URL}/2026/10/14/26-1.xml",
+                f"{BOAMP_BASE_URL}/FluxHistorique/Boamp_v240/2024/03/12/24-1.xml",
+                None,
+            ]
+        }
+    )
+    out = df.select(source_file_expr(2026))["sourceFile"].to_list()
+    assert out == [
+        f"{BOAMP_BASE_URL}/FluxHistorique/Boamp_v240/2025/11/05/25-1.xml",
+        f"{BOAMP_BASE_URL}/2026/10/14/26-1.xml",
+        f"{BOAMP_BASE_URL}/FluxHistorique/Boamp_v240/2024/03/12/24-1.xml",
+        None,
+    ]
+    # l'année suivante, 2026 bascule à son tour
+    assert df.select(source_file_expr(2027))["sourceFile"][1] == (
+        f"{BOAMP_BASE_URL}/FluxHistorique/Boamp_v240/2026/10/14/26-1.xml"
+    )

@@ -1,5 +1,6 @@
 """Parsing d'un avis BOAMP et d'un jour d'avis en lignes avis-lot."""
 
+import re
 from collections import Counter
 from datetime import date
 
@@ -92,3 +93,32 @@ def parse_day(files: dict[str, bytes]) -> tuple[pl.DataFrame, Counter]:
         return empty_avis_frame(), compteur
     df = pl.DataFrame(lignes, schema=AVIS_LOT_SCHEMA)
     return conform_avis(df), compteur
+
+
+FLUX_HISTORIQUE = "FluxHistorique/Boamp_v240"
+
+
+def source_file_expr(annee_run: int) -> pl.Expr:
+    """URL DILA de `sourceFile` recalculée pour l'année du run.
+
+    La DILA déplace les années passées sous FluxHistorique/Boamp_v240/ : une URL
+    figée à la lecture de l'avis deviendrait un lien mort. Les URL du flux courant
+    d'une année antérieure à `annee_run` sont donc réécrites à chaque run.
+    """
+    annee = (
+        pl.col("sourceFile")
+        .str.extract(rf"^{re.escape(BOAMP_BASE_URL)}/(\d{{4}})/", 1)
+        .cast(pl.Int32, strict=False)
+    )
+    return (
+        pl.when(annee < annee_run)
+        .then(
+            pl.col("sourceFile").str.replace(
+                f"{BOAMP_BASE_URL}/",
+                f"{BOAMP_BASE_URL}/{FLUX_HISTORIQUE}/",
+                literal=True,
+            )
+        )
+        .otherwise(pl.col("sourceFile"))
+        .alias("sourceFile")
+    )

@@ -90,6 +90,9 @@ détection/filtrage de `flatten.py` (`detect_format`, `parse_type_avis`, `is_inc
 
 ### Déroulé d'un run
 
+0. **Référentiels** — si le répertoire SIRENE du mois est absent, `sirene_preprocess`
+   est lancé en sous-flow (comme `decp_processing`) ; un référentiel encore absent arrête
+   le run avant toute acquisition.
 1. **Acquisition** — pour chaque jour de `BOAMP_START_DATE` (2024-01-01) à aujourd'hui :
    1. si la partition normalisée locale existe et que le jour est hors fenêtre de re-crawl
       (`BOAMP_RECRAWL_DAYS`, défaut **3**) → rien à faire (simple `stat`) ;
@@ -162,6 +165,10 @@ Aucun lien n'est établi en v1 entre une pré-information et l'avis de marché q
 Une chaîne composée **uniquement d'annulations** (ex. annulation dont l'avis annulé est
 exclu ou antérieur à 2024) est écartée à la consolidation : il n'y a aucun appel d'offres à
 décrire.
+
+`sourceFile` (URL DILA du fichier) est recalculé à chaque écriture : un fichier d'une
+année antérieure à celle du run pointe vers `FluxHistorique/Boamp_v240/`, où la DILA
+déplace les années passées.
 
 ## Contrat avis-lot (sortie des adaptateurs de source)
 
