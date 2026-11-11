@@ -18,6 +18,11 @@ COMPTEURS = (
     "chaine_annulation_seule",
     "uid_doublon",
     "geocodage_en_erreur",
+    "cycle",
+    "jour_traite",
+    "jour_vide",
+    "erreur_mapping",
+    "sans_date_publication",
 )
 _PREFIXES_COMPTEURS = ("exclu:", "non_mappe:")
 

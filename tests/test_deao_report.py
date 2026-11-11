@@ -53,3 +53,25 @@ def test_lignes_rapport():
 
 def test_publier_rapport_hors_contexte_prefect():
     publier_rapport([{"indicateur": "lu", "valeur": 1}])
+
+
+def test_lignes_rapport_compteurs_du_run():
+    stats = Counter(
+        cycle=1,
+        jour_traite=30,
+        erreur_mapping=2,
+        sans_date_publication=3,
+        jour_vide=4,
+        inconnu=9,
+    )
+    lignes = {
+        ligne["indicateur"]: ligne["valeur"]
+        for ligne in lignes_rapport(stats, pl.DataFrame())
+    }
+    assert lignes == {
+        "cycle": 1,
+        "jour_traite": 30,
+        "erreur_mapping": 2,
+        "sans_date_publication": 3,
+        "jour_vide": 4,
+    }
