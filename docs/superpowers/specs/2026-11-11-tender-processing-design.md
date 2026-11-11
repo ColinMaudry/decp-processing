@@ -29,7 +29,7 @@ Perspectives prises en compte dans le design (hors périmètre de cette issue) :
 | Source v1           | Flux DILA seul (`echanges.dila.gouv.fr/OPENDATA/BOAMP`). TED en v2                                                              |
 | Sortie publiée      | **Uniquement le schéma cible**. L'aplatissement générique devient un outil interne (exploration, CSV de définitions)            |
 | Grain               | **Une ligne par appel d'offres × lot** (consolidation des avis initiaux, rectificatifs, annulations)                            |
-| Pré-information     | Incluse (`typeAnnonce = pre_information`), `statut` nul ; en attendant un dataset dédié à la programmation des achats           |
+| Pré-information     | Incluse, `statut = pre-information` ; en attendant un dataset dédié à la programmation des achats                               |
 | Identifiant         | `uid = <sourceDataset>_<IDWEB de l'avis initial>_<lotId>`, ex. `boamp_26-10255_1`                                               |
 | Nommage             | Noms DECP quand le concept est le même, camelCase sinon                                                                         |
 | Archive brute       | Tous les XML DILA (attributions comprises) archivés par jour sur S3                                                             |
@@ -135,26 +135,26 @@ détection/filtrage de `flatten.py` (`detect_format`, `parse_type_avis`, `is_inc
 
 Sur `GESTION/REFERENCE/TYPE_AVIS` (commun aux deux formats) :
 
-| `NATURE`                                                                | Décision                                              | `typeAvis`     |
-| ----------------------------------------------------------------------- | ----------------------------------------------------- | -------------- |
-| `APPEL_OFFRE`, `QUALIFICATION` avec `STATUT=INITIAL`                    | retenu                                                | `initial`      |
-| `APPEL_OFFRE`, `QUALIFICATION` avec `STATUT=RECTIFICATIF`               | retenu                                                | `rectificatif` |
-| `APPEL_OFFRE` avec `STATUT=ANNULATION`                                  | retenu                                                | `annulation`   |
-| `RECTIFICATIF`                                                          | retenu                                                | `rectificatif` |
-| `ANNULATION`                                                            | retenu (**nouveau**)                                  | `annulation`   |
-| `PRE-INFORMATION`, `PERIODIQUE` avec sous-élément `MISE_EN_CONCURRENCE` | retenu, `typeAnnonce = appel_offres`                  | `initial`      |
-| `PRE-INFORMATION`, `PERIODIQUE` (autres sous-éléments)                  | retenu (**nouveau**), `typeAnnonce = pre_information` | `initial`      |
-| `MODIFICATION`                                                          | **exclu** (modification de marché attribué)           | —              |
-| toute autre (`ATTRIBUTION`, `EX_ANTE_VOLONTAIRE`, …)                    | exclu, compté                                         | —              |
+| `NATURE`                                                                | Décision                                      | `typeAvis`     |
+| ----------------------------------------------------------------------- | --------------------------------------------- | -------------- |
+| `APPEL_OFFRE`, `QUALIFICATION` avec `STATUT=INITIAL`                    | retenu                                        | `initial`      |
+| `APPEL_OFFRE`, `QUALIFICATION` avec `STATUT=RECTIFICATIF`               | retenu                                        | `rectificatif` |
+| `APPEL_OFFRE` avec `STATUT=ANNULATION`                                  | retenu                                        | `annulation`   |
+| `RECTIFICATIF`                                                          | retenu                                        | `rectificatif` |
+| `ANNULATION`                                                            | retenu (**nouveau**)                          | `annulation`   |
+| `PRE-INFORMATION`, `PERIODIQUE` avec sous-élément `MISE_EN_CONCURRENCE` | retenu (appel à la concurrence)               | `initial`      |
+| `PRE-INFORMATION`, `PERIODIQUE` (autres sous-éléments)                  | retenu (**nouveau**), `preInformation = true` | `initial`      |
+| `MODIFICATION`                                                          | **exclu** (modification de marché attribué)   | —              |
+| toute autre (`ATTRIBUTION`, `EX_ANTE_VOLONTAIRE`, …)                    | exclu, compté                                 | —              |
 
-Les rectificatifs et annulations héritent du `typeAnnonce` de l'avis initial de leur chaîne
+Les rectificatifs et annulations héritent du `preInformation` de l'avis initial de leur chaîne
 (à défaut : `appel_offres`).
 
 **Pré-information** : un avis de pré-information simple (eForms sous-types 1 à 9, legacy
 `PRE-INFORMATION`/`PERIODIQUE` sans `MISE_EN_CONCURRENCE`) annonce un futur appel d'offres
 à une date indéterminée. Il est publié avec les mêmes colonnes ; `dateLimiteReponse` et
 `urlConsultation` y sont généralement nuls. Une pré-information valant mise en concurrence
-(eForms sous-types 10 à 14) est un appel à la concurrence : `typeAnnonce = appel_offres`.
+(eForms sous-types 10 à 14) est un appel à la concurrence : traitée comme un appel d'offres.
 Aucun lien n'est établi en v1 entre une pré-information et l'avis de marché qui la suit.
 
 Une chaîne composée **uniquement d'annulations** (ex. annulation dont l'avis annulé est
@@ -168,9 +168,9 @@ Chaque adaptateur produit des lignes avis-lot comprenant :
 - toutes les colonnes descriptives du schéma publié (voir Mapping) ;
 - `sourceDataset` (`boamp`), `idAvis` (IDWEB), `avisPrecedent` (IDWEB de
   `ANNONCE_ANTERIEUR`, nul pour un avis initial), `typeAvis`
-  (`initial`/`rectificatif`/`annulation`), `typeAnnonce`
-  (`appel_offres`/`pre_information`, nul pour un rectificatif ou une annulation, hérité à
-  la consolidation), `datePublicationAvis`, `sourceFile` ;
+  (`initial`/`rectificatif`/`annulation`), `preInformation`
+  (bool, nul pour un rectificatif ou une annulation, hérité à la consolidation ; non
+  publié), `datePublicationAvis`, `sourceFile` ;
 - `avisComplet` (bool) : vrai si l'avis décrit entièrement l'appel d'offres (avis initial
   de tout format, rectificatif eForms) ; faux pour un rectificatif ou une annulation legacy ;
 - `infosRectificatif` (texte `infosRectif` / `infosAnnulation` legacy, ou
@@ -248,16 +248,16 @@ retenu comme racine** pour que l'`uid` soit stable.
 
 ### 3. Cycle de vie
 
-| Colonne                    | Règle                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `avisLies`                 | tous les IDWEB de la chaîne, triés                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `idDernierAvis`            | IDWEB du dernier avis de la chaîne                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `datePublicationInitiale`  | date de l'avis initial, à défaut du plus ancien avis disponible                                                                                                                                                                                                                                                                                                                                                                      |
-| `dateDerniereModification` | date du dernier rectificatif ou de l'annulation ; nulle s'il n'y a que l'avis initial                                                                                                                                                                                                                                                                                                                                                |
-| `rectifie`                 | vrai si la chaîne contient au moins un `rectificatif`                                                                                                                                                                                                                                                                                                                                                                                |
-| `infosRectificatifs`       | liste des textes `infosRectificatif` de la chaîne                                                                                                                                                                                                                                                                                                                                                                                    |
-| `typeAnnonce`              | celui de l'avis initial de la chaîne (à défaut `appel_offres`)                                                                                                                                                                                                                                                                                                                                                                       |
-| `statut`                   | **nul si `typeAnnonce = pre_information`** (seule date connue : la publication ; avis considéré immuable) ; sinon `annule` si la chaîne contient une `annulation` ; sinon, si `dateLimiteReponse` renseignée : `clos` si elle est antérieure à la date du run, `ouvert` sinon ; si `dateLimiteReponse` nulle : `ouvert` si `datePublicationInitiale` date de moins de `TENDERS_STATUT_DELAI_JOURS` (défaut 90) jours, `clos` au-delà |
+| Colonne                    | Règle                                                                                                                                                                                                                                                                                                                                                                                                     |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `avisLies`                 | tous les IDWEB de la chaîne, triés                                                                                                                                                                                                                                                                                                                                                                        |
+| `idDernierAvis`            | IDWEB du dernier avis de la chaîne                                                                                                                                                                                                                                                                                                                                                                        |
+| `datePublicationInitiale`  | date de l'avis initial, à défaut du plus ancien avis disponible                                                                                                                                                                                                                                                                                                                                           |
+| `dateDerniereModification` | date du dernier rectificatif ou de l'annulation ; nulle s'il n'y a que l'avis initial                                                                                                                                                                                                                                                                                                                     |
+| `rectifie`                 | vrai si la chaîne contient au moins un `rectificatif`                                                                                                                                                                                                                                                                                                                                                     |
+| `infosRectificatifs`       | liste des textes `infosRectificatif` de la chaîne                                                                                                                                                                                                                                                                                                                                                         |
+| `preInformation` (interne) | celui de l'avis initial de la chaîne (à défaut `false`), non publié                                                                                                                                                                                                                                                                                                                                       |
+| `statut`                   | `annule` si la chaîne contient une `annulation` ; sinon **`pre-information`** si `preInformation` (seule date connue : la publication) ; sinon, si `dateLimiteReponse` renseignée : `clos` si elle est antérieure à la date du run, `ouvert` sinon ; si `dateLimiteReponse` nulle : `ouvert` si `datePublicationInitiale` date de moins de `TENDERS_STATUT_DELAI_JOURS` (défaut 90) jours, `clos` au-delà |
 
 Limite documentée : un rectificatif legacy qui repousse la date limite ne la met pas à jour
 (texte libre) ; l'appel d'offres peut passer `clos` à tort. `rectifie` et
@@ -312,7 +312,7 @@ Ordre des colonnes :
 | Groupe         | Colonnes                                                                                                                                                                                                                                                                                           |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Identification | `uid`, `sourceDataset`, `idAvisInitial`, `idDernierAvis`, `avisLies`, `urlAvis`, `sourceFile`                                                                                                                                                                                                      |
-| Cycle de vie   | `typeAnnonce`, `statut`, `rectifie`, `infosRectificatifs`, `datePublicationInitiale`, `dateDerniereModification`, `dateLimiteReponse`                                                                                                                                                              |
+| Cycle de vie   | `statut`, `rectifie`, `infosRectificatifs`, `datePublicationInitiale`, `dateDerniereModification`, `dateLimiteReponse`                                                                                                                                                                             |
 | Acheteur       | `acheteur_id`, `acheteur_id_source`, `acheteur_nom`, `referenceAcheteur`, `acheteur_categorie`, `acheteur_commune_code`, `acheteur_commune_nom`, `acheteur_departement_code`, `acheteur_departement_nom`, `acheteur_region_code`, `acheteur_region_nom`, `acheteur_latitude`, `acheteur_longitude` |
 | Objet          | `objet`, `description`, `typeAchat`, `codeCPV`, `procedure`, `techniques`, `lieuExecution_code`, `lieuExecution_typeCode`, `dureeMois`, `montantEstime`                                                                                                                                            |
 | Lot            | `lotId`, `lotIntitule`                                                                                                                                                                                                                                                                             |
@@ -393,12 +393,12 @@ Fixtures : **avis réels** (échantillon DILA), chaînes complétées si besoin,
 - chaîne legacy initial → annulation (26-99177 → 26-99542) ;
 - MAPA sans SIRET ; eForms avec `CompanyID` non SIRET ; eForms `LOT-0000` ;
 - exclusions : `MODIFICATION` (sous-type 38), `ATTRIBUTION` ;
-- `PRE-INFORMATION` simple (→ `pre_information`) et valant `MISE_EN_CONCURRENCE`
+- `PRE-INFORMATION` simple (→ `statut = pre-information`) et valant `MISE_EN_CONCURRENCE`
   (eForms sous-type 10, ex. 26-98723 → `appel_offres`).
 
 Tests unitaires :
 
-- filtre et `typeAvis` / `typeAnnonce` / `avisComplet` par cas ;
+- filtre et `typeAvis` / `preInformation` / `avisComplet` par cas ;
 - mapping par format (colonne par colonne sur les fixtures), `lotId`, `dureeMois` (`ceil`),
   `dateLimiteReponse` eForms au niveau du lot ;
 - `siret_valide` (Luhn, exception La Poste, longueur, non numérique) ;
@@ -406,7 +406,7 @@ Tests unitaires :
 - contenu : dernier avis complet, rectificatif legacy appliqué à tous les lots, lot absent
   du dernier avis ;
 - `statut` avec date de run injectée : annulation, date limite passée / future, date limite
-  nulle avant / après 90 jours, pré-information → nul ;
+  nulle avant / après 90 jours, pré-information → `pre-information`, pré-information annulée → `annule` ;
 - dictionnaire SIRET : clé non ambiguë appliquée, clé ambiguë ignorée ;
 - replis département : code postal (dont Corse, outre-mer), NUTS3 ;
 - acquisition : re-crawl différentiel, partition vide marqueur, repli 404 →
