@@ -101,7 +101,7 @@ détection/filtrage de `flatten.py` (`detect_format`, `parse_type_avis`, `is_inc
 3. **Concaténation** de toutes les partitions (toutes sources) en LazyFrame.
 4. **Consolidation** → une ligne par appel d'offres × lot.
 5. **Enrichissement** acheteur.
-6. **Écriture** `dist/deao/` : `deao.parquet`, `deao.csv.gz` (sans les colonnes
+6. **Écriture** `DEAO_DIST_DIR` (défaut `dist/deao/`) : `deao.parquet`, `deao.csv.gz` (sans les colonnes
    liste), `schema.json`.
 7. **Publication** data.gouv.fr derrière les garde-fous.
 8. **Artefact Prefect** de suivi (voir « Suivi d'exécution »).
@@ -378,6 +378,9 @@ généré et publié avec les données.
   `-dev` sur `scaleway-prod` / `scaleway-dev`.
   - `instance_type="STANDARD3-X4C-16G"` (disponible en `nl-ams-2`, zone
     du volume `decp-data-<env>`, vérifié).
+  - `dist_dir` **séparé** : `/srv/shared/deao/<env>/dist`. Le lanceur rapatrie tout
+    `/work/dist/` avec `rsync --delete` puis bascule le répertoire : viser le `dist_dir`
+    des DECP effacerait les fichiers DECP du serveur.
   - Quotidien, planifié **après** `decp-processing` (5 h), par ex. 9 h : la limite de
     concurrence `volume-<env>` (= 1) sérialise de toute façon les deux runs.
 - Le flow n'a aucune dépendance à son lieu d'exécution (chemins par l'environnement) :
@@ -388,19 +391,20 @@ généré et publié avec les données.
 
 ## Configuration
 
-| Variable                                | Défaut                                         | Rôle                                                               |
-| --------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------ |
-| `BOAMP_BASE_URL`                        | `https://echanges.dila.gouv.fr/OPENDATA/BOAMP` | inchangée                                                          |
-| `BOAMP_START_DATE`                      | `2024-01-01`                                   | inchangée                                                          |
-| `BOAMP_RECRAWL_DAYS`                    | `3`                                            | fenêtre de re-crawl différentiel (était 7, 14 dans `template.env`) |
-| `BOAMP_ARCHIVE_CUTOFF_YEAR`             | —                                              | **supprimée** (repli 404)                                          |
-| `BOAMP_INCLUDED_NATURES`                | voir Filtrage                                  | `+ANNULATION`, `−MODIFICATION`                                     |
-| `DEAO_DATA_DIR`                         | `DATA_DIR / "deao"`                            | partitions normalisées                                             |
-| `DEAO_S3_PREFIX`                        | `boamp/raw` (par source)                       | archive brute                                                      |
-| `DEAO_REBUILD`                          | `false`                                        | reconstruction des partitions depuis S3                            |
-| `DEAO_STATUT_DELAI_JOURS`               | `90`                                           | statut sans date limite                                            |
-| `DEAO_MIN_ROWS_TO_PUBLISH`              | `50000`                                        | garde-fou de publication                                           |
-| `DEAO_*_RESOURCE_ID`, `DEAO_DATASET_ID` | `""`                                           | publication                                                        |
+| Variable                                | Défaut                                         | Rôle                                                                        |
+| --------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------- |
+| `BOAMP_BASE_URL`                        | `https://echanges.dila.gouv.fr/OPENDATA/BOAMP` | inchangée                                                                   |
+| `BOAMP_START_DATE`                      | `2024-01-01`                                   | inchangée                                                                   |
+| `BOAMP_RECRAWL_DAYS`                    | `3`                                            | fenêtre de re-crawl différentiel (était 7, 14 dans `template.env`)          |
+| `BOAMP_ARCHIVE_CUTOFF_YEAR`             | —                                              | **supprimée** (repli 404)                                                   |
+| `BOAMP_INCLUDED_NATURES`                | voir Filtrage                                  | `+ANNULATION`, `−MODIFICATION`                                              |
+| `DEAO_DATA_DIR`                         | `DATA_DIR / "deao"`                            | partitions normalisées                                                      |
+| `DEAO_DIST_DIR`                         | `DIST_DIR / "deao"`                            | sorties (ne pas renseigner sur l'instance : seul `/work/dist` est rapatrié) |
+| `DEAO_S3_PREFIX`                        | `boamp/raw` (par source)                       | archive brute                                                               |
+| `DEAO_REBUILD`                          | `false`                                        | reconstruction des partitions depuis S3                                     |
+| `DEAO_STATUT_DELAI_JOURS`               | `90`                                           | statut sans date limite                                                     |
+| `DEAO_MIN_ROWS_TO_PUBLISH`              | `50000`                                        | garde-fou de publication                                                    |
+| `DEAO_*_RESOURCE_ID`, `DEAO_DATASET_ID` | `""`                                           | publication                                                                 |
 
 ## Suivi d'exécution
 
