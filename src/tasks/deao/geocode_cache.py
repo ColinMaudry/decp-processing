@@ -1,12 +1,19 @@
+import io
 from collections.abc import Callable
 from datetime import date, timedelta
 
 import polars as pl
+from botocore.exceptions import ClientError
 
-from src.config import DEAO_DATA_DIR, DEAO_GEOCODE_S3_PREFIX, GEOCODING_RETRY_DAYS
+from src.config import (
+    DEAO_DATA_DIR,
+    DEAO_GEOCODE_S3_PREFIX,
+    GEOCODING_RETRY_DAYS,
+    S3_BUCKET,
+)
 from src.tasks.geocode import build_address_geocoding_csv, geocode_csv
-from src.tasks.get import get_from_s3
 from src.tasks.publish import publish_to_s3
+from src.tasks.utils import s3_client
 
 CACHE_FILENAME = "adresse_geocode.parquet"
 
@@ -55,6 +62,22 @@ def a_geocoder(
     return cles.filter(~pl.col("adresse_cle").is_in(connues))
 
 
+def charger_cache() -> pl.DataFrame:
+    """Cache S3 ; vide seulement si la clé n'existe pas, toute autre erreur remonte."""
+    key = f"{DEAO_GEOCODE_S3_PREFIX.strip('/')}/{CACHE_FILENAME}"
+    try:
+        obj = s3_client().get_object(Bucket=S3_BUCKET, Key=key)
+    except ClientError as e:
+        if e.response.get("Error", {}).get("Code") in ("NoSuchKey", "404"):
+            return pl.DataFrame(schema=ADRESSE_GEOCODE_SCHEMA)
+        raise
+    return (
+        pl.read_parquet(io.BytesIO(obj["Body"].read()))
+        .select(list(ADRESSE_GEOCODE_SCHEMA))
+        .cast(ADRESSE_GEOCODE_SCHEMA)
+    )
+
+
 def _geocode_adresses(adresses: pl.DataFrame) -> pl.DataFrame:
     return geocode_csv(
         adresses,
@@ -73,12 +96,7 @@ def geocoder_adresses(
     adresses = adresses.filter(pl.col("adresse_cle").is_not_null()).unique(
         subset="adresse_cle", keep="first", maintain_order=True
     )
-    cache_lf = get_from_s3(CACHE_FILENAME, prefix=DEAO_GEOCODE_S3_PREFIX)
-    cache = (
-        pl.DataFrame(schema=ADRESSE_GEOCODE_SCHEMA)
-        if cache_lf is None
-        else cache_lf.select(list(ADRESSE_GEOCODE_SCHEMA)).collect()
-    )
+    cache = charger_cache()
     delta = a_geocoder(adresses, cache, today, GEOCODING_RETRY_DAYS)
     if delta.height == 0:
         return cache

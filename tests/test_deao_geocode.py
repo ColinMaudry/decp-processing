@@ -1,6 +1,9 @@
+import io
 from datetime import date
 
 import polars as pl
+import pytest
+from botocore.exceptions import ClientError
 
 from src.tasks.deao import geocode_cache
 from src.tasks.deao.geocode_cache import (
@@ -10,6 +13,7 @@ from src.tasks.deao.geocode_cache import (
     geocoder_adresses,
 )
 from src.tasks.geocode import build_address_geocoding_csv, parse_geocoding_results
+from tests.deao_fakes import FakeS3
 
 TODAY = date(2026, 11, 11)
 
@@ -72,13 +76,14 @@ def test_adresse_cle_expr():
     assert df["adresse_cle"].to_list() == ["12 bvd x|29260|lesneven", "|29260|", None]
 
 
-def _patch_s3(monkeypatch, cache, tmp_path):
+def _patch_s3(monkeypatch, cache, tmp_path, fake=None):
+    fake = fake or FakeS3()
+    if cache is not None:
+        buf = io.BytesIO()
+        cache.write_parquet(buf)
+        fake.objects["deao/adresse_geocode.parquet"] = buf.getvalue()
     published = []
-    monkeypatch.setattr(
-        geocode_cache,
-        "get_from_s3",
-        lambda key, prefix="": None if cache is None else cache.lazy(),
-    )
+    monkeypatch.setattr(geocode_cache, "s3_client", lambda: fake)
     monkeypatch.setattr(
         geocode_cache,
         "publish_to_s3",
@@ -152,3 +157,40 @@ def test_geocoder_adresses_sans_cache(monkeypatch, tmp_path):
         geocode=lambda d: pl.DataFrame(schema=ADRESSE_GEOCODE_SCHEMA),
     )
     assert res.height == 0 and published == []
+
+
+def test_geocoder_adresses_cle_absente_geocode_tout(monkeypatch, tmp_path):
+    published = _patch_s3(monkeypatch, None, tmp_path)
+    seen = []
+
+    def fake(delta):
+        seen.append(delta["adresse_cle"].to_list())
+        return pl.DataFrame(
+            {
+                "adresse_cle": ["a"],
+                "commune_code": ["29103"],
+                "latitude": [1.0],
+                "longitude": [1.0],
+                "score": [0.9],
+                "status": ["success"],
+                "geocoded_at": [TODAY],
+            }
+        )
+
+    adresses = pl.DataFrame({"adresse_cle": ["a"], "q": ["x"], "postcode": ["1"]})
+    res = geocoder_adresses(adresses, TODAY, geocode=fake)
+    assert seen == [["a"]]
+    assert res.height == 1 and len(published) == 1
+
+
+@pytest.mark.parametrize("code", ["AccessDenied", "InternalError"])
+def test_geocoder_adresses_erreur_s3_remonte(monkeypatch, tmp_path, code):
+    class Broken(FakeS3):
+        def get_object(self, Bucket, Key, **kwargs):
+            raise ClientError({"Error": {"Code": code, "Message": "x"}}, "GetObject")
+
+    published = _patch_s3(monkeypatch, None, tmp_path, fake=Broken())
+    adresses = pl.DataFrame({"adresse_cle": ["a"], "q": ["x"], "postcode": ["1"]})
+    with pytest.raises(ClientError):
+        geocoder_adresses(adresses, TODAY, geocode=lambda d: d)
+    assert published == []
