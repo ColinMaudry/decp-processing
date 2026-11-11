@@ -1,7 +1,6 @@
 import sys
 
 from src.config import SCRAPING_MODE, SCRAPING_MONTH, SCRAPING_TARGET, SCRAPING_YEAR
-from src.flows.boamp_processing import boamp_processing
 from src.flows.deao_processing import deao_processing
 from src.flows.decp_processing import decp_processing
 from src.flows.get_cog import get_cog
@@ -17,7 +16,6 @@ from src.tasks.bucket_sync import (
 FUNCTIONS = {
     "sirene_preprocess": sirene_preprocess,
     "decp_processing": decp_processing,
-    "boamp_processing": boamp_processing,
     "deao_processing": deao_processing,
     "get_cog": get_cog,
     "scrap": scrap,

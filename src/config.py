@@ -309,7 +309,7 @@ ACHETEURS_NON_SIRENE = {
 }
 
 # ---------------------------------------------------------------------------
-# BOAMP / eForms (flow boamp_processing) — issue #174
+# BOAMP / eForms (source de deao_processing) — issue #174
 # ---------------------------------------------------------------------------
 
 BOAMP_BASE_URL = os.getenv(
@@ -318,10 +318,6 @@ BOAMP_BASE_URL = os.getenv(
 
 # Première date traitée (incluse). Les fichiers < cette date sont ignorés.
 BOAMP_START_DATE = os.getenv("BOAMP_START_DATE", "2024-01-01")
-
-# Année à partir de laquelle le flux est servi dans /OPENDATA/BOAMP/<année>/
-# (et non FluxHistorique). Les années < cette valeur sont en FluxHistorique.
-BOAMP_ARCHIVE_CUTOFF_YEAR = int(os.getenv("BOAMP_ARCHIVE_CUTOFF_YEAR", "2026"))
 
 # Nombre de derniers jours re-crawlés à chaque run (rattrapage des ajouts tardifs).
 BOAMP_RECRAWL_DAYS = int(os.getenv("BOAMP_RECRAWL_DAYS", "3"))
@@ -333,9 +329,6 @@ BOAMP_INCLUDED_NATURES = {
     "RECTIFICATIF",
     "ANNULATION",
 }
-# Inclusions conditionnelles : ces NATURE ne sont gardées que si le sous-élément
-# est MISE_EN_CONCURRENCE (avis valant appel à la concurrence).
-BOAMP_MISE_EN_CONCURRENCE_NATURES = {"PRE-INFORMATION", "PERIODIQUE"}
 # Pré-informations : conservées comme telles (statut "pre-information") par deao_processing.
 BOAMP_PRE_INFORMATION_NATURES = {"PRE-INFORMATION", "PERIODIQUE"}
 
@@ -343,18 +336,6 @@ BOAMP_PRE_INFORMATION_NATURES = {"PRE-INFORMATION", "PERIODIQUE"}
 BOAMP_AVIS_URL_TEMPLATE = os.getenv(
     "BOAMP_AVIS_URL_TEMPLATE", 'https://www.boamp.fr/pages/avis/?q=idweb:"{idweb}"'
 )
-
-# Dossiers de travail / sortie.
-BOAMP_DATA_DIR = make_path_from_env("BOAMP_DATA_DIR", DATA_DIR / "boamp")
-BOAMP_DATA_DIR.mkdir(exist_ok=True, parents=True)
-BOAMP_PARTITIONS_DIR = BOAMP_DATA_DIR / "partitions"
-BOAMP_PARTITIONS_DIR.mkdir(exist_ok=True, parents=True)
-ALL_CONFIG["BOAMP_DATA_DIR"] = BOAMP_DATA_DIR
-
-# Publication data.gouv.fr (à renseigner une fois le dataset créé).
-BOAMP_DATASET_ID = os.getenv("BOAMP_DATASET_ID", "")
-BOAMP_PARQUET_RESOURCE_ID = os.getenv("BOAMP_PARQUET_RESOURCE_ID", "")
-BOAMP_CSV_RESOURCE_ID = os.getenv("BOAMP_CSV_RESOURCE_ID", "")
 
 # ---------------------------------------------------------------------------
 # DEAO (flow deao_processing) — Données essentielles d'appels d'offres, issue #178

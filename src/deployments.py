@@ -13,6 +13,67 @@ from prefect.runner.storage import GitRepository
 # - les variables d'environnement d'instance (DECP_DIST_DIR, DECP_DATA_DIR)
 #   viennent du user-data de l'instance, pas des `job_variables`.
 
+REPO_URL = "https://github.com/ColinMaudry/decp-processing.git"
+DEAO_INSTANCE_TYPE = "STANDARD3-X4C-16G"
+
+
+def deao_deployment_specs() -> list[dict]:
+    """Déploiements DEAO : kwargs de `.deploy()` + `entrypoint` et `branch` (source Git).
+
+    DEAO a son propre `dist_dir` (/srv/shared/deao/...), distinct de celui des DECP.
+    """
+    launcher = "src/flows/launcher.py:run_on_scaleway"
+    flow_entrypoint = "src/flows/deao_processing.py:deao_processing"
+    specs = [
+        {
+            "entrypoint": launcher,
+            "branch": "main",
+            "name": "deao-processing",
+            "description": "DEAO : tous les jours à 10h00, sur une instance Scaleway éphémère.",
+            "work_pool_name": "local",
+            "cron": "0 9 * * *",
+            "parameters": {
+                "env": "prod",
+                "deployment": "deao-processing/deao-processing-exec-prod",
+                "branch": "main",
+                "dist_dir": "/srv/shared/deao/prod/dist",
+                "instance_type": DEAO_INSTANCE_TYPE,
+            },
+        },
+        {
+            "entrypoint": flow_entrypoint,
+            "branch": "main",
+            "name": "deao-processing-exec-prod",
+            "description": "Exécution de deao_processing sur l'instance Scaleway éphémère de prod.",
+            "work_pool_name": "scaleway-prod",
+            "job_variables": {"env": {"DECP_PROCESSING_PUBLISH": "True"}},
+        },
+        {
+            "entrypoint": launcher,
+            "branch": "main",
+            "name": "deao-processing-dev",
+            "description": "DEAO : déploiement de la branche dev, sur une instance Scaleway éphémère.",
+            "work_pool_name": "local",
+            "parameters": {
+                "env": "dev",
+                "deployment": "deao-processing/deao-processing-exec-dev",
+                "branch": "dev",
+                "dist_dir": "/srv/shared/deao/dev/dist",
+                "instance_type": DEAO_INSTANCE_TYPE,
+            },
+        },
+        {
+            "entrypoint": flow_entrypoint,
+            "branch": "dev",
+            "name": "deao-processing-exec-dev",
+            "description": "Exécution de deao_processing sur l'instance Scaleway éphémère de dev.",
+            "work_pool_name": "scaleway-dev",
+            "job_variables": {"env": {"DECP_PROCESSING_PUBLISH": "False"}},
+        },
+    ]
+    return specs
+
+
 if __name__ == "__main__":
     flow.from_source(
         source=GitRepository(
@@ -258,22 +319,11 @@ if __name__ == "__main__":
         },
     )
 
-    flow.from_source(
-        source=GitRepository(
-            url="https://github.com/ColinMaudry/decp-processing.git", branch="main"
-        ),
-        entrypoint="src/flows/boamp_processing.py:boamp_processing",
-    ).deploy(
-        name="boamp-processing",
-        description="BOAMP/eForms : tous les jours à 4h00",
-        work_pool_name="local",
-        ignore_warnings=True,
-        cron="0 4 * * *",
-        job_variables={
-            "env": {
-                "DECP_PROCESSING_PUBLISH": "True",
-                "DECP_DIST_DIR": "/srv/shared/decp/prod/dist",
-                "DECP_DATA_DIR": "/home/yunohost.app/prefect",
-            }
-        },
-    )
+    for spec in deao_deployment_specs():
+        flow.from_source(
+            source=GitRepository(url=REPO_URL, branch=spec["branch"]),
+            entrypoint=spec["entrypoint"],
+        ).deploy(
+            **{k: v for k, v in spec.items() if k not in ("branch", "entrypoint")},
+            ignore_warnings=True,
+        )
