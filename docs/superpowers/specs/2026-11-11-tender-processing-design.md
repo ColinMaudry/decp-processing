@@ -148,7 +148,7 @@ Sur `GESTION/REFERENCE/TYPE_AVIS` (commun aux deux formats) :
 | toute autre (`ATTRIBUTION`, `EX_ANTE_VOLONTAIRE`, …)                    | exclu, compté                                 | —              |
 
 Les rectificatifs et annulations héritent du `preInformation` de l'avis initial de leur chaîne
-(à défaut : `appel_offres`).
+(à défaut : `false`).
 
 **Pré-information** : un avis de pré-information simple (eForms sous-types 1 à 9, legacy
 `PRE-INFORMATION`/`PERIODIQUE` sans `MISE_EN_CONCURRENCE`) annonce un futur appel d'offres
@@ -394,7 +394,7 @@ Fixtures : **avis réels** (échantillon DILA), chaînes complétées si besoin,
 - MAPA sans SIRET ; eForms avec `CompanyID` non SIRET ; eForms `LOT-0000` ;
 - exclusions : `MODIFICATION` (sous-type 38), `ATTRIBUTION` ;
 - `PRE-INFORMATION` simple (→ `statut = pre-information`) et valant `MISE_EN_CONCURRENCE`
-  (eForms sous-type 10, ex. 26-98723 → `appel_offres`).
+  (eForms sous-type 10, ex. 26-98723 → statut d'appel d'offres).
 
 Tests unitaires :
 
