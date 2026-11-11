@@ -196,7 +196,7 @@ Règles générales :
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | `objet`                                         | `ProcurementProject/Name` de l'avis (BT-21)                                                                                     | `INDEXATION/RESUME_OBJET`, sinon `intitule` / `objet`                                             | String                                                                                      |
 | `description`                                   | `Description` lot, sinon avis (BT-24)                                                                                           | `natureMarche/description` (FNSimple), `description/*` (MAPA)                                     | String                                                                                      |
-| `typeAchat`                                     | `ProcurementTypeCode` (BT-23)                                                                                                   | `INDEXATION/NATURE_MARCHE`                                                                        | `Travaux` / `Fournitures` / `Services`                                                      |
+| `type`                                          | `ProcurementTypeCode` (BT-23)                                                                                                   | `INDEXATION/NATURE_MARCHE`                                                                        | `Travaux` / `Fournitures` / `Services`                                                      |
 | `codeCPV`                                       | `MainCommodityClassification` lot, sinon avis (BT-262)                                                                          | `codeCPV/objetPrincipal/classPrincipale`                                                          | String, 8 chiffres                                                                          |
 | `procedure`                                     | `ProcedureCode` (BT-105)                                                                                                        | `INDEXATION/TYPE_PROCEDURE`                                                                       | libellés DECP ; valeur non mappée conservée brute et comptée                                |
 | `techniques`                                    | `ContractingSystem` accord-cadre (BT-765), SAD (BT-766)                                                                         | accord-cadre / SAD si présents                                                                    | List(String), valeurs DECP                                                                  |
@@ -307,16 +307,56 @@ Hors périmètre v1 : recherche de SIRET par l'API Recherche d'entreprises.
 
 ## Schéma publié
 
-Ordre des colonnes :
+Ordre des colonnes calqué sur `reference/schema_base.json` (DECP) : les colonnes homonymes
+gardent la position relative qu'elles ont dans les DECP, les colonnes propres aux appels
+d'offres sont insérées à côté de leur équivalent DECP le plus proche (indiqué entre
+parenthèses).
 
-| Groupe         | Colonnes                                                                                                                                                                                                                                                                                           |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Identification | `uid`, `sourceDataset`, `idAvisInitial`, `idDernierAvis`, `avisLies`, `urlAvis`, `sourceFile`                                                                                                                                                                                                      |
-| Cycle de vie   | `statut`, `rectifie`, `infosRectificatifs`, `datePublicationInitiale`, `dateDerniereModification`, `dateLimiteReponse`                                                                                                                                                                             |
-| Acheteur       | `acheteur_id`, `acheteur_id_source`, `acheteur_nom`, `referenceAcheteur`, `acheteur_categorie`, `acheteur_commune_code`, `acheteur_commune_nom`, `acheteur_departement_code`, `acheteur_departement_nom`, `acheteur_region_code`, `acheteur_region_nom`, `acheteur_latitude`, `acheteur_longitude` |
-| Objet          | `objet`, `description`, `typeAchat`, `codeCPV`, `procedure`, `techniques`, `lieuExecution_code`, `lieuExecution_typeCode`, `dureeMois`, `montantEstime`                                                                                                                                            |
-| Lot            | `lotId`, `lotIntitule`                                                                                                                                                                                                                                                                             |
-| Accès          | `urlConsultation`                                                                                                                                                                                                                                                                                  |
+| #   | Colonne                     | Position DECP de référence                     |
+| --- | --------------------------- | ---------------------------------------------- |
+| 1   | `uid`                       | `uid`                                          |
+| 2   | `referenceAcheteur`         | (`id`)                                         |
+| 3   | `acheteur_id`               | `acheteur_id`                                  |
+| 4   | `acheteur_id_source`        | (après `acheteur_id`)                          |
+| 5   | `acheteur_nom`              | `acheteur_nom`                                 |
+| 6   | `objet`                     | `objet`                                        |
+| 7   | `lotId`                     | (après `objet`)                                |
+| 8   | `lotIntitule`               | (après `objet`)                                |
+| 9   | `description`               | (après `objet`)                                |
+| 10  | `montantEstime`             | (`montant`)                                    |
+| 11  | `type`                      | `type`                                         |
+| 12  | `codeCPV`                   | `codeCPV`                                      |
+| 13  | `procedure`                 | `procedure`                                    |
+| 14  | `techniques`                | `techniques`                                   |
+| 15  | `dureeMois`                 | `dureeMois`                                    |
+| 16  | `datePublicationInitiale`   | (`dateNotification`, `datePublicationDonnees`) |
+| 17  | `dateDerniereModification`  | (idem)                                         |
+| 18  | `dateLimiteReponse`         | (idem)                                         |
+| 19  | `lieuExecution_code`        | `lieuExecution_code`                           |
+| 20  | `lieuExecution_typeCode`    | `lieuExecution_typeCode`                       |
+| 21  | `acheteur_categorie`        | `acheteur_categorie`                           |
+| 22  | `acheteur_commune_code`     | `acheteur_commune_code`                        |
+| 23  | `acheteur_commune_nom`      | `acheteur_commune_nom`                         |
+| 24  | `acheteur_departement_code` | `acheteur_departement_code`                    |
+| 25  | `acheteur_departement_nom`  | `acheteur_departement_nom`                     |
+| 26  | `acheteur_region_code`      | `acheteur_region_code`                         |
+| 27  | `acheteur_region_nom`       | `acheteur_region_nom`                          |
+| 28  | `acheteur_latitude`         | `acheteur_latitude`                            |
+| 29  | `acheteur_longitude`        | `acheteur_longitude`                           |
+| 30  | `statut`                    | (`donneesActuelles`)                           |
+| 31  | `rectifie`                  | (`donneesActuelles`)                           |
+| 32  | `infosRectificatifs`        | (`donneesActuelles`)                           |
+| 33  | `urlConsultation`           | (avant `sourceDataset`)                        |
+| 34  | `urlAvis`                   | (avant `sourceDataset`)                        |
+| 35  | `idAvisInitial`             | (avant `sourceDataset`)                        |
+| 36  | `idDernierAvis`             | (avant `sourceDataset`)                        |
+| 37  | `avisLies`                  | (avant `sourceDataset`)                        |
+| 38  | `sourceDataset`             | `sourceDataset`                                |
+| 39  | `sourceFile`                | `sourceFile`                                   |
+
+`type` : mêmes valeurs et même sens que dans les DECP (`Fournitures`, `Services`,
+`Travaux`) ; les descriptions des colonnes homonymes sont reprises de `schema_base.json`
+et adaptées aux appels d'offres.
 
 Colonnes liste (`avisLies`, `infosRectificatifs`, `techniques`) : présentes dans le
 parquet, exclues du CSV (comportement actuel de `sink_to_files`).
@@ -366,7 +406,7 @@ généré et publié avec les données.
 - XML illisible : compté, logué (nom de fichier), conservé dans l'archive ; le jour est
   traité.
 - Avis exclus : comptés par `NATURE`.
-- Valeurs non mappées (`procedure`, `typeAchat`, unité de durée…) : comptées par valeur,
+- Valeurs non mappées (`procedure`, `type`, unité de durée…) : comptées par valeur,
   loguées.
 - Artefact Prefect de fin de run : avis lus / retenus / exclus par `NATURE`, erreurs de
   parsing, appels d'offres × lots par `statut`, **taux de remplissage par colonne et par
@@ -374,14 +414,14 @@ généré et publié avec les données.
 
 ## Écarts de la spec du 2026-06-05 rattrapés
 
-| Écart (audit du 2026-11-11)                                                                     | Traitement                                                     |
-| ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| 5 colonnes du cœur manquantes (`nature_marche`, `type_procedure`, `cpv_principal`, `lot_cpv_*`) | absorbées par le mapping (`typeAchat`, `procedure`, `codeCPV`) |
-| `acheteur_siret` legacy toujours nul                                                            | `codeIdentificationNational` (FNSimple) + dictionnaire         |
-| avis ignorés non comptés, XML malformés silencieux                                              | Suivi d'exécution                                              |
-| collisions de colonnes non suffixées                                                            | sans objet (mapping explicite)                                 |
-| fixtures manquantes                                                                             | Tests                                                          |
-| `lot_intitule` eForms = premier `Name` descendant                                               | `Name` du `ProcurementProject` enfant direct du lot            |
+| Écart (audit du 2026-11-11)                                                                     | Traitement                                                |
+| ----------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| 5 colonnes du cœur manquantes (`nature_marche`, `type_procedure`, `cpv_principal`, `lot_cpv_*`) | absorbées par le mapping (`type`, `procedure`, `codeCPV`) |
+| `acheteur_siret` legacy toujours nul                                                            | `codeIdentificationNational` (FNSimple) + dictionnaire    |
+| avis ignorés non comptés, XML malformés silencieux                                              | Suivi d'exécution                                         |
+| collisions de colonnes non suffixées                                                            | sans objet (mapping explicite)                            |
+| fixtures manquantes                                                                             | Tests                                                     |
+| `lot_intitule` eForms = premier `Name` descendant                                               | `Name` du `ProcurementProject` enfant direct du lot       |
 
 ## Tests
 
