@@ -38,6 +38,8 @@ def deao_deployment_specs() -> list[dict]:
                 "branch": "main",
                 "dist_dir": "/srv/shared/deao/prod/dist",
                 "instance_type": DEAO_INSTANCE_TYPE,
+                # R19 : le premier crawl complet (~500k GET) dépasse les 4 h par défaut.
+                "max_duration_hours": 12,
             },
         },
         {
@@ -60,6 +62,8 @@ def deao_deployment_specs() -> list[dict]:
                 "branch": "dev",
                 "dist_dir": "/srv/shared/deao/dev/dist",
                 "instance_type": DEAO_INSTANCE_TYPE,
+                # R19 : le premier crawl complet (~500k GET) dépasse les 4 h par défaut.
+                "max_duration_hours": 12,
             },
         },
         {

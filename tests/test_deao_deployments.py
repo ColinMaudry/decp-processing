@@ -42,3 +42,17 @@ def test_deao_quatre_deploiements_references_coherentes():
     assert specs["deao-processing-exec-dev"]["job_variables"]["env"] == {
         "DECP_PROCESSING_PUBLISH": "False"
     }
+
+
+def test_deao_lanceurs_duree_max_12h():
+    """R19 : le premier crawl complet (~500k GET) dépasse les 4 h par défaut."""
+    import inspect
+
+    from src.flows.launcher import run_on_scaleway
+
+    params = inspect.signature(run_on_scaleway.fn).parameters
+    specs = {s["name"]: s for s in deao_deployment_specs()}
+    for nom in ("deao-processing", "deao-processing-dev"):
+        parametres = specs[nom]["parameters"]
+        assert parametres["max_duration_hours"] == 12
+        assert set(parametres) <= set(params)
