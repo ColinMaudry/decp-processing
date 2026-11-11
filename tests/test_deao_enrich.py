@@ -1,6 +1,7 @@
 import json
 
 import polars as pl
+import pytest
 
 from src.config import BASE_DIR
 from src.tasks.deao.enrich import (
@@ -215,3 +216,26 @@ def test_aucun_geocodage_si_tout_est_dans_sirene():
 
     out = enrich_acheteurs(df, _lf_ul(), _lf_etab(), COG, geocoder)
     assert out["acheteur_categorie"].to_list() == ["Région"]
+
+
+def test_enrichir_sirene_siret_duplique_dans_sirene():
+    lf_etab = pl.concat([_lf_etab(), _lf_etab().filter(siret="20007695800011")])
+    assert lf_etab.filter(siret="20007695800011").collect().height == 2
+    df = _df(
+        acheteur_id=["20007695800011", "99999999900001"],
+        acheteur_nom=["Nom avis", "Inconnu"],
+    )
+    out = enrichir_sirene(df, _lf_ul(), lf_etab)
+    assert out.height == 2
+    assert out["acheteur_nom"].to_list() == ["Collectivité de Corse", "Inconnu"]
+
+
+def test_enrich_acheteurs_nombre_de_lignes_modifie(monkeypatch):
+    from src.tasks.deao import enrich
+
+    monkeypatch.setattr(
+        enrich, "enrichir_geographie", lambda df, cog, geocoder: pl.concat([df, df])
+    )
+    df = _df(acheteur_id=["20007695800011"], acheteur_nom=["Nom avis"])
+    with pytest.raises(RuntimeError, match="nombre de lignes"):
+        enrich.enrich_acheteurs(df, _lf_ul(), _lf_etab(), COG, geocoder=None)

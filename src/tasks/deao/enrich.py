@@ -83,6 +83,8 @@ def enrichir_sirene(
         *COLONNES_SIRENE,
         pl.lit(True).alias(_TROUVE),
     ).collect()
+    # Un SIRET présent plusieurs fois dans SIRENE dupliquerait les lignes au join.
+    sirene = sirene.unique("acheteur_id", keep="first", maintain_order=True)
     sirene = sirene.with_columns(
         pl.col("acheteur_latitude").cast(pl.Float64),
         pl.col("acheteur_longitude").cast(pl.Float64),
@@ -239,5 +241,8 @@ def enrich_acheteurs(
     df = appliquer_dictionnaire_siret(df)
     df = enrichir_sirene(df, lf_unites_legales, lf_etablissements)
     df = enrichir_geographie(df, df_cog, geocoder)
-    assert df.height == n, "L'enrichissement acheteur a modifié le nombre de lignes"
+    if df.height != n:
+        raise RuntimeError(
+            f"L'enrichissement acheteur a modifié le nombre de lignes ({n} → {df.height})"
+        )
     return df.drop(_TROUVE)

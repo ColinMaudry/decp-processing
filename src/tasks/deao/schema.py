@@ -57,7 +57,8 @@ PUBLISHED_FIELDS: tuple[Field, ...] = (
         "acheteur_nom",
         S,
         "Nom acheteur",
-        "Nom de l'acheteur tel que renseigné dans l'avis d'appel d'offres.",
+        "Nom de l'acheteur : dénomination SIRENE si le SIRET de l'acheteur est "
+        "trouvé dans SIRENE, sinon nom tel que renseigné dans l'avis.",
     ),
     Field(
         "objet",
