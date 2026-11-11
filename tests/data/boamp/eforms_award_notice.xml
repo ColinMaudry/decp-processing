@@ -1,0 +1,1368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jo:ann xmlns:jo="http://boamp.journal-officiel.gouv.fr/XML/3.2.5">
+   <DONNEES>
+      <EFORMS>
+         <ContractAwardNotice xmlns:cac="urn:boamp:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                              xmlns:cbc="urn:boamp:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+                              xmlns:efac="http://data.europa.eu/p27/eforms-ubl-extension-aggregate-components/1"
+                              xmlns:efbc="http://data.europa.eu/p27/eforms-ubl-extension-basic-components/1"
+                              xmlns:efext="http://data.europa.eu/p27/eforms-ubl-extensions/1"
+                              xmlns:ext="urn:boamp:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+            <ext:UBLExtensions>
+               <ext:UBLExtension>
+                  <ext:ExtensionContent>
+                     <efext:EformsExtension>
+                        <efac:NoticeResult>
+                           <efbc:OverallMaximumFrameworkContractsAmount currencyID="EUR">4000000</efbc:OverallMaximumFrameworkContractsAmount>
+                           <efac:LotResult>
+                              <cbc:ID schemeName="result">RES-0001</cbc:ID>
+                              <cbc:TenderResultCode listName="winner-selection-status">selec-w</cbc:TenderResultCode>
+                              <efac:LotTender>
+                                 <cbc:ID>TEN-0001</cbc:ID>
+                              </efac:LotTender>
+                              <efac:FrameworkAgreementValues>
+                                 <cbc:MaximumValueAmount currencyID="EUR">4000000</cbc:MaximumValueAmount>
+                              </efac:FrameworkAgreementValues>
+                              <efac:ReceivedSubmissionsStatistics>
+                                 <efbc:StatisticsCode listName="received-submission-type">tenders</efbc:StatisticsCode>
+                                 <efbc:StatisticsNumeric>4</efbc:StatisticsNumeric>
+                              </efac:ReceivedSubmissionsStatistics>
+                              <efac:SettledContract>
+                                 <cbc:ID>CON-0001</cbc:ID>
+                              </efac:SettledContract>
+                              <efac:TenderLot>
+                                 <cbc:ID>LOT-0001</cbc:ID>
+                              </efac:TenderLot>
+                           </efac:LotResult>
+                           <efac:LotTender>
+                              <cbc:ID schemeName="tender">TEN-0001</cbc:ID>
+                              <cbc:RankCode>1</cbc:RankCode>
+                              <efbc:TenderRankedIndicator>true</efbc:TenderRankedIndicator>
+                              <efbc:TenderVariantIndicator>false</efbc:TenderVariantIndicator>
+                              <efac:SubcontractingTerm>
+                                 <efbc:TermCode listName="applicability">not-known</efbc:TermCode>
+                              </efac:SubcontractingTerm>
+                              <efac:TenderingParty>
+                                 <cbc:ID>TPA-0001</cbc:ID>
+                              </efac:TenderingParty>
+                              <efac:TenderLot>
+                                 <cbc:ID>LOT-0001</cbc:ID>
+                              </efac:TenderLot>
+                              <efac:TenderReference>
+                                 <cbc:ID>SECAB</cbc:ID>
+                              </efac:TenderReference>
+                           </efac:LotTender>
+                           <efac:SettledContract>
+                              <cbc:ID>CON-0001</cbc:ID>
+                              <cbc:AwardDate>2025-12-30+04:00</cbc:AwardDate>
+                              <cbc:IssueDate>2026-01-13+04:00</cbc:IssueDate>
+                              <cac:SignatoryParty>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID>ORG-0001</cbc:ID>
+                                 </cac:PartyIdentification>
+                              </cac:SignatoryParty>
+                              <efac:ContractReference>
+                                 <cbc:ID>2025AS008</cbc:ID>
+                              </efac:ContractReference>
+                              <efac:LotTender>
+                                 <cbc:ID>TEN-0001</cbc:ID>
+                              </efac:LotTender>
+                           </efac:SettledContract>
+                           <efac:TenderingParty>
+                              <cbc:ID schemeName="tendering-party">TPA-0001</cbc:ID>
+                              <efac:Tenderer>
+                                 <cbc:ID>ORG-0005</cbc:ID>
+                              </efac:Tenderer>
+                           </efac:TenderingParty>
+                        </efac:NoticeResult>
+                        <efac:NoticeSubType>
+                           <cbc:SubTypeCode listName="notice-subtype">30</cbc:SubTypeCode>
+                        </efac:NoticeSubType>
+                        <efac:Organizations>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cbc:WebsiteURI>https://www.marches-securises.fr/perso/AR-Roland-Garros_974/</cbc:WebsiteURI>
+                                 <cbc:EndpointID>https://www.reunion.aeroport.fr</cbc:EndpointID>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID>ORG-0001</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">Aéroport de La Réunion Roland Garros (974)</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>74 avenue Roland Garros</cbc:StreetName>
+                                    <cbc:CityName>Sainte-Marie</cbc:CityName>
+                                    <cbc:PostalZone>97438</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRY40</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID>52819443400015</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>+33 262481874</cbc:Telephone>
+                                    <cbc:Telefax>+33 262488046</cbc:Telefax>
+                                    <cbc:ElectronicMail>achats@reunion.aeroport.fr</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID>ORG-0003</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">Comité consultatif interrégional de Paris - Règlement amiable des litiges</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>27, rue Miollis</cbc:StreetName>
+                                    <cbc:AdditionalStreetName>27, rue Miollis</cbc:AdditionalStreetName>
+                                    <cbc:Department>177 500 006 00024</cbc:Department>
+                                    <cbc:CityName>PARIS</cbc:CityName>
+                                    <cbc:PostalZone>75015</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FR101</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID>FR101</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Name>177 500 006 00024</cbc:Name>
+                                    <cbc:Telephone>+33 144426343</cbc:Telephone>
+                                    <cbc:Telefax>+33 144426337</cbc:Telefax>
+                                    <cbc:ElectronicMail>ccira@paris-idf.gouv.fr</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID>ORG-0004</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">TRIBUNAL JUDICIAIRE DE SAINT-DENIS</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>5, avenue André MALRAUX
+CS81027</cbc:StreetName>
+                                    <cbc:CityName>SAINTE-CLOTILDE</cbc:CityName>
+                                    <cbc:PostalZone>97490</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRY40</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID>17974111100027</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>+33 262402345</cbc:Telephone>
+                                    <cbc:Telefax>+33 262211019</cbc:Telefax>
+                                    <cbc:ElectronicMail>accueil.tj-st-denis-de-la-reunion@justice.fr</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID>ORG-0005</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">SECAB</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>RUE COCO ROBERT ZAE DE LA MARE II- LOT N 2</cbc:StreetName>
+                                    <cbc:CityName>SAINTE-MARIE</cbc:CityName>
+                                    <cbc:PostalZone>97438</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FRY40</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID>40318018500023</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>+33 262219446</cbc:Telephone>
+                                    <cbc:ElectronicMail>secab@secab.re</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                        </efac:Organizations>
+                     </efext:EformsExtension>
+                  </ext:ExtensionContent>
+               </ext:UBLExtension>
+            </ext:UBLExtensions>
+            <cbc:UBLVersionID>2.3</cbc:UBLVersionID>
+            <cbc:CustomizationID>eforms-sdk-1.12</cbc:CustomizationID>
+            <cbc:ID schemeName="notice-id">7ffa44cf-3e05-4f84-8e10-25887906f033</cbc:ID>
+            <cbc:ContractFolderID>d3c5e034-bde2-4413-9a88-7364707fbb00</cbc:ContractFolderID>
+            <cbc:IssueDate>2026-01-29Z</cbc:IssueDate>
+            <cbc:IssueTime>18:21:05Z</cbc:IssueTime>
+            <cbc:VersionID>01</cbc:VersionID>
+            <cbc:RegulatoryDomain>32014L0025</cbc:RegulatoryDomain>
+            <cbc:NoticeTypeCode listName="result">can-standard</cbc:NoticeTypeCode>
+            <cbc:NoticeLanguageCode listName="language">FRA</cbc:NoticeLanguageCode>
+            <cac:ContractingParty>
+               <cbc:BuyerProfileURI>https://www.marches-securises.fr/perso/AR-Roland-Garros_974/</cbc:BuyerProfileURI>
+               <cac:ContractingPartyType>
+                  <cbc:PartyTypeCode listName="buyer-legal-type">spec-rights-entity</cbc:PartyTypeCode>
+               </cac:ContractingPartyType>
+               <cac:ContractingActivity>
+                  <cbc:ActivityTypeCode listName="entity-activity">airport</cbc:ActivityTypeCode>
+               </cac:ContractingActivity>
+               <cac:Party>
+                  <cac:PartyIdentification>
+                     <cbc:ID>ORG-0001</cbc:ID>
+                  </cac:PartyIdentification>
+               </cac:Party>
+            </cac:ContractingParty>
+            <cac:TenderingProcess>
+               <cbc:ProcedureCode listName="procurement-procedure-type">neg-w-call</cbc:ProcedureCode>
+            </cac:TenderingProcess>
+            <cac:ProcurementProject>
+               <cbc:Name languageID="FRA">Accord-cadre mono attributaire relatif au remplacement, à l’extension et à la maintenance du système de vidéoprotection de l’Aéroport La Réunion Roland GARROS</cbc:Name>
+               <cbc:Description languageID="FRA">Accord-cadre mono attributaire relatif au remplacement, à l'extension et à la maintenance du système de vidéoprotection de l'Aéroport La Réunion Roland GARROS</cbc:Description>
+               <cbc:ProcurementTypeCode listName="contract-nature">supplies</cbc:ProcurementTypeCode>
+               <cac:MainCommodityClassification>
+                  <cbc:ItemClassificationCode listName="cpv">35120000</cbc:ItemClassificationCode>
+               </cac:MainCommodityClassification>
+               <cac:RealizedLocation>
+                  <cac:Address>
+                     <cbc:StreetName>74, avenue Roland Garros</cbc:StreetName>
+                     <cbc:CityName>SAINTE MARIE</cbc:CityName>
+                     <cbc:PostalZone>97438</cbc:PostalZone>
+                     <cbc:CountrySubentityCode listName="nuts">FRY40</cbc:CountrySubentityCode>
+                     <cac:Country>
+                        <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                     </cac:Country>
+                  </cac:Address>
+               </cac:RealizedLocation>
+            </cac:ProcurementProject>
+            <cac:ProcurementProjectLot>
+               <cbc:ID schemeName="Lot">LOT-0001</cbc:ID>
+               <cac:TenderingTerms>
+                  <cbc:FundingProgramCode listName="eu-funded">no-eu-funds</cbc:FundingProgramCode>
+                  <cac:AwardingTerms>
+                     <cac:AwardingCriterion>
+                        <cac:SubordinateAwardingCriterion>
+                           <ext:UBLExtensions>
+                              <ext:UBLExtension>
+                                 <ext:ExtensionContent>
+                                    <efext:EformsExtension>
+                                       <efac:AwardCriterionParameter>
+                                          <efbc:ParameterCode listName="number-weight">per-exa</efbc:ParameterCode>
+                                          <efbc:ParameterNumeric>60</efbc:ParameterNumeric>
+                                       </efac:AwardCriterionParameter>
+                                    </efext:EformsExtension>
+                                 </ext:ExtensionContent>
+                              </ext:UBLExtension>
+                           </ext:UBLExtensions>
+                           <cbc:AwardingCriterionTypeCode listName="award-criterion-type">price</cbc:AwardingCriterionTypeCode>
+                           <cbc:Name languageID="FRA">Prix</cbc:Name>
+                           <cbc:Description languageID="FRA">Cf. RC</cbc:Description>
+                        </cac:SubordinateAwardingCriterion>
+                        <cac:SubordinateAwardingCriterion>
+                           <ext:UBLExtensions>
+                              <ext:UBLExtension>
+                                 <ext:ExtensionContent>
+                                    <efext:EformsExtension>
+                                       <efac:AwardCriterionParameter>
+                                          <efbc:ParameterCode listName="number-weight">per-exa</efbc:ParameterCode>
+                                          <efbc:ParameterNumeric>40</efbc:ParameterNumeric>
+                                       </efac:AwardCriterionParameter>
+                                    </efext:EformsExtension>
+                                 </ext:ExtensionContent>
+                              </ext:UBLExtension>
+                           </ext:UBLExtensions>
+                           <cbc:AwardingCriterionTypeCode listName="award-criterion-type">quality</cbc:AwardingCriterionTypeCode>
+                           <cbc:Name languageID="FRA">Valeur technique</cbc:Name>
+                           <cbc:Description languageID="FRA">Cf. RC</cbc:Description>
+                        </cac:SubordinateAwardingCriterion>
+                     </cac:AwardingCriterion>
+                  </cac:AwardingTerms>
+                  <cac:AdditionalInformationParty>
+                     <cac:PartyIdentification>
+                        <cbc:ID>ORG-0001</cbc:ID>
+                     </cac:PartyIdentification>
+                  </cac:AdditionalInformationParty>
+                  <cac:DocumentProviderParty>
+                     <cac:PartyIdentification>
+                        <cbc:ID>ORG-0001</cbc:ID>
+                     </cac:PartyIdentification>
+                  </cac:DocumentProviderParty>
+                  <cac:AppealTerms>
+                     <cac:AppealInformationParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID>ORG-0004</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:AppealInformationParty>
+                     <cac:AppealReceiverParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID>ORG-0004</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:AppealReceiverParty>
+                     <cac:MediationParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID>ORG-0003</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:MediationParty>
+                  </cac:AppealTerms>
+               </cac:TenderingTerms>
+               <cac:TenderingProcess>
+                  <cbc:GovernmentAgreementConstraintIndicator>true</cbc:GovernmentAgreementConstraintIndicator>
+                  <cac:AuctionTerms>
+                     <cbc:AuctionConstraintIndicator>false</cbc:AuctionConstraintIndicator>
+                  </cac:AuctionTerms>
+                  <cac:ContractingSystem>
+                     <cbc:ContractingSystemTypeCode listName="framework-agreement">fa-wo-rc</cbc:ContractingSystemTypeCode>
+                  </cac:ContractingSystem>
+                  <cac:ContractingSystem>
+                     <cbc:ContractingSystemTypeCode listName="dps-usage">none</cbc:ContractingSystemTypeCode>
+                  </cac:ContractingSystem>
+               </cac:TenderingProcess>
+               <cac:ProcurementProject>
+                  <cbc:ID>2025AS008</cbc:ID>
+                  <cbc:Name languageID="FRA">Accord-cadre mono attributaire relatif au remplacement, à l’extension et à la maintenance du système de vidéoprotection de l’Aéroport La Réunion Roland GARROS</cbc:Name>
+                  <cbc:Description languageID="FRA">Le présent accord cadre a pour objet de définir les termes contractuels généraux entre la SA Aéroport de la Réunion Roland Garros (SA ARRG) et le titulaire pour la passation des marchés subséquents relatifs au remplacement, à l’extension et à la maintenance du système de vidéoprotection de la SA ARRG.</cbc:Description>
+                  <cbc:ProcurementTypeCode listName="contract-nature">supplies</cbc:ProcurementTypeCode>
+                  <cbc:Note languageID="FRA">L’accord-cadre est conclu pour une durée de deux (2) ans à compter de sa date de notification, reconductible trois (3) fois pour la même durée par une décision expresse prise par l’entité adjudicatrice, et notifiée au titulaire en respectant un préavis d’un (1) mois avant la date anniversaire dudit accord-cadre. Le titulaire ne pourra pas refuser la reconduction.
+Délai de réception des candidatures : 02/07/2025 à 12h00 (GMT+4).
+A ce stade de candidature, même si le DCE est fourni aux candidats, il lui est demandé de ne remettre que les pièces relatives à la candidature définies dans le règlement de consultation (article 4.1).
+Il est précisé aux candidats que si une offre technique et financière est remise à la phase de candidature, elle ne sera pas prise en considération.
+Les candidatures et les offres seront à déposer sur le profil acheteur : https://www.marches-securises.fr/perso/AR-Roland-Garros_974. Les modalités sont précisées au règlement de consultation.</cbc:Note>
+                  <cac:RequestedTenderTotal>
+                     <ext:UBLExtensions>
+                        <ext:UBLExtension>
+                           <ext:ExtensionContent>
+                              <efext:EformsExtension>
+                                 <efbc:FrameworkMaximumAmount currencyID="EUR">4000000</efbc:FrameworkMaximumAmount>
+                              </efext:EformsExtension>
+                           </ext:ExtensionContent>
+                        </ext:UBLExtension>
+                     </ext:UBLExtensions>
+                     <cbc:EstimatedOverallContractAmount currencyID="EUR">1500000</cbc:EstimatedOverallContractAmount>
+                  </cac:RequestedTenderTotal>
+                  <cac:MainCommodityClassification>
+                     <cbc:ItemClassificationCode listName="cpv">35120000</cbc:ItemClassificationCode>
+                  </cac:MainCommodityClassification>
+                  <cac:RealizedLocation>
+                     <cac:Address>
+                        <cbc:StreetName>74, avenue Roland Garros</cbc:StreetName>
+                        <cbc:CityName>SAINTE MARIE</cbc:CityName>
+                        <cbc:PostalZone>97438</cbc:PostalZone>
+                        <cbc:CountrySubentityCode listName="nuts">FRY40</cbc:CountrySubentityCode>
+                        <cac:Country>
+                           <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                        </cac:Country>
+                     </cac:Address>
+                  </cac:RealizedLocation>
+                  <cac:PlannedPeriod>
+                     <cbc:DurationMeasure unitCode="MONTH">24</cbc:DurationMeasure>
+                  </cac:PlannedPeriod>
+                  <cac:ContractExtension>
+                     <cbc:OptionsDescription languageID="FRA">-Prestations complémentaires : Prestations réalisées dans le cadre d’éventuelles modifications du marché pour la réalisation de prestations supplémentaires dès lorsqu’elles seraient nécessaires à l’achèvement de la mission. Les
+conditions d’application de ces évolutions sont décrites à l’article R-2194 du code de la commande publique
+-Prestations non prévus : la poursuite de l’exécution des prestations en cas de dépassement de la masse initiale est subordonnée à la conclusion d’un avenant ou à l’émission d’une décision de poursuivre prise par l’entité adjudicatrice. Cet avenant ou décision de poursuivre ne peut avoir pour effet de bouleverser l’économie du marché, ni en changer l’objet.
+- Marchés similaires : possibilité ouverte conformément à l’article R.2122-7 du code de la commande publique.</cbc:OptionsDescription>
+                     <cbc:MaximumNumberNumeric>3</cbc:MaximumNumberNumeric>
+                  </cac:ContractExtension>
+               </cac:ProcurementProject>
+            </cac:ProcurementProjectLot>
+            <cac:TenderResult>
+               <cbc:AwardDate>2000-01-01Z</cbc:AwardDate>
+            </cac:TenderResult>
+         </ContractAwardNotice>
+      </EFORMS>
+   </DONNEES>
+   <GESTION>
+      <REFERENCE>
+         <IDWEB>26-10260</IDWEB>
+         <TYPE_AVIS>
+            <FAMILLE>
+               <JOUE/>
+            </FAMILLE>
+            <PERIMETRE>
+               <DIRECTIVE-25/>
+            </PERIMETRE>
+            <NATURE>
+               <ATTRIBUTION>
+                  <STANDARD/>
+               </ATTRIBUTION>
+            </NATURE>
+            <STATUT>
+               <INITIAL/>
+            </STATUT>
+         </TYPE_AVIS>
+      </REFERENCE>
+      <INDEXATION>
+         <SCHEMA>3.2.5</SCHEMA>
+         <NOMORGANISME>Aéroport de La Réunion Roland Garros (974)</NOMORGANISME>
+         <TITULAIRES>
+            <DENOMINATION>SECAB</DENOMINATION>
+         </TITULAIRES>
+         <TYPE_PROCEDURE>
+            <NEGOCIE/>
+         </TYPE_PROCEDURE>
+         <DATE_PUBLICATION>2026-01-31</DATE_PUBLICATION>
+         <DATE_FIN_DIFFUSION>2026-02-28</DATE_FIN_DIFFUSION>
+         <DESCRIPTEURS>
+            <DESCRIPTEUR>
+               <CODE>331</CODE>
+               <LIBELLE>Surveillance</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>204</CODE>
+               <LIBELLE>Matériel électronique</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>162</CODE>
+               <LIBELLE>Informatique (matériel)</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>209</CODE>
+               <LIBELLE>Matériel de sécurité</LIBELLE>
+            </DESCRIPTEUR>
+            <DESCRIPTEUR>
+               <CODE>196</CODE>
+               <LIBELLE>Maintenance</LIBELLE>
+            </DESCRIPTEUR>
+         </DESCRIPTEURS>
+         <NATURE_MARCHE>
+            <FOURNITURES/>
+         </NATURE_MARCHE>
+         <CRITERES_SOCIAUX_ENV>
+            <ENVIRONNEMENTAUX/>
+         </CRITERES_SOCIAUX_ENV>
+         <DEP_PUBLICATION>974</DEP_PUBLICATION>
+         <RESUME_OBJET>Accord-cadre mono attributaire relatif au remplacement, à l’extension et à la maintenance du système de vidéoprotection de l’Aéroport La Réunion Roland GARROS</RESUME_OBJET>
+      </INDEXATION>
+   </GESTION>
+   <HTML><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="FR">
+   <head>
+      <style type="text/css">.fr-h4 { font-weight: 700 !important; margin: 0.5rem 0 0.5rem 0rem!important; font-size: 1.4rem !important; line-height: 2rem !important; } .fr-h5, .fr-h5 + .fr-text--bold { font-weight: 700 !important; margin: 0.5rem 0 0.5rem 0rem !important; font-size: 1.3rem !important; line-height: 2rem !important; } .section { padding: 6px 6px 6px 36px; } .fr-text--bold { font-weight: bold; } .center { text-align: center; }
+                </style>
+      <title>Avis d’attribution de marché - Avis n° 26-10260 du 29/01/2026</title>
+      <meta name="subject" content="Avis d’attribution de marché"/>
+      <meta name="author"
+            content="Direction de l’information légale et administrative (DILA)"/>
+      <meta name="description"
+            content="Avis d’attribution de marché - Avis n° 26-10260 du 29/01/2026 sur le site Boamp.fr"/>
+   </head>
+   <body>
+      <div class="center">
+         <div class="fr-h4" id="doc_titre">Avis d’attribution de marché</div>
+      </div>
+      <div>Département(s) de publication :<span>
+            <strong>974</strong>
+         </span>
+      </div>
+      <div>
+         <span>Annonce n°</span>
+         <strong>26-10260</strong>
+      </div>
+      <hr/>
+      <div id="section_1_d1e9">
+         <span class="fr-h5">Section 1 -</span>
+         <span class="fr-text--bold">Acheteur</span>
+         <div class="section" id="section_1.1_d1e381">
+            <span>1.1</span>
+            <span class="fr-text--bold">Acheteur</span>
+            <div class="section">
+               <span class="fr-text--bold">Nom officiel</span>
+               <span>:</span>
+               <span>Aéroport de La Réunion Roland Garros (974)</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Forme juridique de l’acheteur</span>
+               <span>:</span>
+               <span>Entité disposant de droits spéciaux ou exclusifs</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Activité de l’entité adjudicatrice</span>
+               <span>:</span>
+               <span>Activités aéroportuaires</span>
+            </div>
+         </div>
+      </div>
+      <div id="section_2_d1e9">
+         <span class="fr-h5">Section 2 -</span>
+         <span class="fr-text--bold">Procédure</span>
+         <div class="section" id="section_2.1_d1e412">
+            <span>2.1</span>
+            <span class="fr-text--bold">Procédure</span>
+            <div class="section">
+               <span class="fr-text--bold">Titre</span>
+               <span>:</span>
+               <span>Accord-cadre mono attributaire relatif au remplacement, à l’extension et à la maintenance du système de vidéoprotection de l’Aéroport La Réunion Roland GARROS</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Description</span>
+               <span>:</span>
+               <span>Accord-cadre mono attributaire relatif au remplacement, à l'extension et à la maintenance du système de vidéoprotection de l'Aéroport La Réunion Roland GARROS</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Identifiant de la procédure</span>
+               <span>:</span>
+               <span>d3c5e034-bde2-4413-9a88-7364707fbb00</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Type de procédure</span>
+               <span>:</span>
+               <span>Négociée avec publication préalable d’un appel à la concurrence / concurrentielle avec négociation</span>
+            </div>
+            <div class="section" id="section_2.1.1_d1e412">
+               <span>2.1.1</span>
+               <span class="fr-text--bold">Objet</span>
+               <div class="section">
+                  <span class="fr-text--bold">Nature du marché</span>
+                  <span>:</span>
+                  <span>Fournitures</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Nomenclature principale</span>
+                  <span/>
+                  <span>(</span>
+                  <span>cpv</span>
+                  <span>):</span>
+                  <span>35120000</span>
+                  <span/>
+                  <span>Systèmes et appareils de surveillance et de sécurité</span>
+               </div>
+            </div>
+            <div class="section" id="section_2.1.2_d1e431">
+               <span>2.1.2</span>
+               <span class="fr-text--bold">Lieu d’exécution</span>
+               <div class="section">
+                  <span class="fr-text--bold">Adresse postale</span>
+                  <span>:</span>
+                  <span>74, avenue Roland Garros</span>
+                  <span/>
+                  <span/>
+                  <span/>
+                  <span/>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Ville</span>
+                  <span>:</span>
+                  <span>SAINTE MARIE</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Code postal</span>
+                  <span>:</span>
+                  <span>97438</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Subdivision pays (NUTS)</span>
+                  <span>:</span>
+                  <span>La Réunion</span>
+                  <span/>
+                  <span>(</span>
+                  <span>FRY40</span>
+                  <span>)</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Pays</span>
+                  <span>:</span>
+                  <span>France</span>
+               </div>
+            </div>
+            <div class="section" id="section_2.1.4_d1e412">
+               <span>2.1.4</span>
+               <span class="fr-text--bold">Informations générales</span>
+               <div class="section">
+                  <span class="fr-text--bold">Base juridique</span>
+                  <span>:</span>
+               </div>
+               <div class="section">
+                  <span>Directive 2014/25/UE</span>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div id="section_5_d1e9">
+         <span class="fr-h5">Section 5 -</span>
+         <span class="fr-text--bold">Lot</span>
+         <div class="section" id="section_5.1_d1e451">
+            <span>5.1</span>
+            <span class="fr-text--bold">Identifiant technique du lot</span>
+            <span>:</span>
+            <span>LOT-0001</span>
+            <div class="section">
+               <span class="fr-text--bold">Titre</span>
+               <span>:</span>
+               <span>Accord-cadre mono attributaire relatif au remplacement, à l’extension et à la maintenance du système de vidéoprotection de l’Aéroport La Réunion Roland GARROS</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Description</span>
+               <span>:</span>
+               <span>Le présent accord cadre a pour objet de définir les termes contractuels généraux entre la SA Aéroport de la Réunion Roland Garros (SA ARRG) et le titulaire pour la passation des marchés subséquents relatifs au remplacement, à l’extension et à la maintenance du système de vidéoprotection de la SA ARRG.</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Identifiant interne</span>
+               <span>:</span>
+               <span>2025AS008</span>
+            </div>
+            <div class="section" id="section_5.1.1_d1e597">
+               <span>5.1.1</span>
+               <span class="fr-text--bold">Objet</span>
+               <div class="section">
+                  <span class="fr-text--bold">Nature du marché</span>
+                  <span>:</span>
+                  <span>Fournitures</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Nomenclature principale</span>
+                  <span/>
+                  <span>(</span>
+                  <span>cpv</span>
+                  <span>):</span>
+                  <span>35120000</span>
+                  <span/>
+                  <span>Systèmes et appareils de surveillance et de sécurité</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Options</span>
+                  <span>:</span>
+                  <div class="section">
+                     <span class="fr-text--bold">Description des options</span>
+                     <span>:</span>
+                     <span>-Prestations complémentaires : Prestations réalisées dans le cadre d’éventuelles modifications du marché pour la réalisation de prestations supplémentaires dès lorsqu’elles seraient nécessaires à l’achèvement de la mission. Les conditions d’application de ces évolutions sont décrites à l’article R-2194 du code de la commande publique -Prestations non prévus : la poursuite de l’exécution des prestations en cas de dépassement de la masse initiale est subordonnée à la conclusion d’un avenant ou à l’émission d’une décision de poursuivre prise par l’entité adjudicatrice. Cet avenant ou décision de poursuivre ne peut avoir pour effet de bouleverser l’économie du marché, ni en changer l’objet. - Marchés similaires : possibilité ouverte conformément à l’article R.2122-7 du code de la commande publique.</span>
+                  </div>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.2_d1e641">
+               <span>5.1.2</span>
+               <span class="fr-text--bold">Lieu d’exécution</span>
+               <div class="section">
+                  <span class="fr-text--bold">Adresse postale</span>
+                  <span>:</span>
+                  <span>74, avenue Roland Garros</span>
+                  <span/>
+                  <span/>
+                  <span/>
+                  <span/>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Ville</span>
+                  <span>:</span>
+                  <span>SAINTE MARIE</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Code postal</span>
+                  <span>:</span>
+                  <span>97438</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Subdivision pays (NUTS)</span>
+                  <span>:</span>
+                  <span>La Réunion</span>
+                  <span/>
+                  <span>(</span>
+                  <span>FRY40</span>
+                  <span>)</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Pays</span>
+                  <span>:</span>
+                  <span>France</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Informations complémentaires</span>
+                  <span>:</span>
+                  <span/>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.3_d1e662">
+               <span>5.1.3</span>
+               <span class="fr-text--bold">Durée estimée</span>
+               <div class="section">
+                  <span class="fr-text--bold">Durée</span>
+                  <span>:</span>
+                  <span>24</span>
+                  <span/>
+                  <span class="fr-text--bold">Mois</span>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.4_d1e668">
+               <span>5.1.4</span>
+               <span class="fr-text--bold">Renouvellement</span>
+               <div class="section">
+                  <span class="fr-text--bold">Nombre maximal de renouvellements</span>
+                  <span>:</span>
+                  <span>3</span>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.5_d1e614">
+               <span>5.1.5</span>
+               <span class="fr-text--bold">Valeur</span>
+               <div class="section">
+                  <span class="fr-text--bold">Valeur estimée hors TVA</span>
+                  <span>:</span>
+                  <span>1,500,000</span>
+                  <span/>
+                  <span class="fr-text--bold">Euro</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Valeur maximale de l’accord-cadre</span>
+                  <span>:</span>
+                  <span>4,000,000</span>
+                  <span/>
+                  <span class="fr-text--bold">Euro</span>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.6_d1e451">
+               <span>5.1.6</span>
+               <span class="fr-text--bold">Informations générales</span>
+               <div class="section">
+                  <span>Projet de passation de marché non financé par des fonds de l’UE</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Le marché relève de l’accord sur les marchés publics (AMP)</span>
+                  <span>:</span>
+                  <span class="fr-text--bold">oui</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Informations complémentaires</span>
+                  <span>:</span>
+                  <span>L’accord-cadre est conclu pour une durée de deux (2) ans à compter de sa date de notification, reconductible trois (3) fois pour la même durée par une décision expresse prise par l’entité adjudicatrice, et notifiée au titulaire en respectant un préavis d’un (1) mois avant la date anniversaire dudit accord-cadre. Le titulaire ne pourra pas refuser la reconduction. Délai de réception des candidatures : 02/07/2025 à 12h00 (GMT+4). A ce stade de candidature, même si le DCE est fourni aux candidats, il lui est demandé de ne remettre que les pièces relatives à la candidature définies dans le règlement de consultation (article 4.1). Il est précisé aux candidats que si une offre technique et financière est remise à la phase de candidature, elle ne sera pas prise en considération. Les candidatures et les offres seront à déposer sur le profil acheteur : https://www.marches-securises.fr/perso/AR-Roland-Garros_974. Les modalités sont précisées au règlement de consultation.</span>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.10_d1e463">
+               <span>5.1.10</span>
+               <span class="fr-text--bold">Critères d’attribution</span>
+               <div class="section">
+                  <span class="fr-text--bold">Critère</span>
+                  <span>:</span>
+                  <div class="section">
+                     <span class="fr-text--bold">Type</span>
+                     <span>:</span>
+                     <span>Prix</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Nom</span>
+                     <span>:</span>
+                     <span>Prix</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Description</span>
+                     <span>:</span>
+                     <span>Cf. RC</span>
+                  </div>
+                  <div class="section">
+                     <span>Pondération (pourcentage, valeur exacte)</span>
+                     <span>:</span>
+                     <span>60</span>
+                  </div>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Critère</span>
+                  <span>:</span>
+                  <div class="section">
+                     <span class="fr-text--bold">Type</span>
+                     <span>:</span>
+                     <span>Qualité</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Nom</span>
+                     <span>:</span>
+                     <span>Valeur technique</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Description</span>
+                     <span>:</span>
+                     <span>Cf. RC</span>
+                  </div>
+                  <div class="section">
+                     <span>Pondération (pourcentage, valeur exacte)</span>
+                     <span>:</span>
+                     <span>40</span>
+                  </div>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.15_d1e575">
+               <span>5.1.15</span>
+               <span class="fr-text--bold">Techniques</span>
+               <div class="section">
+                  <span class="fr-text--bold">Accord-cadre</span>
+                  <span>:</span>
+                  <div class="section">
+                     <span>Accord-cadre, sans remise en concurrence</span>
+                  </div>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Informations sur le système d’acquisition dynamique</span>
+                  <span>:</span>
+                  <div class="section">
+                     <span>Pas de système d’acquisition dynamique</span>
+                  </div>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.16_d1e453">
+               <span>5.1.16</span>
+               <span class="fr-text--bold">Informations complémentaires, médiation et réexamen</span>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation chargée des procédures de médiation</span>
+                  <span>:</span>
+                  <span>Comité consultatif interrégional de Paris - Règlement amiable des litiges</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation chargée des procédures de recours</span>
+                  <span>:</span>
+                  <span>TRIBUNAL JUDICIAIRE DE SAINT-DENIS</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation qui fournit des informations complémentaires sur la procédure de passation de marché</span>
+                  <span>:</span>
+                  <span>Aéroport de La Réunion Roland Garros (974)</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation qui fournit un accès hors ligne aux documents de marché</span>
+                  <span>:</span>
+                  <span>Aéroport de La Réunion Roland Garros (974)</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation qui fournit des précisions concernant l’introduction des recours</span>
+                  <span>:</span>
+                  <span>TRIBUNAL JUDICIAIRE DE SAINT-DENIS</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation qui signe le marché</span>
+                  <span>:</span>
+                  <span>Aéroport de La Réunion Roland Garros (974)</span>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div id="section_6_d1e19">
+         <span class="fr-h5">Section 6 -</span>
+         <span class="fr-text--bold">Résultats</span>
+         <div class="section">
+            <span class="fr-text--bold">Valeur maximale des accords-cadres dans cette procédure</span>
+            <span>:</span>
+            <span>4,000,000</span>
+            <span/>
+            <span class="fr-text--bold">Euro</span>
+         </div>
+         <div class="section" id="section_6.1_d1e24">
+            <span>6.1</span>
+            <span class="fr-text--bold">Résultat – Identifiants des lots</span>
+            <span>:</span>
+            <span>LOT-0001</span>
+            <div class="section">
+               <span>Au moins un lauréat a été choisi.</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Accord-cadre</span>
+               <span>:</span>
+               <div class="section">
+                  <span class="fr-text--bold">Valeur maximale de l’accord-cadre</span>
+                  <span>:</span>
+                  <span>4,000,000</span>
+                  <span/>
+                  <span class="fr-text--bold">Euro</span>
+               </div>
+            </div>
+            <div class="section" id="section_6.1.2_d1e24">
+               <span>6.1.2</span>
+               <span class="fr-text--bold">Informations sur les lauréats</span>
+               <div class="section">
+                  <span class="fr-text--bold">Lauréat</span>
+                  <span>:</span>
+                  <div class="section">
+                     <span class="fr-text--bold">Nom officiel</span>
+                     <span>:</span>
+                     <span>SECAB</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Offre</span>
+                     <span>:</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Identifiant de l’offre</span>
+                     <span>:</span>
+                     <span>SECAB</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Identifiant du lot ou groupe de lots</span>
+                     <span>:</span>
+                     <span>LOT-0001</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">L’offre a été classée</span>
+                     <span>:</span>
+                     <span class="fr-text--bold">oui</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Place sur la liste des lauréats</span>
+                     <span>:</span>
+                     <span>1</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">L’offre est une variante</span>
+                     <span>:</span>
+                     <span class="fr-text--bold">non</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Sous-traitance</span>
+                     <span>:</span>
+                     <span>Pas encore connu</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Informations relatives au marché</span>
+                     <span>:</span>
+                     <div class="section">
+                        <span class="fr-text--bold">Identifiant du marché</span>
+                        <span>:</span>
+                        <span>2025AS008</span>
+                     </div>
+                     <div class="section">
+                        <span class="fr-text--bold">Date à laquelle le lauréat a été choisi</span>
+                        <span>:</span>
+                        <span>30/12/2025</span>
+                     </div>
+                     <div class="section">
+                        <span class="fr-text--bold">Date de conclusion du marché</span>
+                        <span>:</span>
+                        <span>13/01/2026</span>
+                     </div>
+                     <div class="section">
+                        <span class="fr-text--bold">Le marché est attribué dans le contexte d’un accord-cadre</span>
+                        <span>:</span>
+                        <span class="fr-text--bold">non</span>
+                     </div>
+                     <div class="section">
+                        <span class="fr-text--bold">Organisation qui signe le marché</span>
+                        <span>:</span>
+                        <span>Aéroport de La Réunion Roland Garros (974)</span>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="section" id="section_6.1.4_d1e24">
+               <span>6.1.4</span>
+               <span class="fr-text--bold">Informations statistiques</span>
+               <div class="section">
+                  <span class="fr-text--bold">Offres ou demandes de participation reçues</span>
+                  <span>:</span>
+                  <div class="section">
+                     <span class="fr-text--bold">Type de soumissions reçues</span>
+                     <span>:</span>
+                     <span>Offres</span>
+                     <div class="section">
+                        <span class="fr-text--bold">Nombre d’offres ou de demandes de participation reçues</span>
+                        <span>:</span>
+                        <span>4</span>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div id="section_8_d1e9">
+         <span class="fr-h5">Section 8 -</span>
+         <span class="fr-text--bold">Organisations</span>
+         <div class="section" id="section_8.1_d1e145">
+            <span>8.1</span>
+            <span>ORG-0001</span>
+            <div class="section">
+               <span class="fr-text--bold">Nom officiel</span>
+               <span>:</span>
+               <span>Aéroport de La Réunion Roland Garros (974)</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Numéro d’enregistrement</span>
+               <span>:</span>
+               <span>52819443400015</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse postale</span>
+               <span>:</span>
+               <span>74 avenue Roland Garros</span>
+               <span/>
+               <span/>
+               <span/>
+               <span/>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Ville</span>
+               <span>:</span>
+               <span>Sainte-Marie</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Code postal</span>
+               <span>:</span>
+               <span>97438</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Subdivision pays (NUTS)</span>
+               <span>:</span>
+               <span>La Réunion</span>
+               <span/>
+               <span>(</span>
+               <span>FRY40</span>
+               <span>)</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Pays</span>
+               <span>:</span>
+               <span>France</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse électronique</span>
+               <span>:</span>
+               <span>achats@reunion.aeroport.fr</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Téléphone</span>
+               <span>:</span>
+               <span>+33 262481874</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Télécopieur</span>
+               <span>:</span>
+               <span>+33 262488046</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse internet</span>
+               <span>:</span>
+               <span>https://www.marches-securises.fr/perso/AR-Roland-Garros_974/</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Point de terminaison pour l’échange d’informations (URL)</span>
+               <span>:</span>
+               <span>https://www.reunion.aeroport.fr</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Profil de l’acheteur</span>
+               <span>:</span>
+               <span>https://www.marches-securises.fr/perso/AR-Roland-Garros_974/</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Rôles de cette organisation</span>
+               <span>:</span>
+               <div class="section">
+                  <span class="fr-text--bold">Acheteur</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation qui fournit des informations complémentaires sur la procédure de passation de marché</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation qui fournit un accès hors ligne aux documents de marché</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation qui signe le marché</span>
+               </div>
+            </div>
+         </div>
+         <div class="section" id="section_8.1_d1e199">
+            <span>8.1</span>
+            <span>ORG-0003</span>
+            <div class="section">
+               <span class="fr-text--bold">Nom officiel</span>
+               <span>:</span>
+               <span>Comité consultatif interrégional de Paris - Règlement amiable des litiges</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Numéro d’enregistrement</span>
+               <span>:</span>
+               <span>FR101</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Département</span>
+               <span>:</span>
+               <span>177 500 006 00024</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse postale</span>
+               <span>:</span>
+               <span>27, rue Miollis</span>
+               <span/>
+               <span>27, rue Miollis</span>
+               <span/>
+               <span/>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Ville</span>
+               <span>:</span>
+               <span>PARIS</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Code postal</span>
+               <span>:</span>
+               <span>75015</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Subdivision pays (NUTS)</span>
+               <span>:</span>
+               <span>Paris</span>
+               <span/>
+               <span>(</span>
+               <span>FR101</span>
+               <span>)</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Pays</span>
+               <span>:</span>
+               <span>France</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Point de contact</span>
+               <span>:</span>
+               <span>177 500 006 00024</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse électronique</span>
+               <span>:</span>
+               <span>ccira@paris-idf.gouv.fr</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Téléphone</span>
+               <span>:</span>
+               <span>+33 144426343</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Télécopieur</span>
+               <span>:</span>
+               <span>+33 144426337</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Rôles de cette organisation</span>
+               <span>:</span>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation chargée des procédures de médiation</span>
+               </div>
+            </div>
+         </div>
+         <div class="section" id="section_8.1_d1e255">
+            <span>8.1</span>
+            <span>ORG-0004</span>
+            <div class="section">
+               <span class="fr-text--bold">Nom officiel</span>
+               <span>:</span>
+               <span>TRIBUNAL JUDICIAIRE DE SAINT-DENIS</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Numéro d’enregistrement</span>
+               <span>:</span>
+               <span>17974111100027</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse postale</span>
+               <span>:</span>
+               <span>5, avenue André MALRAUX CS81027</span>
+               <span/>
+               <span/>
+               <span/>
+               <span/>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Ville</span>
+               <span>:</span>
+               <span>SAINTE-CLOTILDE</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Code postal</span>
+               <span>:</span>
+               <span>97490</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Subdivision pays (NUTS)</span>
+               <span>:</span>
+               <span>La Réunion</span>
+               <span/>
+               <span>(</span>
+               <span>FRY40</span>
+               <span>)</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Pays</span>
+               <span>:</span>
+               <span>France</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse électronique</span>
+               <span>:</span>
+               <span>accueil.tj-st-denis-de-la-reunion@justice.fr</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Téléphone</span>
+               <span>:</span>
+               <span>+33 262402345</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Télécopieur</span>
+               <span>:</span>
+               <span>+33 262211019</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Rôles de cette organisation</span>
+               <span>:</span>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation chargée des procédures de recours</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation qui fournit des précisions concernant l’introduction des recours</span>
+               </div>
+            </div>
+         </div>
+         <div class="section" id="section_8.1_d1e304">
+            <span>8.1</span>
+            <span>ORG-0005</span>
+            <div class="section">
+               <span class="fr-text--bold">Nom officiel</span>
+               <span>:</span>
+               <span>SECAB</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Numéro d’enregistrement</span>
+               <span>:</span>
+               <span>40318018500023</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse postale</span>
+               <span>:</span>
+               <span>RUE COCO ROBERT ZAE DE LA MARE II- LOT N 2</span>
+               <span/>
+               <span/>
+               <span/>
+               <span/>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Ville</span>
+               <span>:</span>
+               <span>SAINTE-MARIE</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Code postal</span>
+               <span>:</span>
+               <span>97438</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Subdivision pays (NUTS)</span>
+               <span>:</span>
+               <span>La Réunion</span>
+               <span/>
+               <span>(</span>
+               <span>FRY40</span>
+               <span>)</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Pays</span>
+               <span>:</span>
+               <span>France</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse électronique</span>
+               <span>:</span>
+               <span>secab@secab.re</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Téléphone</span>
+               <span>:</span>
+               <span>+33 262219446</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Rôles de cette organisation</span>
+               <span>:</span>
+               <div class="section">
+                  <span class="fr-text--bold">Soumissionnaire</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Lauréat de ces lots</span>
+                  <span>:</span>
+                  <span>LOT-0001</span>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div id="section_11_d1e9">
+         <span class="fr-h5">Section 11 -</span>
+         <span class="fr-text--bold">Informations relatives à l’avis</span>
+         <div class="section" id="section_11.1_d1e9">
+            <span>11.1</span>
+            <span class="fr-text--bold">Informations relatives à l’avis</span>
+            <div class="section">
+               <span class="fr-text--bold">Identifiant/version de l’avis</span>
+               <span>:</span>
+               <span>7ffa44cf-3e05-4f84-8e10-25887906f033</span>
+               <span/>
+               <span>-</span>
+               <span>01</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Type de formulaire</span>
+               <span>:</span>
+               <span>Résultats</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Type d’avis</span>
+               <span>:</span>
+               <span>Avis d’attribution de marché ou de concession – régime ordinaire</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Date d’envoi de l’avis</span>
+               <span>:</span>
+               <span>29/01/2026</span>
+               <span/>
+               <span>à 18:21</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Langues dans lesquelles l’avis en question est officiellement disponible</span>
+               <span>:</span>
+               <span>français</span>
+               <span/>
+               <span/>
+            </div>
+         </div>
+         <div class="section" id="section_11.2_d1e9">
+            <span>11.2</span>
+            <span class="fr-text--bold">Informations relatives à la publication</span>
+         </div>
+      </div>
+      <hr/>
+      <div>
+         <span class="fr-text--bold">Date d'envoi du présent avis à la publication : </span>29/01/2026</div>
+   </body>
+</html>
+]]></HTML>
+   <HTMLSYNTHESE><![CDATA[<!DOCTYPE HTML>
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   </head>
+   <body>
+      <h3>L’essentiel du marché</h3>
+      <ul>
+         <li><span>Acheteur(s) : </span><ul>
+               <li><span class="fr-text--bold">Aéroport de La Réunion Roland Garros (974) : </span><ul>
+                     <li><span class="fr-text--bold">Adresse : </span>74 avenue Roland Garros Sainte-Marie 97438 FRY40 FRA</li>
+                     <li><span class="fr-text--bold">Point(s) de contact : </span></li>
+                     <li><span class="fr-text--bold">Téléphone : </span>+33 262481874</li>
+                     <li><span class="fr-text--bold">Courriel : </span>achats@reunion.aeroport.fr</li>
+                     <li><span class="fr-text--bold">Adresse internet : </span><a href="https://www.marches-securises.fr/perso/AR-Roland-Garros_974/" target="_blank" title="Aller sur la page https://www.marches-securises.fr/perso/AR-Roland-Garros_974/ - nouvelle fenêtre"><span>https://www.marches-securises.fr/perso/AR-Roland-Garros_974/</span></a></li>
+                     <li><span class="fr-text--bold">Adresse internet du profil d'acheteur : </span><a href="https://www.marches-securises.fr/perso/AR-Roland-Garros_974/" target="_blank" title="Aller sur la page https://www.marches-securises.fr/perso/AR-Roland-Garros_974/ - nouvelle fenêtre"><span>https://www.marches-securises.fr/perso/AR-Roland-Garros_974/</span></a></li>
+                  </ul>
+               </li>
+            </ul>
+         </li>
+         <li><span class="fr-text--bold">Titre du marché : </span>Accord-cadre mono attributaire relatif au remplacement, à l’extension et à la maintenance
+            du système de vidéoprotection de l’Aéroport La Réunion Roland GARROS</li>
+         <li><span class="fr-text--bold">Objet du marché : </span>Accord-cadre mono attributaire relatif au remplacement, à l'extension et à la maintenance
+            du système de vidéoprotection de l'Aéroport La Réunion Roland GARROS</li>
+         <li><span class="fr-text--bold">Renseignements relatifs aux lots :</span><ul>
+               <li><span class="fr-text--bold">Lot 1 : </span>Accord-cadre mono attributaire relatif au remplacement, à l’extension et à la maintenance
+                  du système de vidéoprotection de l’Aéroport La Réunion Roland GARROS</li>
+            </ul>
+         </li>
+      </ul>
+   </body>
+</html>]]></HTMLSYNTHESE>
+</jo:ann>

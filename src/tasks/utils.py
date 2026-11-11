@@ -4,8 +4,11 @@ import logging
 import re
 import shutil
 import time
+from collections.abc import Callable, Iterable
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 import polars as pl
 from prefect import task
@@ -36,6 +39,46 @@ def gzip_file_reproducible(src: Path, dst: Path, compresslevel: int = 9) -> Path
         ) as f_gz:
             shutil.copyfileobj(f_in, f_gz, length=1024 * 1024)
     return dst
+
+
+def run_in_pool(
+    fn: Callable[[Any], Any],
+    items: Iterable[Any],
+    *,
+    max_workers: int,
+    logger: logging.Logger,
+    label: Callable[[Any], str] = str,
+) -> list[tuple[Any, Any]]:
+    """Exécute ``fn(item)`` en parallèle avec un Ctrl+C propre.
+
+    Les résultats arrivent au fil de l'eau (``as_completed``). Sur
+    ``KeyboardInterrupt``, les tâches encore en file d'attente sont annulées
+    (``cancel_futures=True``) et l'interruption est propagée immédiatement, sans
+    attendre le drainage de toute la file. Les threads déjà en cours ne sont pas
+    interruptibles (limitation Python) : seules les ``max_workers`` tâches
+    actives finissent.
+
+    Les exceptions de chaque tâche sont journalisées (via ``label(item)``) sans
+    arrêter les autres. Renvoie la liste des ``(item, result)`` terminés sans
+    erreur.
+    """
+    results: list[tuple[Any, Any]] = []
+    executor = ThreadPoolExecutor(max_workers=max_workers)
+    futures = {executor.submit(fn, item): item for item in items}
+    try:
+        for future in as_completed(futures):
+            item = futures[future]
+            try:
+                results.append((item, future.result()))
+            except Exception as e:
+                logger.error(f"❌ Échec {label(item)} ({type(e).__name__}): {e}")
+        return results
+    except KeyboardInterrupt:
+        logger.warning("⛔ Interruption demandée, annulation des tâches en attente...")
+        executor.shutdown(wait=False, cancel_futures=True)
+        raise
+    finally:
+        executor.shutdown(wait=False)
 
 
 def stream_replace_bytestring(iterator, old_bytestring: bytes, new_bytestring: bytes):

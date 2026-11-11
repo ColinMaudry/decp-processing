@@ -257,3 +257,23 @@ if __name__ == "__main__":
             }
         },
     )
+
+    flow.from_source(
+        source=GitRepository(
+            url="https://github.com/ColinMaudry/decp-processing.git", branch="main"
+        ),
+        entrypoint="src/flows/boamp_processing.py:boamp_processing",
+    ).deploy(
+        name="boamp-processing",
+        description="BOAMP/eForms : tous les jours à 4h00",
+        work_pool_name="local",
+        ignore_warnings=True,
+        cron="0 4 * * *",
+        job_variables={
+            "env": {
+                "DECP_PROCESSING_PUBLISH": "True",
+                "DECP_DIST_DIR": "/srv/shared/decp/prod/dist",
+                "DECP_DATA_DIR": "/home/yunohost.app/prefect",
+            }
+        },
+    )

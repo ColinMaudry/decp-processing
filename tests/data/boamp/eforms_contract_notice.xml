@@ -1,0 +1,1107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jo:ann xmlns:jo="http://boamp.journal-officiel.gouv.fr/XML/3.2.5">
+   <DONNEES>
+      <EFORMS xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         <ContractNotice xmlns:cac="urn:boamp:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                         xmlns:cbc="urn:boamp:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+                         xmlns:efac="http://data.europa.eu/p27/eforms-ubl-extension-aggregate-components/1"
+                         xmlns:efbc="http://data.europa.eu/p27/eforms-ubl-extension-basic-components/1"
+                         xmlns:efext="http://data.europa.eu/p27/eforms-ubl-extensions/1"
+                         xmlns:ext="urn:boamp:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+            <ext:UBLExtensions>
+               <ext:UBLExtension>
+                  <ext:ExtensionContent>
+                     <efext:EformsExtension>
+                        <efac:NoticeSubType>
+                           <cbc:SubTypeCode listName="notice-subtype">16</cbc:SubTypeCode>
+                        </efac:NoticeSubType>
+                        <efac:Organizations>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cbc:WebsiteURI>https://hautsdeseinehabitat.fr/</cbc:WebsiteURI>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0001</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">Hauts-de-Seine Habitat - OPH</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>45 rue Paul Vaillant Couturier</cbc:StreetName>
+                                    <cbc:CityName>Levallois-Perret</cbc:CityName>
+                                    <cbc:PostalZone>92500</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FR105</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID>27920022400012</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>+33 171152678</cbc:Telephone>
+                                    <cbc:ElectronicMail>marches@hdshabitat.fr</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cbc:WebsiteURI>https://cergy-pontoise.tribunal-administratif.fr/</cbc:WebsiteURI>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0002</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">Tribunal Administratif de Cergy Pontoise</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:StreetName>2-4 2 BOULEVARD DE L'HAUTIL</cbc:StreetName>
+                                    <cbc:CityName>CERGY</cbc:CityName>
+                                    <cbc:PostalZone>95000</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FR105</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID>179 507 025 00015</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Name>greffe.ta-cergy-pontoise@juradm.fr</cbc:Name>
+                                    <cbc:Telephone>0130173400</cbc:Telephone>
+                                    <cbc:ElectronicMail>greffe.ta-cergy-pontoise@juradm.fr</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                           <efac:Organization>
+                              <efac:Company>
+                                 <cbc:WebsiteURI>www.dematis.com</cbc:WebsiteURI>
+                                 <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0000</cbc:ID>
+                                 </cac:PartyIdentification>
+                                 <cac:PartyName>
+                                    <cbc:Name languageID="FRA">DEMATIS</cbc:Name>
+                                 </cac:PartyName>
+                                 <cac:PostalAddress>
+                                    <cbc:CityName>Paris</cbc:CityName>
+                                    <cbc:PostalZone>75015</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">FR101</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                       <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                                    </cac:Country>
+                                 </cac:PostalAddress>
+                                 <cac:PartyLegalEntity>
+                                    <cbc:CompanyID>45072478600030</cbc:CompanyID>
+                                 </cac:PartyLegalEntity>
+                                 <cac:Contact>
+                                    <cbc:Telephone>+33 172365548</cbc:Telephone>
+                                    <cbc:ElectronicMail>contact@dematis.com</cbc:ElectronicMail>
+                                 </cac:Contact>
+                              </efac:Company>
+                           </efac:Organization>
+                        </efac:Organizations>
+                     </efext:EformsExtension>
+                  </ext:ExtensionContent>
+               </ext:UBLExtension>
+            </ext:UBLExtensions>
+            <cbc:UBLVersionID>2.3</cbc:UBLVersionID>
+            <cbc:CustomizationID>eforms-sdk-1.13</cbc:CustomizationID>
+            <cbc:ID schemeName="notice-id">c8a1bde7-708e-47da-b46a-b7051be5aeec</cbc:ID>
+            <cbc:ContractFolderID>3180afbe-c579-4af0-84df-f0285d29b719</cbc:ContractFolderID>
+            <cbc:IssueDate>2026-01-29+01:00</cbc:IssueDate>
+            <cbc:IssueTime>15:20:04+01:00</cbc:IssueTime>
+            <cbc:VersionID>01</cbc:VersionID>
+            <cbc:RegulatoryDomain>32014L0024</cbc:RegulatoryDomain>
+            <cbc:NoticeTypeCode listName="competition">cn-standard</cbc:NoticeTypeCode>
+            <cbc:NoticeLanguageCode listName="language">FRA</cbc:NoticeLanguageCode>
+            <cac:ContractingParty>
+               <cbc:BuyerProfileURI>https://hautsdeseine-habitat.e-marchespublics.com</cbc:BuyerProfileURI>
+               <cac:ContractingPartyType>
+                  <cbc:PartyTypeCode listName="buyer-legal-type">body-pl</cbc:PartyTypeCode>
+               </cac:ContractingPartyType>
+               <cac:ContractingActivity>
+                  <cbc:ActivityTypeCode listName="authority-activity">hc-am</cbc:ActivityTypeCode>
+               </cac:ContractingActivity>
+               <cac:Party>
+                  <cac:PartyIdentification>
+                     <cbc:ID>ORG-0001</cbc:ID>
+                  </cac:PartyIdentification>
+                  <cac:ServiceProviderParty>
+                     <cbc:ServiceTypeCode listName="organisation-role">ted-esen</cbc:ServiceTypeCode>
+                     <cac:Party>
+                        <cac:PartyIdentification>
+                           <cbc:ID>ORG-0000</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:Party>
+                  </cac:ServiceProviderParty>
+               </cac:Party>
+            </cac:ContractingParty>
+            <cac:TenderingTerms>
+               <cac:TendererQualificationRequest>
+                  <cac:SpecificTendererRequirement>
+                     <cbc:TendererRequirementTypeCode listName="exclusion-grounds-source">epo-procurement-document</cbc:TendererRequirementTypeCode>
+                  </cac:SpecificTendererRequirement>
+               </cac:TendererQualificationRequest>
+            </cac:TenderingTerms>
+            <cac:TenderingProcess>
+               <cbc:ProcedureCode listName="procurement-procedure-type">open</cbc:ProcedureCode>
+               <cac:ProcessJustification>
+                  <cbc:ProcessReasonCode listName="accelerated-procedure">false</cbc:ProcessReasonCode>
+               </cac:ProcessJustification>
+            </cac:TenderingProcess>
+            <cac:ProcurementProject>
+               <cbc:ID>DEX2026-03</cbc:ID>
+               <cbc:Name languageID="FRA">MARCHE DE SERVICES RELATIF A L'ASSISTANCE POUR LA MOBILITE VERTICALE DE PERSONNES ET DE PRESTATIONS COMPLEMENTAIRES LIEES AUX SITUATIONS D'ISOLEMENT EN ETAGE SUR L'ENSEMBLE DU PARC IMMOBILIER DE HAUTS-DE-SEINE HABITAT- OPH</cbc:Name>
+               <cbc:Description languageID="FRA">Le présent marché de services a pour objet la mise en place d'une solution d'assistance à mobilité
+verticale et autres prestations complémentaires liées aux situations d'isolement en étage suite à une
+problématique d'arrêt d'un ascenseur ou de personnes ne pouvant plus se déplacer dans un immeuble
+de l'ensemble du parc immobilier de Hauts-de-Seine Habitat -OPH.</cbc:Description>
+               <cbc:ProcurementTypeCode listName="contract-nature">services</cbc:ProcurementTypeCode>
+               <cac:RequestedTenderTotal>
+                  <ext:UBLExtensions>
+                     <ext:UBLExtension>
+                        <ext:ExtensionContent>
+                           <efext:EformsExtension>
+                              <efbc:FrameworkMaximumAmount currencyID="EUR">1200000</efbc:FrameworkMaximumAmount>
+                           </efext:EformsExtension>
+                        </ext:ExtensionContent>
+                     </ext:UBLExtension>
+                  </ext:UBLExtensions>
+               </cac:RequestedTenderTotal>
+               <cac:MainCommodityClassification>
+                  <cbc:ItemClassificationCode listName="cpv">79622000</cbc:ItemClassificationCode>
+               </cac:MainCommodityClassification>
+               <cac:AdditionalCommodityClassification>
+                  <cbc:ItemClassificationCode listName="cpv">98513310</cbc:ItemClassificationCode>
+               </cac:AdditionalCommodityClassification>
+               <cac:RealizedLocation>
+                  <cac:Address>
+                     <cbc:CountrySubentityCode listName="nuts">FR105</cbc:CountrySubentityCode>
+                     <cac:Country>
+                        <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                     </cac:Country>
+                  </cac:Address>
+               </cac:RealizedLocation>
+            </cac:ProcurementProject>
+            <cac:ProcurementProjectLot>
+               <cbc:ID schemeName="Lot">LOT-0001</cbc:ID>
+               <cac:TenderingTerms>
+                  <cbc:VariantConstraintCode listName="permission">not-allowed</cbc:VariantConstraintCode>
+                  <cbc:FundingProgramCode listName="eu-funded">no-eu-funds</cbc:FundingProgramCode>
+                  <cac:CallForTendersDocumentReference>
+                     <cbc:ID>DOC-1</cbc:ID>
+                     <cbc:DocumentType>non-restricted-document</cbc:DocumentType>
+                     <cac:Attachment>
+                        <cac:ExternalReference>
+                           <cbc:URI>https://hautsdeseine-habitat.e-marchespublics.com/pack/annonce_marche_public_6038_1142860.html</cbc:URI>
+                        </cac:ExternalReference>
+                     </cac:Attachment>
+                  </cac:CallForTendersDocumentReference>
+                  <cac:TendererQualificationRequest>
+                     <cac:SpecificTendererRequirement>
+                        <cbc:TendererRequirementTypeCode listName="reserved-procurement">none</cbc:TendererRequirementTypeCode>
+                     </cac:SpecificTendererRequirement>
+                  </cac:TendererQualificationRequest>
+                  <cac:TendererQualificationRequest>
+                     <cac:SpecificTendererRequirement>
+                        <cbc:TendererRequirementTypeCode listName="selection-criteria-source">epo-procurement-document</cbc:TendererRequirementTypeCode>
+                     </cac:SpecificTendererRequirement>
+                  </cac:TendererQualificationRequest>
+                  <cac:ContractExecutionRequirement>
+                     <cbc:ExecutionRequirementCode listName="conditions">performance</cbc:ExecutionRequirementCode>
+                  </cac:ContractExecutionRequirement>
+                  <cac:ContractExecutionRequirement>
+                     <cbc:ExecutionRequirementCode listName="ecatalog-submission">not-allowed</cbc:ExecutionRequirementCode>
+                  </cac:ContractExecutionRequirement>
+                  <cac:ContractExecutionRequirement>
+                     <cbc:ExecutionRequirementCode listName="reserved-execution">no</cbc:ExecutionRequirementCode>
+                  </cac:ContractExecutionRequirement>
+                  <cac:ContractExecutionRequirement>
+                     <cbc:ExecutionRequirementCode listName="einvoicing">required</cbc:ExecutionRequirementCode>
+                  </cac:ContractExecutionRequirement>
+                  <cac:AdditionalInformationParty>
+                     <cac:PartyIdentification>
+                        <cbc:ID>ORG-0001</cbc:ID>
+                     </cac:PartyIdentification>
+                  </cac:AdditionalInformationParty>
+                  <cac:TenderRecipientParty>
+                     <cbc:EndpointID>https://hautsdeseine-habitat.e-marchespublics.com/</cbc:EndpointID>
+                  </cac:TenderRecipientParty>
+                  <cac:TenderValidityPeriod>
+                     <cbc:DurationMeasure unitCode="DAY">180</cbc:DurationMeasure>
+                  </cac:TenderValidityPeriod>
+                  <cac:AppealTerms>
+                     <cac:PresentationPeriod>
+                        <cbc:Description languageID="FRA">Les voies de recours ouvertes aux candidats sont les suivantes : &#xD;
+- Référé précontractuel prévu aux articles L.551-1 à L.551-12 du Code de justice administrative &#xD;
+(CJA), et pouvant être exercé avant la signature du contrat ; &#xD;
+- Référé contractuel prévu aux articles L.551-13 à L.551-23 du CJA, et pouvant être exercé dans &#xD;
+les délais prévus à l'article R. 551-7 du CJA ; &#xD;
+- Recours pour excès de pouvoir contre une décision administrative prévu aux articles R. 421-1 &#xD;
+à R. 421-7 du CJA, et pouvant être exercé dans les 2 mois suivant la notification ou publication &#xD;
+de la décision de l'organisme (le recours ne peut plus, toutefois, être exercé après la signature &#xD;
+du contrat) ; &#xD;
+- Recours de pleine juridiction ouvert aux tiers justifiant d'un intérêt lésé, et pouvant être &#xD;
+exercé dans les deux mois suivant la date à laquelle la conclusion du contrat est rendue &#xD;
+publique</cbc:Description>
+                     </cac:PresentationPeriod>
+                     <cac:AppealInformationParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID>ORG-0002</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:AppealInformationParty>
+                     <cac:AppealReceiverParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID>ORG-0002</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:AppealReceiverParty>
+                     <cac:MediationParty>
+                        <cac:PartyIdentification>
+                           <cbc:ID>ORG-0001</cbc:ID>
+                        </cac:PartyIdentification>
+                     </cac:MediationParty>
+                  </cac:AppealTerms>
+                  <cac:Language>
+                     <cbc:ID>FRA</cbc:ID>
+                  </cac:Language>
+                  <cac:PostAwardProcess>
+                     <cbc:ElectronicOrderUsageIndicator>false</cbc:ElectronicOrderUsageIndicator>
+                     <cbc:ElectronicPaymentUsageIndicator>true</cbc:ElectronicPaymentUsageIndicator>
+                  </cac:PostAwardProcess>
+               </cac:TenderingTerms>
+               <cac:TenderingProcess>
+                  <cbc:SubmissionMethodCode listName="esubmission">required</cbc:SubmissionMethodCode>
+                  <cbc:GovernmentAgreementConstraintIndicator>true</cbc:GovernmentAgreementConstraintIndicator>
+                  <cac:TenderSubmissionDeadlinePeriod>
+                     <cbc:EndDate>2026-03-02+01:00</cbc:EndDate>
+                     <cbc:EndTime>12:00:00+01:00</cbc:EndTime>
+                  </cac:TenderSubmissionDeadlinePeriod>
+                  <cac:OpenTenderEvent>
+                     <cbc:OccurrenceDate>2026-03-02+01:00</cbc:OccurrenceDate>
+                     <cbc:OccurrenceTime>12:00:00+01:00</cbc:OccurrenceTime>
+                     <cac:OccurenceLocation>
+                        <cbc:Description languageID="FRA">Siège d'Hauts-de-Seine Habitat</cbc:Description>
+                     </cac:OccurenceLocation>
+                  </cac:OpenTenderEvent>
+                  <cac:AuctionTerms>
+                     <cbc:AuctionConstraintIndicator>false</cbc:AuctionConstraintIndicator>
+                  </cac:AuctionTerms>
+                  <cac:FrameworkAgreement>
+                     <cbc:MaximumOperatorQuantity>1</cbc:MaximumOperatorQuantity>
+                  </cac:FrameworkAgreement>
+                  <cac:ContractingSystem>
+                     <cbc:ContractingSystemTypeCode listName="framework-agreement">fa-wo-rc</cbc:ContractingSystemTypeCode>
+                  </cac:ContractingSystem>
+                  <cac:ContractingSystem>
+                     <cbc:ContractingSystemTypeCode listName="dps-usage">none</cbc:ContractingSystemTypeCode>
+                  </cac:ContractingSystem>
+               </cac:TenderingProcess>
+               <cac:ProcurementProject>
+                  <cbc:ID>DEX2026-03</cbc:ID>
+                  <cbc:Name languageID="FRA">MARCHE DE SERVICES RELATIF A L'ASSISTANCE &#xD;
+POUR LA MOBILITE VERTICALE DE PERSONNES ET &#xD;
+DE PRESTATIONS COMPLEMENTAIRES LIEES AUX &#xD;
+SITUATIONS D'ISOLEMENT EN ETAGE SUR &#xD;
+L'ENSEMBLE DU PARC IMMOBILIER DE HAUTS-DE-SEINE HABITAT- OPH</cbc:Name>
+                  <cbc:Description languageID="FRA">Le présent marché de services a pour objet la mise en place d'une solution d'assistance à mobilité &#xD;
+verticale et autres prestations complémentaires liées aux situations d'isolement en étage suite à une &#xD;
+problématique d'arrêt d'un ascenseur ou de personnes ne pouvant plus se déplacer dans un immeuble &#xD;
+de l'ensemble du parc immobilier de Hauts-de-Seine Habitat -OPH.</cbc:Description>
+                  <cbc:ProcurementTypeCode listName="contract-nature">services</cbc:ProcurementTypeCode>
+                  <cac:RequestedTenderTotal>
+                     <cbc:EstimatedOverallContractAmount currencyID="EUR">1200000</cbc:EstimatedOverallContractAmount>
+                  </cac:RequestedTenderTotal>
+                  <cac:MainCommodityClassification>
+                     <cbc:ItemClassificationCode listName="cpv">79622000</cbc:ItemClassificationCode>
+                  </cac:MainCommodityClassification>
+                  <cac:AdditionalCommodityClassification>
+                     <cbc:ItemClassificationCode listName="cpv">98513310</cbc:ItemClassificationCode>
+                  </cac:AdditionalCommodityClassification>
+                  <cac:RealizedLocation>
+                     <cac:Address>
+                        <cbc:CountrySubentityCode listName="nuts">FR105</cbc:CountrySubentityCode>
+                        <cac:Country>
+                           <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+                        </cac:Country>
+                     </cac:Address>
+                  </cac:RealizedLocation>
+                  <cac:PlannedPeriod>
+                     <cbc:DurationMeasure unitCode="MONTH">48</cbc:DurationMeasure>
+                  </cac:PlannedPeriod>
+               </cac:ProcurementProject>
+            </cac:ProcurementProjectLot>
+         </ContractNotice>
+      </EFORMS>
+   </DONNEES>
+   <GESTION>
+      <REFERENCE>
+         <IDWEB>26-10255</IDWEB>
+         <TYPE_AVIS>
+            <FAMILLE>
+               <JOUE/>
+            </FAMILLE>
+            <PERIMETRE>
+               <DIRECTIVE-24/>
+            </PERIMETRE>
+            <NATURE>
+               <APPEL_OFFRE>
+                  <STANDARD/>
+               </APPEL_OFFRE>
+            </NATURE>
+            <STATUT>
+               <INITIAL/>
+            </STATUT>
+         </TYPE_AVIS>
+      </REFERENCE>
+      <INDEXATION>
+         <SCHEMA>3.2.5</SCHEMA>
+         <NOMORGANISME>Hauts-de-Seine Habitat - OPH</NOMORGANISME>
+         <TYPE_PROCEDURE>
+            <OUVERT/>
+         </TYPE_PROCEDURE>
+         <DATE_PUBLICATION>2026-01-31</DATE_PUBLICATION>
+         <DATE_LIMITE_REPONSE>2026-03-02T12:00:00+01:00</DATE_LIMITE_REPONSE>
+         <DATE_FIN_DIFFUSION>2026-03-02</DATE_FIN_DIFFUSION>
+         <DESCRIPTEURS>
+            <DESCRIPTEUR>
+               <CODE>274</CODE>
+               <LIBELLE>Prestations de services</LIBELLE>
+            </DESCRIPTEUR>
+         </DESCRIPTEURS>
+         <NATURE_MARCHE>
+            <SERVICES/>
+         </NATURE_MARCHE>
+         <DEP_PUBLICATION>75</DEP_PUBLICATION>
+         <DEP_PUBLICATION>78</DEP_PUBLICATION>
+         <DEP_PUBLICATION>77</DEP_PUBLICATION>
+         <DEP_PUBLICATION>93</DEP_PUBLICATION>
+         <DEP_PUBLICATION>92</DEP_PUBLICATION>
+         <DEP_PUBLICATION>95</DEP_PUBLICATION>
+         <DEP_PUBLICATION>94</DEP_PUBLICATION>
+         <DEP_PUBLICATION>91</DEP_PUBLICATION>
+         <RESUME_OBJET>MARCHE DE SERVICES RELATIF A L'ASSISTANCE POUR LA MOBILITE VERTICALE DE PERSONNES ET DE PRESTATIONS COMPLEMENTAIRES LIEES AUX SITUATIONS D'ISOLEMENT EN ETAGE SUR L'ENSEMBLE DU PARC IMMOBILIER</RESUME_OBJET>
+      </INDEXATION>
+   </GESTION>
+   <HTML><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="FR">
+   <head>
+      <style type="text/css">.fr-h4 { font-weight: 700 !important; margin: 0.5rem 0 0.5rem 0rem!important; font-size: 1.4rem !important; line-height: 2rem !important; } .fr-h5, .fr-h5 + .fr-text--bold { font-weight: 700 !important; margin: 0.5rem 0 0.5rem 0rem !important; font-size: 1.3rem !important; line-height: 2rem !important; } .section { padding: 6px 6px 6px 36px; } .fr-text--bold { font-weight: bold; } .center { text-align: center; }
+                </style>
+      <title>Avis de marché - Avis n° 26-10255 du 29/01/2026</title>
+      <meta name="subject" content="Avis de marché"/>
+      <meta name="author"
+            content="Direction de l’information légale et administrative (DILA)"/>
+      <meta name="description"
+            content="Avis de marché - Avis n° 26-10255 du 29/01/2026 sur le site Boamp.fr"/>
+   </head>
+   <body>
+      <div class="center">
+         <div class="fr-h4" id="doc_titre">Avis de marché</div>
+      </div>
+      <div>Département(s) de publication :<span>
+            <strong>75, 78, 77, 93, 92, 95, 94, 91</strong>
+         </span>
+      </div>
+      <div>
+         <span>Annonce n°</span>
+         <strong>26-10255</strong>
+      </div>
+      <hr/>
+      <div id="section_1_d1e9">
+         <span class="fr-h5">Section 1 -</span>
+         <span class="fr-text--bold">Acheteur</span>
+         <div class="section" id="section_1.1_d1e210">
+            <span>1.1</span>
+            <span class="fr-text--bold">Acheteur</span>
+            <div class="section">
+               <span class="fr-text--bold">Nom officiel</span>
+               <span>:</span>
+               <span>Hauts-de-Seine Habitat - OPH</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Forme juridique de l’acheteur</span>
+               <span>:</span>
+               <span>Organisme de droit public</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Activité du pouvoir adjudicateur</span>
+               <span>:</span>
+               <span>Logement et équipements collectifs</span>
+            </div>
+         </div>
+      </div>
+      <div id="section_2_d1e9">
+         <span class="fr-h5">Section 2 -</span>
+         <span class="fr-text--bold">Procédure</span>
+         <div class="section" id="section_2.1_d1e273">
+            <span>2.1</span>
+            <span class="fr-text--bold">Procédure</span>
+            <div class="section">
+               <span class="fr-text--bold">Titre</span>
+               <span>:</span>
+               <span>MARCHE DE SERVICES RELATIF A L'ASSISTANCE POUR LA MOBILITE VERTICALE DE PERSONNES ET DE PRESTATIONS COMPLEMENTAIRES LIEES AUX SITUATIONS D'ISOLEMENT EN ETAGE SUR L'ENSEMBLE DU PARC IMMOBILIER DE HAUTS-DE-SEINE HABITAT- OPH</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Description</span>
+               <span>:</span>
+               <span>Le présent marché de services a pour objet la mise en place d'une solution d'assistance à mobilité verticale et autres prestations complémentaires liées aux situations d'isolement en étage suite à une problématique d'arrêt d'un ascenseur ou de personnes ne pouvant plus se déplacer dans un immeuble de l'ensemble du parc immobilier de Hauts-de-Seine Habitat -OPH.</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Identifiant de la procédure</span>
+               <span>:</span>
+               <span>3180afbe-c579-4af0-84df-f0285d29b719</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Identifiant interne</span>
+               <span>:</span>
+               <span>DEX2026-03</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Type de procédure</span>
+               <span>:</span>
+               <span>Ouverte</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">La procédure est accélérée</span>
+               <span>:</span>
+               <span class="fr-text--bold">non</span>
+            </div>
+            <div class="section" id="section_2.1.1_d1e273">
+               <span>2.1.1</span>
+               <span class="fr-text--bold">Objet</span>
+               <div class="section">
+                  <span class="fr-text--bold">Nature du marché</span>
+                  <span>:</span>
+                  <span>Services</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Nomenclature principale</span>
+                  <span/>
+                  <span>(</span>
+                  <span>cpv</span>
+                  <span>):</span>
+                  <span>79622000</span>
+                  <span/>
+                  <span>Services de mise à disposition de personnel d'aide à domicile</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Nomenclature supplémentaire</span>
+                  <span/>
+                  <span>(</span>
+                  <span>cpv</span>
+                  <span>):</span>
+                  <span>98513310</span>
+                  <span/>
+                  <span>Services d'aide à domicile</span>
+               </div>
+            </div>
+            <div class="section" id="section_2.1.2_d1e319">
+               <span>2.1.2</span>
+               <span class="fr-text--bold">Lieu d’exécution</span>
+               <div class="section">
+                  <span class="fr-text--bold">Subdivision pays (NUTS)</span>
+                  <span>:</span>
+                  <span>Hauts-de-Seine</span>
+                  <span/>
+                  <span>(</span>
+                  <span>FR105</span>
+                  <span>)</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Pays</span>
+                  <span>:</span>
+                  <span>France</span>
+               </div>
+            </div>
+            <div class="section" id="section_2.1.3_d1e273">
+               <span>2.1.3</span>
+               <span class="fr-text--bold">Valeur</span>
+               <div class="section">
+                  <span class="fr-text--bold">Valeur maximale de l’accord-cadre</span>
+                  <span>:</span>
+                  <span>1,200,000</span>
+                  <span/>
+                  <span class="fr-text--bold">Euro</span>
+               </div>
+            </div>
+            <div class="section" id="section_2.1.4_d1e273">
+               <span>2.1.4</span>
+               <span class="fr-text--bold">Informations générales</span>
+               <div class="section">
+                  <span class="fr-text--bold">Base juridique</span>
+                  <span>:</span>
+               </div>
+               <div class="section">
+                  <span>Directive 2014/24/UE</span>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div id="section_5_d1e9">
+         <span class="fr-h5">Section 5 -</span>
+         <span class="fr-text--bold">Lot</span>
+         <div class="section" id="section_5.1_d1e333">
+            <span>5.1</span>
+            <span class="fr-text--bold">Identifiant technique du lot</span>
+            <span>:</span>
+            <span>LOT-0001</span>
+            <div class="section">
+               <span class="fr-text--bold">Titre</span>
+               <span>:</span>
+               <span>MARCHE DE SERVICES RELATIF A L'ASSISTANCE POUR LA MOBILITE VERTICALE DE PERSONNES ET DE PRESTATIONS COMPLEMENTAIRES LIEES AUX SITUATIONS D'ISOLEMENT EN ETAGE SUR L'ENSEMBLE DU PARC IMMOBILIER DE HAUTS-DE-SEINE HABITAT- OPH</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Description</span>
+               <span>:</span>
+               <span>Le présent marché de services a pour objet la mise en place d'une solution d'assistance à mobilité verticale et autres prestations complémentaires liées aux situations d'isolement en étage suite à une problématique d'arrêt d'un ascenseur ou de personnes ne pouvant plus se déplacer dans un immeuble de l'ensemble du parc immobilier de Hauts-de-Seine Habitat -OPH.</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Identifiant interne</span>
+               <span>:</span>
+               <span>DEX2026-03</span>
+            </div>
+            <div class="section" id="section_5.1.1_d1e521">
+               <span>5.1.1</span>
+               <span class="fr-text--bold">Objet</span>
+               <div class="section">
+                  <span class="fr-text--bold">Nature du marché</span>
+                  <span>:</span>
+                  <span>Services</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Nomenclature principale</span>
+                  <span/>
+                  <span>(</span>
+                  <span>cpv</span>
+                  <span>):</span>
+                  <span>79622000</span>
+                  <span/>
+                  <span>Services de mise à disposition de personnel d'aide à domicile</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Nomenclature supplémentaire</span>
+                  <span/>
+                  <span>(</span>
+                  <span>cpv</span>
+                  <span>):</span>
+                  <span>98513310</span>
+                  <span/>
+                  <span>Services d'aide à domicile</span>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.2_d1e553">
+               <span>5.1.2</span>
+               <span class="fr-text--bold">Lieu d’exécution</span>
+               <div class="section">
+                  <span class="fr-text--bold">Subdivision pays (NUTS)</span>
+                  <span>:</span>
+                  <span>Hauts-de-Seine</span>
+                  <span/>
+                  <span>(</span>
+                  <span>FR105</span>
+                  <span>)</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Pays</span>
+                  <span>:</span>
+                  <span>France</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Informations complémentaires</span>
+                  <span>:</span>
+                  <span/>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.3_d1e568">
+               <span>5.1.3</span>
+               <span class="fr-text--bold">Durée estimée</span>
+               <div class="section">
+                  <span class="fr-text--bold">Durée</span>
+                  <span>:</span>
+                  <span>48</span>
+                  <span/>
+                  <span class="fr-text--bold">Mois</span>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.5_d1e534">
+               <span>5.1.5</span>
+               <span class="fr-text--bold">Valeur</span>
+               <div class="section">
+                  <span class="fr-text--bold">Valeur estimée hors TVA</span>
+                  <span>:</span>
+                  <span>1,200,000</span>
+                  <span/>
+                  <span class="fr-text--bold">Euro</span>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.6_d1e333">
+               <span>5.1.6</span>
+               <span class="fr-text--bold">Informations générales</span>
+               <div class="section">
+                  <span class="fr-text--bold">Participation réservée</span>
+                  <span>:</span>
+                  <span>La participation n’est pas réservée.</span>
+               </div>
+               <div class="section">
+                  <span>Projet de passation de marché non financé par des fonds de l’UE</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Le marché relève de l’accord sur les marchés publics (AMP)</span>
+                  <span>:</span>
+                  <span class="fr-text--bold">oui</span>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.11_d1e335">
+               <span>5.1.11</span>
+               <span class="fr-text--bold">Documents de marché</span>
+               <div class="section">
+                  <span class="fr-text--bold">Adresse des documents de marché</span>
+                  <span>:</span>
+                  <span>https://hautsdeseine-habitat.e-marchespublics.com/pack/annonce_marche_public_6038_1142860.html</span>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.12_d1e333">
+               <span>5.1.12</span>
+               <span class="fr-text--bold">Conditions du marché public</span>
+               <div class="section">
+                  <span class="fr-text--bold">Conditions de présentation</span>
+                  <span>:</span>
+                  <div class="section">
+                     <span class="fr-text--bold">Présentation par voie électronique</span>
+                     <span>:</span>
+                     <span>Requise</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Adresse de présentation</span>
+                     <span>:</span>
+                     <span>https://hautsdeseine-habitat.e-marchespublics.com/</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Langues dans lesquelles les offres ou demandes de participation peuvent être présentées</span>
+                     <span>:</span>
+                     <span>français</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Catalogue électronique</span>
+                     <span>:</span>
+                     <span>Non autorisée</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Variantes</span>
+                     <span>:</span>
+                     <span>Non autorisée</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Date limite de réception des offres</span>
+                     <span>:</span>
+                     <span>02/03/2026</span>
+                     <span/>
+                     <span>à 12:00</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Date limite de validité de l’offre</span>
+                     <span>:</span>
+                     <span>180</span>
+                     <span/>
+                     <span class="fr-text--bold">Jour</span>
+                  </div>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Informations relatives à l’ouverture publique</span>
+                  <span>:</span>
+                  <div class="section">
+                     <span class="fr-text--bold">Date d'ouverture</span>
+                     <span>:</span>
+                     <span>02/03/2026</span>
+                     <span/>
+                     <span>à 12:00</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Lieu</span>
+                     <span>:</span>
+                     <span>Siège d'Hauts-de-Seine Habitat</span>
+                  </div>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Conditions du marché</span>
+                  <span>:</span>
+                  <div class="section">
+                     <span class="fr-text--bold">Le marché doit être exécuté dans le cadre de programmes d’emplois protégés</span>
+                     <span>:</span>
+                     <span>Non</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Facturation en ligne</span>
+                     <span>:</span>
+                     <span>Requise</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">La commande en ligne sera utilisée</span>
+                     <span>:</span>
+                     <span class="fr-text--bold">non</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Le paiement en ligne sera utilisé</span>
+                     <span>:</span>
+                     <span class="fr-text--bold">oui</span>
+                  </div>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.15_d1e470">
+               <span>5.1.15</span>
+               <span class="fr-text--bold">Techniques</span>
+               <div class="section">
+                  <span class="fr-text--bold">Accord-cadre</span>
+                  <span>:</span>
+                  <div class="section">
+                     <span>Accord-cadre, sans remise en concurrence</span>
+                  </div>
+                  <div class="section">
+                     <span class="fr-text--bold">Nombre maximal de participants</span>
+                     <span>:</span>
+                     <span>1</span>
+                  </div>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Informations sur le système d’acquisition dynamique</span>
+                  <span>:</span>
+                  <div class="section">
+                     <span>Pas de système d’acquisition dynamique</span>
+                  </div>
+               </div>
+            </div>
+            <div class="section" id="section_5.1.16_d1e335">
+               <span>5.1.16</span>
+               <span class="fr-text--bold">Informations complémentaires, médiation et réexamen</span>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation chargée des procédures de médiation</span>
+                  <span>:</span>
+                  <span>Hauts-de-Seine Habitat - OPH</span>
+                  <span/>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation chargée des procédures de recours</span>
+                  <span>:</span>
+                  <span>Tribunal Administratif de Cergy Pontoise</span>
+                  <span/>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Informations relatives aux délais de recours</span>
+                  <span>:</span>
+                  <span>Les voies de recours ouvertes aux candidats sont les suivantes : - Référé précontractuel prévu aux articles L.551-1 à L.551-12 du Code de justice administrative (CJA), et pouvant être exercé avant la signature du contrat ; - Référé contractuel prévu aux articles L.551-13 à L.551-23 du CJA, et pouvant être exercé dans les délais prévus à l'article R. 551-7 du CJA ; - Recours pour excès de pouvoir contre une décision administrative prévu aux articles R. 421-1 à R. 421-7 du CJA, et pouvant être exercé dans les 2 mois suivant la notification ou publication de la décision de l'organisme (le recours ne peut plus, toutefois, être exercé après la signature du contrat) ; - Recours de pleine juridiction ouvert aux tiers justifiant d'un intérêt lésé, et pouvant être exercé dans les deux mois suivant la date à laquelle la conclusion du contrat est rendue publique</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation qui fournit des informations complémentaires sur la procédure de passation de marché</span>
+                  <span>:</span>
+                  <span>Hauts-de-Seine Habitat - OPH</span>
+                  <span/>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation qui fournit des précisions concernant l’introduction des recours</span>
+                  <span>:</span>
+                  <span>Tribunal Administratif de Cergy Pontoise</span>
+                  <span/>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div id="section_8_d1e9">
+         <span class="fr-h5">Section 8 -</span>
+         <span class="fr-text--bold">Organisations</span>
+         <div class="section" id="section_8.1_d1e27">
+            <span>8.1</span>
+            <span>ORG-0001</span>
+            <div class="section">
+               <span class="fr-text--bold">Nom officiel</span>
+               <span>:</span>
+               <span>Hauts-de-Seine Habitat - OPH</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Numéro d’enregistrement</span>
+               <span>:</span>
+               <span>27920022400012</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse postale</span>
+               <span>:</span>
+               <span>45 rue Paul Vaillant Couturier</span>
+               <span/>
+               <span/>
+               <span/>
+               <span/>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Ville</span>
+               <span>:</span>
+               <span>Levallois-Perret</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Code postal</span>
+               <span>:</span>
+               <span>92500</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Subdivision pays (NUTS)</span>
+               <span>:</span>
+               <span>Hauts-de-Seine</span>
+               <span/>
+               <span>(</span>
+               <span>FR105</span>
+               <span>)</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Pays</span>
+               <span>:</span>
+               <span>France</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse électronique</span>
+               <span>:</span>
+               <span>marches@hdshabitat.fr</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Téléphone</span>
+               <span>:</span>
+               <span>+33 171152678</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse internet</span>
+               <span>:</span>
+               <span>https://hautsdeseinehabitat.fr/</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Profil de l’acheteur</span>
+               <span>:</span>
+               <span>https://hautsdeseine-habitat.e-marchespublics.com</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Rôles de cette organisation</span>
+               <span>:</span>
+               <div class="section">
+                  <span class="fr-text--bold">Acheteur</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation qui fournit des informations complémentaires sur la procédure de passation de marché</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation chargée des procédures de médiation</span>
+               </div>
+            </div>
+         </div>
+         <div class="section" id="section_8.1_d1e78">
+            <span>8.1</span>
+            <span>ORG-0002</span>
+            <div class="section">
+               <span class="fr-text--bold">Nom officiel</span>
+               <span>:</span>
+               <span>Tribunal Administratif de Cergy Pontoise</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Numéro d’enregistrement</span>
+               <span>:</span>
+               <span>179 507 025 00015</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse postale</span>
+               <span>:</span>
+               <span>2-4 2 BOULEVARD DE L'HAUTIL</span>
+               <span/>
+               <span/>
+               <span/>
+               <span/>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Ville</span>
+               <span>:</span>
+               <span>CERGY</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Code postal</span>
+               <span>:</span>
+               <span>95000</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Subdivision pays (NUTS)</span>
+               <span>:</span>
+               <span>Hauts-de-Seine</span>
+               <span/>
+               <span>(</span>
+               <span>FR105</span>
+               <span>)</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Pays</span>
+               <span>:</span>
+               <span>France</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Point de contact</span>
+               <span>:</span>
+               <span>greffe.ta-cergy-pontoise@juradm.fr</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse électronique</span>
+               <span>:</span>
+               <span>greffe.ta-cergy-pontoise@juradm.fr</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Téléphone</span>
+               <span>:</span>
+               <span>0130173400</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse internet</span>
+               <span>:</span>
+               <span>https://cergy-pontoise.tribunal-administratif.fr/</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Rôles de cette organisation</span>
+               <span>:</span>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation chargée des procédures de recours</span>
+               </div>
+               <div class="section">
+                  <span class="fr-text--bold">Organisation qui fournit des précisions concernant l’introduction des recours</span>
+               </div>
+            </div>
+         </div>
+         <div class="section" id="section_8.1_d1e131">
+            <span>8.1</span>
+            <span>ORG-0000</span>
+            <div class="section">
+               <span class="fr-text--bold">Nom officiel</span>
+               <span>:</span>
+               <span>DEMATIS</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Numéro d’enregistrement</span>
+               <span>:</span>
+               <span>45072478600030</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Ville</span>
+               <span>:</span>
+               <span>Paris</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Code postal</span>
+               <span>:</span>
+               <span>75015</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Subdivision pays (NUTS)</span>
+               <span>:</span>
+               <span>Paris</span>
+               <span/>
+               <span>(</span>
+               <span>FR101</span>
+               <span>)</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Pays</span>
+               <span>:</span>
+               <span>France</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse électronique</span>
+               <span>:</span>
+               <span>contact@dematis.com</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Téléphone</span>
+               <span>:</span>
+               <span>+33 172365548</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Adresse internet</span>
+               <span>:</span>
+               <span>www.dematis.com</span>
+            </div>
+            <div class="section">
+               <span class="fr-text--bold">Rôles de cette organisation</span>
+               <span>:</span>
+               <div class="section">
+                  <span class="fr-text--bold">TED eSender</span>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="section">
+         <span class="fr-text--bold">Informations relatives à l’avis</span>
+         <div class="section">
+            <span class="fr-text--bold">Identifiant/version de l’avis</span>
+            <span>:</span>
+            <span>c8a1bde7-708e-47da-b46a-b7051be5aeec</span>
+            <span/>
+            <span>-</span>
+            <span>01</span>
+         </div>
+         <div class="section">
+            <span class="fr-text--bold">Type de formulaire</span>
+            <span>:</span>
+            <span>Mise en concurrence</span>
+         </div>
+         <div class="section">
+            <span class="fr-text--bold">Type d’avis</span>
+            <span>:</span>
+            <span>Avis de marché ou de concession – régime ordinaire</span>
+         </div>
+         <div class="section">
+            <span class="fr-text--bold">Date d’envoi de l’avis</span>
+            <span>:</span>
+            <span>29/01/2026</span>
+            <span/>
+            <span>à 15:20</span>
+         </div>
+         <div class="section">
+            <span class="fr-text--bold">Langues dans lesquelles l’avis en question est officiellement disponible</span>
+            <span>:</span>
+            <span>français</span>
+            <span/>
+            <span/>
+         </div>
+      </div>
+      <hr/>
+      <div>
+         <span class="fr-text--bold">Date d'envoi du présent avis à la publication : </span>29/01/2026</div>
+   </body>
+</html>
+]]></HTML>
+   <HTMLSYNTHESE><![CDATA[<!DOCTYPE HTML>
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   </head>
+   <body>
+      <h3>L’essentiel du marché</h3>
+      <ul>
+         <li><span>Acheteur(s) : </span><ul>
+               <li><span class="fr-text--bold">Hauts-de-Seine Habitat - OPH : </span><ul>
+                     <li><span class="fr-text--bold">Adresse : </span>45 rue Paul Vaillant Couturier Levallois-Perret 92500 FR105 FRA</li>
+                     <li><span class="fr-text--bold">Point(s) de contact : </span></li>
+                     <li><span class="fr-text--bold">Téléphone : </span>+33 171152678</li>
+                     <li><span class="fr-text--bold">Courriel : </span>marches@hdshabitat.fr</li>
+                     <li><span class="fr-text--bold">Adresse internet : </span><a href="https://hautsdeseinehabitat.fr/" target="_blank" title="Aller sur la page https://hautsdeseinehabitat.fr/ - nouvelle fenêtre"><span>https://hautsdeseinehabitat.fr/</span></a></li>
+                     <li><span class="fr-text--bold">Adresse internet du profil d'acheteur : </span><a href="https://hautsdeseine-habitat.e-marchespublics.com" target="_blank" title="Aller sur la page https://hautsdeseine-habitat.e-marchespublics.com - nouvelle fenêtre"><span>https://hautsdeseine-habitat.e-marchespublics.com</span></a></li>
+                  </ul>
+               </li>
+            </ul>
+         </li>
+         <li><span class="fr-text--bold">Titre du marché : </span>MARCHE DE SERVICES RELATIF A L'ASSISTANCE POUR LA MOBILITE VERTICALE DE PERSONNES
+            ET DE PRESTATIONS COMPLEMENTAIRES LIEES AUX SITUATIONS D'ISOLEMENT EN ETAGE SUR L'ENSEMBLE
+            DU PARC IMMOBILIER DE HAUTS-DE-SEINE HABITAT- OPH</li>
+         <li><span class="fr-text--bold">Objet du marché : </span>Le présent marché de services a pour objet la mise en place d'une solution d'assistance
+            à mobilité verticale et autres prestations complémentaires liées aux situations d'isolement
+            en étage suite à une problématique d'arrêt d'un ascenseur ou de personnes ne pouvant
+            plus se déplacer dans un immeuble de l'ensemble du parc immobilier de Hauts-de-Seine
+            Habitat -OPH.</li>
+         <li><span class="fr-text--bold">Renseignements relatifs aux lots :</span><ul>
+               <li><span class="fr-text--bold">Lot 1 : </span>MARCHE DE SERVICES RELATIF A L'ASSISTANCE POUR LA MOBILITE VERTICALE DE PERSONNES
+                  ET DE PRESTATIONS COMPLEMENTAIRES LIEES AUX SITUATIONS D'ISOLEMENT EN ETAGE SUR L'ENSEMBLE
+                  DU PARC IMMOBILIER DE HAUTS-DE-SEINE HABITAT- OPH</li>
+            </ul>
+         </li>
+      </ul>
+   </body>
+</html>]]></HTMLSYNTHESE>
+</jo:ann>
