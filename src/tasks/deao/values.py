@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, time
+from datetime import datetime
 from functools import cache
 from math import ceil, isfinite
 from zoneinfo import ZoneInfo
@@ -62,15 +62,6 @@ def duree_mois(valeur: str | float | None, unite: str) -> int | None:
 
 
 _DATE_OFFSET = re.compile(r"(\d{4}-\d{2}-\d{2})(Z|[+-]\d{2}:\d{2})?")
-
-
-def _parse_time(heure: str) -> time | None:
-    try:
-        return datetime.fromisoformat(
-            f"2000-01-01T{heure.replace('Z', '+00:00')}"
-        ).time()
-    except ValueError:
-        return None
 
 
 def parse_datetime_paris(

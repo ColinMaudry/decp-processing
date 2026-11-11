@@ -2,9 +2,10 @@
 
 Date : 2026-11-11
 Issue : #178
-Statut : design validé (brainstorming), à transformer en plan d'implémentation.
+Statut : implémenté (plan `docs/superpowers/plans/2026-11-11-deao-processing.md`).
 Base : branche `feature/boamp_eforms` (flow `boamp_processing`, spec
-`2026-06-05-boamp-eforms-flattening-design.md`), mergée dans `feature/178_boamp`.
+`2026-06-05-boamp-eforms-flattening-design.md`), mergée dans `feature/178_boamp` ; le flow
+`boamp_processing` est remplacé par `deao_processing`.
 
 ## Objectif
 

@@ -46,14 +46,6 @@ def first_child_localname(elem) -> str | None:
     return None
 
 
-def gestion_text(root, name: str) -> str | None:
-    """Texte du premier élément `name` sous GESTION."""
-    gestion = find(root, "GESTION")
-    if gestion is None:
-        return None
-    return text(find(gestion, name))
-
-
 def indexation_choice(root, name: str) -> str | None:
     """Nom local du premier enfant de GESTION/INDEXATION/<name>."""
     gestion = find(root, "GESTION")

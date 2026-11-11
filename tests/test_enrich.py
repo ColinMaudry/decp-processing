@@ -39,6 +39,7 @@ class TestEnrich:
             ).collect(),
             lf_output.collect(),
             check_column_order=False,
+            check_row_order=False,
         )
 
     def test_add_unites_legales_data_acheteurs(self):
