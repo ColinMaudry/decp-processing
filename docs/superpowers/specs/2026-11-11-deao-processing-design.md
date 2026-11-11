@@ -1,4 +1,4 @@
-# Flow `tender_processing` — appels d'offres BOAMP vers un dataset tabulaire
+# Flow `deao_processing` — Données essentielles d'appels d'offres (DEAO), BOAMP
 
 Date : 2026-11-11
 Issue : #178
@@ -23,20 +23,21 @@ Perspectives prises en compte dans le design (hors périmètre de cette issue) :
 
 ## Décisions structurantes
 
-| Sujet               | Décision                                                                                                                        |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Base de code        | On repart de `feature/boamp_eforms` (acquisition, filtrage, parsing eForms/legacy)                                              |
-| Source v1           | Flux DILA seul (`echanges.dila.gouv.fr/OPENDATA/BOAMP`). TED en v2                                                              |
-| Sortie publiée      | **Uniquement le schéma cible**. L'aplatissement générique devient un outil interne (exploration, CSV de définitions)            |
-| Grain               | **Une ligne par appel d'offres × lot** (consolidation des avis initiaux, rectificatifs, annulations)                            |
-| Pré-information     | Incluse, `statut = pre-information` ; en attendant un dataset dédié à la programmation des achats                               |
-| Identifiant         | `uid = <sourceDataset>_<IDWEB de l'avis initial>_<lotId>`, ex. `boamp_26-10255_1`                                               |
-| Nommage             | Noms DECP quand le concept est le même, camelCase sinon                                                                         |
-| Archive brute       | Tous les XML DILA (attributions comprises) archivés par jour sur S3                                                             |
-| Données normalisées | Partitions parquet par jour sur le volume persistant `/data`, reconstructibles depuis S3                                        |
-| Enrichissement      | SIRENE (fonctions DECP), repli géocodage Géoplateforme de l'adresse de l'avis, reconstitution du SIRET par dictionnaire interne |
-| Exécution           | Serveur éphémère Scaleway (#189), instance `STANDARD3-X4C-16G`                                                                  |
-| Publication         | `tenders.parquet` + `tenders.csv.gz` + `schema.json`                                                                            |
+| Sujet               | Décision                                                                                                                                      |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Base de code        | On repart de `feature/boamp_eforms` (acquisition, filtrage, parsing eForms/legacy)                                                            |
+| Source v1           | Flux DILA seul (`echanges.dila.gouv.fr/OPENDATA/BOAMP`). TED en v2                                                                            |
+| Sortie publiée      | **Uniquement le schéma cible**. L'aplatissement générique devient un outil interne (exploration, CSV de définitions)                          |
+| Grain               | **Une ligne par appel d'offres × lot** (consolidation des avis initiaux, rectificatifs, annulations)                                          |
+| Pré-information     | Incluse, `statut = pre-information` ; en attendant un dataset dédié à la programmation des achats                                             |
+| Identifiant         | `uid = <sourceDataset>_<IDWEB de l'avis initial>_<lotId>`, ex. `boamp_26-10255_1`                                                             |
+| Nommage             | Noms DECP quand le concept est le même, camelCase sinon                                                                                       |
+| Nom du produit      | **DEAO** (Données essentielles d'appels d'offres), dans la continuité de DECP : flow `deao_processing`, variables `DEAO_*`, fichiers `deao.*` |
+| Archive brute       | Tous les XML DILA (attributions comprises) archivés par jour sur S3                                                                           |
+| Données normalisées | Partitions parquet par jour sur le volume persistant `/data`, reconstructibles depuis S3                                                      |
+| Enrichissement      | SIRENE (fonctions DECP), repli géocodage Géoplateforme de l'adresse de l'avis, reconstitution du SIRET par dictionnaire interne               |
+| Exécution           | Serveur éphémère Scaleway (#189), instance `STANDARD3-X4C-16G`                                                                                |
+| Publication         | `deao.parquet` + `deao.csv.gz` + `schema.json`                                                                                                |
 
 ## Constats sur les données (échantillon du 2026-11-11)
 
@@ -70,8 +71,8 @@ Perspectives prises en compte dans le design (hors périmètre de cette issue) :
 ### Code
 
 ```
-src/flows/tender_processing.py          # remplace src/flows/boamp_processing.py
-src/tasks/tenders/
+src/flows/deao_processing.py          # remplace src/flows/boamp_processing.py
+src/tasks/deao/
   sources/boamp/
     fetch.py       # repris de src/tasks/boamp/fetch.py (index jour, téléchargement)
     archive.py     # jour <-> .tar.zst sur S3 ; listing des jours archivés
@@ -100,7 +101,7 @@ détection/filtrage de `flatten.py` (`detect_format`, `parse_type_avis`, `is_inc
 3. **Concaténation** de toutes les partitions (toutes sources) en LazyFrame.
 4. **Consolidation** → une ligne par appel d'offres × lot.
 5. **Enrichissement** acheteur.
-6. **Écriture** `dist/tenders/` : `tenders.parquet`, `tenders.csv.gz` (sans les colonnes
+6. **Écriture** `dist/deao/` : `deao.parquet`, `deao.csv.gz` (sans les colonnes
    liste), `schema.json`.
 7. **Publication** data.gouv.fr derrière les garde-fous.
 8. **Artefact Prefect** de suivi (voir « Suivi d'exécution »).
@@ -125,10 +126,10 @@ détection/filtrage de `flatten.py` (`detect_format`, `parse_type_avis`, `is_inc
 
 ### Partitions normalisées
 
-- Chemin : `TENDERS_DATA_DIR/avis/<source>/<AAAA>/<MM>/<JJ>.parquet` (volume `/data`).
+- Chemin : `DEAO_DATA_DIR/avis/<source>/<AAAA>/<MM>/<JJ>.parquet` (volume `/data`).
 - Contenu : les lignes **avis-lot** au contrat commun (ci-dessous), uniquement pour les
   avis retenus par le filtre.
-- `TENDERS_REBUILD=true` : suppression de toutes les partitions et reconstruction depuis
+- `DEAO_REBUILD=true` : suppression de toutes les partitions et reconstruction depuis
   S3, sans requête DILA (à utiliser après tout changement de mapping).
 
 ## Filtrage des avis
@@ -248,16 +249,16 @@ retenu comme racine** pour que l'`uid` soit stable.
 
 ### 3. Cycle de vie
 
-| Colonne                    | Règle                                                                                                                                                                                                                                                                                                                                                                                                     |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `avisLies`                 | tous les IDWEB de la chaîne, triés                                                                                                                                                                                                                                                                                                                                                                        |
-| `idDernierAvis`            | IDWEB du dernier avis de la chaîne                                                                                                                                                                                                                                                                                                                                                                        |
-| `datePublicationInitiale`  | date de l'avis initial, à défaut du plus ancien avis disponible                                                                                                                                                                                                                                                                                                                                           |
-| `dateDerniereModification` | date du dernier rectificatif ou de l'annulation ; nulle s'il n'y a que l'avis initial                                                                                                                                                                                                                                                                                                                     |
-| `rectifie`                 | vrai si la chaîne contient au moins un `rectificatif`                                                                                                                                                                                                                                                                                                                                                     |
-| `infosRectificatifs`       | liste des textes `infosRectificatif` de la chaîne                                                                                                                                                                                                                                                                                                                                                         |
-| `preInformation` (interne) | celui de l'avis initial de la chaîne (à défaut `false`), non publié                                                                                                                                                                                                                                                                                                                                       |
-| `statut`                   | `annule` si la chaîne contient une `annulation` ; sinon **`pre-information`** si `preInformation` (seule date connue : la publication) ; sinon, si `dateLimiteReponse` renseignée : `clos` si elle est antérieure à la date du run, `ouvert` sinon ; si `dateLimiteReponse` nulle : `ouvert` si `datePublicationInitiale` date de moins de `TENDERS_STATUT_DELAI_JOURS` (défaut 90) jours, `clos` au-delà |
+| Colonne                    | Règle                                                                                                                                                                                                                                                                                                                                                                                                  |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `avisLies`                 | tous les IDWEB de la chaîne, triés                                                                                                                                                                                                                                                                                                                                                                     |
+| `idDernierAvis`            | IDWEB du dernier avis de la chaîne                                                                                                                                                                                                                                                                                                                                                                     |
+| `datePublicationInitiale`  | date de l'avis initial, à défaut du plus ancien avis disponible                                                                                                                                                                                                                                                                                                                                        |
+| `dateDerniereModification` | date du dernier rectificatif ou de l'annulation ; nulle s'il n'y a que l'avis initial                                                                                                                                                                                                                                                                                                                  |
+| `rectifie`                 | vrai si la chaîne contient au moins un `rectificatif`                                                                                                                                                                                                                                                                                                                                                  |
+| `infosRectificatifs`       | liste des textes `infosRectificatif` de la chaîne                                                                                                                                                                                                                                                                                                                                                      |
+| `preInformation` (interne) | celui de l'avis initial de la chaîne (à défaut `false`), non publié                                                                                                                                                                                                                                                                                                                                    |
+| `statut`                   | `annule` si la chaîne contient une `annulation` ; sinon **`pre-information`** si `preInformation` (seule date connue : la publication) ; sinon, si `dateLimiteReponse` renseignée : `clos` si elle est antérieure à la date du run, `ouvert` sinon ; si `dateLimiteReponse` nulle : `ouvert` si `datePublicationInitiale` date de moins de `DEAO_STATUT_DELAI_JOURS` (défaut 90) jours, `clos` au-delà |
 
 Limite documentée : un rectificatif legacy qui repousse la date limite ne la met pas à jour
 (texte libre) ; l'appel d'offres peut passer `clos` à tort. `rectifie` et
@@ -366,14 +367,14 @@ généré et publié avec les données.
 
 ## Publication et déploiement
 
-- Dataset data.gouv.fr existant (actuel `BOAMP_DATASET_ID`), réutilisé. Ressources : `tenders.parquet`, `tenders.csv.gz`,
-  `schema.json`. Variables `TENDERS_DATASET_ID`, `TENDERS_PARQUET_RESOURCE_ID`,
-  `TENDERS_CSV_RESOURCE_ID`, `TENDERS_SCHEMA_RESOURCE_ID`, qui remplacent les
+- Dataset data.gouv.fr existant (actuel `BOAMP_DATASET_ID`), réutilisé. Ressources : `deao.parquet`, `deao.csv.gz`,
+  `schema.json`. Variables `DEAO_DATASET_ID`, `DEAO_PARQUET_RESOURCE_ID`,
+  `DEAO_CSV_RESOURCE_ID`, `DEAO_SCHEMA_RESOURCE_ID`, qui remplacent les
   `BOAMP_*_ID` actuels (mêmes valeurs ; ressource `schema.json` à créer).
-- Garde-fous : `DECP_PROCESSING_PUBLISH` **et** au moins `TENDERS_MIN_ROWS_TO_PUBLISH`
+- Garde-fous : `DECP_PROCESSING_PUBLISH` **et** au moins `DEAO_MIN_ROWS_TO_PUBLISH`
   (défaut 50 000) lignes.
 - Déploiement : `deployments.py` remplace `boamp_processing` par un lanceur
-  `tender-processing` (`run_on_scaleway`, pool `local`) + `tender-processing-exec-prod` /
+  `deao-processing` (`run_on_scaleway`, pool `local`) + `deao-processing-exec-prod` /
   `-dev` sur `scaleway-prod` / `scaleway-dev`.
   - `instance_type="STANDARD3-X4C-16G"` (disponible en `nl-ams-2`, zone
     du volume `decp-data-<env>`, vérifié).
@@ -387,19 +388,19 @@ généré et publié avec les données.
 
 ## Configuration
 
-| Variable                                      | Défaut                                         | Rôle                                                               |
-| --------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------ |
-| `BOAMP_BASE_URL`                              | `https://echanges.dila.gouv.fr/OPENDATA/BOAMP` | inchangée                                                          |
-| `BOAMP_START_DATE`                            | `2024-01-01`                                   | inchangée                                                          |
-| `BOAMP_RECRAWL_DAYS`                          | `3`                                            | fenêtre de re-crawl différentiel (était 7, 14 dans `template.env`) |
-| `BOAMP_ARCHIVE_CUTOFF_YEAR`                   | —                                              | **supprimée** (repli 404)                                          |
-| `BOAMP_INCLUDED_NATURES`                      | voir Filtrage                                  | `+ANNULATION`, `−MODIFICATION`                                     |
-| `TENDERS_DATA_DIR`                            | `DATA_DIR / "tenders"`                         | partitions normalisées                                             |
-| `TENDERS_S3_PREFIX`                           | `boamp/raw` (par source)                       | archive brute                                                      |
-| `TENDERS_REBUILD`                             | `false`                                        | reconstruction des partitions depuis S3                            |
-| `TENDERS_STATUT_DELAI_JOURS`                  | `90`                                           | statut sans date limite                                            |
-| `TENDERS_MIN_ROWS_TO_PUBLISH`                 | `50000`                                        | garde-fou de publication                                           |
-| `TENDERS_*_RESOURCE_ID`, `TENDERS_DATASET_ID` | `""`                                           | publication                                                        |
+| Variable                                | Défaut                                         | Rôle                                                               |
+| --------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------ |
+| `BOAMP_BASE_URL`                        | `https://echanges.dila.gouv.fr/OPENDATA/BOAMP` | inchangée                                                          |
+| `BOAMP_START_DATE`                      | `2024-01-01`                                   | inchangée                                                          |
+| `BOAMP_RECRAWL_DAYS`                    | `3`                                            | fenêtre de re-crawl différentiel (était 7, 14 dans `template.env`) |
+| `BOAMP_ARCHIVE_CUTOFF_YEAR`             | —                                              | **supprimée** (repli 404)                                          |
+| `BOAMP_INCLUDED_NATURES`                | voir Filtrage                                  | `+ANNULATION`, `−MODIFICATION`                                     |
+| `DEAO_DATA_DIR`                         | `DATA_DIR / "deao"`                            | partitions normalisées                                             |
+| `DEAO_S3_PREFIX`                        | `boamp/raw` (par source)                       | archive brute                                                      |
+| `DEAO_REBUILD`                          | `false`                                        | reconstruction des partitions depuis S3                            |
+| `DEAO_STATUT_DELAI_JOURS`               | `90`                                           | statut sans date limite                                            |
+| `DEAO_MIN_ROWS_TO_PUBLISH`              | `50000`                                        | garde-fou de publication                                           |
+| `DEAO_*_RESOURCE_ID`, `DEAO_DATASET_ID` | `""`                                           | publication                                                        |
 
 ## Suivi d'exécution
 
@@ -426,7 +427,7 @@ généré et publié avec les données.
 ## Tests
 
 Fixtures : **avis réels** (échantillon DILA), chaînes complétées si besoin, dans
-`tests/data/tenders/` :
+`tests/data/deao/` :
 
 - chaîne eForms initial → rectificatif (26-87868 → 26-99074) ;
 - chaîne legacy FNSimple initial → rectificatif (26-92574 → 26-99891) ;
