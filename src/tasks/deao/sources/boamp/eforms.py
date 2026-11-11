@@ -26,6 +26,7 @@ from src.tasks.deao.values import (
     duree_mois,
     normalize_lot_id,
     parse_datetime_paris,
+    unite_duree_connue,
 )
 from src.tasks.utils import siret_valide
 
@@ -100,12 +101,16 @@ def _cpv(projet) -> str | None:
     )
 
 
-def _duree(projet) -> int | None:
+def _duree(projet, compteur: Counter) -> int | None:
     periode = direct_child(projet, "PlannedPeriod") if projet is not None else None
     mesure = find(periode, "DurationMeasure") if periode is not None else None
     if mesure is None:
         return None
-    return duree_mois(text(mesure), mesure.get("unitCode", ""))
+    unite = mesure.get("unitCode", "")
+    if not unite_duree_connue(unite):
+        compteur[f"non_mappe:unite_duree:{unite}"] += 1
+        return None
+    return duree_mois(text(mesure), unite)
 
 
 def _montant(projet) -> float | None:
@@ -169,6 +174,14 @@ def _id_lot(lot) -> str | None:
     return None
 
 
+def _ids_lots(lots: list) -> list[str]:
+    """IDs normalisés des lots ; le rang pour tous si un ID manque ou se répète."""
+    ids = [_id_lot(lot) for lot in lots]
+    if None in ids or len(set(ids)) != len(ids):
+        return [str(rang) for rang in range(1, len(lots) + 1)]
+    return ids
+
+
 def _infos_rectificatif(root) -> str | None:
     textes = [
         t
@@ -227,7 +240,7 @@ def map_eforms(root, classement: Classement, compteur: Counter) -> list[dict]:
                 "lotIntitule": None,
                 "description": _description(pp),
                 "codeCPV": _cpv(pp),
-                "dureeMois": _duree(pp),
+                "dureeMois": _duree(pp, compteur),
                 "montantEstime": _montant(pp),
                 "dateLimiteReponse": _date_limite(None, root),
                 "techniques": [],
@@ -238,9 +251,9 @@ def map_eforms(root, classement: Classement, compteur: Counter) -> list[dict]:
         ]
 
     rows = []
-    for rang, lot in enumerate(lots, start=1):
+    for lot, lot_id in zip(lots, _ids_lots(lots), strict=True):
         lpp = direct_child(lot, "ProcurementProject")
-        duree = _duree(lpp)
+        duree = _duree(lpp, compteur)
         montant = _montant(lpp)
         lieu = departement_depuis_nuts(_nuts_lieu(lpp)) or departement_depuis_nuts(
             _nuts_lieu(pp)
@@ -248,13 +261,13 @@ def map_eforms(root, classement: Classement, compteur: Counter) -> list[dict]:
         rows.append(
             {
                 **commun,
-                "lotId": _id_lot(lot) or str(rang),
+                "lotId": lot_id,
                 "lotIntitule": text(direct_child(lpp, "Name"))
                 if lpp is not None
                 else None,
                 "description": _description(lpp) or _description(pp),
                 "codeCPV": _cpv(lpp) or _cpv(pp),
-                "dureeMois": duree if duree is not None else _duree(pp),
+                "dureeMois": duree if duree is not None else _duree(pp, compteur),
                 "montantEstime": montant if montant is not None else _montant(pp),
                 "dateLimiteReponse": _date_limite(lot, root),
                 "techniques": _techniques(lot),

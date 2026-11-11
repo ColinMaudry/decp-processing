@@ -100,3 +100,46 @@ def test_url_consultation_sans_corruption_des_parametres():
         "</CallForTendersDocumentReference></TenderingTerms></ProcurementProjectLot>"
     )
     assert _url_consultation(lot) == "https://x/?a=1&region=2&copy=3"
+
+
+def _lots_et_ids(root):
+    lots = [e for e in root.iter() if localname(e.tag) == "ProcurementProjectLot"]
+    ids = [
+        next(i for i in lot if localname(i.tag) == "ID" and i.get("schemeName"))
+        for lot in lots
+    ]
+    return lots, ids
+
+
+def test_lot_sans_id_numerote_tous_les_lots_par_rang():
+    root = load("26-98580.xml")
+    lots, ids = _lots_et_ids(root)
+    for lot in lots[2:]:
+        lot.getparent().remove(lot)
+    lots[0].remove(ids[0])
+    ids[1].text = "LOT-0001"
+    rows = map_eforms(root, classify(root), Counter())
+    assert [r["lotId"] for r in rows] == ["1", "2"]
+
+
+def test_ids_de_lot_dupliques_numerotes_par_rang():
+    root = load("26-98580.xml")
+    _, ids = _lots_et_ids(root)
+    for ident in ids:
+        ident.text = "LOT-0007"
+    rows = map_eforms(root, classify(root), Counter())
+    assert [r["lotId"] for r in rows] == ["1", "2", "3", "4"]
+
+
+def test_unite_de_duree_inconnue_comptee():
+    root = load("26-98580.xml")
+    for e in root.iter():
+        if (
+            localname(e.tag) == "DurationMeasure"
+            and localname(e.getparent().tag) == "PlannedPeriod"
+        ):
+            e.set("unitCode", "WEEK")
+    compteur = Counter()
+    rows = map_eforms(root, classify(root), compteur)
+    assert rows[0]["dureeMois"] is None
+    assert compteur["non_mappe:unite_duree:WEEK"] >= 1
