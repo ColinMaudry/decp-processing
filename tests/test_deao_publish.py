@@ -51,3 +51,20 @@ def test_publish_deao_ignore_ressource_sans_id(monkeypatch, tmp_path):
     monkeypatch.setattr(config, "DEAO_SCHEMA_RESOURCE_ID", "")
     publish.publish_deao_to_datagouv(Path(tmp_path))
     assert len(appels) == 1
+
+
+def test_publish_deao_echec_leve_apres_toutes_les_tentatives(monkeypatch, tmp_path):
+    appels = []
+
+    def stub(dataset, resource_id, file, key):
+        appels.append(resource_id)
+        return {"success": resource_id != "p"}
+
+    monkeypatch.setattr(publish, "update_resource", stub)
+    monkeypatch.setattr(config, "DEAO_DATASET_ID", "ds")
+    monkeypatch.setattr(config, "DEAO_PARQUET_RESOURCE_ID", "p")
+    monkeypatch.setattr(config, "DEAO_CSV_RESOURCE_ID", "c")
+    monkeypatch.setattr(config, "DEAO_SCHEMA_RESOURCE_ID", "s")
+    with pytest.raises(RuntimeError, match="deao.parquet"):
+        publish.publish_deao_to_datagouv(tmp_path)
+    assert appels == ["p", "c", "s"]

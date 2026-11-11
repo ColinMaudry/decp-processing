@@ -75,7 +75,7 @@ def lignes_rapport(stats: Counter, df: pl.DataFrame) -> list[dict]:
     for colonne, format_source, valeur in taux.iter_rows():
         lignes.append(
             {
-                "indicateur": f"remplissage:{colonne}:{format_source}",
+                "indicateur": f"remplissage:{colonne}:{format_source if format_source is not None else 'null'}",
                 "valeur": round(float(valeur), 3),
             }
         )

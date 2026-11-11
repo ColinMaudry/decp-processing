@@ -217,6 +217,7 @@ def publish_deao_to_datagouv(dist_dir: Path) -> None:
         (dist_dir / "deao.csv.gz", config.DEAO_CSV_RESOURCE_ID),
         (dist_dir / "schema.json", config.DEAO_SCHEMA_RESOURCE_ID),
     ]
+    echecs = []
     for file_path, resource_id in uploads:
         if not resource_id:
             logger.warning(f"Resource id manquant pour {file_path.name}, ignoré.")
@@ -230,6 +231,14 @@ def publish_deao_to_datagouv(dist_dir: Path) -> None:
         )
         if result.get("success") is True:
             logger.info("OK")
+        else:
+            logger.error(
+                f"Échec de la mise à jour de {file_path.name} "
+                f"(ressource {resource_id}) : {result}"
+            )
+            echecs.append(f"{file_path.name} ({resource_id})")
+    if echecs:
+        raise RuntimeError(f"Publication DEAO en échec pour : {', '.join(echecs)}")
 
 
 # À supprimer avec l'ancien flow boamp_processing (tâche 15)
