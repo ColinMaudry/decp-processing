@@ -1,4 +1,5 @@
 import io
+from collections.abc import Callable
 from datetime import date
 
 import httpx
@@ -37,27 +38,57 @@ def build_geocoding_csv(addresses: pl.DataFrame) -> bytes:
     return buf.getvalue()
 
 
+def build_address_geocoding_csv(addresses: pl.DataFrame) -> bytes:
+    df = addresses.select(
+        pl.col("adresse_cle"),
+        pl.col("q"),
+        pl.col("postcode").cast(pl.String),
+        pl.lit("").alias("citycode"),
+    )
+    buf = io.BytesIO()
+    df.write_csv(buf)
+    return buf.getvalue()
+
+
 def parse_geocoding_results(
     csv_bytes: bytes,
     min_score: float,
     today: date,
+    key_column: str = "siret",
+    with_citycode: bool = False,
 ) -> pl.DataFrame:
+    columns = [key_column, "result_score", "latitude", "longitude"]
+    schema_overrides = {
+        key_column: pl.String,
+        "result_score": pl.Float64,
+        "latitude": pl.Float64,
+        "longitude": pl.Float64,
+    }
+    if with_citycode:
+        columns.append("result_citycode")
+        schema_overrides["result_citycode"] = pl.String
     df = pl.read_csv(
         io.BytesIO(csv_bytes),
         null_values=["[ND]"],
-        schema_overrides={
-            "siret": pl.String,
-            "result_score": pl.Float64,
-            "latitude": pl.Float64,
-            "longitude": pl.Float64,
-        },
-        columns=["siret", "result_score", "latitude", "longitude"],
+        schema_overrides=schema_overrides,
+        columns=columns,
     )
     is_success = pl.col("result_score").is_not_null() & (
         pl.col("result_score") >= min_score
     )
+    commune_code = (
+        [
+            pl.when(is_success)
+            .then(pl.col("result_citycode"))
+            .otherwise(None)
+            .alias("commune_code")
+        ]
+        if with_citycode
+        else []
+    )
     return df.select(
-        pl.col("siret"),
+        pl.col(key_column),
+        *commune_code,
         pl.when(is_success).then(pl.col("latitude")).otherwise(None).alias("latitude"),
         pl.when(is_success)
         .then(pl.col("longitude"))
@@ -93,15 +124,23 @@ def geocode_csv(
     addresses: pl.DataFrame,
     chunk_size: int = GEOCODING_CHUNK_SIZE,
     min_score: float = GEOCODING_MIN_SCORE,
+    key_column: str = "siret",
+    with_citycode: bool = False,
+    csv_builder: Callable[[pl.DataFrame], bytes] = build_geocoding_csv,
+    empty_schema: dict | None = None,
 ) -> pl.DataFrame:
     logger.info("Géocodage via Géoplateforme...")
     today = date.today()
     results = []
     for i in range(0, addresses.height, chunk_size):
         chunk = addresses.slice(i, chunk_size)
-        csv_bytes = build_geocoding_csv(chunk)
+        csv_bytes = csv_builder(chunk)
         response_csv = post_geocoding_chunk(csv_bytes)
-        results.append(parse_geocoding_results(response_csv, min_score, today))
+        results.append(
+            parse_geocoding_results(
+                response_csv, min_score, today, key_column, with_citycode
+            )
+        )
     if not results:
-        return pl.DataFrame(schema=SIRET_LATLONG_SCHEMA)
+        return pl.DataFrame(schema=empty_schema or SIRET_LATLONG_SCHEMA)
     return pl.concat(results)
