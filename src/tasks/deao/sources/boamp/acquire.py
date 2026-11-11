@@ -91,12 +91,12 @@ def process_day(d: date, action: Action, archived: bool) -> Counter:
         write_archive = False
     elif action == Action.CRAWL:
         files = _crawl(d, {})
-        write_archive = bool(files)
+        write_archive = True
     else:
         files = read_day_archive(d) if archived else {}
         new = _crawl(d, files)
         files = {**files, **new}
-        write_archive = bool(new) or (not archived and bool(files))
+        write_archive = bool(new) or not archived
 
     df, compteur = parse_day(files)
 

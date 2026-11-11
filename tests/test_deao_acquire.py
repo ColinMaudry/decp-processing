@@ -1,3 +1,4 @@
+# ruff: noqa: F811
 from datetime import date
 from pathlib import Path
 
@@ -118,7 +119,8 @@ def test_process_day_jour_sans_dossier_ecrit_marqueur(partitions, web, fake_s3):
     d = date(2026, 1, 1)
     process_day(d, Action.CRAWL, archived=False)
     assert pl.read_parquet(partition_path(d)).height == 0
-    assert list_archived_days() == set()
+    assert list_archived_days() == {d}
+    assert read_day_archive(d) == {}
 
 
 def test_process_day_crawl_ecrit_archive_et_partition(partitions, web, fake_s3):  # noqa: F811
@@ -207,3 +209,43 @@ def test_acquire_compte_les_jours_en_erreur(partitions, web, fake_s3, monkeypatc
     c = acquire_boamp(date(2026, 1, 10), date(2026, 1, 11), rebuild=False)
     assert c["jour_en_erreur"] == 1
     assert local_days() == {date(2026, 1, 10)}
+
+
+def test_recrawl_echec_second_telechargement_laisse_tout_intact(
+    partitions, web, fake_s3
+):  # noqa: F811
+    d = date(2026, 10, 14)
+    write_day_archive(d, {"26-1.xml": XML_FILES[0].read_bytes()})
+    process_day(d, Action.FROM_ARCHIVE, archived=True)
+    before_objects = dict(fake_s3.objects)
+    before_part = partition_path(d).read_bytes()
+    web.pages[_url(d)] = (200, _index("26-1.xml", "26-2.xml", "26-3.xml"))
+    web.pages[_url(d) + "26-2.xml"] = (200, XML_FILES[1].read_bytes())
+    web.pages[_url(d) + "26-3.xml"] = (500, b"")
+    with pytest.raises(Exception):
+        process_day(d, Action.RECRAWL, archived=True)
+    assert fake_s3.objects == before_objects
+    assert partition_path(d).read_bytes() == before_part
+
+
+def test_recrawl_non_archive_ecrit_archive_complete(partitions, web, fake_s3):  # noqa: F811
+    d = date(2026, 10, 14)
+    web.pages[_url(d)] = (200, _index("26-1.xml", "26-2.xml"))
+    web.pages[_url(d) + "26-1.xml"] = (200, XML_FILES[0].read_bytes())
+    web.pages[_url(d) + "26-2.xml"] = (200, XML_FILES[1].read_bytes())
+    process_day(d, Action.RECRAWL, archived=False)
+    assert set(read_day_archive(d)) == {"26-1.xml", "26-2.xml"}
+
+
+def test_rebuild_jour_vide_archive_sans_reseau(partitions, monkeypatch, fake_s3):  # noqa: F811
+    monkeypatch.setattr(acquire, "BOAMP_RECRAWL_DAYS", 0)
+    d = date(2026, 1, 10)
+    write_day_archive(d, {})
+
+    def boom(url):
+        raise AssertionError("réseau interdit")
+
+    monkeypatch.setattr(fetch, "http_get", boom)
+    c = acquire_boamp(d, d, rebuild=True)
+    assert c["jour_en_erreur"] == 0
+    assert pl.read_parquet(partition_path(d)).height == 0
