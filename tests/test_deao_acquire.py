@@ -249,3 +249,35 @@ def test_rebuild_jour_vide_archive_sans_reseau(partitions, monkeypatch, fake_s3)
     c = acquire_boamp(d, d, rebuild=True)
     assert c["jour_en_erreur"] == 0
     assert pl.read_parquet(partition_path(d)).height == 0
+
+
+def test_process_day_echec_parsing_archive_ecrite_sans_partition(
+    partitions,
+    web,
+    fake_s3,  # noqa: F811
+    monkeypatch,
+):
+    d = date(2026, 10, 14)
+    xml = XML_FILES[0].read_bytes()
+    web.pages[_url(d)] = (200, _index("26-1.xml"))
+    web.pages[_url(d) + "26-1.xml"] = (200, xml)
+
+    def boom(files):
+        raise RuntimeError("parsing")
+
+    monkeypatch.setattr(acquire, "parse_day", boom)
+    with pytest.raises(RuntimeError):
+        process_day(d, Action.CRAWL, archived=False)
+    assert read_day_archive(d) == {"26-1.xml": xml}
+    assert not partition_path(d).exists()
+    assert not list(partitions.rglob("*.parquet*"))
+
+
+def test_process_day_compte_les_jours_vides(partitions, web, fake_s3):  # noqa: F811
+    vide = date(2026, 1, 1)
+    c = process_day(vide, Action.CRAWL, archived=False)
+    assert c["jour_vide"] == 1
+    d = date(2026, 10, 14)
+    web.pages[_url(d)] = (200, _index("26-1.xml"))
+    web.pages[_url(d) + "26-1.xml"] = (200, XML_FILES[0].read_bytes())
+    assert process_day(d, Action.CRAWL, archived=False)["jour_vide"] == 0

@@ -1,7 +1,7 @@
 import re
 from datetime import datetime, time
 from functools import cache
-from math import ceil
+from math import ceil, isfinite
 from zoneinfo import ZoneInfo
 
 import polars as pl
@@ -25,22 +25,40 @@ def normalize_lot_id(raw: str | None) -> str | None:
     return raw
 
 
+DUREE_MOIS_MAX = 1200
+_MOIS_PAR_UNITE = {
+    "MONTH": 1,
+    "mois": 1,
+    "DAY": 1 / 30,
+    "jours": 1 / 30,
+    "YEAR": 12,
+    "ans": 12,
+}
+
+
+def unite_duree_connue(unite: str | None) -> bool:
+    return (unite or "").strip() in _MOIS_PAR_UNITE
+
+
 def duree_mois(valeur: str | float | None, unite: str) -> int | None:
-    """Convertit une durée en mois entiers (arrondi supérieur)."""
+    """Convertit une durée en mois entiers (arrondi supérieur).
+
+    None si la valeur est illisible, non finie, négative, supérieure à
+    DUREE_MOIS_MAX mois, ou si l'unité est inconnue.
+    """
     if valeur is None:
         return None
     try:
         n = float(valeur)
     except (TypeError, ValueError):
         return None
-    unite = (unite or "").strip()
-    if unite in ("MONTH", "mois"):
-        return ceil(n)
-    if unite in ("DAY", "jours"):
-        return ceil(n / 30)
-    if unite in ("YEAR", "ans"):
-        return ceil(n * 12)
-    return None
+    facteur = _MOIS_PAR_UNITE.get((unite or "").strip())
+    if facteur is None or not isfinite(n) or n < 0:
+        return None
+    mois = n * facteur
+    if not isfinite(mois) or mois > DUREE_MOIS_MAX:
+        return None
+    return ceil(mois)
 
 
 _DATE_OFFSET = re.compile(r"(\d{4}-\d{2}-\d{2})(Z|[+-]\d{2}:\d{2})?")

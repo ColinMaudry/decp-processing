@@ -84,7 +84,9 @@ def process_day(d: date, action: Action, archived: bool) -> Counter:
     """Acquiert un jour et écrit sa partition.
 
     Tout est gardé en mémoire : une erreur de listing ou de téléchargement lève
-    avant toute écriture (archive d'abord, partition ensuite).
+    avant toute écriture. L'archive brute est écrite avant le parsing, pour
+    qu'un échec de parsing ne la prive pas des fichiers téléchargés ; la
+    partition n'est écrite qu'après un parsing réussi.
     """
     if action == Action.FROM_ARCHIVE:
         files = read_day_archive(d)
@@ -98,10 +100,13 @@ def process_day(d: date, action: Action, archived: bool) -> Counter:
         files = {**files, **new}
         write_archive = bool(new) or not archived
 
-    df, compteur = parse_day(files)
-
     if write_archive:
         write_day_archive(d, files)
+
+    df, compteur = parse_day(files)
+    if not files:
+        compteur["jour_vide"] += 1
+
     path = partition_path(d)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".parquet.tmp")

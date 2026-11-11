@@ -56,6 +56,13 @@ def test_parse_datetime_paris(valeur, heure, attendu):
         ("1.5", "MONTH", 2),
         ("3", "WEEK", None),
         (None, "MONTH", None),
+        ("NaN", "MONTH", None),
+        ("inf", "MONTH", None),
+        ("-3", "MONTH", None),
+        ("1e30", "YEAR", None),
+        ("1e30", "MONTH", None),
+        ("1200", "MONTH", 1200),
+        ("101", "YEAR", None),
     ],
 )
 def test_duree_mois(v, u, attendu):

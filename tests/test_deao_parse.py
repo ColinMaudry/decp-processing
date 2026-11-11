@@ -1,3 +1,4 @@
+import re
 from datetime import date, datetime
 from pathlib import Path
 
@@ -5,6 +6,7 @@ import polars as pl
 
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA
 from src.tasks.deao.sources.boamp.parse import parse_day
+from src.tasks.deao.sources.boamp.xml import idweb
 from src.tasks.deao.values import PARIS
 
 FIXTURES = Path(__file__).parent / "data" / "deao"
@@ -54,3 +56,35 @@ def test_parse_day_xml_illisible():
 def test_parse_day_vide():
     df, c = parse_day({})
     assert df.height == 0 and df.schema == pl.Schema(AVIS_LOT_SCHEMA)
+
+
+def test_parse_day_isole_un_avis_dont_le_mapping_echoue(monkeypatch):
+    from src.tasks.deao.sources.boamp import parse
+
+    vrai_map_legacy = parse.map_legacy
+
+    def map_legacy(root, classement, compteur):
+        if idweb(root) == "26-99870":
+            raise KeyError("DONNEES")
+        return vrai_map_legacy(root, classement, compteur)
+
+    monkeypatch.setattr(parse, "map_legacy", map_legacy)
+    files = {p.name: p.read_bytes() for p in FIXTURES.glob("*.xml")}
+    df, c = parse_day(files)
+    assert c["erreur_mapping"] == 1
+    assert c["retenu"] == 10
+    assert "26-99870" not in df["idAvis"].to_list()
+    assert df.filter(pl.col("idAvis") == "26-99891").height == 1
+
+
+def test_parse_day_compte_les_avis_sans_date_publication():
+    xml = (FIXTURES / "26-99870.xml").read_bytes()
+    xml_sans_date = re.sub(
+        rb"<DATE_PUBLICATION>[^<]*</DATE_PUBLICATION>",
+        b"<DATE_PUBLICATION>inconnue</DATE_PUBLICATION>",
+        xml,
+    )
+    assert xml_sans_date != xml
+    df, c = parse_day({"26-99870.xml": xml_sans_date})
+    assert c["sans_date_publication"] == 1
+    assert df["sourceFile"].to_list() == [None]

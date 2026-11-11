@@ -45,12 +45,21 @@ def parse_avis(xml: bytes, filename: str, compteur: Counter) -> list[dict]:
         compteur[f"exclu:{classement.nature}"] += 1
         return []
 
-    if classement.formatSource == "eforms":
-        lignes = map_eforms(root, classement, compteur)
-    else:
-        lignes = map_legacy(root, classement, compteur)
+    try:
+        if classement.formatSource == "eforms":
+            lignes = map_eforms(root, classement, compteur)
+        else:
+            lignes = map_legacy(root, classement, compteur)
+    except Exception as e:
+        compteur["erreur_mapping"] += 1
+        get_logger("WARNING").warning(
+            f"Avis non mappé ({filename}) : {type(e).__name__} : {e}"
+        )
+        return []
 
     date_publication = _date_publication(root)
+    if date_publication is None:
+        compteur["sans_date_publication"] += 1
     source_file = (
         f"{BOAMP_BASE_URL}/{date_publication:%Y}/{date_publication:%m}"
         f"/{date_publication:%d}/{filename}"
