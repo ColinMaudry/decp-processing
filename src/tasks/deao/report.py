@@ -17,6 +17,7 @@ COMPTEURS = (
     "jour_en_erreur",
     "chaine_annulation_seule",
     "uid_doublon",
+    "geocodage_en_erreur",
 )
 _PREFIXES_COMPTEURS = ("exclu:", "non_mappe:")
 
