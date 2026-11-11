@@ -88,3 +88,15 @@ def test_memes_cles_que_le_schema():
     for nom in ("26-87868.xml", "26-98580.xml", "26-94806.xml"):
         for r in mapper(nom):
             assert set(r) <= set(AVIS_LOT_SCHEMA)
+
+
+def test_url_consultation_sans_corruption_des_parametres():
+    from src.tasks.deao.sources.boamp.eforms import _url_consultation
+
+    lot = etree.fromstring(
+        "<ProcurementProjectLot><TenderingTerms><CallForTendersDocumentReference>"
+        "<Attachment><ExternalReference><URI>https://x/?a=1&amp;region=2&amp;copy=3"
+        "</URI></ExternalReference></Attachment>"
+        "</CallForTendersDocumentReference></TenderingTerms></ProcurementProjectLot>"
+    )
+    assert _url_consultation(lot) == "https://x/?a=1&region=2&copy=3"

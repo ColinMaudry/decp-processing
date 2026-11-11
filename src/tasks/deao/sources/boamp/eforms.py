@@ -1,6 +1,5 @@
 """Mapping des avis BOAMP eForms (UBL ContractNotice / PriorInformationNotice)."""
 
-import html
 import re
 from collections import Counter
 
@@ -102,11 +101,8 @@ def _cpv(projet) -> str | None:
 
 
 def _duree(projet) -> int | None:
-    mesure = (
-        find(direct_child(projet, "PlannedPeriod"), "DurationMeasure")
-        if (projet is not None and direct_child(projet, "PlannedPeriod") is not None)
-        else None
-    )
+    periode = direct_child(projet, "PlannedPeriod") if projet is not None else None
+    mesure = find(periode, "DurationMeasure") if periode is not None else None
     if mesure is None:
         return None
     return duree_mois(text(mesure), mesure.get("unitCode", ""))
@@ -137,7 +133,7 @@ def _url_consultation(lot) -> str | None:
     uri = find(reference, "URI") if reference is not None else None
     url = text(uri)
     # certains éditeurs encodent deux fois les "&"
-    return html.unescape(url) if url else None
+    return url.replace("&amp;", "&") if url else None
 
 
 def _techniques(lot) -> list[str]:
