@@ -95,7 +95,7 @@ PUBLISHED_FIELDS: tuple[Field, ...] = (
         "type",
         S,
         "Type",
-        "Type de marché public : fournitures, services ou travaux.",
+        "Type d'appel d'offres : fournitures, services ou travaux.",
         TYPES,
     ),
     Field(
@@ -144,7 +144,7 @@ PUBLISHED_FIELDS: tuple[Field, ...] = (
         "lieuExecution_code",
         S,
         "Code lieu exécution",
-        "Code du lieu d'exécution du marché public. Le type de code est renseigné par 'Type code lieu exécution'.",
+        "Code du lieu d'exécution de l'appel d'offres. Le type de code est renseigné par 'Type code lieu exécution'.",
     ),
     Field(
         "lieuExecution_typeCode",
@@ -241,7 +241,7 @@ PUBLISHED_FIELDS: tuple[Field, ...] = (
         "urlAvis",
         S,
         "URL de l'avis",
-        "Lien vers l'avis publié (dernier avis complet de la chaîne).",
+        "Lien BOAMP vers le dernier avis de la chaîne d'avis.",
     ),
     Field(
         "idAvisInitial",

@@ -47,11 +47,11 @@ def restore_legacy_uid(lf: pl.LazyFrame) -> pl.LazyFrame:
     return lf.with_columns((pl.col("acheteur_id") + pl.col("id")).alias("uid"))
 
 
-def _gzip_decp_csv(path: Path) -> None:
-    """`decp.csv` fait plusieurs Go : on produit aussi `decp.csv.gz` à côté
+def _gzip_csv(path: Path) -> None:
+    """`decp.csv` (ou `deao.csv`) fait plusieurs Go : on produit aussi `.csv.gz` à côté
     (gzip reproductible, checksum stable), publié à sa place sur data.gouv.fr."""
     csv_path = Path(f"{path}.csv")
-    if path.name == "decp" and csv_path.exists():
+    if path.name in {"decp", "deao"} and csv_path.exists():
         gzip_file_reproducible(csv_path, Path(f"{path}.csv.gz"))
 
 
@@ -64,7 +64,7 @@ def save_to_files(df: pl.DataFrame, path: Path, file_format=None):
         tmp_path.rename(path.with_suffix(".parquet"))
     if "csv" in file_format:
         df.write_csv(f"{path}.csv")
-        _gzip_decp_csv(path)
+        _gzip_csv(path)
 
 
 def sink_to_files(
@@ -95,7 +95,7 @@ def sink_to_files(
             f"{path}.csv", engine="streaming"
         )
 
-    _gzip_decp_csv(path)
+    _gzip_csv(path)
 
     # Si ça peut réduire un peu l'empreinte mémoire
     del lf

@@ -196,6 +196,43 @@ def publish_to_s3(file: Path, prefix: str = "") -> None:
     logger.info("OK")
 
 
+def should_publish_deao(n_lignes: int) -> bool:
+    from src import config
+
+    return bool(
+        config.DECP_PROCESSING_PUBLISH
+        and config.DEAO_DATASET_ID
+        and n_lignes >= config.DEAO_MIN_ROWS_TO_PUBLISH
+    )
+
+
+def publish_deao_to_datagouv(dist_dir: Path) -> None:
+    """Met à jour les ressources parquet/CSV gzip/schéma DEAO sur data.gouv.fr."""
+    from src import config
+
+    logger = get_logger(level=LOG_LEVEL)
+    dist_dir = Path(dist_dir)
+    uploads = [
+        (dist_dir / "deao.parquet", config.DEAO_PARQUET_RESOURCE_ID),
+        (dist_dir / "deao.csv.gz", config.DEAO_CSV_RESOURCE_ID),
+        (dist_dir / "schema.json", config.DEAO_SCHEMA_RESOURCE_ID),
+    ]
+    for file_path, resource_id in uploads:
+        if not resource_id:
+            logger.warning(f"Resource id manquant pour {file_path.name}, ignoré.")
+            continue
+        logger.info(f"Mise à jour de {file_path.name}...")
+        result = update_resource(
+            config.DEAO_DATASET_ID,
+            resource_id,
+            str(file_path),
+            config.DATAGOUVFR_API_KEY,
+        )
+        if result.get("success") is True:
+            logger.info("OK")
+
+
+# À supprimer avec l'ancien flow boamp_processing (tâche 15)
 def publish_boamp_to_datagouv():
     """Met à jour les ressources parquet/CSV BOAMP sur data.gouv.fr."""
     from src.config import (

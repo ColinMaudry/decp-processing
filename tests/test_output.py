@@ -132,3 +132,8 @@ def test_save_to_files_produit_decp_csv_gz(tmp_path):
     save_to_files(df, tmp_path / "decp", file_format=["csv"])
     assert (tmp_path / "decp.csv").exists()
     assert (tmp_path / "decp.csv.gz").exists()
+
+
+def test_sink_deao_produit_csv_gz(tmp_path):
+    sink_to_files(pl.LazyFrame({"a": [1]}), tmp_path / "deao")
+    assert (tmp_path / "deao.csv.gz").exists()
