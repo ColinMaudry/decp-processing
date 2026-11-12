@@ -108,7 +108,7 @@ RESOURCE_CACHE_DIR.mkdir(exist_ok=True, parents=True)
 ALL_CONFIG["RESOURCE_CACHE_DIR"] = RESOURCE_CACHE_DIR
 
 DIST_DIR = make_path_from_env("DECP_DIST_DIR", BASE_DIR / "dist")
-DIST_DIR.mkdir(exist_ok=True, parents=True, mode=777)
+DIST_DIR.mkdir(exist_ok=True, parents=True, mode=0o777)
 ALL_CONFIG["DIST_DIR"] = DIST_DIR
 
 
