@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><ContractNotice xmlns="urn:oasis:names:specification:ubl:schema:xsd:ContractNotice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:efac="http://data.europa.eu/p27/eforms-ubl-extension-aggregate-components/1" xmlns:efbc="http://data.europa.eu/p27/eforms-ubl-extension-basic-components/1" xmlns:efext="http://data.europa.eu/p27/eforms-ubl-extensions/1" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema">
+    <ext:UBLExtensions xmlns="">
+        <ext:UBLExtension>
+            <ext:ExtensionContent>
+                <efext:EformsExtension>
+                    <efac:NoticeSubType>
+                        <cbc:SubTypeCode listName="notice-subtype">E3</cbc:SubTypeCode>
+                    </efac:NoticeSubType>
+                    <efac:Organizations>
+                        <efac:Organization>
+                            <efac:Company>
+                                <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0001</cbc:ID>
+                                </cac:PartyIdentification>
+                                <cac:PartyName>
+                                    <cbc:Name languageID="ENG">South Kerry Development Partnership CLG</cbc:Name>
+                                </cac:PartyName>
+                                <cac:PostalAddress>
+                                    <cbc:StreetName>West Main Street, Cahersiveen, Co Kerry</cbc:StreetName>
+                                    <cbc:CityName>Cahersiveen</cbc:CityName>
+                                    <cbc:PostalZone>V23P981</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">IE053</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                        <cbc:IdentificationCode listName="country">IRL</cbc:IdentificationCode>
+                                    </cac:Country>
+                                </cac:PostalAddress>
+                                <cac:PartyLegalEntity>
+                                    <cbc:CompanyID>191645</cbc:CompanyID>
+                                </cac:PartyLegalEntity>
+                                <cac:Contact>
+                                    <cbc:ElectronicMail>nspillane@skdp.net</cbc:ElectronicMail>
+                                </cac:Contact>
+                            </efac:Company>
+                        </efac:Organization>
+                        <efac:Organization>
+                            <efac:Company>
+                                <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0002</cbc:ID>
+                                </cac:PartyIdentification>
+                                <cac:PartyName>
+                                    <cbc:Name languageID="ENG">The High Court of Ireland</cbc:Name>
+                                </cac:PartyName>
+                                <cac:PostalAddress>
+                                    <cbc:StreetName>Four Courts, Inns Quay, Dublin 7</cbc:StreetName>
+                                    <cbc:Department>The High Court of Ireland</cbc:Department>
+                                    <cbc:CityName>Dublin</cbc:CityName>
+                                    <cbc:PostalZone>D07 WDX8</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">IE061</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                        <cbc:IdentificationCode listName="country">IRL</cbc:IdentificationCode>
+                                    </cac:Country>
+                                </cac:PostalAddress>
+                                <cac:PartyLegalEntity>
+                                    <cbc:CompanyID>The High Court of Ireland</cbc:CompanyID>
+                                </cac:PartyLegalEntity>
+                                <cac:Contact>
+                                    <cbc:Telephone>+353 1 8886000</cbc:Telephone>
+                                    <cbc:ElectronicMail>HighCourtCentralOffice@courts.ie</cbc:ElectronicMail>
+                                </cac:Contact>
+                            </efac:Company>
+                        </efac:Organization>
+                        <efac:Organization>
+                            <efac:Company>
+                                <cac:PartyIdentification>
+                                    <cbc:ID schemeName="organization">ORG-0003</cbc:ID>
+                                </cac:PartyIdentification>
+                                <cac:PartyName>
+                                    <cbc:Name languageID="ENG">European Dynamics S.A.</cbc:Name>
+                                </cac:PartyName>
+                                <cac:PostalAddress>
+                                    <cbc:Department>European Dynamics S.A.</cbc:Department>
+                                    <cbc:CityName>Athens</cbc:CityName>
+                                    <cbc:PostalZone>15125</cbc:PostalZone>
+                                    <cbc:CountrySubentityCode listName="nuts">EL301</cbc:CountrySubentityCode>
+                                    <cac:Country>
+                                        <cbc:IdentificationCode listName="country">GRC</cbc:IdentificationCode>
+                                    </cac:Country>
+                                </cac:PostalAddress>
+                                <cac:PartyLegalEntity>
+                                    <cbc:CompanyID>002024901000</cbc:CompanyID>
+                                </cac:PartyLegalEntity>
+                                <cac:Contact>
+                                    <cbc:Telephone>+30 2108094500</cbc:Telephone>
+                                    <cbc:ElectronicMail>eproc-esender@eurodyn.com</cbc:ElectronicMail>
+                                </cac:Contact>
+                            </efac:Company>
+                        </efac:Organization>
+                    </efac:Organizations>
+                <efac:Publication><efbc:NoticePublicationID schemeName="ojs-notice-id">00711056-2026</efbc:NoticePublicationID><efbc:GazetteID schemeName="ojs-id">199/2026</efbc:GazetteID><efbc:PublicationDate>2026-10-14+02:00</efbc:PublicationDate></efac:Publication></efext:EformsExtension>
+            </ext:ExtensionContent>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+    <cbc:UBLVersionID xmlns="">2.3</cbc:UBLVersionID>
+    <cbc:CustomizationID xmlns="">eforms-sdk-1.13</cbc:CustomizationID>
+    <cbc:ID xmlns="" schemeName="notice-id">8b30b69c-28d6-4d77-b981-6c8720dead24</cbc:ID>
+    <cbc:ContractFolderID xmlns="">30a5bf07-18ec-4b10-9606-af35241e9c2f</cbc:ContractFolderID>
+    <cbc:IssueDate xmlns="">2026-10-12+01:00</cbc:IssueDate>
+    <cbc:IssueTime xmlns="">16:58:02+01:00</cbc:IssueTime>
+    <cbc:VersionID xmlns="">01</cbc:VersionID>
+    <cbc:RegulatoryDomain xmlns="">other</cbc:RegulatoryDomain>
+    <cbc:NoticeTypeCode xmlns="" listName="competition">cn-standard</cbc:NoticeTypeCode>
+    <cbc:NoticeLanguageCode xmlns="" listName="language">ENG</cbc:NoticeLanguageCode>
+    <cac:ContractingParty xmlns="">
+        <cac:ContractingPartyType>
+            <cbc:PartyTypeCode listName="buyer-legal-type">org-sub-cga</cbc:PartyTypeCode>
+        </cac:ContractingPartyType>
+        <cac:ContractingActivity>
+            <cbc:ActivityTypeCode listName="authority-activity">gen-pub</cbc:ActivityTypeCode>
+        </cac:ContractingActivity>
+        <cac:Party>
+            <cac:PartyIdentification>
+                <cbc:ID>ORG-0001</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:ServiceProviderParty>
+                <cbc:ServiceTypeCode listName="organisation-role">ted-esen</cbc:ServiceTypeCode>
+                <cac:Party>
+                    <cac:PartyIdentification>
+                        <cbc:ID>ORG-0003</cbc:ID>
+                    </cac:PartyIdentification>
+                </cac:Party>
+            </cac:ServiceProviderParty>
+        </cac:Party>
+    </cac:ContractingParty>
+    <cac:TenderingTerms xmlns="">
+        <cac:ProcurementLegislationDocumentReference>
+            <cbc:ID>Other</cbc:ID>
+        </cac:ProcurementLegislationDocumentReference>
+        <cac:TendererQualificationRequest>
+            <cac:SpecificTendererRequirement>
+                <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-sitn-bankr</cbc:TendererRequirementTypeCode>
+            </cac:SpecificTendererRequirement>
+        </cac:TendererQualificationRequest>
+        <cac:TendererQualificationRequest>
+            <cac:SpecificTendererRequirement>
+                <cbc:TendererRequirementTypeCode listName="exclusion-grounds-source">epo-notice</cbc:TendererRequirementTypeCode>
+            </cac:SpecificTendererRequirement>
+        </cac:TendererQualificationRequest>
+    </cac:TenderingTerms>
+    <cac:TenderingProcess xmlns="">
+        <cbc:ProcedureCode listName="procurement-procedure-type">open</cbc:ProcedureCode>
+        <cac:ProcessJustification>
+            <cbc:ProcessReasonCode listName="accelerated-procedure">false</cbc:ProcessReasonCode>
+        </cac:ProcessJustification>
+    </cac:TenderingProcess>
+    <cac:ProcurementProject xmlns="">
+        <cbc:Name languageID="ENG">Provision of an Environmental Education Course</cbc:Name>
+        <cbc:Description languageID="ENG">SKDP is seeking to deliver an environmental educational short course which is both informative and practical and which will be made available for participation to the public in the South Kerry area. This initiative is being developed in line with the 2023 – 2027 LEADER programme objectives which incorporates a number of thematic areas, one of which is ‘Sustainable Development and Climate Change Mitigation and Adaptation’. A sub-theme under this core theme is ‘Climate Change Capacity Building’. Climate change presents an ever-growing and existential challenge to Kerry’s rich and biodiverse ecological habitats and overall environmental health. This challenge is one which will affect not only our natural flora and fauna but also the wellness and health of our communities as well as their economic resilience as Kerry’s economy is heavily reliant on tourism. The Kerry Local Development Strategy which was developed through public participation to inform the core objectives of this current iteration of LEADER, found that an understanding of the science of climate change and in particular how Ireland and Southwest Ireland will be affected was a noticeable knowledge gap when engaging with the local communities. Priorities identified under the current LEADER programme include the provision of environmental educational training resources. To identify the specific areas of environmental education which groups would be most interested in, SKDP undertook a short public survey which was widely distributed to communities and community groups and remained open for 4.5 weeks. SKDP received 49 responses, with the outcome directing this RFT. SKDP are now seeking to enlist the expertise of an experienced environmental education/ training provider to develop and deliver an environmental education course. It is envisaged that this course will support the needs and priorities of these groups and their communities and support them to take meaningful local action for the environment. The objective of this RFT is to seek tenders from environmental education / training providers for the delivery of an environmental education course which will support communities to take meaningful local action to support biodiversity and to increase the resilience of habitats in their local areas. The course should be delivered as three modules. This is to enable participants, if they are unable to complete the full course, to complete one or two modules. The modules are as follows: 1. Seed Saving, Pollinators and Meadow Management 2. Tree Planting and Long-Term Management 3. Invasive Species Identification and Management The below are suggested inclusions for each module. SKDP invites tenderers to advise on the most appropriate and practicable approach to each module and are open to variations to the outline below.</cbc:Description>
+        <cbc:ProcurementTypeCode listName="contract-nature">services</cbc:ProcurementTypeCode>
+        <cac:RequestedTenderTotal>
+            <cbc:EstimatedOverallContractAmount currencyID="EUR">25000</cbc:EstimatedOverallContractAmount>
+        </cac:RequestedTenderTotal>
+        <cac:MainCommodityClassification>
+            <cbc:ItemClassificationCode listName="cpv">80540000</cbc:ItemClassificationCode>
+        </cac:MainCommodityClassification>
+        <cac:AdditionalCommodityClassification>
+            <cbc:ItemClassificationCode listName="cpv">80000000</cbc:ItemClassificationCode>
+        </cac:AdditionalCommodityClassification>
+        <cac:AdditionalCommodityClassification>
+            <cbc:ItemClassificationCode listName="cpv">80500000</cbc:ItemClassificationCode>
+        </cac:AdditionalCommodityClassification>
+        <cac:RealizedLocation>
+            <cac:Address>
+                <cbc:CityName>Cahersiveen</cbc:CityName>
+                <cbc:CountrySubentityCode listName="nuts">MEZZZ</cbc:CountrySubentityCode>
+                <cac:Country>
+                    <cbc:IdentificationCode listName="country">IRL</cbc:IdentificationCode>
+                </cac:Country>
+            </cac:Address>
+        </cac:RealizedLocation>
+    </cac:ProcurementProject>
+    <cac:ProcurementProjectLot xmlns="">
+        <cbc:ID schemeName="Lot">LOT-0001</cbc:ID>
+        <cac:TenderingTerms>
+            <ext:UBLExtensions>
+                <ext:UBLExtension>
+                    <ext:ExtensionContent>
+                        <efext:EformsExtension>
+                            <efac:Funding>
+                                <cbc:FundingProgramCode listName="eu-programme">EAFRD_2021</cbc:FundingProgramCode>
+                            </efac:Funding>
+                            <efac:StrategicProcurement>
+                                <efbc:ApplicableLegalBasis listName="cvd-scope">false</efbc:ApplicableLegalBasis>
+                            </efac:StrategicProcurement>
+                        </efext:EformsExtension>
+                    </ext:ExtensionContent>
+                </ext:UBLExtension>
+            </ext:UBLExtensions>
+            <cbc:FundingProgramCode listName="eu-funded">eu-funds</cbc:FundingProgramCode>
+            <cbc:MultipleTendersCode listName="permission">not-allowed</cbc:MultipleTendersCode>
+            <cac:CallForTendersDocumentReference>
+                <ext:UBLExtensions>
+                    <ext:UBLExtension>
+                        <ext:ExtensionContent>
+                            <efext:EformsExtension>
+                                <efac:NonOfficialLanguages>
+                                    <cac:Language>
+                                        <cbc:ID>ENG</cbc:ID>
+                                    </cac:Language>
+                                </efac:NonOfficialLanguages>
+                                <efac:OfficialLanguages>
+                                    <cac:Language>
+                                        <cbc:ID>ENG</cbc:ID>
+                                    </cac:Language>
+                                </efac:OfficialLanguages>
+                            </efext:EformsExtension>
+                        </ext:ExtensionContent>
+                    </ext:UBLExtension>
+                </ext:UBLExtensions>
+                <cbc:ID>RFT - SKDP Action for the Environment</cbc:ID>
+                <cbc:DocumentType>non-restricted-document</cbc:DocumentType>
+                <cac:Attachment>
+                    <cac:ExternalReference>
+                        <cbc:URI>https://www.etenders.gov.ie/epps/cft/listContractDocuments.do?resourceId=9278062</cbc:URI>
+                    </cac:ExternalReference>
+                </cac:Attachment>
+            </cac:CallForTendersDocumentReference>
+            <cac:TendererQualificationRequest>
+                <cac:SpecificTendererRequirement>
+                    <cbc:TendererRequirementTypeCode listName="selection-criteria-source">epo-procurement-document</cbc:TendererRequirementTypeCode>
+                </cac:SpecificTendererRequirement>
+            </cac:TendererQualificationRequest>
+            <cac:ContractExecutionRequirement>
+                <cbc:ExecutionRequirementCode listName="ecatalog-submission">not-allowed</cbc:ExecutionRequirementCode>
+            </cac:ContractExecutionRequirement>
+            <cac:DocumentProviderParty>
+                <cac:PartyIdentification>
+                    <cbc:ID>ORG-0001</cbc:ID>
+                </cac:PartyIdentification>
+            </cac:DocumentProviderParty>
+            <cac:TenderRecipientParty>
+                <cbc:EndpointID>https://www.etenders.gov.ie/epps/cft/viewTenders.do?resourceId=9278062</cbc:EndpointID>
+                <cac:PartyIdentification>
+                    <cbc:ID>ORG-0001</cbc:ID>
+                </cac:PartyIdentification>
+            </cac:TenderRecipientParty>
+            <cac:TenderEvaluationParty>
+                <cac:PartyIdentification>
+                    <cbc:ID>ORG-0001</cbc:ID>
+                </cac:PartyIdentification>
+            </cac:TenderEvaluationParty>
+            <cac:TenderValidityPeriod>
+                <cbc:DurationMeasure unitCode="DAY">90</cbc:DurationMeasure>
+            </cac:TenderValidityPeriod>
+            <cac:AppealTerms>
+                <cac:AppealInformationParty>
+                    <cac:PartyIdentification>
+                        <cbc:ID>ORG-0002</cbc:ID>
+                    </cac:PartyIdentification>
+                </cac:AppealInformationParty>
+                <cac:AppealReceiverParty>
+                    <cac:PartyIdentification>
+                        <cbc:ID>ORG-0002</cbc:ID>
+                    </cac:PartyIdentification>
+                </cac:AppealReceiverParty>
+            </cac:AppealTerms>
+            <cac:Language>
+                <cbc:ID>ENG</cbc:ID>
+            </cac:Language>
+        </cac:TenderingTerms>
+        <cac:TenderingProcess>
+            <cbc:SubmissionMethodCode listName="esubmission">required</cbc:SubmissionMethodCode>
+            <cac:TenderSubmissionDeadlinePeriod>
+                <cbc:EndDate>2026-11-02+01:00</cbc:EndDate>
+                <cbc:EndTime>17:00:00+01:00</cbc:EndTime>
+            </cac:TenderSubmissionDeadlinePeriod>
+            <cac:AdditionalInformationRequestPeriod>
+                <cbc:EndDate>2026-10-26+01:00</cbc:EndDate>
+                <cbc:EndTime>17:00:00+01:00</cbc:EndTime>
+            </cac:AdditionalInformationRequestPeriod>
+            <cac:AuctionTerms>
+                <cbc:AuctionConstraintIndicator>false</cbc:AuctionConstraintIndicator>
+            </cac:AuctionTerms>
+            <cac:ContractingSystem>
+                <cbc:ContractingSystemTypeCode listName="dps-usage">none</cbc:ContractingSystemTypeCode>
+            </cac:ContractingSystem>
+            <cac:ContractingSystem>
+                <cbc:ContractingSystemTypeCode listName="framework-agreement">none</cbc:ContractingSystemTypeCode>
+            </cac:ContractingSystem>
+        </cac:TenderingProcess>
+        <cac:ProcurementProject>
+            <cbc:ID>0</cbc:ID>
+            <cbc:Name languageID="ENG">Provision of an Environmental Education Course</cbc:Name>
+            <cbc:Description languageID="ENG">SKDP is seeking to deliver an environmental educational short course which is both informative and practical and which will be made available for participation to the public in the South Kerry area. This initiative is being developed in line with the 2023 – 2027 LEADER programme objectives which incorporates a number of thematic areas, one of which is ‘Sustainable Development and Climate Change Mitigation and Adaptation’. A sub-theme under this core theme is ‘Climate Change Capacity Building’. Climate change presents an ever-growing and existential challenge to Kerry’s rich and biodiverse ecological habitats and overall environmental health. This challenge is one which will affect not only our natural flora and fauna but also the wellness and health of our communities as well as their economic resilience as Kerry’s economy is heavily reliant on tourism. The Kerry Local Development Strategy which was developed through public participation to inform the core objectives of this current iteration of LEADER, found that an understanding of the science of climate change and in particular how Ireland and Southwest Ireland will be affected was a noticeable knowledge gap when engaging with the local communities. Priorities identified under the current LEADER programme include the provision of environmental educational training resources. To identify the specific areas of environmental education which groups would be most interested in, SKDP undertook a short public survey which was widely distributed to communities and community groups and remained open for 4.5 weeks. SKDP received 49 responses, with the outcome directing this RFT. SKDP are now seeking to enlist the expertise of an experienced environmental education/ training provider to develop and deliver an environmental education course. It is envisaged that this course will support the needs and priorities of these groups and their communities and support them to take meaningful local action for the environment. The objective of this RFT is to seek tenders from environmental education / training providers for the delivery of an environmental education course which will support communities to take meaningful local action to support biodiversity and to increase the resilience of habitats in their local areas. The course should be delivered as three modules. This is to enable participants, if they are unable to complete the full course, to complete one or two modules. The modules are as follows: 1. Seed Saving, Pollinators and Meadow Management 2. Tree Planting and Long-Term Management 3. Invasive Species Identification and Management The below are suggested inclusions for each module. SKDP invites tenderers to advise on the most appropriate and practicable approach to each module and are open to variations to the outline below.</cbc:Description>
+            <cbc:ProcurementTypeCode listName="contract-nature">services</cbc:ProcurementTypeCode>
+            <cbc:EstimatedOverallContractQuantity unitCode="HUR">1</cbc:EstimatedOverallContractQuantity>
+            <cbc:SMESuitableIndicator>true</cbc:SMESuitableIndicator>
+            <cac:RequestedTenderTotal>
+                <cbc:EstimatedOverallContractAmount currencyID="EUR">25000</cbc:EstimatedOverallContractAmount>
+            </cac:RequestedTenderTotal>
+            <cac:MainCommodityClassification>
+                <cbc:ItemClassificationCode listName="cpv">80540000</cbc:ItemClassificationCode>
+            </cac:MainCommodityClassification>
+            <cac:AdditionalCommodityClassification>
+                <cbc:ItemClassificationCode listName="cpv">80000000</cbc:ItemClassificationCode>
+            </cac:AdditionalCommodityClassification>
+            <cac:AdditionalCommodityClassification>
+                <cbc:ItemClassificationCode listName="cpv">80500000</cbc:ItemClassificationCode>
+            </cac:AdditionalCommodityClassification>
+            <cac:RealizedLocation>
+                <cac:Address>
+                    <cbc:StreetName>South Kerry </cbc:StreetName>
+                    <cbc:CityName>Cahersiveen</cbc:CityName>
+                    <cbc:PostalZone>V23P981</cbc:PostalZone>
+                    <cbc:CountrySubentityCode listName="nuts">FRZZZ</cbc:CountrySubentityCode>
+                    <cac:Country>
+                        <cbc:IdentificationCode listName="country">IRL</cbc:IdentificationCode>
+                    </cac:Country>
+                </cac:Address>
+            </cac:RealizedLocation>
+            <cac:PlannedPeriod>
+                <cbc:DurationMeasure unitCode="MONTH">6</cbc:DurationMeasure>
+            </cac:PlannedPeriod>
+        </cac:ProcurementProject>
+    </cac:ProcurementProjectLot>
+</ContractNotice>

@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><ContractNotice xmlns="urn:oasis:names:specification:ubl:schema:xsd:ContractNotice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:efac="http://data.europa.eu/p27/eforms-ubl-extension-aggregate-components/1" xmlns:efbc="http://data.europa.eu/p27/eforms-ubl-extension-basic-components/1" xmlns:efext="http://data.europa.eu/p27/eforms-ubl-extensions/1" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+   <ext:UBLExtensions>
+      <ext:UBLExtension>
+         <ext:ExtensionContent>
+            <efext:EformsExtension>
+               <efac:NoticeSubType>
+                  <cbc:SubTypeCode listName="notice-subtype">16</cbc:SubTypeCode>
+               </efac:NoticeSubType>
+               <efac:Organizations>
+                  <efac:Organization>
+                     <efac:Company>
+                        <cbc:WebsiteURI>https://bip.malopolska.pl/umwm/</cbc:WebsiteURI>
+                        <cbc:EndpointID>https://ezamowienia.gov.pl</cbc:EndpointID>
+                        <cac:PartyIdentification>
+                           <cbc:ID schemeName="organization">ORG-0001</cbc:ID>
+                        </cac:PartyIdentification>
+                        <cac:PartyName>
+                           <cbc:Name languageID="POL">Województwo Małopolskie</cbc:Name>
+                        </cac:PartyName>
+                        <cac:PostalAddress>
+                           <cbc:StreetName>ul. Basztowa 22</cbc:StreetName>
+                           <cbc:CityName>Kraków</cbc:CityName>
+                           <cbc:PostalZone>31-156</cbc:PostalZone>
+                           <cbc:CountrySubentityCode listName="nuts">PL213</cbc:CountrySubentityCode>
+                           <cac:Country>
+                              <cbc:IdentificationCode listName="country">POL</cbc:IdentificationCode>
+                           </cac:Country>
+                        </cac:PostalAddress>
+                        <cac:PartyLegalEntity>
+                           <cbc:CompanyID>351554287</cbc:CompanyID>
+                        </cac:PartyLegalEntity>
+                        <cac:Contact>
+                           <cbc:Name>Zespół Zamówień Publicznych</cbc:Name>
+                           <cbc:Telephone>+48 126303222</cbc:Telephone>
+                           <cbc:ElectronicMail>przetargi@umwm.malopolska.pl</cbc:ElectronicMail>
+                        </cac:Contact>
+                     </efac:Company>
+                  </efac:Organization>
+                  <efac:Organization>
+                     <efac:Company>
+                        <cbc:WebsiteURI>https://www.gov.pl/web/uzp/krajowa-izba-odwolawcza</cbc:WebsiteURI>
+                        <cbc:EndpointID>https://ezamowienia.gov.pl</cbc:EndpointID>
+                        <cac:PartyIdentification>
+                           <cbc:ID schemeName="organization">ORG-0003</cbc:ID>
+                        </cac:PartyIdentification>
+                        <cac:PartyName>
+                           <cbc:Name languageID="POL">Krajowa Izba Odwoławcza</cbc:Name>
+                        </cac:PartyName>
+                        <cac:PostalAddress>
+                           <cbc:StreetName>ul. Postępu 17a</cbc:StreetName>
+                           <cbc:CityName>Warszawa</cbc:CityName>
+                           <cbc:PostalZone>02-676</cbc:PostalZone>
+                           <cbc:CountrySubentityCode listName="nuts">PL911</cbc:CountrySubentityCode>
+                           <cac:Country>
+                              <cbc:IdentificationCode listName="country">POL</cbc:IdentificationCode>
+                           </cac:Country>
+                        </cac:PostalAddress>
+                        <cac:PartyLegalEntity>
+                           <cbc:CompanyID>010828091</cbc:CompanyID>
+                        </cac:PartyLegalEntity>
+                        <cac:Contact>
+                           <cbc:Telephone>(22) 458 78 01</cbc:Telephone>
+                           <cbc:ElectronicMail>odwolania@uzp.gov.pl</cbc:ElectronicMail>
+                        </cac:Contact>
+                     </efac:Company>
+                  </efac:Organization>
+                  <efac:Organization>
+                     <efac:Company>
+                        <cbc:WebsiteURI>https://op.europa.eu</cbc:WebsiteURI>
+                        <cac:PartyIdentification>
+                           <cbc:ID schemeName="organization">ORG-0000</cbc:ID>
+                        </cac:PartyIdentification>
+                        <cac:PartyName>
+                           <cbc:Name languageID="POL">Publications Office of the European Union</cbc:Name>
+                        </cac:PartyName>
+                        <cac:PostalAddress>
+                           <cbc:CityName>Luxembourg</cbc:CityName>
+                           <cbc:PostalZone>2417</cbc:PostalZone>
+                           <cbc:CountrySubentityCode listName="nuts">LU000</cbc:CountrySubentityCode>
+                           <cac:Country>
+                              <cbc:IdentificationCode listName="country">LUX</cbc:IdentificationCode>
+                           </cac:Country>
+                        </cac:PostalAddress>
+                        <cac:PartyLegalEntity>
+                           <cbc:CompanyID>PUBL</cbc:CompanyID>
+                        </cac:PartyLegalEntity>
+                        <cac:Contact>
+                           <cbc:Telephone>+352 29291</cbc:Telephone>
+                           <cbc:ElectronicMail>ted@publications.europa.eu</cbc:ElectronicMail>
+                        </cac:Contact>
+                     </efac:Company>
+                  </efac:Organization>
+               </efac:Organizations>
+            <efac:Publication><efbc:NoticePublicationID schemeName="ojs-notice-id">00708669-2026</efbc:NoticePublicationID><efbc:GazetteID schemeName="ojs-id">199/2026</efbc:GazetteID><efbc:PublicationDate>2026-10-14+02:00</efbc:PublicationDate></efac:Publication></efext:EformsExtension>
+         </ext:ExtensionContent>
+      </ext:UBLExtension>
+   </ext:UBLExtensions>
+   <cbc:UBLVersionID>2.3</cbc:UBLVersionID>
+   <cbc:CustomizationID>eforms-sdk-1.14</cbc:CustomizationID>
+   <cbc:ID schemeName="notice-id">aeb03d11-a838-4923-82ac-fdb545e766f7</cbc:ID>
+   <cbc:ContractFolderID>2976e468-de0d-48a5-831b-19ab2281190f</cbc:ContractFolderID>
+   <cbc:IssueDate>2026-10-13Z</cbc:IssueDate>
+   <cbc:IssueTime>10:29:38Z</cbc:IssueTime>
+   <cbc:VersionID>01</cbc:VersionID>
+   <cbc:RegulatoryDomain>32014L0024</cbc:RegulatoryDomain>
+   <cbc:NoticeTypeCode listName="competition">cn-standard</cbc:NoticeTypeCode>
+   <cbc:NoticeLanguageCode listName="language">POL</cbc:NoticeLanguageCode>
+   <cac:ContractingParty>
+      <cbc:BuyerProfileURI>https://bip.malopolska.pl/umwm/</cbc:BuyerProfileURI>
+      <cac:ContractingPartyType>
+         <cbc:PartyTypeCode listName="buyer-legal-type">ra</cbc:PartyTypeCode>
+      </cac:ContractingPartyType>
+      <cac:ContractingActivity>
+         <cbc:ActivityTypeCode listName="authority-activity">gen-pub</cbc:ActivityTypeCode>
+      </cac:ContractingActivity>
+      <cac:Party>
+         <cac:PartyIdentification>
+            <cbc:ID schemeName="organization">ORG-0001</cbc:ID>
+         </cac:PartyIdentification>
+         <cac:ServiceProviderParty>
+            <cbc:ServiceTypeCode listName="organisation-role">ted-esen</cbc:ServiceTypeCode>
+            <cac:Party>
+               <cac:PartyIdentification>
+                  <cbc:ID schemeName="organization">ORG-0000</cbc:ID>
+               </cac:PartyIdentification>
+            </cac:Party>
+         </cac:ServiceProviderParty>
+      </cac:Party>
+   </cac:ContractingParty>
+   <cac:TenderingTerms>
+      <cac:ProcurementLegislationDocumentReference>
+         <cbc:ID>Zamówienie publiczne udzielane jest w trybie przetargu nieograniczonego zgodnie z art. 132 ustawy z dnia 11 września 2019 r. Prawo zamówień publicznych  (t.j. Dz. U. z 2026 r. poz. 793 z późn. zm.).</cbc:ID>
+      </cac:ProcurementLegislationDocumentReference>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-grounds-source">epo-notice</cbc:TendererRequirementTypeCode>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-mis-prep-confl</cbc:TendererRequirementTypeCode>
+            <cbc:Description languageID="POL">Wymienione w pkt. 2.1.4 niniejszego ogłoszenia</cbc:Description>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-crim-corrpt</cbc:TendererRequirementTypeCode>
+            <cbc:Description languageID="POL">Wymienione w pkt. 2.1.4 niniejszego ogłoszenia</cbc:Description>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-crim-fraud</cbc:TendererRequirementTypeCode>
+            <cbc:Description languageID="POL">Wymienione w pkt. 2.1.4 niniejszego ogłoszenia</cbc:Description>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-mis-bre-lab-law</cbc:TendererRequirementTypeCode>
+            <cbc:Description languageID="POL">Wymienione w pkt. 2.1.4 niniejszego ogłoszenia</cbc:Description>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-pmt-bre-ssc</cbc:TendererRequirementTypeCode>
+            <cbc:Description languageID="POL">Wymienione w pkt. 2.1.4 niniejszego ogłoszenia</cbc:Description>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-pmt-bre-tax</cbc:TendererRequirementTypeCode>
+            <cbc:Description languageID="POL">Wymienione w pkt. 2.1.4 niniejszego ogłoszenia</cbc:Description>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-natl-bre-nat-law</cbc:TendererRequirementTypeCode>
+            <cbc:Description languageID="POL">Wymienione w pkt. 2.1.4 niniejszego ogłoszenia</cbc:Description>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-mis-distortion</cbc:TendererRequirementTypeCode>
+            <cbc:Description languageID="POL">Wymienione w pkt. 2.1.4 niniejszego ogłoszenia</cbc:Description>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-crim-traffick</cbc:TendererRequirementTypeCode>
+            <cbc:Description languageID="POL">Wymienione w pkt. 2.1.4 niniejszego ogłoszenia</cbc:Description>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-crim-laund</cbc:TendererRequirementTypeCode>
+            <cbc:Description languageID="POL">Wymienione w pkt. 2.1.4 niniejszego ogłoszenia</cbc:Description>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-crim-terror</cbc:TendererRequirementTypeCode>
+            <cbc:Description languageID="POL">Wymienione w pkt. 2.1.4 niniejszego ogłoszenia</cbc:Description>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-crim-part</cbc:TendererRequirementTypeCode>
+            <cbc:Description languageID="POL">Wymienione w pkt. 2.1.4 niniejszego ogłoszenia</cbc:Description>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-mis-bre-env-law</cbc:TendererRequirementTypeCode>
+            <cbc:Description languageID="POL">Wymienione w pkt. 2.1.4 niniejszego ogłoszenia</cbc:Description>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+      <cac:TendererQualificationRequest>
+         <cac:SpecificTendererRequirement>
+            <cbc:TendererRequirementTypeCode listName="exclusion-ground">exg-mis-misrepresent</cbc:TendererRequirementTypeCode>
+            <cbc:Description languageID="POL">Wymienione w pkt. 2.1.4 niniejszego ogłoszenia</cbc:Description>
+         </cac:SpecificTendererRequirement>
+      </cac:TendererQualificationRequest>
+   </cac:TenderingTerms>
+   <cac:TenderingProcess>
+      <cbc:Description languageID="POL">1. Zamówienie publiczne udzielane jest w trybie przetargu nieograniczonego zgodnie z art. 132 ustawy z dnia 11 września 2019 r. Prawo zamówień publicznych (t.j. Dz. U. z 2026 r. poz. 793 z póżn. zm.). zwaną dalej ustawą.
+2. Zamawiający zgodnie z art. 139 i nast. ustawy najpierw dokona badania i oceny ofert, a następnie dokona kwalifikacji podmiotowej wykonawcy, którego oferta została najwyżej oceniona w zakresie braku podstaw wykluczenia oraz spełniania warunków udziału w postępowaniu.
+3. Zamawiający nie dopuszcza możliwości składania ofert częściowych.
+W przypadku niniejszego postępowania Zamawiający odstąpił od podziału na części ponieważ uznał, że nie zachodzi potrzeba udzielania niniejszego zamówienia w częściach. Podział zamówienia powodowałby nadmierne koszty wykonania zamówienia lub też wymagał nadmiernego jednoczesnego zaangażowania zasobów ludzkich do skoordynowania działań różnych wykonawców realizujących poszczególne części zamówienia, co mogłoby zagrozić właściwemu jego wykonaniu.
+Ponadto, niniejsze postępowanie jest jedną z części zamówienia, gdyż Zamawiający dokonał podziału zamówienia na części i przeprowadza na poszczególne części odrębne postępowania.
+4. Klauzule informacyjne z art. 13 i 14 RODO ujęte są w załącznikach nr 1A i nr 1B do swz.
+5. Zamawiający wymaga złożenia przez Wykonawcę wraz z ofertą oświadczenia o wypełnieniu obowiązków informacyjnych, przewidzianych w art. 13 oraz jeśli dotyczy art. 14 RODO – oświadczenie jest ujęte w Formularzu oferty.
+6. Informacje o sposobie porozumiewania się zamawiającego z wykonawcami oraz przekazywania oświadczeń lub dokumentów, a także wskazanie osób uprawnionych do porozumiewania się z wykonawcami oraz forma składania dokumentów są określone w swz.</cbc:Description>
+      <cbc:ProcedureCode listName="procurement-procedure-type">open</cbc:ProcedureCode>
+      <cac:ProcessJustification>
+         <cbc:ProcessReasonCode listName="accelerated-procedure">true</cbc:ProcessReasonCode>
+         <cbc:ProcessReason languageID="POL">Zamawiający zgodnie z treścią art. 89 ust. 1 ustawy Pzp opublikował wstępne ogłoszenie informacyjne, które zawierało wszystkie informacje wymagane dla ogłoszenia o zamówieniu, w zakresie, w jakim były one dostępne w chwili publikacji wstępnego ogłoszenia informacyjnego, i zostało ono zamieszczone w profilu nabywcy na co najmniej 35 dni i nie więcej niż 12 miesięcy przed dniem przekazani ogłoszenia o zamówieniu Urzędowi Publikacji Unii Europejskiej. Zamawiający w celu skrócenia terminu składania ofert zamieścił wstępne ogłoszenie informacyjne 2026/S 115-417104 z dnia 17/06/2026 r. na BIPie 17 czerwca 2026 r.</cbc:ProcessReason>
+      </cac:ProcessJustification>
+   </cac:TenderingProcess>
+   <cac:ProcurementProject>
+      <cbc:ID schemeName="InternalID">EK-IX.272.18.2026</cbc:ID>
+      <cbc:Name languageID="POL">Organizacja podróży oraz obsługa logistyczna pobytu delegacji z Małopolski w Lyonie we Francji w roli wystawcy w Targach Edukacyjnych pod nazwą Mundial Zawodów w Lyonie</cbc:Name>
+      <cbc:Description languageID="POL">1.	Przedmiotem zamówienia jest organizacja podróży oraz obsługa logistyczna pobytu delegacji z Małopolski w Lyonie we Francji w roli wystawcy w Targach Edukacyjnych pod nazwą Mundial Zawodów w Lyonie. Mundial Zawodów odbędzie się w dniach 10-13 grudnia 2026r. w hali Eurexpo w Lyonie. W ramach zamówienia Wykonawca zapewni:
+a)	Transport uczestników z Małopolski (z Krakowa oraz Nowego Sącza) do Lyonu i z powrotem, transport po Lyonie oraz transport sprzętu i materiałów promocyjnych z Małopolski (z Krakowa oraz Nowego Sącza) do Lyonu i z powrotem - w tym ubezpieczenie sprzętu oraz ubezpieczenie uczestników,
+b)	Zapewnienie posiłków dla każdego uczestnika delegacji –  kolacji podczas całego pobytu w Lyon (tj. w dniach 9 - 13 grudnia) oraz 14 grudnia Wykonawca zapewni lunchbox  na podróż wszystkim uczestnikom, a jeżeli czas podróży ulegnie wydłużeniu to również ciepłe posiłki.
+c)	Tłumacza języka francuskiego,
+d)	Obsługę logistyczną stoiska Małopolski na Targach, w tym przygotowanie projektu wizualizacji stoiska, urządzenie i wyposażenie stoiska w meble/ścianki oddzielające oraz media (prąd, Internet).
+2.	Szczegółowy opis przedmiotu zamówienia (SOPZ) stanowi załącznik nr 1D do swz i będzie on wprowadzony jako załącznik nr 1 do umowy w sprawie zamówienia publicznego.
+3.	Warunki realizacji zamówienia zawarte są w projektowanych postanowieniach umowy w sprawie zamówienia publicznego, które zostaną wprowadzone do umowy w sprawie zamówienia publicznego – wzorze umowy i stanowią załącznik nr 1C do swz (zwane są dalej wzorem umowy).
+4.	Zamawiający stosownie do dyspozycji wynikającej z art. 95 ustawy określa, że nie wymaga zatrudnienia przez wykonawcę lub podwykonawcę na podstawie stosunku pracy osób wykonujących czynności w zakresie realizacji zamówienia.
+5.	Oznaczenie wg CPV: 63500000-4 Usługi biur podróży, podmiotów turystycznych i pomocy turystycznej.</cbc:Description>
+      <cbc:ProcurementTypeCode listName="contract-nature">services</cbc:ProcurementTypeCode>
+      <cbc:Note languageID="POL">I.O udzielenie zamówienia mogą ubiegać się wykonawcy, którzy:
+1)nie podlegają wykluczeniu z postępowania na podstawie art. 108 ust. 1 oraz art. 109 ust. 1 pkt 2) lit. a) i lit. b), pkt 3), pkt 8) i pkt 10) ustawy,
+2)nie podlegają wykluczeniu z postępowania na podstawie art. 7 ust. 1 ustawy z dnia 13 kwietnia 2022 r. o szczególnych rozwiązaniach w zakresie przeciwdziałania wspieraniu agresji na Ukrainę oraz służących ochronie bezpieczeństwa narodowego,
+3)	nie podlegają zakazowi udzielania lub dalszego wykonywania wszelkich zamówień publicznych na podstawie artykułu 5k ust. 1 Rozporządzenia Rady (UE) Nr 833/2014 z dnia 31 lipca 2014 r. dotyczącego środków ograniczających w związku z działaniami Rosji destabilizującymi sytuację na Ukrainie (Dz. Urz. UE L 229 z 31.07.2014, str. 1, z późn. zm.).
+Z uwagi na wartość zamówienia Zamawiający odstępuje od przesłanki wykluczania wykonawcy z postępowania, o której mowa w art. 108 ust. 2 ustawy, ponieważ nie ma ona zastosowania w niniejszym postępowaniu.
+Przed wyborem najkorzystniejszej oferty Zamawiający wezwie wykonawcę, którego oferta została najwyżej oceniona, do złożenia w wyznaczonym terminie:
+II. 1.	Oświadczenia o niepodleganiu wykluczeniu, spełnianiu warunków udziału w postępowaniu, w zakresie wskazanym przez Zamawiającego. Oświadczenie, stanowi dowód potwierdzający brak podstaw wykluczenia, spełnianie warunków udziału w postępowaniu na dzień składania ofert, tymczasowo zastępujący wymagane przez Zamawiającego podmiotowe środki dowodowe.
+2.Oświadczenie, o którym mowa w ust. 1, składa się na formularzu jednolitego europejskiego dokumentu zamówienia, sporządzonym zgodnie ze wzorem standardowego formularza określonego w rozporządzeniu wykonawczym Komisji (UE) 2016/7 z dnia 5 stycznia 2016 r. Ustanawiającym standardowy formularz jednolitego europejskiego dokumentu zamówienia (Dz. Urz. UE L 3 z 06.01.2016, str. 16), zwanym dalej „jednolitym dokumentem lub JEDZ”, którego wzór stanowi załącznik nr 3 do swz.
+Zamawiający informuje, że wykonawca wypełnia oświadczenie w zakresie wskazanym przez Zamawiającego, w części IV może ograniczyć się do wypełnienia sekcji α (alfa): Ogólne oświadczenie dotyczące wszystkich kryteriów kwalifikacji i nie musi wypełniać żadnej z pozostałych sekcji w części IV JEDZ.
+Instrukcja wypełniania JEDZ jest zamieszczona na stronie internetowej Urzędu Zamówień Publicznych, pod adresem: https://www.gov.pl/web/uzp/jedz
+UWAGA! Zamawiający zaleca wypełnienie formularza JEDZ (ESPD) za pomocą serwisu dostępnego pod adresem: https://espd.uzp.gov.pl/. W tym celu przygotowany przez Zamawiającego jednolity europejski dokument zamówienia (ESPD) w formacie *xml, stanowiący załącznik nr 3A do swz należy pobrać ze strony internetowej prowadzonego postępowania (e-Zamówienia), zapisać na dysku, a następnie zaimportować do wyżej wymienionego serwisu oraz postępując zgodnie z zamieszczoną tam instrukcją wypełnić wzór elektronicznego formularza ESPD. Serwis ESPD nie archiwizuje plików.
+3.W przypadku wspólnego ubiegania się o zamówienie przez wykonawców, oświadczenie, o którym mowa w ust. 1, składa każdy z wykonawców. Oświadczenia te potwierdzają brak podstaw wykluczenia oraz spełnianie warunków udziału w postępowaniu w zakresie, w jakim każdy z wykonawców wykazuje spełnianie warunków udziału w postępowaniu.
+4.Wykonawca, który polega na zdolnościach lub sytuacji podmiotów udostępniających zasoby na zasadach określonych w art. 118 ustawy przedstawia, wraz z oświadczeniem, o którym mowa w ust. 1, także oświadczenie JEDZ podmiotu udostępniającego zasoby, potwierdzające brak podstaw wykluczenia tego podmiotu oraz odpowiednio spełnianie warunków udziału w postępowaniu, w zakresie, w jakim wykonawca powołuje się na jego zasoby.
+5.Wykonawca może wykorzystać jednolity dokument złożony w odrębnym postępowaniu o udzielenie zamówienia, jeżeli potwierdzi, że informacje w nim zawarte pozostają prawidłowe.
+6.Na potwierdzenie braku podstaw wykluczenia Zamawiający żąda następujących podmiotowych środków dowodowych:
+1)informacji z Krajowego Rejestru Karnego, sporządzonej nie wcześniej niż 6 miesięcy przed jej złożeniem, w zakresie:
+a)art. 108 ust. 1 pkt 1 i 2 ustawy z dnia 11 września 2019 r. – Prawo zamówień publicznych, zwanej dalej „ustawą”,
+b)art. 108 ust. 1 pkt 4 ustawy, dotyczącej orzeczenia zakazu ubiegania się o zamówienie publiczne tytułem środka karnego,
+c)art. 109 ust. 1 pkt 2 lit. a ustawy,
+d)art. 109 ust. 1 pkt 2 lit. b ustawy, dotyczącej ukarania za wykroczenie, za które wymierzono karę aresztu,
+e)art. 109 ust. 1 pkt 3 ustawy, dotyczącej skazania za przestępstwo lub ukarania za wykroczenie, za które wymierzono karę aresztu;
+2)oświadczenia wykonawcy, w zakresie art. 108 ust. 1 pkt 5 ustawy, o braku przynależności do tej samej grupy kapitałowej w rozumieniu ustawy z dnia 16 lutego 2007 r. o ochronie konkurencji i konsumentów (Dz. U. z 2020 r. poz. 1076 i 1086), z innym wykonawcą, który złożył odrębną ofertę w postępowaniu, albo oświadczenia o przynależności do tej samej grupy kapitałowej wraz z dokumentami lub informacjami potwierdzającymi przygotowanie oferty w postępowaniu niezależnie od innego wykonawcy należącego do tej samej grupy kapitałowej. Wzór oświadczenia stanowi załącznik nr 4 do swz;
+3)oświadczenia wykonawcy o aktualności informacji zawartych w oświadczeniu, o którym mowa w ust. 1, w zakresie podstaw wykluczenia z postępowania wskazanych przez Zamawiającego, o których mowa w:
+a)art. 108 ust. 1 pkt 3 ustawy,
+b)art. 108 ust. 1 pkt 4 ustawy, dotyczących orzeczenia zakazu ubiegania się o zamówienie publiczne tytułem środka zapobiegawczego,
+c)art. 108 ust. 1 pkt 5 ustawy, dotyczących zawarcia z innymi wykonawcami porozumienia mającego na celu zakłócenie konkurencji,
+d)art. 108 ust. 1 pkt 6 ustawy,
+e)art. 109 ust. 1 pkt 2 lit. b ustawy, dotyczących ukarania za wykroczenie, za które wymierzono karę ograniczenia wolności lub karę grzywny,
+f)art. 109 ust. 1 pkt 3 ustawy, dotyczących ukarania za wykroczenie, za które wymierzono karę ograniczenia wolności lub karę grzywny,
+g)art. 109 ust. 1 pkt 8 i 10) ustawy,
+wzór oświadczenia stanowi załącznik nr 5 do swz.
+7.Jeżeli wykonawca ma siedzibę lub miejsce zamieszkania poza granicami Rzeczypospolitej Polskiej, zamiast informacji z Krajowego Rejestru Karnego, o której mowa w ust. 6 pkt 1) – składa informację z odpowiedniego rejestru, takiego jak rejestr sądowy, albo, w przypadku braku takiego rejestru, inny równoważny dokument wydany przez właściwy organ sądowy lub administracyjny kraju, w którym wykonawca ma siedzibę lub miejsce zamieszkania lub miejsce zamieszkania ma osoba, której dotyczy informacja albo dokument, w zakresie, o którym mowa w ust. 6 pkt 1).
+8.Dokument, o którym mowa w ust. 7 powinien być wystawiony nie wcześniej niż 6 miesięcy przed jego złożeniem.
+9.Jeżeli w kraju, w którym wykonawca ma siedzibę lub miejsce zamieszkania lub miejsce zamieszkania ma osoba, której dokument dotyczy, nie wydaje się dokumentów, o których mowa w ust. 7, lub gdy dokumenty te nie odnoszą się do wszystkich przypadków, o których mowa w art. 108 ust. 1 pkt 1, 2 i 4, art. 109 ust. 1 pkt 2 lit. a i b oraz pkt 3 ustawy, zastępuje się je odpowiednio w całości lub w części dokumentem zawierającym odpowiednio oświadczenie wykonawcy, ze wskazaniem osoby albo osób uprawnionych do jego reprezentacji, lub oświadczenie osoby, której dokument miał dotyczyć, złożone pod przysięgą, lub, jeżeli w kraju, w którym wykonawca ma siedzibę lub miejsce zamieszkania lub miejsce zamieszkania ma osoba, której dokument miał dotyczyć, nie ma przepisów o oświadczeniu pod przysięgą, złożone przed organem sądowym lub administracyjnym, notariuszem, organem samorządu zawodowego lub gospodarczego, właściwym ze względu na siedzibę lub miejsce zamieszkania wykonawcy lub miejsce zamieszkania osoby, której dokument miał dotyczyć. Przepis ust. 8 stosuje się.
+10.W przypadku wykonawców wspólnie ubiegających się o udzielenie zamówienia, podmiotowe środki dowodowe na potwierdzenie braku podstaw wykluczenia wymienione w ust. 6 składa każdy z wykonawców wspólnie ubiegających się o udzielenie zamówienia.
+11.Wykonawca nie jest zobowiązany do złożenia podmiotowych środków dowodowych, które Zamawiający posiada, jeżeli wykonawca wskaże te środki oraz potwierdzi ich prawidłowość i aktualność.
+12.Zamawiający nie wezwie wykonawcy do złożenia podmiotowych środków dowodowych, jeżeli może je uzyskać za pomocą bezpłatnych i ogólnodostępnych baz danych, w szczególności rejestrów publicznych w rozumieniu ustawy z dnia 17 lutego 2005 r. o informatyzacji działalności podmiotów realizujących zadania publiczne, o ile wykonawca wskazał w jednolitym dokumencie lub w formularzu oferty dane umożliwiające dostęp do tych środków
+III. 1.Zamawiający wymaga złożenia przez Wykonawcę wraz z ofertą oświadczenia, że Wykonawca:
+a)nie podlega wykluczeniu z postępowania na podstawie art. 7 ust. 1 ustawy z dnia 13 kwietnia 2022 r. o szczególnych rozwiązaniach w zakresie przeciwdziałania wspieraniu agresji na Ukrainę oraz służących ochronie bezpieczeństwa narodowego,
+b)nie podlega zakazowi udzielania lub dalszego wykonywania wszelkich zamówień publicznych na podstawie artykułu 5k ust. 1 Rozporządzenia Rady (UE) Nr 833/2014 z dnia 31 lipca 2014 r. dotyczącego środków ograniczających w związku z działaniami Rosji destabilizującymi sytuację na Ukrainie (Dz. Urz. UE L 229 z 31.07.2014, str. 1, z późn. zm.) - oświadczenia są ujęte w załączniku nr 2C do swz.
+2. W przypadku wspólnego ubiegania się o zamówienie przez wykonawców, oświadczenie, o którym mowa w ust. 1swz, składa każdy z Wykonawców. 3. Wykonawca, który polega na zdolnościach lub sytuacji podmiotów udostępniających zasoby na zasadach określonych w art. 118 ustawy przedstawia, wraz z oświadczeniem, o którym mowa w ust. 1, także oświadczenie, o którym mowa w ust. 1 podmiotu udostępniającego zasoby.
+cd w swz</cbc:Note>
+      <cac:RequestedTenderTotal>
+         <cbc:EstimatedOverallContractAmount currencyID="PLN">97196</cbc:EstimatedOverallContractAmount>
+      </cac:RequestedTenderTotal>
+      <cac:MainCommodityClassification>
+         <cbc:ItemClassificationCode listName="cpv">63500000</cbc:ItemClassificationCode>
+      </cac:MainCommodityClassification>
+      <cac:RealizedLocation>
+         <cac:Address>
+            <cbc:CountrySubentityCode listName="nuts">FRK26</cbc:CountrySubentityCode>
+            <cac:Country>
+               <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+            </cac:Country>
+         </cac:Address>
+      </cac:RealizedLocation>
+   </cac:ProcurementProject>
+   <cac:ProcurementProjectLot>
+      <cbc:ID schemeName="Lot">LOT-0001</cbc:ID>
+      <cac:TenderingTerms>
+         <ext:UBLExtensions>
+            <ext:UBLExtension>
+               <ext:ExtensionContent>
+                  <efext:EformsExtension>
+                     <efac:SelectionCriteria>
+                        <cbc:TendererRequirementTypeCode listName="selection-criterion">slc-suit-reg-prof</cbc:TendererRequirementTypeCode>
+                        <cbc:Description languageID="POL">I.1. O udzielenie zamówienia mogą ubiegać się wykonawcy, którzy spełniają warunki udziału w postępowaniu dotyczące zdolności technicznej lub zawodowej:
+warunek udziału w postępowaniu zostanie uznany za spełniony, gdy wykonawca wykaże, że należycie wykonał (lub wykonuje – w przypadku świadczeń powtarzających się lub ciągłych) w okresie ostatnich 3 lat, a jeżeli okres prowadzenia działalności jest krótszy – w tym okresie, co najmniej jedną usługę polegającą na organizacji i wyjazdu grupy osób (co najmniej 3 osoby) na zagraniczne: targi i/lub konferencję i/lub wizytę studyjną i/lub warsztaty, o wartości usługi co najmniej 20 000 zł brutto.
+Przez jedną usługę należy rozumieć jedną umowę.
+Okresy wyrażone w latach lub miesiącach, o których mowa powyżej, liczy się wstecz od dnia w którym upływa termin składania ofert w postępowaniu.
+2.	Wykonawca może w celu potwierdzenia spełniania warunków udziału w postępowaniu polegać na zdolnościach technicznych lub zawodowych podmiotów udostępniających zasoby na zasadach określonych w art. 118 ustawy.
+3.	W przypadku wykonawców wspólnie ubiegających się o udzielenie zamówienia w odniesieniu do warunku dotyczącego doświadczenia wykonawcy wspólnie ubiegający się o udzielenie zamówienia mogą polegać na zdolnościach tych z wykonawców, którzy wykonają usługi, do realizacji których te zdolności są wymagane.
+4.	W przypadku, o którym mowa w ust. 3, wykonawcy wspólnie ubiegający się o udzielenie zamówienia dołączają do oferty oświadczenie, z którego wynika, które usługi wykonają poszczególni wykonawcy (wzór oświadczenia stanowi załącznik nr 2A do swz).
+5.	Wykonawcy wspólnie ubiegający się o udzielenie zamówienia ustanawiają pełnomocnika do reprezentowania ich w postępowaniu o udzielenie zamówienia albo do reprezentowania w postępowaniu i zawarcia umowy w sprawie zamówienia publicznego (do oferty należy załączyć odpowiednie pełnomocnictwo) chyba, że w przypadku spółki cywilnej, z umowy tej spółki wynika sposób jej reprezentowania (do stwierdzenia, czego niezbędne jest załączenie do oferty umowy spółki cywilnej). Wszelka korespondencja oraz rozliczenia dokonywane będą wyłącznie z podmiotem występującym, jako pełnomocnik pozostałych. Oferta musi być podpisana w taki sposób, by prawnie zobowiązywała wszystkie podmioty występujące wspólnie. Wykonawcy wspólnie ubiegający się o udzielenie zamówienia, ponoszą solidarną odpowiedzialność za wykonanie umowy.
+cd w swz</cbc:Description>
+                     </efac:SelectionCriteria>
+                  </efext:EformsExtension>
+               </ext:ExtensionContent>
+            </ext:UBLExtension>
+         </ext:UBLExtensions>
+         <cbc:FundingProgramCode listName="eu-funded">no-eu-funds</cbc:FundingProgramCode>
+         <cac:RequiredFinancialGuarantee>
+            <cbc:GuaranteeTypeCode listName="tender-guarantee-required">false</cbc:GuaranteeTypeCode>
+         </cac:RequiredFinancialGuarantee>
+         <cac:CallForTendersDocumentReference>
+            <cbc:ID>ocds-148610-7ef45e09-67c4-4288-bb7c-d1ba54bc644b</cbc:ID>
+            <cbc:DocumentType>non-restricted-document</cbc:DocumentType>
+            <cac:Attachment>
+               <cac:ExternalReference>
+                  <cbc:URI>https://ezamowienia.gov.pl/mp-client/search/list/ocds-148610-7ef45e09-67c4-4288-bb7c-d1ba54bc644b</cbc:URI>
+               </cac:ExternalReference>
+            </cac:Attachment>
+         </cac:CallForTendersDocumentReference>
+         <cac:TendererQualificationRequest>
+            <cac:SpecificTendererRequirement>
+               <cbc:TendererRequirementTypeCode listName="selection-criteria-source">epo-notice</cbc:TendererRequirementTypeCode>
+            </cac:SpecificTendererRequirement>
+         </cac:TendererQualificationRequest>
+         <cac:TendererQualificationRequest>
+            <cac:SpecificTendererRequirement>
+               <cbc:TendererRequirementTypeCode listName="reserved-procurement">none</cbc:TendererRequirementTypeCode>
+            </cac:SpecificTendererRequirement>
+         </cac:TendererQualificationRequest>
+         <cac:ContractExecutionRequirement>
+            <cbc:ExecutionRequirementCode listName="reserved-execution">no</cbc:ExecutionRequirementCode>
+         </cac:ContractExecutionRequirement>
+         <cac:ContractExecutionRequirement>
+            <cbc:ExecutionRequirementCode listName="einvoicing">allowed</cbc:ExecutionRequirementCode>
+         </cac:ContractExecutionRequirement>
+         <cac:ContractExecutionRequirement>
+            <cbc:ExecutionRequirementCode listName="ecatalog-submission">not-allowed</cbc:ExecutionRequirementCode>
+         </cac:ContractExecutionRequirement>
+         <cac:AwardingTerms>
+            <cac:AwardingCriterion>
+               <cac:SubordinateAwardingCriterion>
+                  <ext:UBLExtensions>
+                     <ext:UBLExtension>
+                        <ext:ExtensionContent>
+                           <efext:EformsExtension>
+                              <efac:AwardCriterionParameter>
+                                 <efbc:ParameterCode listName="number-weight">poi-exa</efbc:ParameterCode>
+                                 <efbc:ParameterNumeric>60</efbc:ParameterNumeric>
+                              </efac:AwardCriterionParameter>
+                           </efext:EformsExtension>
+                        </ext:ExtensionContent>
+                     </ext:UBLExtension>
+                  </ext:UBLExtensions>
+                  <cbc:AwardingCriterionTypeCode listName="award-criterion-type">price</cbc:AwardingCriterionTypeCode>
+                  <cbc:Name languageID="POL">Cena brutto wykonania przedmiotu zamówienia </cbc:Name>
+                  <cbc:Description languageID="POL">Ocena ofert w kryterium „Cena brutto za wykonanie przedmiotu zamówienia ” zostanie dokonana według wzoru: Cena brutto wykonania zamówienia=[Cena brutto wykonania zamówienia spośród ofert niepodlegających odrzuceniu)/(Cena brutto wykonania zamówienia oferty ocenianej)] x  60 pkt</cbc:Description>
+               </cac:SubordinateAwardingCriterion>
+               <cac:SubordinateAwardingCriterion>
+                  <ext:UBLExtensions>
+                     <ext:UBLExtension>
+                        <ext:ExtensionContent>
+                           <efext:EformsExtension>
+                              <efac:AwardCriterionParameter>
+                                 <efbc:ParameterCode listName="number-weight">poi-exa</efbc:ParameterCode>
+                                 <efbc:ParameterNumeric>20</efbc:ParameterNumeric>
+                              </efac:AwardCriterionParameter>
+                           </efext:EformsExtension>
+                        </ext:ExtensionContent>
+                     </ext:UBLExtension>
+                  </ext:UBLExtensions>
+                  <cbc:AwardingCriterionTypeCode listName="award-criterion-type">quality</cbc:AwardingCriterionTypeCode>
+                  <cbc:Name languageID="POL">Zapewnienie dodatkowo realizacji programu edukacyjno – poznawczego dla uczestników delegacji z Małopolski w Lyon, o którym mowa w pkt 7 SOPZ</cbc:Name>
+                  <cbc:Description languageID="POL">Ocena ofert w kryterium „Zapewnienie dodatkowo realizacji programu edukacyjno – poznawczego dla uczestników delegacji z Małopolski w Lyon, o którym mowa w pkt 7 SOPZ” zostanie dokonana według następujących zasad;
+•	Jeśli wykonawca zaoferuje zapewnienie dodatkowo realizacji programu edukacyjno – poznawczego dla uczestników delegacji z Małopolski w Lyon (poprzez zaznaczenie „TAK” w Formularzu oferty) – oferta wykonawcy otrzyma 20 pkt,
+•	Jeśli wykonawca nie zaoferuje zapewnienia dodatkowo realizacji programu edukacyjno – poznawczego dla uczestników delegacji z Małopolski w Lyon (poprzez zaznaczenie „NIE” w Formularzu oferty) – oferta wykonawcy otrzyma 0 pkt,
+•	Jeśli wykonawca nie zaznaczy żadnej odpowiedzi albo zaznaczy obie odpowiedzi - Zamawiający uzna, że wykonawca nie oferuje zapewnienia dodatkowo realizacji programu edukacyjno – poznawczego dla uczestników delegacji z Małopolski w Lyon i oferta wykonawcy otrzyma 0 pkt.
+W kryterium „Zapewnienie dodatkowo realizacji programu edukacyjno – poznawczego dla uczestników delegacji z Małopolski w Lyon” oferta może uzyskać maksymalnie 20 punktów</cbc:Description>
+               </cac:SubordinateAwardingCriterion>
+               <cac:SubordinateAwardingCriterion>
+                  <ext:UBLExtensions>
+                     <ext:UBLExtension>
+                        <ext:ExtensionContent>
+                           <efext:EformsExtension>
+                              <efac:AwardCriterionParameter>
+                                 <efbc:ParameterCode listName="number-weight">poi-exa</efbc:ParameterCode>
+                                 <efbc:ParameterNumeric>20</efbc:ParameterNumeric>
+                              </efac:AwardCriterionParameter>
+                           </efext:EformsExtension>
+                        </ext:ExtensionContent>
+                     </ext:UBLExtension>
+                  </ext:UBLExtensions>
+                  <cbc:AwardingCriterionTypeCode listName="award-criterion-type">quality</cbc:AwardingCriterionTypeCode>
+                  <cbc:Name languageID="POL">Zapewnienie dodatkowo 1 tłumacza języka francuskiego podczas Mundialu Zawodów, który będzie z delegacją z Małopolski na stoisku w dniach 10-13 grudnia 2026</cbc:Name>
+                  <cbc:Description languageID="POL">Ocena ofert w kryterium „Zapewnienie dodatkowo 1 tłumacza języka francuskiego podczas Mundialu Zawodów, który będzie z delegacją z Małopolski na stoisku w dniach 10-13 grudnia 2026  ” zostanie dokonana według następujących zasad:
+•	Jeśli wykonawca zaoferuje zapewnienie dodatkowo 1 tłumacza języka francuskiego podczas Mundialu Zawodów, który będzie z delegacja z Małopolski na stoisku w dniach 10-13 grudnia 2026   (poprzez zaznaczenie „TAK” w Formularzu oferty) – oferta wykonawcy otrzyma 20 pkt,
+•	Jeśli wykonawca nie zaoferuje 1 dodatkowego tłumacza języka francuskiego podczas Mundialu Zawodów, który będzie z delegacja z Małopolski na stoisku w dniach 10-13 grudnia 2026 (poprzez zaznaczenie „NIE” w Formularzu oferty) – oferta wykonawcy otrzyma 0 pkt,
+•	Jeśli wykonawca nie zaznaczy żadnej odpowiedzi albo zaznaczy obie odpowiedzi - Zamawiający uzna, że wykonawca nie zaoferuje 1 dodatkowego tłumacza języka francuskiego podczas Mundialu Zawodów, który będzie z delegacja z Małopolski na stoisku w dniach 10-13 grudnia 2026  i oferta wykonawcy otrzyma 0 pkt.
+W kryterium „Zapewnienie dodatkowo 1 tłumacza języka francuskiego podczas Mundialu Zawodów, który będzie z delegacją z Małopolski na stoisku w dniach 10-13 grudnia 2026  ” oferta może uzyskać maksymalnie 20 punktów.
+</cbc:Description>
+               </cac:SubordinateAwardingCriterion>
+            </cac:AwardingCriterion>
+         </cac:AwardingTerms>
+         <cac:TenderRecipientParty>
+            <cbc:EndpointID>https://ezamowienia.gov.pl/mp-client/search/list/ocds-148610-7ef45e09-67c4-4288-bb7c-d1ba54bc644b</cbc:EndpointID>
+         </cac:TenderRecipientParty>
+         <cac:TenderValidityPeriod>
+            <cbc:DurationMeasure unitCode="DAY">90</cbc:DurationMeasure>
+         </cac:TenderValidityPeriod>
+         <cac:AppealTerms>
+            <cac:PresentationPeriod>
+               <cbc:Description languageID="POL">1.	Wykonawcy oraz innemu podmiotowi, jeżeli ma lub miał interes w uzyskaniu zamówienia oraz poniósł lub może ponieść szkodę w wyniku naruszenia przez Zamawiającego przepisów ustawy przysługują środki ochrony prawnej.
+2.	Środki ochrony prawnej wobec ogłoszenia wszczynającego postępowanie o udzielenie zamówienia oraz dokumentów zamówienia przysługują również organizacjom wpisanym na listę, o której mowa w art. 469 pkt 15 ustawy, oraz Rzecznikowi Małych i Średnich Przedsiębiorców.
+3.	Przepisy dotyczące środków ochrony prawnej są określone w dziale IX ustawy.
+4.	Odwołanie przysługuje na niezgodną z przepisami ustawy czynność Zamawiającego, podjętą w postępowaniu o udzielenie zamówienia, w tym na projektowane postanowienie umowy oraz zaniechanie czynności w postępowaniu o udzielenie zamówienia, do której Zamawiający był obowiązany na podstawie ustawy.
+5.	Na orzeczenie Izby oraz postanowienie Prezesa Izby, o którym mowa w art. 519
+ust. 1 ustawy, stronom oraz uczestnikom postępowania odwoławczego przysługuje skarga do sądu.
+</cbc:Description>
+            </cac:PresentationPeriod>
+            <cac:AppealReceiverParty>
+               <cac:PartyIdentification>
+                  <cbc:ID>ORG-0003</cbc:ID>
+               </cac:PartyIdentification>
+            </cac:AppealReceiverParty>
+         </cac:AppealTerms>
+         <cac:Language>
+            <cbc:ID>POL</cbc:ID>
+         </cac:Language>
+         <cac:PostAwardProcess>
+            <cbc:ElectronicOrderUsageIndicator>true</cbc:ElectronicOrderUsageIndicator>
+            <cbc:ElectronicPaymentUsageIndicator>true</cbc:ElectronicPaymentUsageIndicator>
+         </cac:PostAwardProcess>
+      </cac:TenderingTerms>
+      <cac:TenderingProcess>
+         <cbc:SubmissionMethodCode listName="esubmission">required</cbc:SubmissionMethodCode>
+         <cbc:GovernmentAgreementConstraintIndicator>false</cbc:GovernmentAgreementConstraintIndicator>
+         <cac:TenderSubmissionDeadlinePeriod>
+            <cbc:EndDate>2026-10-29+01:00</cbc:EndDate>
+            <cbc:EndTime>10:00:00+01:00</cbc:EndTime>
+         </cac:TenderSubmissionDeadlinePeriod>
+         <cac:OpenTenderEvent>
+            <cbc:OccurrenceDate>2026-10-29+01:00</cbc:OccurrenceDate>
+            <cbc:OccurrenceTime>10:05:00+01:00</cbc:OccurrenceTime>
+            <cbc:Description languageID="POL">1. Otwarcie ofert następuje przez Platformę e-Zamówienia.
+2. Termin, do którego oferta musi pozostać ważna - termin związania ofertą upływa 26.01.2027 r.</cbc:Description>
+         </cac:OpenTenderEvent>
+         <cac:AuctionTerms>
+            <cbc:AuctionConstraintIndicator>false</cbc:AuctionConstraintIndicator>
+         </cac:AuctionTerms>
+         <cac:ContractingSystem>
+            <cbc:ContractingSystemTypeCode listName="framework-agreement">none</cbc:ContractingSystemTypeCode>
+         </cac:ContractingSystem>
+         <cac:ContractingSystem>
+            <cbc:ContractingSystemTypeCode listName="dps-usage">none</cbc:ContractingSystemTypeCode>
+         </cac:ContractingSystem>
+      </cac:TenderingProcess>
+      <cac:ProcurementProject>
+         <cbc:ID schemeName="InternalID">EK-IX.272.18.2026</cbc:ID>
+         <cbc:Name languageID="POL">Organizacja podróży oraz obsługa logistyczna pobytu delegacji z Małopolski w Lyonie we Francji w roli wystawcy w Targach Edukacyjnych pod nazwą Mundial Zawodów w Lyonie</cbc:Name>
+         <cbc:Description languageID="POL">1.	Przedmiotem zamówienia jest organizacja podróży oraz obsługa logistyczna pobytu delegacji z Małopolski w Lyonie we Francji w roli wystawcy w Targach Edukacyjnych pod nazwą Mundial Zawodów w Lyonie. Mundial Zawodów odbędzie się w dniach 10-13 grudnia 2026r. w hali Eurexpo w Lyonie. W ramach zamówienia Wykonawca zapewni:
+a)	Transport uczestników z Małopolski (z Krakowa oraz Nowego Sącza) do Lyonu i z powrotem, transport po Lyonie oraz transport sprzętu i materiałów promocyjnych z Małopolski (z Krakowa oraz Nowego Sącza) do Lyonu i z powrotem - w tym ubezpieczenie sprzętu oraz ubezpieczenie uczestników,
+b)	Zapewnienie posiłków dla każdego uczestnika delegacji –  kolacji podczas całego pobytu w Lyon (tj. w dniach 9 - 13 grudnia) oraz 14 grudnia Wykonawca zapewni lunchbox  na podróż wszystkim uczestnikom, a jeżeli czas podróży ulegnie wydłużeniu to również ciepłe posiłki.
+c)	Tłumacza języka francuskiego,
+d)	Obsługę logistyczną stoiska Małopolski na Targach, w tym przygotowanie projektu wizualizacji stoiska, urządzenie i wyposażenie stoiska w meble/ścianki oddzielające oraz media (prąd, Internet).
+2.	Szczegółowy opis przedmiotu zamówienia (SOPZ) stanowi załącznik nr 1D do swz i będzie on wprowadzony jako załącznik nr 1 do umowy w sprawie zamówienia publicznego.
+3.	Warunki realizacji zamówienia zawarte są w projektowanych postanowieniach umowy w sprawie zamówienia publicznego, które zostaną wprowadzone do umowy w sprawie zamówienia publicznego – wzorze umowy i stanowią załącznik nr 1C do swz (zwane są dalej wzorem umowy).
+4.	Zamawiający stosownie do dyspozycji wynikającej z art. 95 ustawy określa, że nie wymaga zatrudnienia przez wykonawcę lub podwykonawcę na podstawie stosunku pracy osób wykonujących czynności w zakresie realizacji zamówienia.
+5.	Oznaczenie wg CPV: 63500000-4 Usługi biur podróży, podmiotów turystycznych i pomocy turystycznej.</cbc:Description>
+         <cbc:ProcurementTypeCode listName="contract-nature">services</cbc:ProcurementTypeCode>
+         <cac:RequestedTenderTotal>
+            <cbc:EstimatedOverallContractAmount currencyID="PLN">97196</cbc:EstimatedOverallContractAmount>
+         </cac:RequestedTenderTotal>
+         <cac:MainCommodityClassification>
+            <cbc:ItemClassificationCode listName="cpv">63500000</cbc:ItemClassificationCode>
+         </cac:MainCommodityClassification>
+         <cac:RealizedLocation>
+            <cac:Address>
+               <cbc:CountrySubentityCode listName="nuts">FRK26</cbc:CountrySubentityCode>
+               <cac:Country>
+                  <cbc:IdentificationCode listName="country">FRA</cbc:IdentificationCode>
+               </cac:Country>
+            </cac:Address>
+         </cac:RealizedLocation>
+         <cac:PlannedPeriod>
+            <cbc:DurationMeasure unitCode="MONTH">2</cbc:DurationMeasure>
+         </cac:PlannedPeriod>
+      </cac:ProcurementProject>
+   </cac:ProcurementProjectLot>
+</ContractNotice>
