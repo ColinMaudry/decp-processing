@@ -8,6 +8,7 @@ from pathlib import Path
 
 import httpx
 import polars as pl
+import yaml
 from dotenv import find_dotenv, load_dotenv
 from ijson import sendable_list
 from prefect.logging import get_logger
@@ -394,7 +395,67 @@ DEAO_STATUT_DELAI_JOURS = int(os.getenv("DEAO_STATUT_DELAI_JOURS", "90"))
 DEAO_MIN_ROWS_TO_PUBLISH = int(os.getenv("DEAO_MIN_ROWS_TO_PUBLISH", "50000"))
 
 # Publication data.gouv.fr.
-DEAO_DATASET_ID = os.getenv("DEAO_DATASET_ID", "")
+# a = dataset public (Open Data), b = dataset privé (toutes les sources)
+DEAO_OPEN_DATASET_ID = os.getenv("DEAO_OPEN_DATASET_ID", "")
+DEAO_CLOSED_DATASET_ID = os.getenv("DEAO_CLOSED_DATASET_ID", "")
+DEAO_CLOSED_PARQUET_RESOURCE_ID = os.getenv("DEAO_CLOSED_PARQUET_RESOURCE_ID", "")
+
+# Ne lancer que ces scrapers DEAO (codes séparés par des virgules) ; aucune publication
+SOLO_DEAO_SCRAPS = os.getenv("SOLO_DEAO_SCRAPS", "")
+if len(SOLO_DEAO_SCRAPS) > 0:
+    SOLO_DEAO_SCRAPS = SOLO_DEAO_SCRAPS.strip().split(",")
+else:
+    SOLO_DEAO_SCRAPS = []
+ALL_CONFIG["SOLO_DEAO_SCRAPS"] = SOLO_DEAO_SCRAPS
+
+
+@dataclass(frozen=True)
+class SourceDeao:
+    code: str
+    name: str
+    open_data: bool
+    resource_id: str
+    min_rows: int
+    skip: bool = False
+
+
+def charger_registre_deao(path: Path) -> tuple[SourceDeao, ...]:
+    """Charge et valide le registre YAML des sources DEAO."""
+    with open(path, "r") as f:
+        entrees = yaml.safe_load(f) or []
+    sources = []
+    codes = set()
+    for entree in entrees:
+        manquants = [
+            c
+            for c in ("code", "name", "open_data", "resource_id", "min_rows")
+            if c not in entree
+        ]
+        if manquants:
+            raise ValueError(
+                f"Registre DEAO {path} : champs manquants {manquants} dans {entree}"
+            )
+        if entree["code"] in codes:
+            raise ValueError(f"Registre DEAO {path} : code en double {entree['code']}")
+        codes.add(entree["code"])
+        sources.append(
+            SourceDeao(
+                code=entree["code"],
+                name=entree["name"],
+                open_data=bool(entree["open_data"]),
+                resource_id=str(entree["resource_id"]),
+                min_rows=int(entree["min_rows"]),
+                skip=bool(entree.get("skip", False)),
+            )
+        )
+    return tuple(sources)
+
+
+DEAO_REGISTRE = charger_registre_deao(
+    make_path_from_env(
+        "DEAO_SOURCES_REFERENCE_FILEPATH", REFERENCE_DIR / "deao_sources.yaml"
+    )
+)
 DEAO_PARQUET_RESOURCE_ID = os.getenv("DEAO_PARQUET_RESOURCE_ID", "")
 DEAO_CSV_RESOURCE_ID = os.getenv("DEAO_CSV_RESOURCE_ID", "")
 DEAO_SCHEMA_RESOURCE_ID = os.getenv("DEAO_SCHEMA_RESOURCE_ID", "")

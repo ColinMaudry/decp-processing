@@ -201,7 +201,7 @@ def should_publish_deao(n_lignes: int) -> bool:
 
     return bool(
         config.DECP_PROCESSING_PUBLISH
-        and config.DEAO_DATASET_ID
+        and config.DEAO_OPEN_DATASET_ID
         and n_lignes >= config.DEAO_MIN_ROWS_TO_PUBLISH
     )
 
@@ -224,7 +224,7 @@ def publish_deao_to_datagouv(dist_dir: Path) -> None:
             continue
         logger.info(f"Mise à jour de {file_path.name}...")
         result = update_resource(
-            config.DEAO_DATASET_ID,
+            config.DEAO_OPEN_DATASET_ID,
             resource_id,
             str(file_path),
             config.DATAGOUVFR_API_KEY,

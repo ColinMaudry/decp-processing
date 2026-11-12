@@ -172,7 +172,7 @@ def deao_processing(run_date: str | None = None) -> None:
         publish_deao_to_datagouv(DEAO_DIST_DIR)
     else:
         logger.info(
-            "Publication DEAO désactivée (DECP_PROCESSING_PUBLISH, DEAO_DATASET_ID "
+            "Publication DEAO désactivée (DECP_PROCESSING_PUBLISH, DEAO_OPEN_DATASET_ID "
             f"ou {df.height} lignes < DEAO_MIN_ROWS_TO_PUBLISH)."
         )
 

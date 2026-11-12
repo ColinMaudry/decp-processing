@@ -1,0 +1,10 @@
+- code: boamp # = sourceDataset, préfixe d'uid
+  name: Bulletin officiel des annonces des marchés publics (BOAMP, DILA)
+  open_data: true
+  resource_id: 9861dd3a-e4af-49c7-b8f9-8d20b0cfdd62
+  min_rows: 1
+- code: joue
+  name: Journal officiel de l'Union européenne (JOUE, via TED)
+  open_data: true
+  resource_id: 8fd238e4-d5ab-40d1-9b61-a07c2fdb020c
+  min_rows: 1

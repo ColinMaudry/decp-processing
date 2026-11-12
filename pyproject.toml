@@ -7,6 +7,7 @@ requires-python = ">= 3.11"
 authors = [{ name = "Colin Maudry", email = "colin@colmo.tech" }]
 dependencies = [
   "python-dotenv",
+  "pyyaml",
   "pandas",                # nécessaire pour l'écriture en base de données
   "polars==2.1.0",
   "pyarrow",
@@ -44,6 +45,8 @@ env = [
   "DECP_USE_CACHE=false",
   "MAX_PREFECT_WORKERS=1",
   "SOLO_DATASETS=",
+  "SOLO_DEAO_SCRAPS=",
+  "DEAO_SOURCES_REFERENCE_FILEPATH=tests/data/deao_sources_test.yaml",
   "PREFECT_TASKS_DISABLE_CACHE=True",
 ]
 addopts = "-p no:warnings"
