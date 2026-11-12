@@ -338,6 +338,24 @@ BOAMP_AVIS_URL_TEMPLATE = os.getenv(
 )
 
 # ---------------------------------------------------------------------------
+# Source JOUE (via l'API et le site TED)
+# ---------------------------------------------------------------------------
+TED_API_URL = os.getenv("TED_API_URL", "https://api.ted.europa.eu/v3")
+TED_NOTICE_XML_URL = os.getenv(
+    "TED_NOTICE_XML_URL", "https://ted.europa.eu/en/notice/{publication_number}/xml"
+)
+JOUE_AVIS_URL_TEMPLATE = os.getenv(
+    "JOUE_AVIS_URL_TEMPLATE",
+    "https://ted.europa.eu/fr/notice/-/detail/{publication_number}",
+)
+# Pays de l'acheteur ou du lieu d'exécution (France et outre-mer)
+JOUE_COUNTRY_CODES = tuple(
+    os.getenv("JOUE_COUNTRY_CODES", "FRA ATF PYF NCL WLF SPM BLM MAF").split()
+)
+JOUE_S3_PREFIX = os.getenv("JOUE_S3_PREFIX", "joue/raw")
+JOUE_MAX_WORKERS = int(os.getenv("JOUE_MAX_WORKERS", "4"))
+
+# ---------------------------------------------------------------------------
 # DEAO (flow deao_processing) — Données essentielles d'appels d'offres, issue #178
 # ---------------------------------------------------------------------------
 

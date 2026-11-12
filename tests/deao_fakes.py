@@ -1,7 +1,10 @@
 """Faux client S3 en mémoire, partagé par les tests DEAO."""
 
 import io
+import re
+from datetime import date, datetime
 
+import httpx
 import pytest
 from botocore.exceptions import ClientError
 
@@ -41,3 +44,79 @@ def fake_s3(monkeypatch):
     fake = FakeS3()
     monkeypatch.setattr(archive, "s3_client", lambda: fake)
     return fake
+
+
+XML_TED_TEST = b'<?xml version="1.0" encoding="UTF-8"?><ContractNotice/>'
+
+
+class FakeTed:
+    """Faux TED : recherche paginée (POST) et XML (GET), avec pannes simulées."""
+
+    def __init__(self):
+        # numéro de publication -> XML, par date de publication
+        self.avis_par_jour: dict[date, dict[str, bytes]] = {}
+        # uuid eForms -> numéro de publication
+        self.identifiants: dict[str, str] = {}
+        # codes forcés avant succès pour le XML d'un numéro, consommés dans l'ordre
+        self.reponses_xml: dict[str, list[int]] = {}
+        self.recherche_en_erreur: set[date] = set()
+        self.identifiants_en_erreur: set[str] = set()
+        self.appels: list[str] = []
+
+    def post(self, url, payload):
+        query = payload["query"]
+        self.appels.append(f"POST {url} {query}")
+        if m := re.search(r"publication-date=(\d{8})", query):
+            jour = datetime.strptime(m.group(1), "%Y%m%d").date()
+            if jour in self.recherche_en_erreur:
+                return httpx.Response(500)
+            numeros = sorted(self.avis_par_jour.get(jour, {}))
+        elif m := re.search(r"notice-identifier=(\S+)", query):
+            if m.group(1) in self.identifiants_en_erreur:
+                return httpx.Response(500)
+            pn = self.identifiants.get(m.group(1))
+            numeros = [pn] if pn else []
+        else:
+            return httpx.Response(400)
+        debut = int(payload.get("iterationNextToken") or 0)
+        fin = debut + payload["limit"]
+        corps = {
+            "notices": [{"publication-number": n} for n in numeros[debut:fin]],
+            "totalNoticeCount": len(numeros),
+        }
+        if fin < len(numeros):
+            corps["iterationNextToken"] = str(fin)
+        return httpx.Response(200, json=corps)
+
+    def get(self, url):
+        self.appels.append(f"GET {url}")
+        pn = url.split("/notice/")[1].split("/")[0]
+        forces = self.reponses_xml.get(pn)
+        if forces:
+            code = forces.pop(0)
+            if code != 200:
+                return httpx.Response(code)
+        for avis in self.avis_par_jour.values():
+            if pn in avis:
+                return httpx.Response(200, content=avis[pn])
+        return httpx.Response(404)
+
+
+@pytest.fixture
+def fake_ted(monkeypatch):
+    from src.tasks.deao.sources.joue import fetch
+
+    fake = FakeTed()
+    fake.avis_par_jour[date(2026, 10, 14)] = {"706679-2026": XML_TED_TEST}
+    fake.identifiants["c2dbf0bf-bd32-4b44-9a85-c27a0f0c3e9b"] = "677195-2026"
+    monkeypatch.setattr(fetch, "_post_raw", fake.post)
+    monkeypatch.setattr(fetch, "_get_raw", fake.get)
+    return fake
+
+
+@pytest.fixture
+def no_sleep(monkeypatch):
+    from src.tasks.deao.sources.joue import fetch
+
+    for fn in (fetch.http_get, fetch.http_post):
+        monkeypatch.setattr(fn.retry, "sleep", lambda _: None)
