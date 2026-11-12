@@ -3,6 +3,7 @@ from datetime import date, datetime
 from pathlib import Path
 
 import polars as pl
+from polars.testing import assert_frame_equal
 
 from src.config import BOAMP_BASE_URL
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA
@@ -113,3 +114,23 @@ def test_source_file_expr_annees_passees_sous_flux_historique():
     assert df.select(source_file_expr(2027))["sourceFile"][1] == (
         f"{BOAMP_BASE_URL}/FluxHistorique/Boamp_v240/2026/10/14/26-1.xml"
     )
+
+
+def test_parse_day_id_eforms_et_acheteur_pays():
+    files = {p.name: p.read_bytes() for p in FIXTURES.glob("*.xml")}
+    df, _ = parse_day(files)
+    r = df.filter(pl.col("idAvis") == "26-87868").row(0, named=True)
+    assert r["idEforms"] == "17114689-cb66-44e1-b420-be7e501a33b0"
+    legacy = df.filter(pl.col("idAvis") == "26-92574").row(0, named=True)
+    assert legacy["idEforms"] is None and legacy["idEformsPrecedent"] is None
+    assert set(df["acheteur_pays"].to_list()) == {"FRA"}
+
+
+def test_parse_day_inchange_hors_nouvelles_colonnes():
+    """Régression de la refonte : sortie figée (parse_day_expected.parquet)."""
+    files = {p.name: p.read_bytes() for p in FIXTURES.glob("*.xml")}
+    df, _ = parse_day(files)
+    attendu = pl.read_parquet(FIXTURES / "parse_day_expected.parquet")
+    nouvelles = ["idEforms", "idEformsPrecedent", "acheteur_pays"]
+    assert df.drop(nouvelles).columns == attendu.columns
+    assert_frame_equal(df.drop(nouvelles), attendu)

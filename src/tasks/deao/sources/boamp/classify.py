@@ -1,22 +1,9 @@
 """Classement des avis BOAMP : retenu ou non, typeAvis, preInformation."""
 
-from dataclasses import dataclass
-
 from src.config import BOAMP_INCLUDED_NATURES, BOAMP_PRE_INFORMATION_NATURES
-from src.tasks.deao.sources.boamp.xml import (
-    detect_format,
-    find,
-    first_child_localname,
-)
-
-
-@dataclass(frozen=True)
-class Classement:
-    nature: str | None
-    retenu: bool
-    typeAvis: str | None
-    preInformation: bool | None
-    formatSource: str
+from src.tasks.deao.classement import Classement
+from src.tasks.deao.sources.boamp.xml import detect_format
+from src.tasks.deao.xml import find, first_child_localname
 
 
 def classify(root) -> Classement:

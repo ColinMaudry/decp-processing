@@ -33,6 +33,7 @@ INTERNAL_COLUMNS = [
     "acheteur_adresse_cp",
     "acheteur_adresse_ville",
     "acheteur_adresse_nuts",
+    "acheteur_pays",
 ]
 OUTPUT_COLUMNS = [
     f.name for f in PUBLISHED_FIELDS if not f.name.startswith(_ENRICHMENT_PREFIXES)

@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from src.config import BASE_DIR
-from src.tasks.deao.sources.boamp.codes import PROCEDURE_INDEXATION, libelle
+from src.tasks.deao.codes import PROCEDURE_INDEXATION, libelle
 from src.tasks.deao.values import (
     departement_depuis_cp,
     departement_depuis_nuts,

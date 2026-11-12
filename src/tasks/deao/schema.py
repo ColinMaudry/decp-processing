@@ -315,6 +315,9 @@ AVIS_LOT_SCHEMA: dict[str, pl.DataType] = {
     "acheteur_adresse_cp": S,
     "acheteur_adresse_ville": S,
     "acheteur_adresse_nuts": S,
+    "acheteur_pays": S,
+    "idEforms": S,
+    "idEformsPrecedent": S,
 }
 
 

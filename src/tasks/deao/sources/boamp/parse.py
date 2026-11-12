@@ -8,15 +8,13 @@ import polars as pl
 from lxml import etree
 
 from src.config import BOAMP_BASE_URL
+from src.tasks.deao.eforms import changed_notice_id, notice_id
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA, conform_avis, empty_avis_frame
 from src.tasks.deao.sources.boamp.classify import classify
 from src.tasks.deao.sources.boamp.eforms import map_eforms
 from src.tasks.deao.sources.boamp.legacy import map_legacy
-from src.tasks.deao.sources.boamp.xml import (
-    annonce_anterieure,
-    find,
-    idweb,
-)
+from src.tasks.deao.sources.boamp.xml import annonce_anterieure, idweb
+from src.tasks.deao.xml import find
 from src.tasks.utils import get_logger
 
 
@@ -67,8 +65,15 @@ def parse_avis(xml: bytes, filename: str, compteur: Counter) -> list[dict]:
         if date_publication
         else None
     )
+    notice = None
+    if classement.formatSource == "eforms":
+        eforms = find(root, "EFORMS")
+        notice = next((c for c in eforms if isinstance(c.tag, str)), None)
     communs = {
         "sourceDataset": "boamp",
+        "idEforms": notice_id(notice) if notice is not None else None,
+        "idEformsPrecedent": changed_notice_id(notice) if notice is not None else None,
+        "acheteur_pays": "FRA",
         "idAvis": idweb(root),
         "avisPrecedent": annonce_anterieure(root),
         "typeAvis": classement.typeAvis,

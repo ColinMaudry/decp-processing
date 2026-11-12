@@ -144,6 +144,7 @@ def test_colonnes_de_sortie():
         "acheteur_adresse_cp",
         "acheteur_adresse_ville",
         "acheteur_adresse_nuts",
+        "acheteur_pays",
     ]
     assert out.columns == attendues
     published = {f.name: f.dtype for f in PUBLISHED_FIELDS}
