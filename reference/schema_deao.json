@@ -1,0 +1,284 @@
+{
+  "fields": [
+    {
+      "type": "string",
+      "name": "uid",
+      "title": "Identifiant unique",
+      "description": "Identifiant unique de l'appel d'offres et du lot, de la forme <sourceDataset>_<idAvisInitial>_<lotId> (sourceDataset : boamp ou joue ; idAvisInitial : IDWEB pour boamp, numéro de publication pour joue). Stable tant que l'avis initial (ou, à défaut, le plus ancien avis connu) de la chaîne d'avis ne change pas.",
+      "short_title": "Id. unique"
+    },
+    {
+      "type": "string",
+      "name": "referenceAcheteur",
+      "title": "Référence acheteur",
+      "description": "Référence interne attribuée à l'appel d'offres par l'acheteur, quand elle est renseignée dans l'avis.",
+      "short_title": "Réf. acheteur"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_id",
+      "title": "SIRET acheteur",
+      "description": "Identifiant de l'établissement de l'acheteur (SIRET), référencé dans la base SIRENE de l'INSEE. Peut être nul si l'avis ne le mentionne pas et qu'il n'a pas pu être déduit.",
+      "short_title": null
+    },
+    {
+      "type": "string",
+      "name": "acheteur_id_source",
+      "title": "Origine du SIRET acheteur",
+      "description": "Origine du SIRET de l'acheteur : 'avis' s'il figure dans l'avis, 'dictionnaire' s'il a été déduit d'autres avis du même acheteur, nul sinon.",
+      "short_title": "Origine SIRET"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_nom",
+      "title": "Nom acheteur",
+      "description": "Nom de l'acheteur : dénomination SIRENE si le SIRET de l'acheteur est trouvé dans SIRENE, sinon nom tel que renseigné dans l'avis.",
+      "short_title": "Acheteur"
+    },
+    {
+      "type": "string",
+      "name": "objet",
+      "title": "Objet",
+      "description": "Objet de l'appel d'offres, tel que renseigné par l'acheteur dans l'avis.",
+      "short_title": null
+    },
+    {
+      "type": "string",
+      "name": "lotId",
+      "title": "Identifiant du lot",
+      "description": "Numéro du lot au sein de l'appel d'offres. '0' signifie que la procédure n'est pas divisée en lots (ou que l'avis ne détaille pas ses lots).",
+      "short_title": "Lot"
+    },
+    {
+      "type": "string",
+      "name": "lotIntitule",
+      "title": "Intitulé du lot",
+      "description": "Intitulé du lot, quand l'appel d'offres est divisé en lots.",
+      "short_title": "Intitulé lot"
+    },
+    {
+      "type": "string",
+      "name": "description",
+      "title": "Description",
+      "description": "Description de l'appel d'offres ou du lot : nature et étendue des besoins.",
+      "short_title": null
+    },
+    {
+      "type": "number",
+      "name": "montantEstime",
+      "title": "Montant estimé",
+      "description": "Montant estimé hors-taxes de l'appel d'offres ou du lot, en euros, quand l'acheteur l'a renseigné.",
+      "short_title": "Montant estimé"
+    },
+    {
+      "type": "string",
+      "name": "type",
+      "title": "Type",
+      "description": "Type d'appel d'offres : fournitures, services ou travaux.",
+      "short_title": "Type",
+      "enum": ["Fournitures", "Services", "Travaux"]
+    },
+    {
+      "type": "string",
+      "name": "codeCPV",
+      "title": "Code CPV",
+      "description": "Catégorie de bien, service ou travaux achetés, selon le Vocabulaire commun pour les marchés publics (CPV).",
+      "short_title": "CPV"
+    },
+    {
+      "type": "string",
+      "name": "procedure",
+      "title": "Procédure",
+      "description": "Le type de procédure de l'appel d'offres, selon les libellés de l'avis BOAMP.",
+      "short_title": null
+    },
+    {
+      "type": "array",
+      "name": "techniques",
+      "title": "Techniques",
+      "description": "Les techniques d'achat utilisées pour l'appel d'offres (accord-cadre, système d'acquisition dynamique, etc.).",
+      "short_title": null
+    },
+    {
+      "type": "integer",
+      "name": "dureeMois",
+      "title": "Durée (mois)",
+      "description": "Durée en mois du marché envisagé.",
+      "short_title": null
+    },
+    {
+      "type": "date",
+      "name": "datePublicationInitiale",
+      "title": "Date de publication initiale",
+      "description": "Date de publication de l'avis initial, à défaut du plus ancien avis disponible.",
+      "short_title": "Date pub.",
+      "format": "default"
+    },
+    {
+      "type": "date",
+      "name": "dateDerniereModification",
+      "title": "Date de dernière modification",
+      "description": "Date du dernier rectificatif ou de l'annulation. Nulle s'il n'y a que l'avis initial.",
+      "short_title": "Date modif.",
+      "format": "default"
+    },
+    {
+      "type": "datetime",
+      "name": "dateLimiteReponse",
+      "title": "Date limite de réponse",
+      "description": "Date et heure limite (fuseau Europe/Paris) de remise des offres ou des candidatures.",
+      "short_title": "Date limite"
+    },
+    {
+      "type": "string",
+      "name": "lieuExecution_code",
+      "title": "Code lieu exécution",
+      "description": "Code du lieu d'exécution de l'appel d'offres. Le type de code est renseigné par 'Type code lieu exécution'.",
+      "short_title": "Lieu exécution"
+    },
+    {
+      "type": "string",
+      "name": "lieuExecution_typeCode",
+      "title": "Type code lieu exécution",
+      "description": "Type du code du lieu d'exécution.",
+      "short_title": "Type lieu exécution"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_categorie",
+      "title": "Catégorie de l'acheteur",
+      "description": "Catégorie de l'acheteur selon son code juridique INSEE.",
+      "short_title": "Catégorie acheteur"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_commune_code",
+      "title": "Commune de l'acheteur (code)",
+      "description": "Code de la commune où se trouve l'acheteur.",
+      "short_title": "Commune ach. (code)"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_commune_nom",
+      "title": "Commune de l'acheteur",
+      "description": "Nom de la commune où se trouve l'acheteur.",
+      "short_title": "Commune acheteur"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_departement_code",
+      "title": "Département de l'acheteur (code)",
+      "description": "Code du département où se trouve l'acheteur.",
+      "short_title": "Département ach. (code)"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_departement_nom",
+      "title": "Département de l'acheteur",
+      "description": "Nom du département où se trouve l'acheteur.",
+      "short_title": "Département acheteur"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_region_code",
+      "title": "Région de l'acheteur (code)",
+      "description": "Code de la région où se trouve l'acheteur.",
+      "short_title": "Région ach. (code)"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_region_nom",
+      "title": "Région de l'acheteur",
+      "description": "Nom de la région où se trouve l'acheteur.",
+      "short_title": "Région acheteur"
+    },
+    {
+      "type": "number",
+      "name": "acheteur_latitude",
+      "title": "Latitude de l'acheteur",
+      "description": "Latitude des coordonnées géographiques de l'acheteur.",
+      "short_title": "Latitude acheteur"
+    },
+    {
+      "type": "number",
+      "name": "acheteur_longitude",
+      "title": "Longitude de l'acheteur",
+      "description": "Longitude des coordonnées géographiques de l'acheteur.",
+      "short_title": "Longitude acheteur"
+    },
+    {
+      "type": "string",
+      "name": "statut",
+      "title": "Statut",
+      "description": "Statut de l'appel d'offres à la date du traitement. 'annule' si un avis d'annulation existe ; 'pre-information' pour un avis de pré-information (seule date connue : la publication) ; sinon, si la date limite de réponse est renseignée : 'clos' si elle est passée, 'ouvert' sinon ; si elle est nulle : 'ouvert' si l'avis initial date de moins de 90 jours (DEAO_STATUT_DELAI_JOURS), 'clos' au-delà. Limite : un rectificatif legacy qui repousse la date limite ne la met pas à jour (texte libre), l'appel d'offres peut donc passer 'clos' à tort ; 'rectifie' et 'infosRectificatifs' permettent de le repérer.",
+      "short_title": null,
+      "enum": ["ouvert", "clos", "annule", "pre-information"]
+    },
+    {
+      "type": "boolean",
+      "name": "rectifie",
+      "title": "Rectifié",
+      "description": "Vrai si l'appel d'offres a fait l'objet d'au moins un avis rectificatif.",
+      "short_title": null
+    },
+    {
+      "type": "array",
+      "name": "infosRectificatifs",
+      "title": "Informations rectificatives",
+      "description": "Textes décrivant les rectifications ou l'annulation, un par avis rectificatif de la chaîne.",
+      "short_title": "Infos rectif."
+    },
+    {
+      "type": "string",
+      "name": "urlConsultation",
+      "title": "URL de consultation",
+      "description": "Adresse où consulter le dossier de consultation et déposer une offre, quand elle est renseignée.",
+      "short_title": "Consultation",
+      "format": "uri"
+    },
+    {
+      "type": "string",
+      "name": "urlAvis",
+      "title": "URL de l'avis",
+      "description": "Lien vers le dernier avis de la chaîne d'avis : boamp.fr pour la source boamp, ted.europa.eu pour la source joue.",
+      "short_title": "Avis",
+      "format": "uri"
+    },
+    {
+      "type": "string",
+      "name": "idAvisInitial",
+      "title": "Identifiant de l'avis initial",
+      "description": "Identifiant de l'avis initial de la chaîne d'avis ; à défaut, de l'avis le plus ancien connu. IDWEB pour la source boamp, numéro de publication (ex. 677195-2026) pour la source joue.",
+      "short_title": "Avis initial"
+    },
+    {
+      "type": "string",
+      "name": "idDernierAvis",
+      "title": "Identifiant du dernier avis",
+      "description": "Identifiant du dernier avis de la chaîne d'avis : IDWEB pour la source boamp, numéro de publication pour la source joue.",
+      "short_title": "Dernier avis"
+    },
+    {
+      "type": "array",
+      "name": "avisLies",
+      "title": "Avis liés",
+      "description": "Identifiants de tous les avis de la chaîne (initial, rectificatifs, annulation), triés : IDWEB pour la source boamp, numéros de publication pour la source joue.",
+      "short_title": "Avis liés"
+    },
+    {
+      "type": "string",
+      "name": "sourceDataset",
+      "title": "Source dataset",
+      "description": "Code de la source dont proviennent les données de cet appel d'offres : boamp (BOAMP, DILA) ou joue (Journal officiel de l'Union européenne, via TED).",
+      "short_title": null
+    },
+    {
+      "type": "string",
+      "name": "sourceFile",
+      "title": "Source fichier",
+      "description": "Lien vers le fichier de données ouvertes dont proviennent les données de cet appel d'offres (archive DILA pour boamp, avis XML sur ted.europa.eu pour joue).",
+      "short_title": null,
+      "format": "uri"
+    }
+  ]
+}

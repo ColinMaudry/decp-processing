@@ -289,6 +289,11 @@ sources, unicité de `uid`.
 - Rapprochement approximatif des doubles envois.
 - Attributions TED (présentes dans l'archive brute).
 - Avis TED antérieurs à 2024 et formulaires pré-eForms.
-- Aligner DEAO sur DECP : schéma publié décrit dans un fichier de référence comme
-  `reference/schema_base.json` (au lieu de `schema.py`), et sources déclarées dans un
-  fichier comme `reference/source_datasets.json` (au lieu de `boamp`/`joue` en dur).
+- Sources déclarées dans un fichier comme `reference/source_datasets.json` : écarté
+  (2026-11-12). BOAMP et JOUE relèvent de la collecte (comme le scraping AWS de DECP),
+  pas de la concaténation de jeux de données déjà au bon format.
+
+Fait en marge de cette spec : le schéma publié est décrit dans
+`reference/schema_deao.json`, au format de `reference/schema_base.json` (DECP), lu par
+`schema.py` (types polars déduits du type Table Schema) et recopié tel quel en
+`schema.json`.

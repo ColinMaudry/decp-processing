@@ -6,8 +6,25 @@ from pathlib import Path
 
 import polars as pl
 
-STATUTS = ("ouvert", "clos", "annule", "pre-information")
-TYPES = ("Fournitures", "Services", "Travaux")
+from src.config import REFERENCE_DIR
+
+# Description des colonnes publiées, au format de reference/schema_base.json (DECP) :
+# l'ordre du fichier est celui du parquet publié.
+SCHEMA_DEAO_PATH = REFERENCE_DIR / "schema_deao.json"
+
+S = pl.String
+DATE = pl.Date
+
+# Type Table Schema → type polars des colonnes publiées.
+_DTYPES = {
+    "string": pl.String,
+    "number": pl.Float64,
+    "integer": pl.Int64,
+    "boolean": pl.Boolean,
+    "date": pl.Date,
+    "datetime": pl.Datetime("us", "Europe/Paris"),
+    "array": pl.List(pl.String),
+}
 
 
 @dataclass(frozen=True)
@@ -16,271 +33,25 @@ class Field:
     dtype: pl.DataType
     title: str
     description: str
+    short_title: str | None = None
     enum: tuple[str, ...] | None = None
 
 
-S = pl.String
-DATE = pl.Date
-LISTE = pl.List(pl.String)
-DATETIME = pl.Datetime("us", "Europe/Paris")
+def _charger_schema() -> list[dict]:
+    with open(SCHEMA_DEAO_PATH, encoding="utf-8") as f:
+        return json.load(f)["fields"]
 
-PUBLISHED_FIELDS: tuple[Field, ...] = (
+
+PUBLISHED_FIELDS: tuple[Field, ...] = tuple(
     Field(
-        "uid",
-        S,
-        "Identifiant unique",
-        "Identifiant unique de l'appel d'offres et du lot, de la forme "
-        "<sourceDataset>_<idAvisInitial>_<lotId> (sourceDataset : boamp ou joue ; "
-        "idAvisInitial : IDWEB pour boamp, numéro de publication pour joue). Stable tant que l'avis initial "
-        "(ou, à défaut, le plus ancien avis connu) de la chaîne d'avis ne change pas.",
-    ),
-    Field(
-        "referenceAcheteur",
-        S,
-        "Référence acheteur",
-        "Référence interne attribuée à l'appel d'offres par l'acheteur, quand elle est renseignée dans l'avis.",
-    ),
-    Field(
-        "acheteur_id",
-        S,
-        "SIRET acheteur",
-        "Identifiant de l'établissement de l'acheteur (SIRET), référencé dans la base SIRENE de l'INSEE. "
-        "Peut être nul si l'avis ne le mentionne pas et qu'il n'a pas pu être déduit.",
-    ),
-    Field(
-        "acheteur_id_source",
-        S,
-        "Origine du SIRET acheteur",
-        "Origine du SIRET de l'acheteur : 'avis' s'il figure dans l'avis, 'dictionnaire' "
-        "s'il a été déduit d'autres avis du même acheteur, nul sinon.",
-    ),
-    Field(
-        "acheteur_nom",
-        S,
-        "Nom acheteur",
-        "Nom de l'acheteur : dénomination SIRENE si le SIRET de l'acheteur est "
-        "trouvé dans SIRENE, sinon nom tel que renseigné dans l'avis.",
-    ),
-    Field(
-        "objet",
-        S,
-        "Objet",
-        "Objet de l'appel d'offres, tel que renseigné par l'acheteur dans l'avis.",
-    ),
-    Field(
-        "lotId",
-        S,
-        "Identifiant du lot",
-        "Numéro du lot au sein de l'appel d'offres. '0' signifie que la procédure "
-        "n'est pas divisée en lots (ou que l'avis ne détaille pas ses lots).",
-    ),
-    Field(
-        "lotIntitule",
-        S,
-        "Intitulé du lot",
-        "Intitulé du lot, quand l'appel d'offres est divisé en lots.",
-    ),
-    Field(
-        "description",
-        S,
-        "Description",
-        "Description de l'appel d'offres ou du lot : nature et étendue des besoins.",
-    ),
-    Field(
-        "montantEstime",
-        pl.Float64,
-        "Montant estimé",
-        "Montant estimé hors-taxes de l'appel d'offres ou du lot, en euros, "
-        "quand l'acheteur l'a renseigné.",
-    ),
-    Field(
-        "type",
-        S,
-        "Type",
-        "Type d'appel d'offres : fournitures, services ou travaux.",
-        TYPES,
-    ),
-    Field(
-        "codeCPV",
-        S,
-        "Code CPV",
-        "Catégorie de bien, service ou travaux achetés, selon le Vocabulaire commun pour les marchés publics (CPV).",
-    ),
-    Field(
-        "procedure",
-        S,
-        "Procédure",
-        "Le type de procédure de l'appel d'offres, selon les libellés de l'avis BOAMP.",
-    ),
-    Field(
-        "techniques",
-        LISTE,
-        "Techniques",
-        "Les techniques d'achat utilisées pour l'appel d'offres (accord-cadre, système d'acquisition dynamique, etc.).",
-    ),
-    Field(
-        "dureeMois",
-        pl.Int64,
-        "Durée (mois)",
-        "Durée en mois du marché envisagé.",
-    ),
-    Field(
-        "datePublicationInitiale",
-        DATE,
-        "Date de publication initiale",
-        "Date de publication de l'avis initial, à défaut du plus ancien avis disponible.",
-    ),
-    Field(
-        "dateDerniereModification",
-        DATE,
-        "Date de dernière modification",
-        "Date du dernier rectificatif ou de l'annulation. Nulle s'il n'y a que l'avis initial.",
-    ),
-    Field(
-        "dateLimiteReponse",
-        DATETIME,
-        "Date limite de réponse",
-        "Date et heure limite (fuseau Europe/Paris) de remise des offres ou des candidatures.",
-    ),
-    Field(
-        "lieuExecution_code",
-        S,
-        "Code lieu exécution",
-        "Code du lieu d'exécution de l'appel d'offres. Le type de code est renseigné par 'Type code lieu exécution'.",
-    ),
-    Field(
-        "lieuExecution_typeCode",
-        S,
-        "Type code lieu exécution",
-        "Type du code du lieu d'exécution.",
-    ),
-    Field(
-        "acheteur_categorie",
-        S,
-        "Catégorie de l'acheteur",
-        "Catégorie de l'acheteur selon son code juridique INSEE.",
-    ),
-    Field(
-        "acheteur_commune_code",
-        S,
-        "Commune de l'acheteur (code)",
-        "Code de la commune où se trouve l'acheteur.",
-    ),
-    Field(
-        "acheteur_commune_nom",
-        S,
-        "Commune de l'acheteur",
-        "Nom de la commune où se trouve l'acheteur.",
-    ),
-    Field(
-        "acheteur_departement_code",
-        S,
-        "Département de l'acheteur (code)",
-        "Code du département où se trouve l'acheteur.",
-    ),
-    Field(
-        "acheteur_departement_nom",
-        S,
-        "Département de l'acheteur",
-        "Nom du département où se trouve l'acheteur.",
-    ),
-    Field(
-        "acheteur_region_code",
-        S,
-        "Région de l'acheteur (code)",
-        "Code de la région où se trouve l'acheteur.",
-    ),
-    Field(
-        "acheteur_region_nom",
-        S,
-        "Région de l'acheteur",
-        "Nom de la région où se trouve l'acheteur.",
-    ),
-    Field(
-        "acheteur_latitude",
-        pl.Float64,
-        "Latitude de l'acheteur",
-        "Latitude des coordonnées géographiques de l'acheteur.",
-    ),
-    Field(
-        "acheteur_longitude",
-        pl.Float64,
-        "Longitude de l'acheteur",
-        "Longitude des coordonnées géographiques de l'acheteur.",
-    ),
-    Field(
-        "statut",
-        S,
-        "Statut",
-        "Statut de l'appel d'offres à la date du traitement. 'annule' si un avis d'annulation "
-        "existe ; 'pre-information' pour un avis de pré-information (seule date connue : la "
-        "publication) ; sinon, si la date limite de réponse est renseignée : 'clos' si elle est "
-        "passée, 'ouvert' sinon ; si elle est nulle : 'ouvert' si l'avis initial date de moins de "
-        "90 jours (DEAO_STATUT_DELAI_JOURS), 'clos' au-delà. Limite : un rectificatif legacy qui "
-        "repousse la date limite ne la met pas à jour (texte libre), l'appel d'offres peut donc "
-        "passer 'clos' à tort ; 'rectifie' et 'infosRectificatifs' permettent de le repérer.",
-        STATUTS,
-    ),
-    Field(
-        "rectifie",
-        pl.Boolean,
-        "Rectifié",
-        "Vrai si l'appel d'offres a fait l'objet d'au moins un avis rectificatif.",
-    ),
-    Field(
-        "infosRectificatifs",
-        LISTE,
-        "Informations rectificatives",
-        "Textes décrivant les rectifications ou l'annulation, un par avis rectificatif de la chaîne.",
-    ),
-    Field(
-        "urlConsultation",
-        S,
-        "URL de consultation",
-        "Adresse où consulter le dossier de consultation et déposer une offre, quand elle est renseignée.",
-    ),
-    Field(
-        "urlAvis",
-        S,
-        "URL de l'avis",
-        "Lien vers le dernier avis de la chaîne d'avis : boamp.fr pour la source boamp, "
-        "ted.europa.eu pour la source joue.",
-    ),
-    Field(
-        "idAvisInitial",
-        S,
-        "Identifiant de l'avis initial",
-        "Identifiant de l'avis initial de la chaîne d'avis ; à défaut, de l'avis le plus ancien connu. "
-        "IDWEB pour la source boamp, numéro de publication (ex. 677195-2026) pour la source joue.",
-    ),
-    Field(
-        "idDernierAvis",
-        S,
-        "Identifiant du dernier avis",
-        "Identifiant du dernier avis de la chaîne d'avis : IDWEB pour la source boamp, "
-        "numéro de publication pour la source joue.",
-    ),
-    Field(
-        "avisLies",
-        LISTE,
-        "Avis liés",
-        "Identifiants de tous les avis de la chaîne (initial, rectificatifs, annulation), triés : "
-        "IDWEB pour la source boamp, numéros de publication pour la source joue.",
-    ),
-    Field(
-        "sourceDataset",
-        S,
-        "Source dataset",
-        "Code de la source dont proviennent les données de cet appel d'offres : boamp "
-        "(BOAMP, DILA) ou joue (Journal officiel de l'Union européenne, via TED).",
-    ),
-    Field(
-        "sourceFile",
-        S,
-        "Source fichier",
-        "Lien vers le fichier de données ouvertes dont proviennent les données de cet appel d'offres "
-        "(archive DILA pour boamp, avis XML sur ted.europa.eu pour joue).",
-    ),
+        name=champ["name"],
+        dtype=_DTYPES[champ["type"]],
+        title=champ["title"],
+        description=champ["description"],
+        short_title=champ.get("short_title"),
+        enum=tuple(champ["enum"]) if "enum" in champ else None,
+    )
+    for champ in _charger_schema()
 )
 
 _DESCRIPTIVES = (
@@ -351,34 +122,11 @@ def empty_avis_frame() -> pl.DataFrame:
     return pl.DataFrame(schema=AVIS_LOT_SCHEMA)
 
 
-def _table_schema_type(dtype: pl.DataType) -> str:
-    if isinstance(dtype, pl.List):
-        return "array"
-    if isinstance(dtype, pl.Datetime):
-        return "datetime"
-    return {
-        pl.String: "string",
-        pl.Int64: "integer",
-        pl.Float64: "number",
-        pl.Boolean: "boolean",
-        pl.Date: "date",
-    }[dtype]
-
-
 def write_table_schema(path: Path) -> Path:
-    """Écrit le Table Schema JSON du schéma publié."""
-    fields = []
-    for f in PUBLISHED_FIELDS:
-        entry = {
-            "name": f.name,
-            "type": _table_schema_type(f.dtype),
-            "title": f.title,
-            "description": f.description,
-        }
-        if f.enum:
-            entry["enum"] = list(f.enum)
-        fields.append(entry)
+    """Écrit le Table Schema JSON du schéma publié (copie de reference/schema_deao.json,
+    mise en forme comme le schema.json de DECP)."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps({"fields": fields}, ensure_ascii=False, indent=2))
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump({"fields": _charger_schema()}, f, indent=4, ensure_ascii=False)
     return path

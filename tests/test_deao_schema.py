@@ -68,3 +68,47 @@ def test_descriptions_mentionnent_les_deux_sources():
     assert "boamp.fr" in champs["urlAvis"].description
     for nom in ("uid", "sourceFile", "sourceDataset"):
         assert "joue" in champs[nom].description.lower(), nom
+
+
+def _champs(chemin):
+    with open(chemin, encoding="utf-8") as f:
+        return json.load(f)["fields"]
+
+
+def test_reference_au_format_du_schema_decp():
+    from src.config import REFERENCE_DIR
+
+    cles_decp = {
+        c for champ in _champs(REFERENCE_DIR / "schema_base.json") for c in champ
+    }
+    for champ in _champs(REFERENCE_DIR / "schema_deao.json"):
+        assert set(champ) <= cles_decp, champ["name"]
+        assert {"type", "name", "title", "description", "short_title"} <= set(champ)
+
+
+def test_colonnes_homonymes_meme_titre_court_que_decp():
+    from src.config import REFERENCE_DIR
+
+    decp = {c["name"]: c for c in _champs(REFERENCE_DIR / "schema_base.json")}
+    for champ in _champs(REFERENCE_DIR / "schema_deao.json"):
+        if champ["name"] in decp:
+            assert champ["short_title"] == decp[champ["name"]]["short_title"], champ[
+                "name"
+            ]
+
+
+def test_types_polars_deduits_de_la_reference():
+    types = published_schema()
+    assert types["dateLimiteReponse"] == pl.Datetime("us", "Europe/Paris")
+    assert types["techniques"] == pl.List(pl.String)
+    assert types["dureeMois"] == pl.Int64
+    assert types["montantEstime"] == pl.Float64
+    assert types["datePublicationInitiale"] == pl.Date
+    assert types["rectifie"] == pl.Boolean
+
+
+def test_schema_publie_identique_a_la_reference(tmp_path):
+    from src.config import REFERENCE_DIR
+
+    publie = _champs(write_table_schema(tmp_path / "schema.json"))
+    assert publie == _champs(REFERENCE_DIR / "schema_deao.json")
