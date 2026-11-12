@@ -5,9 +5,9 @@ from pathlib import Path
 from lxml import etree
 
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA
-from src.tasks.deao.sources.boamp.classify import classify
-from src.tasks.deao.sources.boamp.legacy import map_legacy
 from src.tasks.deao.values import PARIS
+from src.tasks.scrap.deao.boamp_joue.boamp.classify import classify
+from src.tasks.scrap.deao.boamp_joue.boamp.legacy import map_legacy
 
 FIXTURES = Path(__file__).parent / "data" / "deao"
 

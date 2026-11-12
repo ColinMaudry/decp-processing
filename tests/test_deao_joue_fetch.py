@@ -3,8 +3,8 @@ from datetime import date
 import httpx
 import pytest
 
-from src.tasks.deao.sources.joue import fetch
-from src.tasks.deao.sources.joue.fetch import (
+from src.tasks.scrap.deao.boamp_joue.joue import fetch
+from src.tasks.scrap.deao.boamp_joue.joue.fetch import (
     download_xml,
     list_day_files,
     numero_publication,

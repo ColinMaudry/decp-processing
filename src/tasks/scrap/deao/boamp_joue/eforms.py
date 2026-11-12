@@ -3,7 +3,6 @@
 import re
 from collections import Counter
 
-from src.tasks.deao.codes import PROCEDURE_EFORMS, TYPE_EFORMS, libelle
 from src.tasks.deao.values import (
     departement_depuis_nuts,
     duree_mois,
@@ -11,7 +10,8 @@ from src.tasks.deao.values import (
     parse_datetime_paris,
     unite_duree_connue,
 )
-from src.tasks.deao.xml import (
+from src.tasks.scrap.deao.boamp_joue.codes import PROCEDURE_EFORMS, TYPE_EFORMS, libelle
+from src.tasks.scrap.deao.boamp_joue.xml import (
     child_fr,
     children,
     direct_child,

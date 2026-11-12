@@ -4,15 +4,21 @@ import re
 from collections import Counter
 
 from src.config import BOAMP_AVIS_URL_TEMPLATE
-from src.tasks.deao.classement import Classement
-from src.tasks.deao.codes import (
+from src.tasks.deao.values import duree_mois, normalize_lot_id, parse_datetime_paris
+from src.tasks.scrap.deao.boamp_joue.boamp.xml import idweb, indexation_choice
+from src.tasks.scrap.deao.boamp_joue.classement import Classement
+from src.tasks.scrap.deao.boamp_joue.codes import (
     PROCEDURE_INDEXATION,
     TYPE_INDEXATION,
     libelle,
 )
-from src.tasks.deao.sources.boamp.xml import idweb, indexation_choice
-from src.tasks.deao.values import duree_mois, normalize_lot_id, parse_datetime_paris
-from src.tasks.deao.xml import children, direct_child, find, localname, text
+from src.tasks.scrap.deao.boamp_joue.xml import (
+    children,
+    direct_child,
+    find,
+    localname,
+    text,
+)
 from src.tasks.utils import siret_valide
 
 _SEPARATEUR_TEXTE = " | "

@@ -5,10 +5,10 @@ from pathlib import Path
 from lxml import etree
 
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA
-from src.tasks.deao.sources.boamp.classify import classify
-from src.tasks.deao.sources.boamp.eforms import map_eforms
 from src.tasks.deao.values import PARIS
-from src.tasks.deao.xml import direct_child, localname, text
+from src.tasks.scrap.deao.boamp_joue.boamp.classify import classify
+from src.tasks.scrap.deao.boamp_joue.boamp.eforms import map_eforms
+from src.tasks.scrap.deao.boamp_joue.xml import direct_child, localname, text
 
 FIXTURES = Path(__file__).parent / "data" / "deao"
 
@@ -91,7 +91,7 @@ def test_memes_cles_que_le_schema():
 
 
 def test_url_consultation_sans_corruption_des_parametres():
-    from src.tasks.deao.eforms import _url_consultation
+    from src.tasks.scrap.deao.boamp_joue.eforms import _url_consultation
 
     lot = etree.fromstring(
         "<ProcurementProjectLot><TenderingTerms><CallForTendersDocumentReference>"

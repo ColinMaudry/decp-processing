@@ -13,10 +13,10 @@ from src.tasks.deao.consolidate import (
     statut_expr,
 )
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA, PUBLISHED_FIELDS, conform_avis
-from src.tasks.deao.sources.boamp.parse import parse_day
-from src.tasks.deao.sources.joue.identifiants import resoudre_avis_precedents
-from src.tasks.deao.sources.joue.parse import parse_day as parse_day_joue
 from src.tasks.deao.values import PARIS
+from src.tasks.scrap.deao.boamp_joue.boamp.parse import parse_day
+from src.tasks.scrap.deao.boamp_joue.joue.identifiants import resoudre_avis_precedents
+from src.tasks.scrap.deao.boamp_joue.joue.parse import parse_day as parse_day_joue
 
 FIXTURES = Path(__file__).parent / "data" / "deao"
 RUN = date(2026, 10, 15)

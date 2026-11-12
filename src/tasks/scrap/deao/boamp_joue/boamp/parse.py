@@ -8,13 +8,13 @@ import polars as pl
 from lxml import etree
 
 from src.config import BOAMP_BASE_URL
-from src.tasks.deao.eforms import changed_notice_id, notice_id
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA, conform_avis, empty_avis_frame
-from src.tasks.deao.sources.boamp.classify import classify
-from src.tasks.deao.sources.boamp.eforms import map_eforms
-from src.tasks.deao.sources.boamp.legacy import map_legacy
-from src.tasks.deao.sources.boamp.xml import annonce_anterieure, idweb
-from src.tasks.deao.xml import find
+from src.tasks.scrap.deao.boamp_joue.boamp.classify import classify
+from src.tasks.scrap.deao.boamp_joue.boamp.eforms import map_eforms
+from src.tasks.scrap.deao.boamp_joue.boamp.legacy import map_legacy
+from src.tasks.scrap.deao.boamp_joue.boamp.xml import annonce_anterieure, idweb
+from src.tasks.scrap.deao.boamp_joue.eforms import changed_notice_id, notice_id
+from src.tasks.scrap.deao.boamp_joue.xml import find
 from src.tasks.utils import get_logger
 
 

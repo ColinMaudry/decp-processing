@@ -2,7 +2,12 @@
 
 from typing import Literal
 
-from src.tasks.deao.xml import direct_child, find, first_child_localname, text
+from src.tasks.scrap.deao.boamp_joue.xml import (
+    direct_child,
+    find,
+    first_child_localname,
+    text,
+)
 
 
 def indexation_choice(root, name: str) -> str | None:

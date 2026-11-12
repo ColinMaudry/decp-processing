@@ -1,8 +1,8 @@
 """Classement des avis JOUE (eForms lus via TED) : retenu ou non, typeAvis, preInformation."""
 
-from src.tasks.deao.classement import Classement
-from src.tasks.deao.eforms import change_reason, changed_notice_id
-from src.tasks.deao.xml import find
+from src.tasks.scrap.deao.boamp_joue.classement import Classement
+from src.tasks.scrap.deao.boamp_joue.eforms import change_reason, changed_notice_id
+from src.tasks.scrap.deao.boamp_joue.xml import find
 
 
 def liste_nom(notice) -> str | None:

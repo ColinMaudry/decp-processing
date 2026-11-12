@@ -2,7 +2,7 @@
 
 from src.config import BOAMP_S3_PREFIX, MAX_PREFECT_WORKERS
 from src.tasks.deao.acquire import Source
-from src.tasks.deao.sources.boamp import fetch, parse
+from src.tasks.scrap.deao.boamp_joue.boamp import fetch, parse
 
 BOAMP = Source(
     nom="boamp",

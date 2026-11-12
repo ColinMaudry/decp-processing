@@ -7,10 +7,14 @@ import polars as pl
 from lxml import etree
 
 from src.config import JOUE_AVIS_URL_TEMPLATE, TED_NOTICE_XML_URL
-from src.tasks.deao.eforms import changed_notice_id, map_notice, notice_id
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA, conform_avis, empty_avis_frame
-from src.tasks.deao.sources.joue.classify import classify_joue
-from src.tasks.deao.xml import localname, text
+from src.tasks.scrap.deao.boamp_joue.eforms import (
+    changed_notice_id,
+    map_notice,
+    notice_id,
+)
+from src.tasks.scrap.deao.boamp_joue.joue.classify import classify_joue
+from src.tasks.scrap.deao.boamp_joue.xml import localname, text
 from src.tasks.utils import get_logger
 
 

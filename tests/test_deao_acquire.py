@@ -23,8 +23,8 @@ from src.tasks.deao.archive import (
     read_day_archive,
     write_day_archive,
 )
-from src.tasks.deao.sources.boamp import fetch
-from src.tasks.deao.sources.boamp.source import BOAMP
+from src.tasks.scrap.deao.boamp_joue.boamp import fetch
+from src.tasks.scrap.deao.boamp_joue.boamp.source import BOAMP
 from tests.deao_fakes import fake_s3  # noqa: F401
 
 DATA = Path(__file__).parent / "data" / "deao"

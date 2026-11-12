@@ -104,7 +104,7 @@ class FakeTed:
 
 @pytest.fixture
 def fake_ted(monkeypatch):
-    from src.tasks.deao.sources.joue import fetch
+    from src.tasks.scrap.deao.boamp_joue.joue import fetch
 
     fake = FakeTed()
     fake.avis_par_jour[date(2026, 10, 14)] = {"706679-2026": XML_TED_TEST}
@@ -116,7 +116,7 @@ def fake_ted(monkeypatch):
 
 @pytest.fixture
 def no_sleep(monkeypatch):
-    from src.tasks.deao.sources.joue import fetch
+    from src.tasks.scrap.deao.boamp_joue.joue import fetch
 
     for fn in (fetch.http_get, fetch.http_post):
         monkeypatch.setattr(fn.retry, "sleep", lambda _: None)

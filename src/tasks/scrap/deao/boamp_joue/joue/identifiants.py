@@ -14,8 +14,8 @@ import polars as pl
 from botocore.exceptions import ClientError
 
 from src.config import DEAO_DATA_DIR, DEAO_GEOCODE_S3_PREFIX, LOG_LEVEL, S3_BUCKET
-from src.tasks.deao.sources.joue.fetch import numero_publication
 from src.tasks.publish import publish_to_s3
+from src.tasks.scrap.deao.boamp_joue.joue.fetch import numero_publication
 from src.tasks.utils import get_logger, s3_client
 
 CACHE_FILENAME = "joue_identifiants.parquet"

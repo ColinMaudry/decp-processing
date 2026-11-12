@@ -4,13 +4,13 @@ from pathlib import Path
 import polars as pl
 import pytest
 
-from src.tasks.deao.sources.joue import identifiants
-from src.tasks.deao.sources.joue.identifiants import (
+from src.tasks.scrap.deao.boamp_joue.joue import identifiants
+from src.tasks.scrap.deao.boamp_joue.joue.identifiants import (
     charger_cache_identifiants,
     resoudre_avec_cache,
     resoudre_avis_precedents,
 )
-from src.tasks.deao.sources.joue.parse import parse_day
+from src.tasks.scrap.deao.boamp_joue.joue.parse import parse_day
 from tests.deao_fakes import fake_s3, fake_ted, no_sleep  # noqa: F401
 
 DATA = Path(__file__).parent / "data" / "deao" / "joue"

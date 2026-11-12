@@ -3,15 +3,15 @@ from pathlib import Path
 
 from lxml import etree
 
-from src.tasks.deao.eforms import (
+from src.tasks.scrap.deao.boamp_joue.boamp.classify import classify
+from src.tasks.scrap.deao.boamp_joue.boamp.eforms import map_eforms
+from src.tasks.scrap.deao.boamp_joue.eforms import (
     change_reason,
     changed_notice_id,
     map_notice,
     notice_id,
 )
-from src.tasks.deao.sources.boamp.classify import classify
-from src.tasks.deao.sources.boamp.eforms import map_eforms
-from src.tasks.deao.xml import child_fr, find, text
+from src.tasks.scrap.deao.boamp_joue.xml import child_fr, find, text
 
 FIXTURES = Path(__file__).parent / "data" / "deao"
 

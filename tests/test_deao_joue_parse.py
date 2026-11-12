@@ -4,10 +4,10 @@ from pathlib import Path
 from lxml import etree
 
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA
-from src.tasks.deao.sources.joue.classify import classify_joue
-from src.tasks.deao.sources.joue.parse import parse_avis, parse_day
-from src.tasks.deao.sources.joue.source import JOUE
 from src.tasks.deao.values import departement_depuis_nuts
+from src.tasks.scrap.deao.boamp_joue.joue.classify import classify_joue
+from src.tasks.scrap.deao.boamp_joue.joue.parse import parse_avis, parse_day
+from src.tasks.scrap.deao.boamp_joue.joue.source import JOUE
 
 DOSSIER = Path(__file__).parent / "data" / "deao" / "joue"
 
@@ -62,7 +62,7 @@ def test_source():
 def test_avis_sans_type_compte_exclu_sans_type():
     from collections import Counter
 
-    from src.tasks.deao.sources.joue.parse import parse_avis
+    from src.tasks.scrap.deao.boamp_joue.joue.parse import parse_avis
 
     c = Counter()
     assert parse_avis(b"<Notice/>", "x.xml", c) == []

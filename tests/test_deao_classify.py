@@ -3,8 +3,8 @@ from pathlib import Path
 import pytest
 from lxml import etree
 
-from src.tasks.deao.sources.boamp.classify import classify
-from src.tasks.deao.sources.boamp.xml import (
+from src.tasks.scrap.deao.boamp_joue.boamp.classify import classify
+from src.tasks.scrap.deao.boamp_joue.boamp.xml import (
     annonce_anterieure,
     idweb,
     indexation_choice,

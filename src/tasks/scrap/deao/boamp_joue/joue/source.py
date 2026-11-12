@@ -2,7 +2,7 @@
 
 from src.config import JOUE_MAX_WORKERS, JOUE_S3_PREFIX
 from src.tasks.deao.acquire import Source
-from src.tasks.deao.sources.joue import fetch, parse
+from src.tasks.scrap.deao.boamp_joue.joue import fetch, parse
 
 JOUE = Source(
     nom="joue",

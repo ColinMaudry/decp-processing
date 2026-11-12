@@ -11,8 +11,8 @@ import pytest
 from src.tasks.deao import acquire
 from src.tasks.deao.geocode_cache import ADRESSE_GEOCODE_SCHEMA
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA, PUBLISHED_FIELDS, conform_avis
-from src.tasks.deao.sources.boamp import fetch
-from src.tasks.deao.sources.joue import identifiants as joue_identifiants
+from src.tasks.scrap.deao.boamp_joue.boamp import fetch
+from src.tasks.scrap.deao.boamp_joue.joue import identifiants as joue_identifiants
 from tests.deao_fakes import fake_s3, fake_ted, no_sleep  # noqa: F401
 from tests.test_deao_enrich import COG, _lf_etab, _lf_ul
 

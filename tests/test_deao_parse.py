@@ -7,9 +7,9 @@ from polars.testing import assert_frame_equal
 
 from src.config import BOAMP_BASE_URL
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA
-from src.tasks.deao.sources.boamp.parse import parse_day, source_file_expr
-from src.tasks.deao.sources.boamp.xml import idweb
 from src.tasks.deao.values import PARIS
+from src.tasks.scrap.deao.boamp_joue.boamp.parse import parse_day, source_file_expr
+from src.tasks.scrap.deao.boamp_joue.boamp.xml import idweb
 
 FIXTURES = Path(__file__).parent / "data" / "deao"
 
@@ -61,7 +61,7 @@ def test_parse_day_vide():
 
 
 def test_parse_day_isole_un_avis_dont_le_mapping_echoue(monkeypatch):
-    from src.tasks.deao.sources.boamp import parse
+    from src.tasks.scrap.deao.boamp_joue.boamp import parse
 
     vrai_map_legacy = parse.map_legacy
 

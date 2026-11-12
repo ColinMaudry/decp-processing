@@ -31,12 +31,12 @@ from src.tasks.deao.schema import (
     empty_avis_frame,
     write_table_schema,
 )
-from src.tasks.deao.sources.boamp.parse import source_file_expr
-from src.tasks.deao.sources.boamp.source import BOAMP
-from src.tasks.deao.sources.joue.identifiants import resoudre_avis_precedents
-from src.tasks.deao.sources.joue.source import JOUE
 from src.tasks.output import sink_to_files
 from src.tasks.publish import publish_deao_to_datagouv, should_publish_deao
+from src.tasks.scrap.deao.boamp_joue.boamp.parse import source_file_expr
+from src.tasks.scrap.deao.boamp_joue.boamp.source import BOAMP
+from src.tasks.scrap.deao.boamp_joue.joue.identifiants import resoudre_avis_precedents
+from src.tasks.scrap.deao.boamp_joue.joue.source import JOUE
 from src.tasks.utils import get_logger, print_all_config
 
 SOURCES = {"boamp": BOAMP, "joue": JOUE}

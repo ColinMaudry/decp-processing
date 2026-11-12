@@ -6,7 +6,6 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from src.config import BASE_DIR
-from src.tasks.deao.codes import PROCEDURE_INDEXATION, libelle
 from src.tasks.deao.values import (
     departement_depuis_cp,
     departement_depuis_nuts,
@@ -14,6 +13,7 @@ from src.tasks.deao.values import (
     normalize_lot_id,
     parse_datetime_paris,
 )
+from src.tasks.scrap.deao.boamp_joue.codes import PROCEDURE_INDEXATION, libelle
 
 PARIS = ZoneInfo("Europe/Paris")
 
