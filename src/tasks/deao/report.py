@@ -23,7 +23,13 @@ COMPTEURS = (
     "jour_vide",
     "erreur_mapping",
     "sans_date_publication",
+    "chaine_recouvrement",
+    "chaine_conservee",
+    "identifiant_interne",
+    "identifiant_resolu",
+    "identifiant_non_resolu",
 )
+SOURCES_RAPPORT = ("boamp", "joue")
 _PREFIXES_COMPTEURS = ("exclu:", "non_mappe:")
 
 
@@ -52,15 +58,32 @@ def taux_remplissage(df: pl.DataFrame, par: str = "formatSource") -> pl.DataFram
     return pl.concat(frames).sort("colonne", par)
 
 
+def _cle_publiee(cle: str) -> bool:
+    """Clé publiée, après retrait d'un éventuel préfixe de source (« joue: »)."""
+    base = cle.split(":", 1)[1] if cle.split(":", 1)[0] in SOURCES_RAPPORT else cle
+    return base in COMPTEURS or base.startswith(_PREFIXES_COMPTEURS)
+
+
 def lignes_rapport(stats: Counter, df: pl.DataFrame) -> list[dict]:
     lignes: list[dict] = []
     for cle in sorted(stats):
-        if cle in COMPTEURS or cle.startswith(_PREFIXES_COMPTEURS):
+        if _cle_publiee(cle):
             lignes.append({"indicateur": cle, "valeur": int(stats[cle])})
 
     if "statut" in df.columns:
         for valeur, n in df["statut"].value_counts().sort("statut").iter_rows():
             lignes.append({"indicateur": f"statut:{valeur}", "valeur": int(n)})
+
+    if "sourceDataset" in df.columns:
+        for valeur, n in (
+            df["sourceDataset"].value_counts().sort("sourceDataset").iter_rows()
+        ):
+            lignes.append(
+                {
+                    "indicateur": f"sourceDataset:{valeur if valeur is not None else 'null'}",
+                    "valeur": int(n),
+                }
+            )
 
     if "acheteur_id_source" in df.columns:
         for valeur, n in (
@@ -77,6 +100,11 @@ def lignes_rapport(stats: Counter, df: pl.DataFrame) -> list[dict]:
             )
 
     par = "formatSource"
+    if "sourceDataset" in df.columns and par in df.columns:
+        # « boamp/eforms », « boamp/legacy », « joue/eforms »
+        df = df.with_columns(
+            pl.format("{}/{}", pl.col("sourceDataset"), pl.col(par)).alias(par)
+        )
     taux = taux_remplissage(df, par)
     for colonne, format_source, valeur in taux.iter_rows():
         lignes.append(

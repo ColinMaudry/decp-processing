@@ -12,12 +12,14 @@ from src.tasks.deao import acquire
 from src.tasks.deao.geocode_cache import ADRESSE_GEOCODE_SCHEMA
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA, PUBLISHED_FIELDS, conform_avis
 from src.tasks.deao.sources.boamp import fetch
-from tests.deao_fakes import fake_s3  # noqa: F401
+from src.tasks.deao.sources.joue import identifiants as joue_identifiants
+from tests.deao_fakes import fake_s3, fake_ted, no_sleep  # noqa: F401
 from tests.test_deao_enrich import COG, _lf_etab, _lf_ul
 
 flow_module = importlib.import_module("src.flows.deao_processing")
 
 DATA = Path(__file__).parent / "data" / "deao"
+RUN_DATE = "2026-10-15"  # lendemain de l'avis JOUE le plus récent des fixtures
 _DATE_RE = re.compile(rb"<DATE_PUBLICATION>(\d{4}-\d{2}-\d{2})")
 
 
@@ -66,6 +68,12 @@ def flow_env(monkeypatch, tmp_path, fake_s3, dila):  # noqa: F811
     monkeypatch.setattr(flow_module, "DEAO_DIST_DIR", dist)
     monkeypatch.setattr(flow_module, "BOAMP_START_DATE", "2026-09-12")
     monkeypatch.setattr(flow_module, "DEAO_REBUILD", False)
+    # Les tests existants restent sans réseau TED ; ceux de JOUE ajoutent la source.
+    monkeypatch.setattr(flow_module, "DEAO_SOURCES", ("boamp",))
+    # Jamais de S3 réel pour la résolution des identifiants JOUE
+    monkeypatch.setattr(joue_identifiants, "s3_client", lambda: fake_s3)
+    monkeypatch.setattr(joue_identifiants, "DEAO_DATA_DIR", tmp_path)
+    monkeypatch.setattr(joue_identifiants, "publish_to_s3", lambda *a, **k: None)
     # SIRENE présent : pas de prétraitement déclenché
     monkeypatch.setattr(flow_module, "SIRENE_DATA_DIR", tmp_path)
     monkeypatch.setattr(
@@ -153,7 +161,7 @@ def test_lire_partitions_tolere_un_changement_de_contrat(tmp_path, monkeypatch):
     conform_avis(
         pl.DataFrame({"idAvis": ["26-1"], "sourceFile": ["https://x/26-1.xml"]})
     ).write_parquet(mois / "02.parquet")
-    df = flow_module.lire_partitions()
+    df = flow_module.lire_partitions(("boamp",))
     assert df.schema == pl.Schema(AVIS_LOT_SCHEMA)
     assert df.sort("idAvis")["sourceFile"].to_list() == [None, "https://x/26-1.xml"]
 
@@ -173,3 +181,59 @@ def test_deao_processing_source_file_flux_historique(flow_env):
     sources = pl.read_parquet(flow_env / "deao.parquet")["sourceFile"].drop_nulls()
     assert sources.len() > 0
     assert sources.str.contains("/FluxHistorique/Boamp_v240/2026/").all()
+
+
+_PUB_RE = re.compile(rb"<efbc:PublicationDate>(\d{4}-\d{2}-\d{2})")
+
+
+@pytest.fixture
+def ted_fixtures(fake_ted):  # noqa: F811
+    """Faux TED servant les fixtures JOUE réelles à leur date de publication."""
+    fake_ted.avis_par_jour.clear()
+    fake_ted.identifiants.clear()
+    for path in sorted((DATA / "joue").glob("*.xml")):
+        xml = path.read_bytes()
+        jour = date.fromisoformat(_PUB_RE.search(xml).group(1).decode())
+        fake_ted.avis_par_jour.setdefault(jour, {})[path.stem] = xml
+    return fake_ted
+
+
+@pytest.fixture
+def deux_sources(flow_env, monkeypatch, ted_fixtures):
+    monkeypatch.setattr(flow_module, "DEAO_SOURCES", ("boamp", "joue"))
+    monkeypatch.setattr(flow_module, "BOAMP_START_DATE", "2026-09-01")
+    return ted_fixtures
+
+
+def test_flow_sources_inconnue(flow_env, monkeypatch):
+    monkeypatch.setattr(flow_module, "DEAO_SOURCES", ("boamp", "inconnue"))
+    with pytest.raises(ValueError, match="inconnue"):
+        flow_module.deao_processing(run_date=RUN_DATE)
+
+
+def test_flow_deux_sources(flow_env, deux_sources):
+    flow_module.deao_processing(run_date=RUN_DATE)
+    df = pl.read_parquet(flow_env / "deao.parquet")
+    assert df["uid"].is_unique().all()
+    assert set(df["sourceDataset"]) == {"boamp", "joue"}
+    joue = set(df.filter(pl.col("sourceDataset") == "joue")["idAvisInitial"])
+    assert {"677195-2026", "599757-2026", "631605-2026"} & joue == {
+        "677195-2026",
+        "599757-2026",
+    }
+    assert df.filter(pl.col("idAvisInitial") == "599757-2026")[
+        "statut"
+    ].unique().to_list() == ["annule"]
+
+
+def test_flow_sources_boamp_seul(flow_env, deux_sources, monkeypatch):
+    flow_module.deao_processing(run_date=RUN_DATE)  # remplit les partitions joue
+    monkeypatch.setattr(flow_module, "DEAO_SOURCES", ("boamp",))
+    flow_module.deao_processing(run_date=RUN_DATE)
+    assert set(pl.read_parquet(flow_env / "deao.parquet")["sourceDataset"]) == {"boamp"}
+
+
+def test_flow_jour_joue_en_erreur_fait_echouer(flow_env, deux_sources, no_sleep):  # noqa: F811
+    deux_sources.recherche_en_erreur = {date(2026, 10, 14)}  # 500 persistant
+    with pytest.raises(RuntimeError, match="joue"):
+        flow_module.deao_processing(run_date=RUN_DATE)

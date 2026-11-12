@@ -57,3 +57,14 @@ def test_write_table_schema(tmp_path):
     assert (
         next(f for f in data["fields"] if f["name"] == "techniques")["type"] == "array"
     )
+
+
+def test_descriptions_mentionnent_les_deux_sources():
+    champs = {f.name: f for f in PUBLISHED_FIELDS}
+    for nom in ("urlAvis", "idAvisInitial", "idDernierAvis", "avisLies"):
+        texte = champs[nom].description
+        assert "boamp" in texte.lower() and "joue" in texte.lower(), nom
+    assert "ted.europa.eu" in champs["urlAvis"].description
+    assert "boamp.fr" in champs["urlAvis"].description
+    for nom in ("uid", "sourceFile", "sourceDataset"):
+        assert "joue" in champs[nom].description.lower(), nom

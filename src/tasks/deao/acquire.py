@@ -124,7 +124,7 @@ def process_batch(source: Source, items: list[tuple[date, Action, bool]]) -> Cou
     """Traite un lot de jours en parallèle ; compte les jours en échec."""
     logger = get_logger(level=LOG_LEVEL)
     logger.info(
-        f"Process batch, première date : {items[0][0].strftime(format='YYYY-MM-dd')}"
+        f"Process batch {source.nom}, première date : {items[0][0].isoformat()}"
     )
 
     def process_item(item: tuple[date, Action, bool]) -> Counter:

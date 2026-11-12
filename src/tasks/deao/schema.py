@@ -30,7 +30,8 @@ PUBLISHED_FIELDS: tuple[Field, ...] = (
         S,
         "Identifiant unique",
         "Identifiant unique de l'appel d'offres et du lot, de la forme "
-        "<sourceDataset>_<idAvisInitial>_<lotId>. Stable tant que l'avis initial "
+        "<sourceDataset>_<idAvisInitial>_<lotId> (sourceDataset : boamp ou joue ; "
+        "idAvisInitial : IDWEB pour boamp, numéro de publication pour joue). Stable tant que l'avis initial "
         "(ou, à défaut, le plus ancien avis connu) de la chaîne d'avis ne change pas.",
     ),
     Field(
@@ -242,37 +243,43 @@ PUBLISHED_FIELDS: tuple[Field, ...] = (
         "urlAvis",
         S,
         "URL de l'avis",
-        "Lien BOAMP vers le dernier avis de la chaîne d'avis.",
+        "Lien vers le dernier avis de la chaîne d'avis : boamp.fr pour la source boamp, "
+        "ted.europa.eu pour la source joue.",
     ),
     Field(
         "idAvisInitial",
         S,
         "Identifiant de l'avis initial",
-        "Identifiant (IDWEB) de l'avis initial de la chaîne d'avis ; à défaut, de l'avis le plus ancien connu.",
+        "Identifiant de l'avis initial de la chaîne d'avis ; à défaut, de l'avis le plus ancien connu. "
+        "IDWEB pour la source boamp, numéro de publication (ex. 677195-2026) pour la source joue.",
     ),
     Field(
         "idDernierAvis",
         S,
         "Identifiant du dernier avis",
-        "Identifiant (IDWEB) du dernier avis de la chaîne d'avis.",
+        "Identifiant du dernier avis de la chaîne d'avis : IDWEB pour la source boamp, "
+        "numéro de publication pour la source joue.",
     ),
     Field(
         "avisLies",
         LISTE,
         "Avis liés",
-        "Identifiants (IDWEB) de tous les avis de la chaîne (initial, rectificatifs, annulation), triés.",
+        "Identifiants de tous les avis de la chaîne (initial, rectificatifs, annulation), triés : "
+        "IDWEB pour la source boamp, numéros de publication pour la source joue.",
     ),
     Field(
         "sourceDataset",
         S,
         "Source dataset",
-        "Code du jeu de données dont proviennent les données de cet appel d'offres.",
+        "Code de la source dont proviennent les données de cet appel d'offres : boamp "
+        "(BOAMP, DILA) ou joue (Journal officiel de l'Union européenne, via TED).",
     ),
     Field(
         "sourceFile",
         S,
         "Source fichier",
-        "Lien vers le fichier de données ouvertes dont proviennent les données de cet appel d'offres.",
+        "Lien vers le fichier de données ouvertes dont proviennent les données de cet appel d'offres "
+        "(archive DILA pour boamp, avis XML sur ted.europa.eu pour joue).",
     ),
 )
 

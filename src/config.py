@@ -373,6 +373,13 @@ ALL_CONFIG["DEAO_DIST_DIR"] = DEAO_DIST_DIR
 BOAMP_S3_PREFIX = os.getenv("BOAMP_S3_PREFIX", "boamp/raw")
 DEAO_GEOCODE_S3_PREFIX = os.getenv("DEAO_GEOCODE_S3_PREFIX", "deao")
 
+# Sources lues par le flow (séparées par des virgules) : boamp, joue.
+DEAO_SOURCES = tuple(
+    nom.strip()
+    for nom in os.getenv("DEAO_SOURCES", "boamp,joue").split(",")
+    if nom.strip()
+)
+
 # Reconstruire depuis les archives plutôt que de reprendre les partitions existantes.
 DEAO_REBUILD = os.getenv("DEAO_REBUILD", "false").lower() == "true"
 

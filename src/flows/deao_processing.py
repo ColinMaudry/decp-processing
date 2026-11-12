@@ -14,6 +14,7 @@ from src.config import (
     DEAO_DIST_DIR,
     DEAO_PARTITIONS_DIR,
     DEAO_REBUILD,
+    DEAO_SOURCES,
     DEAO_STATUT_DELAI_JOURS,
     LOG_LEVEL,
     SIRENE_DATA_DIR,
@@ -32,9 +33,13 @@ from src.tasks.deao.schema import (
 )
 from src.tasks.deao.sources.boamp.parse import source_file_expr
 from src.tasks.deao.sources.boamp.source import BOAMP
+from src.tasks.deao.sources.joue.identifiants import resoudre_avis_precedents
+from src.tasks.deao.sources.joue.source import JOUE
 from src.tasks.output import sink_to_files
 from src.tasks.publish import publish_deao_to_datagouv, should_publish_deao
 from src.tasks.utils import get_logger, print_all_config
+
+SOURCES = {"boamp": BOAMP, "joue": JOUE}
 
 # Les références de module (BOAMP_START_DATE, DEAO_*, SIRENE_DATA_DIR,
 # sirene_preprocess, charger_referentiels, geocoder_adresses, publier_rapport) sont lues à l'appel : les tests les substituent.
@@ -57,8 +62,11 @@ def charger_referentiels() -> tuple[pl.LazyFrame, pl.LazyFrame, pl.DataFrame]:
     return pl.scan_parquet(ul), pl.scan_parquet(etab), pl.read_parquet(cog)
 
 
-def lire_partitions() -> pl.DataFrame:
-    fichiers = sorted(DEAO_PARTITIONS_DIR.rglob("*.parquet"))
+def lire_partitions(sources: tuple[str, ...]) -> pl.DataFrame:
+    """Partitions des seules sources demandées (celles d'une autre source sont ignorées)."""
+    fichiers = sorted(
+        f for nom in sources for f in (DEAO_PARTITIONS_DIR / nom).rglob("*.parquet")
+    )
     if not fichiers:
         return empty_avis_frame()
     # Schéma imposé : une partition écrite avant un changement de contrat est lue
@@ -103,6 +111,13 @@ def deao_processing(run_date: str | None = None) -> None:
     logger.info("🚀  Début du flow deao_processing")
     print_all_config()
 
+    inconnues = [nom for nom in DEAO_SOURCES if nom not in SOURCES]
+    if inconnues:
+        raise ValueError(
+            f"Source(s) DEAO inconnue(s) : {', '.join(inconnues)} "
+            f"(attendu : {', '.join(SOURCES)})."
+        )
+
     today = date.fromisoformat(run_date) if run_date else date.today()
     stats: Counter = Counter()
 
@@ -114,13 +129,21 @@ def deao_processing(run_date: str | None = None) -> None:
     # En tête de flow : un référentiel absent arrête le run avant l'acquisition.
     lf_unites_legales, lf_etablissements, df_cog = charger_referentiels()
 
-    logger.info(f"Acquisition BOAMP {BOAMP_START_DATE} → {today}...")
-    stats.update(
-        acquire(BOAMP, date.fromisoformat(BOAMP_START_DATE), today, DEAO_REBUILD)
-    )
+    for nom in DEAO_SOURCES:
+        logger.info(f"Acquisition {nom} {BOAMP_START_DATE} → {today}...")
+        compteurs = acquire(
+            SOURCES[nom], date.fromisoformat(BOAMP_START_DATE), today, DEAO_REBUILD
+        )
+        # BOAMP sans préfixe (compatibilité), les autres sources préfixées.
+        stats.update(
+            compteurs
+            if nom == "boamp"
+            else Counter({f"{nom}:{k}": v for k, v in compteurs.items()})
+        )
 
     logger.info("Lecture des partitions et consolidation...")
-    consolidation = consolidate(lire_partitions(), today, DEAO_STATUT_DELAI_JOURS)
+    avis = resoudre_avis_precedents(lire_partitions(DEAO_SOURCES), stats)
+    consolidation = consolidate(avis, today, DEAO_STATUT_DELAI_JOURS)
     stats.update(consolidation.stats)
 
     logger.info("Enrichissement des acheteurs...")
@@ -150,9 +173,17 @@ def deao_processing(run_date: str | None = None) -> None:
         )
 
     # R20 : les jours sains sont écrits et publiés, mais le run échoue visiblement.
-    if stats["jour_en_erreur"] > 0:
+    en_erreur = {
+        k.removesuffix(":jour_en_erreur") if k != "jour_en_erreur" else "boamp": stats[
+            k
+        ]
+        for k in stats
+        if (k == "jour_en_erreur" or k.endswith(":jour_en_erreur")) and stats[k] > 0
+    }
+    if en_erreur:
+        detail = ", ".join(f"{n} {nom}" for nom, n in en_erreur.items())
         raise RuntimeError(
-            f"{stats['jour_en_erreur']} jour(s) BOAMP en erreur (listing, "
+            f"{sum(en_erreur.values())} jour(s) en erreur ({detail} ; listing, "
             "téléchargement ou parsing) : ils seront retentés au prochain run."
         )
 
