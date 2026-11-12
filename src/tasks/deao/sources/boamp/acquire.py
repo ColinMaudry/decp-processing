@@ -9,6 +9,7 @@ from pathlib import Path
 from src.config import (
     BOAMP_RECRAWL_DAYS,
     DEAO_PARTITIONS_DIR,
+    LOG_LEVEL,
     MAX_PREFECT_WORKERS,
 )
 from src.tasks.deao.sources.boamp import fetch
@@ -120,6 +121,10 @@ def _process_day_args(args: tuple[date, Action, bool]) -> Counter:
 
 def process_batch(items: list[tuple[date, Action, bool]]) -> Counter:
     """Traite un lot de jours en parallèle ; compte les jours en échec."""
+    logger = get_logger(level=LOG_LEVEL)
+    logger.info(
+        f"Process batch, première date : {items[0][0].strftime(format='YYYY-MM-dd')}"
+    )
     results = run_in_pool(
         _process_day_args,
         items,
