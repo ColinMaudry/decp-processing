@@ -1,4 +1,4 @@
-"""Rapport de run du flow deao_processing : compteurs, répartitions, taux de remplissage."""
+"""Rapport de run des flows scrap_open et deao_processing : compteurs, répartitions, taux de remplissage."""
 
 from collections import Counter
 
@@ -110,6 +110,44 @@ def lignes_rapport(stats: Counter, df: pl.DataFrame) -> list[dict]:
         lignes.append(
             {
                 "indicateur": f"remplissage:{colonne}:{format_source if format_source is not None else 'null'}",
+                "valeur": round(float(valeur), 3),
+            }
+        )
+    return lignes
+
+
+def lignes_rapport_sources(df: pl.DataFrame) -> list[dict]:
+    """Rapport de deao_processing : lignes, statuts, acheteur_id_source et taux de
+    remplissage par `sourceDataset`."""
+    lignes: list[dict] = []
+
+    def _val(v) -> str:
+        return v if v is not None else "null"
+
+    for src, n in df["sourceDataset"].value_counts().sort("sourceDataset").iter_rows():
+        lignes.append({"indicateur": f"lignes:{_val(src)}", "valeur": int(n)})
+    for colonne, prefixe in (
+        ("statut", "statut"),
+        ("acheteur_id_source", "acheteur_id_source"),
+    ):
+        if colonne not in df.columns:
+            continue
+        for src, valeur, n in (
+            df.group_by("sourceDataset", colonne)
+            .len()
+            .sort("sourceDataset", colonne)
+            .iter_rows()
+        ):
+            lignes.append(
+                {
+                    "indicateur": f"{prefixe}:{_val(src)}:{_val(valeur)}",
+                    "valeur": int(n),
+                }
+            )
+    for colonne, src, valeur in taux_remplissage(df, par="sourceDataset").iter_rows():
+        lignes.append(
+            {
+                "indicateur": f"remplissage:{colonne}:{_val(src)}",
                 "valeur": round(float(valeur), 3),
             }
         )

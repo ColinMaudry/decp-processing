@@ -16,7 +16,7 @@ from src.tasks.scrap.deao.boamp_joue.joue import identifiants as joue_identifian
 from tests.deao_fakes import fake_s3, fake_ted, no_sleep  # noqa: F401
 from tests.test_deao_enrich import COG, _lf_etab, _lf_ul
 
-flow_module = importlib.import_module("src.flows.deao_processing")
+flow_module = importlib.import_module("src.flows.scrap_open")
 
 DATA = Path(__file__).parent / "data" / "deao"
 RUN_DATE = "2026-10-15"  # lendemain de l'avis JOUE le plus récent des fixtures
@@ -93,9 +93,9 @@ def flow_env(monkeypatch, tmp_path, fake_s3, dila):  # noqa: F811
     return dist
 
 
-def test_deao_processing_bout_en_bout(flow_env):
+def test_scrap_open_bout_en_bout(flow_env):
     dist = flow_env
-    flow_module.deao_processing(run_date="2026-10-15")
+    flow_module.scrap_open(run_date="2026-10-15")
     df = pl.read_parquet(dist / "deao.parquet")
     assert df.columns == [f.name for f in PUBLISHED_FIELDS]
     assert df.height == 31 and df["uid"].is_unique().all()
@@ -104,10 +104,10 @@ def test_deao_processing_bout_en_bout(flow_env):
     assert set(df["statut"]) >= {"ouvert", "annule", "pre-information"}
 
 
-def test_deao_processing_second_run_ne_retelecharge_que_la_fenetre(flow_env, dila):
-    flow_module.deao_processing(run_date="2026-10-15")
+def test_scrap_open_second_run_ne_retelecharge_que_la_fenetre(flow_env, dila):
+    flow_module.scrap_open(run_date="2026-10-15")
     dila.clear()
-    flow_module.deao_processing(run_date="2026-10-15")
+    flow_module.scrap_open(run_date="2026-10-15")
     fenetre = {date(2026, 10, 13), date(2026, 10, 14), date(2026, 10, 15)}
     index_fenetre = {url for d in fenetre for url in fetch.day_index_urls(d)}
     assert dila
@@ -115,20 +115,20 @@ def test_deao_processing_second_run_ne_retelecharge_que_la_fenetre(flow_env, dil
     assert {d for d in fenetre if fetch.day_index_urls(d)[0] in dila} == fenetre
 
 
-def test_deao_processing_geocodage_indisponible_continue(flow_env, monkeypatch):
+def test_scrap_open_geocodage_indisponible_continue(flow_env, monkeypatch):
     def panne(adresses, today):
         raise httpx.ConnectError("Géoplateforme indisponible")
 
     monkeypatch.setattr(flow_module, "geocoder_adresses", panne)
     rapports = []
     monkeypatch.setattr(flow_module, "publier_rapport", rapports.append)
-    flow_module.deao_processing(run_date="2026-10-15")
+    flow_module.scrap_open(run_date="2026-10-15")
     assert pl.read_parquet(flow_env / "deao.parquet").height == 31
     lignes = {ligne["indicateur"]: ligne["valeur"] for ligne in rapports[0]}
     assert lignes["geocodage_en_erreur"] == 1
 
 
-def test_deao_processing_jour_en_erreur_publie_puis_echoue(flow_env, monkeypatch):
+def test_scrap_open_jour_en_erreur_publie_puis_echoue(flow_env, monkeypatch):
     """R20 : les jours sains sont écrits (et publiés), puis le run échoue."""
     jour_ko = fetch.day_index_urls(date(2026, 10, 1))[0]
     http_get = fetch.http_get
@@ -143,7 +143,7 @@ def test_deao_processing_jour_en_erreur_publie_puis_echoue(flow_env, monkeypatch
     monkeypatch.setattr(flow_module, "should_publish_deao", lambda n: True)
     monkeypatch.setattr(flow_module, "publish_deao_to_datagouv", publications.append)
     with pytest.raises(RuntimeError, match="1 jour"):
-        flow_module.deao_processing(run_date="2026-10-15")
+        flow_module.scrap_open(run_date="2026-10-15")
     assert pl.read_parquet(flow_env / "deao.parquet").height == 31
     assert publications == [flow_env]
 
@@ -166,18 +166,16 @@ def test_lire_partitions_tolere_un_changement_de_contrat(tmp_path, monkeypatch):
     assert df.sort("idAvis")["sourceFile"].to_list() == [None, "https://x/26-1.xml"]
 
 
-def test_deao_processing_lance_sirene_preprocess_si_absent(
-    flow_env, monkeypatch, tmp_path
-):
+def test_scrap_open_lance_sirene_preprocess_si_absent(flow_env, monkeypatch, tmp_path):
     appels = []
     monkeypatch.setattr(flow_module, "SIRENE_DATA_DIR", tmp_path / "sirene_absent")
     monkeypatch.setattr(flow_module, "sirene_preprocess", lambda: appels.append(1))
-    flow_module.deao_processing(run_date="2026-10-15")
+    flow_module.scrap_open(run_date="2026-10-15")
     assert appels == [1]
 
 
-def test_deao_processing_source_file_flux_historique(flow_env):
-    flow_module.deao_processing(run_date="2027-01-15")
+def test_scrap_open_source_file_flux_historique(flow_env):
+    flow_module.scrap_open(run_date="2027-01-15")
     sources = pl.read_parquet(flow_env / "deao.parquet")["sourceFile"].drop_nulls()
     assert sources.len() > 0
     assert sources.str.contains("/FluxHistorique/Boamp_v240/2026/").all()
@@ -208,13 +206,13 @@ def deux_sources(flow_env, monkeypatch, ted_fixtures):
 def test_flow_sources_inconnue(flow_env, monkeypatch):
     monkeypatch.setattr(flow_module, "DEAO_SOURCES", ("boamp", "inconnue"))
     with pytest.raises(ValueError, match="inconnue"):
-        flow_module.deao_processing(run_date=RUN_DATE)
+        flow_module.scrap_open(run_date=RUN_DATE)
 
 
 def test_flow_sources_vide(flow_env, monkeypatch):
     monkeypatch.setattr(flow_module, "DEAO_SOURCES", ())
     with pytest.raises(ValueError, match="aucune source"):
-        flow_module.deao_processing(run_date=RUN_DATE)
+        flow_module.scrap_open(run_date=RUN_DATE)
 
 
 def test_liste_sources_dedupliquee_en_gardant_l_ordre():
@@ -225,7 +223,7 @@ def test_liste_sources_dedupliquee_en_gardant_l_ordre():
 
 
 def test_flow_deux_sources(flow_env, deux_sources):
-    flow_module.deao_processing(run_date=RUN_DATE)
+    flow_module.scrap_open(run_date=RUN_DATE)
     df = pl.read_parquet(flow_env / "deao.parquet")
     assert df["uid"].is_unique().all()
     assert set(df["sourceDataset"]) == {"boamp", "joue"}
@@ -240,13 +238,13 @@ def test_flow_deux_sources(flow_env, deux_sources):
 
 
 def test_flow_sources_boamp_seul(flow_env, deux_sources, monkeypatch):
-    flow_module.deao_processing(run_date=RUN_DATE)  # remplit les partitions joue
+    flow_module.scrap_open(run_date=RUN_DATE)  # remplit les partitions joue
     monkeypatch.setattr(flow_module, "DEAO_SOURCES", ("boamp",))
-    flow_module.deao_processing(run_date=RUN_DATE)
+    flow_module.scrap_open(run_date=RUN_DATE)
     assert set(pl.read_parquet(flow_env / "deao.parquet")["sourceDataset"]) == {"boamp"}
 
 
 def test_flow_jour_joue_en_erreur_fait_echouer(flow_env, deux_sources, no_sleep):  # noqa: F811
     deux_sources.recherche_en_erreur = {date(2026, 10, 14)}  # 500 persistant
     with pytest.raises(RuntimeError, match="joue"):
-        flow_module.deao_processing(run_date=RUN_DATE)
+        flow_module.scrap_open(run_date=RUN_DATE)

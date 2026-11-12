@@ -167,6 +167,7 @@ class FakeDataGouv:
 
 @pytest.fixture
 def fake_datagouv(monkeypatch):
+    from src.tasks import publish
     from src.tasks.deao import sources_publiees
 
     monkeypatch.setattr(sources_publiees.config, "DEAO_CLOSED_DATASET_ID", "ds-b")
@@ -174,4 +175,6 @@ def fake_datagouv(monkeypatch):
     fake = FakeDataGouv()
     monkeypatch.setattr(sources_publiees, "http_get", fake.get)
     monkeypatch.setattr(sources_publiees, "update_resource", fake.update_resource)
+    # Publication du dataset a (publish_deao_to_datagouv)
+    monkeypatch.setattr(publish, "update_resource", fake.update_resource)
     return fake
