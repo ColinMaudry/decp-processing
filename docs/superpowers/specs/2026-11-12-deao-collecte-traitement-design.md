@@ -332,9 +332,11 @@ Les valeurs ci-dessus sont reportées dans `template.env`.
 
 - Retirer du serveur Prefect les anciens déploiements DEAO Scaleway.
 - Créer la limite de concurrence globale `deao-processing` (1 slot) sur le serveur Prefect.
-- Créer `DEAO_DATA_DIR` et `DEAO_DIST_DIR` sur le serveur principal ; premier run de
-  `scrap_open` avec `DEAO_REBUILD=true` (reconstruction depuis l'archive S3, sans
-  requête DILA/TED pour les jours archivés).
+- Créer les deux dossiers de données par environnement sur le serveur principal :
+  `DEAO_DATA_DIR` = `/home/yunohost.app/prefect/deao/prod` et `.../deao/dev` (et
+  `DEAO_DIST_DIR` correspondants) ; premier run de `scrap_open` de chaque environnement
+  avec `DEAO_REBUILD=true` (reconstruction depuis l'archive S3 partagée, sans requête
+  DILA/TED pour les jours archivés).
 - `.env` : `DEAO_DATASET_ID` → `DEAO_OPEN_DATASET_ID`, nouvelles variables du dataset b.
 
 ## Hors périmètre

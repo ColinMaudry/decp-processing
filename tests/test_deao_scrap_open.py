@@ -363,3 +363,46 @@ def test_flow_jour_joue_en_erreur_fait_echouer(flow_env, deux_sources, no_sleep)
     deux_sources.recherche_en_erreur = {date(2026, 10, 14)}  # 500 persistant
     with pytest.raises(RuntimeError, match="joue"):
         flow_module.scrap_open(run_date=RUN_DATE)
+
+
+def test_scrap_open_echec_publication_boamp_non_bloquant(
+    flow_env, deux_sources, publication, traitement
+):
+    publication.echecs_publication.add(_rid("boamp"))
+    with pytest.raises(RuntimeError, match="boamp") as exc:
+        flow_module.scrap_open(run_date=RUN_DATE)
+    assert "publication en erreur" in str(exc.value)
+    assert [p[:2] for p in publication.publies] == [
+        ("ds-b", _rid("boamp")),
+        ("ds-b", _rid("joue")),
+    ]
+    assert traitement == [RUN_DATE]
+
+
+def test_scrap_open_exception_publication_non_bloquante(
+    flow_env, deux_sources, publication, traitement, monkeypatch
+):
+    from src.tasks.deao import sources_publiees
+
+    def update(dataset_id, resource_id, path, api_key):
+        if resource_id == _rid("boamp"):
+            raise httpx.ConnectError("réseau")
+        return publication.update_resource(dataset_id, resource_id, path, api_key)
+
+    monkeypatch.setattr(sources_publiees, "update_resource", update)
+    with pytest.raises(RuntimeError, match="boamp"):
+        flow_module.scrap_open(run_date=RUN_DATE)
+    assert [p[1] for p in publication.publies] == [_rid("joue")]
+    assert traitement == [RUN_DATE]
+
+
+def test_flow_code_absent_du_registre(flow_env, monkeypatch, traitement):
+    monkeypatch.setattr(flow_module, "DEAO_SOURCES", ("boamp",))
+    monkeypatch.setattr(
+        config,
+        "DEAO_REGISTRE",
+        tuple(s for s in config.DEAO_REGISTRE if s.code != "boamp"),
+    )
+    with pytest.raises(ValueError, match="registre"):
+        flow_module.scrap_open(run_date=RUN_DATE)
+    assert traitement == []

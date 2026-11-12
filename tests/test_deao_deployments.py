@@ -54,7 +54,7 @@ def test_deao_env_dirs():
     for nom, s in _specs().items():
         env = s["job_variables"]["env"]
         env_nom = "dev" if nom.endswith("-dev") else "prod"
-        assert env["DEAO_DATA_DIR"] == "/home/yunohost.app/prefect/deao"
+        assert env["DEAO_DATA_DIR"] == f"/home/yunohost.app/prefect/deao/{env_nom}"
         assert env["DEAO_DIST_DIR"] == f"/srv/shared/deao/{env_nom}/dist"
 
 
@@ -80,3 +80,11 @@ def test_plus_de_scaleway_pour_deao():
         assert "launcher" not in s["entrypoint"]
         assert not s["work_pool_name"].startswith("scaleway")
         assert "parameters" not in s
+
+
+def test_deao_data_dir_distinct_par_environnement():
+    specs = _specs()
+    for nom in ("scrap-open", "scrap-closed", "deao-processing"):
+        prod = specs[nom]["job_variables"]["env"]["DEAO_DATA_DIR"]
+        dev = specs[f"{nom}-dev"]["job_variables"]["env"]["DEAO_DATA_DIR"]
+        assert prod != dev

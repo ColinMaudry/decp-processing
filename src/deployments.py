@@ -75,7 +75,7 @@ def deao_deployment_specs() -> list[dict]:
                 "job_variables": {
                     "env": {
                         "DECP_PROCESSING_PUBLISH": str(env == "prod"),
-                        "DEAO_DATA_DIR": "/home/yunohost.app/prefect/deao",
+                        "DEAO_DATA_DIR": f"/home/yunohost.app/prefect/deao/{env}",
                         "DEAO_DIST_DIR": f"/srv/shared/deao/{env}/dist",
                     }
                 },

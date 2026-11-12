@@ -28,6 +28,19 @@ def dedoublonner_sources(df: pl.DataFrame) -> tuple[pl.DataFrame, Counter]:
     return df, Counter(dedoublonnage_retire=0)
 
 
+def _verifier_identifiants() -> None:
+    """Identifiants nécessaires à la publication : échec avant toute publication."""
+    for nom in (
+        "DEAO_OPEN_DATASET_ID",
+        "DEAO_CLOSED_DATASET_ID",
+        "DEAO_CLOSED_PARQUET_RESOURCE_ID",
+    ):
+        if not getattr(config, nom):
+            raise RuntimeError(
+                f"{nom} est vide : publication impossible (variable d'environnement à définir)."
+            )
+
+
 def _verifier_fichier(code: str, chemin, min_rows: int) -> pl.DataFrame:
     attendu = published_schema()
     schema = dict(pl.read_parquet_schema(chemin))
@@ -44,6 +57,15 @@ def _verifier_fichier(code: str, chemin, min_rows: int) -> pl.DataFrame:
         raise RuntimeError(
             f"Source {code} : {df.height} lignes < minimum attendu {min_rows}"
         )
+    autres = df.filter(
+        pl.col("sourceDataset").is_null() | (pl.col("sourceDataset") != code)
+    )
+    if autres.height:
+        valeurs = sorted(set(autres["sourceDataset"].fill_null("<null>")))
+        raise RuntimeError(
+            f"Source {code} : {autres.height} ligne(s) avec un sourceDataset "
+            f"différent du code de la source ({valeurs})"
+        )
     return df
 
 
@@ -57,16 +79,21 @@ def deao_processing(run_date: str | None = None) -> None:
         if not sources:
             raise ValueError("Aucune source DEAO active dans le registre.")
 
+        if publication_autorisee():
+            _verifier_identifiants()
+
         # Étapes 1 à 3 : toute erreur survient avant la moindre publication.
         dossier = config.DEAO_DATA_DIR / "sources"
         dossier.mkdir(parents=True, exist_ok=True)
-        frames = []
+        frames = {}
         for source in sources:
             logger.info(f"Téléchargement de la source {source.code}...")
             chemin = telecharger_fichier_source(source, dossier)
-            frames.append(_verifier_fichier(source.code, chemin, source.min_rows))
+            frames[source.code] = _verifier_fichier(
+                source.code, chemin, source.min_rows
+            )
 
-        df, stats = dedoublonner_sources(pl.concat(frames))
+        df, stats = dedoublonner_sources(pl.concat(list(frames.values())))
         logger.info(f"Dédoublonnage : {dict(stats)}")
         if df["uid"].is_duplicated().any():
             n = int(df["uid"].is_duplicated().sum())
@@ -77,8 +104,13 @@ def deao_processing(run_date: str | None = None) -> None:
         # Écriture : agrégat Open Data (a) et agrégat complet (b)
         dist = config.DEAO_DIST_DIR
         dist.mkdir(parents=True, exist_ok=True)
-        codes_open = [s.code for s in sources if s.open_data]
-        df_open = df.filter(pl.col("sourceDataset").is_in(codes_open))
+        # Concaténation des seules sources open_data (jamais un filtre a posteriori)
+        frames_open = [frames[s.code] for s in sources if s.open_data]
+        df_open = (
+            pl.concat(frames_open)
+            if frames_open
+            else pl.DataFrame(schema=published_schema())
+        )
         logger.info(f"Écriture de {df_open.height} lignes Open Data dans {dist}...")
         sink_to_files(df_open.lazy(), dist / "deao")
         write_table_schema(dist / "schema.json")

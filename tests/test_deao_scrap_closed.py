@@ -113,3 +113,28 @@ def test_sous_minimum_non_publie(env, monkeypatch):
         flow_module.scrap_closed()
     assert publication.publies == []
     assert appels == [None]
+
+
+def test_echec_publication_d_un_scraper_non_bloquant(env, monkeypatch):
+    publication, appels, _, _ = env
+    monkeypatch.setattr(
+        config,
+        "DEAO_REGISTRE",
+        (REGISTRE[0], SourceDeao("plateforme_b", "B", False, "res-b", 1)),
+    )
+    publication.echecs_publication.add("res-a")
+    with pytest.raises(RuntimeError, match="plateforme_a"):
+        flow_module.scrap_closed(run_date="2026-10-15")
+    assert [p[1] for p in publication.publies] == ["res-a", "res-b"]
+    assert appels == ["2026-10-15"]
+
+
+def test_scraper_avec_autre_source_dataset_non_publie(env):
+    publication, appels, _, scrapers = env
+    scrapers["plateforme_a"] = lambda jour: pl.concat(
+        [_lignes("plateforme_a"), _lignes("boamp", 1)]
+    )
+    with pytest.raises(RuntimeError, match="plateforme_a"):
+        flow_module.scrap_closed()
+    assert publication.publies == []
+    assert appels == [None]

@@ -79,3 +79,92 @@ def test_publier_fichier_echec(fake_datagouv, tmp_path):  # noqa: F811
     _parquet(p)
     with pytest.raises(RuntimeError):
         sp.publier_fichier("ds-b", "res-joue", p)
+
+
+def test_echec_telechargement_ne_laisse_aucun_fichier(fake_datagouv, tmp_path):  # noqa: F811
+    fake_datagouv.fichiers["res-joue"] = b"pas un parquet"
+    with pytest.raises(sp.FichierSourceIndisponible):
+        sp.telecharger_fichier_source(SOURCE, tmp_path)
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_echec_http_ne_laisse_aucun_fichier(fake_datagouv, tmp_path):  # noqa: F811
+    fake_datagouv.fichiers["res-joue"] = b"x"
+    fake_datagouv.en_erreur.add("res-joue")
+    with pytest.raises(sp.FichierSourceIndisponible):
+        sp.telecharger_fichier_source(SOURCE, tmp_path)
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_ancien_fichier_conserve_si_echec(fake_datagouv, tmp_path):  # noqa: F811
+    ancien = tmp_path / "joue.parquet"
+    _parquet(ancien)
+    fake_datagouv.fichiers["res-joue"] = b"pas un parquet"
+    with pytest.raises(sp.FichierSourceIndisponible):
+        sp.telecharger_fichier_source(SOURCE, tmp_path)
+    assert pl.read_parquet(ancien)["a"].to_list() == [1, 2]
+    assert [f.name for f in tmp_path.iterdir()] == ["joue.parquet"]
+
+
+def test_cle_api_pas_envoyee_a_un_hote_tiers(fake_datagouv, tmp_path):  # noqa: F811
+    fake_datagouv.fichiers["res-joue"] = _parquet(tmp_path / "src.parquet")
+    fake_datagouv.hote_fichiers = "cdn.exemple.org"
+    dest = tmp_path / "dest"
+    dest.mkdir()
+    sp.telecharger_fichier_source(SOURCE, dest)
+    assert fake_datagouv.api_key_vue == ["cle-test", None]
+
+
+@pytest.mark.parametrize(
+    "url, attendu",
+    [
+        ("https://www.data.gouv.fr/api/1/x", True),
+        ("https://data.gouv.fr/x", True),
+        ("https://static.data.gouv.fr/x", True),
+        ("https://evildata.gouv.fr/x", False),
+        ("https://data.gouv.fr.evil.org/x", False),
+        ("https://exemple.org/data.gouv.fr", False),
+    ],
+)
+def test_hote_datagouv(url, attendu):
+    assert sp._est_hote_datagouv(url) is attendu
+
+
+def test_ecrire_et_publier_ok(fake_datagouv, tmp_path, monkeypatch):  # noqa: F811
+    monkeypatch.setattr(config, "DECP_PROCESSING_PUBLISH", True)
+    monkeypatch.setattr(config, "SOLO_DEAO_SCRAPS", [])
+    chemin = tmp_path / "joue.parquet"
+    lignes = pl.DataFrame({"a": [1, 2]})
+    assert sp.ecrire_et_publier("joue", lignes, SOURCE, chemin) is None
+    assert chemin.exists()
+    assert fake_datagouv.publies == [("ds-b", "res-joue", "joue.parquet")]
+
+
+def test_ecrire_et_publier_sans_autorisation(fake_datagouv, tmp_path, monkeypatch):  # noqa: F811
+    monkeypatch.setattr(config, "DECP_PROCESSING_PUBLISH", False)
+    chemin = tmp_path / "joue.parquet"
+    assert (
+        sp.ecrire_et_publier("joue", pl.DataFrame({"a": [1]}), SOURCE, chemin) is None
+    )
+    assert chemin.exists() and fake_datagouv.publies == []
+
+
+def test_ecrire_et_publier_sous_minimum(fake_datagouv, tmp_path, monkeypatch):  # noqa: F811
+    monkeypatch.setattr(config, "DECP_PROCESSING_PUBLISH", True)
+    monkeypatch.setattr(config, "SOLO_DEAO_SCRAPS", [])
+    source = SourceDeao("joue", "JOUE", True, "res-joue", 5)
+    cause = sp.ecrire_et_publier(
+        "joue", pl.DataFrame({"a": [1]}), source, tmp_path / "joue.parquet"
+    )
+    assert "sous le minimum (1 < 5)" in cause
+    assert fake_datagouv.publies == []
+
+
+def test_ecrire_et_publier_echec_publication(fake_datagouv, tmp_path, monkeypatch):  # noqa: F811
+    monkeypatch.setattr(config, "DECP_PROCESSING_PUBLISH", True)
+    monkeypatch.setattr(config, "SOLO_DEAO_SCRAPS", [])
+    fake_datagouv.echecs_publication.add("res-joue")
+    cause = sp.ecrire_et_publier(
+        "joue", pl.DataFrame({"a": [1]}), SOURCE, tmp_path / "joue.parquet"
+    )
+    assert cause.startswith("publication en erreur")

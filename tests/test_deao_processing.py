@@ -116,6 +116,55 @@ def test_schema_non_conforme_rien_publie(fake_datagouv, env):
     assert fake_datagouv.publies == []
 
 
+def test_source_dataset_etranger_rien_publie(fake_datagouv, env):
+    """Une ligne d'une autre source dans un fichier (ex. Closed Data dans boamp) bloque tout."""
+    df = pl.read_parquet(io.BytesIO(fake_datagouv.fichiers[_rid(env, "boamp")]))
+    df = df.with_columns(
+        pl.when(pl.col("uid") == "boamp-0")
+        .then(pl.lit("plateforme_fermee"))
+        .otherwise(pl.col("sourceDataset"))
+        .alias("sourceDataset")
+    )
+    buf = io.BytesIO()
+    df.write_parquet(buf)
+    fake_datagouv.fichiers[_rid(env, "boamp")] = buf.getvalue()
+    with pytest.raises(RuntimeError, match="sourceDataset"):
+        deao_processing()
+    assert fake_datagouv.publies == []
+
+
+@pytest.mark.parametrize(
+    "variable",
+    [
+        "DEAO_OPEN_DATASET_ID",
+        "DEAO_CLOSED_DATASET_ID",
+        "DEAO_CLOSED_PARQUET_RESOURCE_ID",
+    ],
+)
+def test_identifiant_vide_rien_publie(fake_datagouv, env, variable):
+    env.monkeypatch.setattr(config, variable, "")
+    with pytest.raises(RuntimeError, match=variable):
+        deao_processing()
+    assert fake_datagouv.publies == []
+
+
+def test_identifiant_vide_sans_publication_ok(fake_datagouv, env):
+    env.monkeypatch.setattr(config, "DEAO_OPEN_DATASET_ID", "")
+    env.monkeypatch.setattr(config, "SOLO_DEAO_SCRAPS", ["x"])
+    deao_processing()
+    assert fake_datagouv.publies == []
+
+
+def test_lecture_independante_de_deao_sources(fake_datagouv, env):
+    from src.flows import scrap_open
+
+    env.monkeypatch.setattr(scrap_open, "DEAO_SOURCES", ("boamp",))
+    env.monkeypatch.setattr(config, "DEAO_SOURCES", ("boamp",), raising=False)
+    deao_processing()
+    closed = pl.read_parquet(env.dist / "closed" / "deao.parquet")
+    assert set(closed["sourceDataset"]) == {"boamp", "joue"}
+
+
 def test_source_skip_non_lue(fake_datagouv, env):
     _registre(env, joue={"skip": True})
     deao_processing()

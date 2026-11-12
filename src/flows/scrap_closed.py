@@ -9,7 +9,7 @@ from src import config
 from src.config import LOG_LEVEL, MAX_PREFECT_WORKERS
 from src.flows.deao_processing import deao_processing
 from src.tasks.deao.schema import published_schema
-from src.tasks.deao.sources_publiees import publication_autorisee, publier_fichier
+from src.tasks.deao.sources_publiees import ecrire_et_publier, publication_autorisee
 from src.tasks.scrap.deao.contrat import SCRAPERS
 from src.tasks.utils import get_logger, run_in_pool
 
@@ -33,7 +33,6 @@ def scrap_closed(run_date: str | None = None) -> None:
     codes = _codes_a_executer()
     erreurs: dict[str, str] = {}
     schema = published_schema()
-    autorisee = publication_autorisee()
 
     for code in codes:
         if code not in SCRAPERS:
@@ -57,7 +56,7 @@ def scrap_closed(run_date: str | None = None) -> None:
         if code not in reussis:
             erreurs[code] = "le scraper a échoué"
 
-    if not autorisee:
+    if not publication_autorisee():
         logger.info(
             "Publication des fichiers par source désactivée "
             "(DECP_PROCESSING_PUBLISH ou SOLO_DEAO_SCRAPS)."
@@ -68,19 +67,20 @@ def scrap_closed(run_date: str | None = None) -> None:
             ecart = sorted(set(df.columns) ^ set(schema))
             erreurs[code] = f"colonnes non conformes au schéma publié ({ecart})"
             continue
-        lignes = df.select(pl.col(c).cast(t) for c, t in schema.items())
-        chemin = config.DEAO_DIST_DIR / f"{code}.parquet"
-        logger.info(f"Écriture de {lignes.height} lignes {code} dans {chemin}...")
-        lignes.write_parquet(chemin, compression="zstd")
-        if not autorisee:
-            continue
-        entree = entrees[code]
-        if lignes.height < entree.min_rows:
+        etrangeres = df.filter(
+            pl.col("sourceDataset").is_null() | (pl.col("sourceDataset") != code)
+        ).height
+        if etrangeres:
             erreurs[code] = (
-                f"{lignes.height} lignes < minimum {entree.min_rows}, non publié"
+                f"{etrangeres} ligne(s) dont sourceDataset != {code}, non publié"
             )
             continue
-        publier_fichier(config.DEAO_CLOSED_DATASET_ID, entree.resource_id, chemin)
+        lignes = df.select(pl.col(c).cast(t) for c, t in schema.items())
+        cause = ecrire_et_publier(
+            code, lignes, entrees[code], config.DEAO_DIST_DIR / f"{code}.parquet"
+        )
+        if cause:
+            erreurs[code] = cause
 
     # Le traitement agrège ce qui est publié sur data.gouv.fr, même en cas d'échec partiel.
     with tags("appels-offres", "traitement"):

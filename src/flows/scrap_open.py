@@ -32,7 +32,7 @@ from src.tasks.deao.schema import (
     PUBLISHED_FIELDS,
     empty_avis_frame,
 )
-from src.tasks.deao.sources_publiees import publication_autorisee, publier_fichier
+from src.tasks.deao.sources_publiees import ecrire_et_publier, publication_autorisee
 from src.tasks.scrap.deao.boamp_joue.boamp.parse import source_file_expr
 from src.tasks.scrap.deao.boamp_joue.boamp.source import BOAMP
 from src.tasks.scrap.deao.boamp_joue.joue.identifiants import resoudre_avis_precedents
@@ -122,6 +122,13 @@ def scrap_open(run_date: str | None = None) -> None:
             f"(attendu : {', '.join(SOURCES)})."
         )
 
+    entrees = {e.code: e for e in config.DEAO_REGISTRE}
+    sans_entree = [nom for nom in DEAO_SOURCES if nom not in entrees]
+    if sans_entree:
+        raise ValueError(
+            f"Source(s) DEAO absente(s) du registre : {', '.join(sans_entree)}."
+        )
+
     today = date.fromisoformat(run_date) if run_date else date.today()
     stats: Counter = Counter()
 
@@ -163,29 +170,19 @@ def scrap_open(run_date: str | None = None) -> None:
 
     df = df.with_columns(source_file_expr(today.year))
     DEAO_DIST_DIR.mkdir(parents=True, exist_ok=True)
-    autorisee = publication_autorisee()
-    if not autorisee:
+    if not publication_autorisee():
         logger.info(
             "Publication des fichiers par source désactivée "
             "(DECP_PROCESSING_PUBLISH ou SOLO_DEAO_SCRAPS)."
         )
-    entrees = {e.code: e for e in config.DEAO_REGISTRE}
+    echecs_publication: dict[str, str] = {}
     for code in DEAO_SOURCES:
         lignes = selection_publiee(df.filter(pl.col("sourceDataset") == code))
-        chemin = DEAO_DIST_DIR / f"{code}.parquet"
-        logger.info(f"Écriture de {lignes.height} lignes {code} dans {chemin}...")
-        lignes.write_parquet(chemin, compression="zstd")
-        entree = entrees[code]
-        if not autorisee:
-            continue
-        if lignes.height < entree.min_rows:
-            stats[f"{code}:sous_minimum"] += 1
-            logger.error(
-                f"{code} : {lignes.height} lignes < minimum {entree.min_rows}, "
-                "fichier non publié."
-            )
-            continue
-        publier_fichier(config.DEAO_CLOSED_DATASET_ID, entree.resource_id, chemin)
+        cause = ecrire_et_publier(
+            code, lignes, entrees[code], DEAO_DIST_DIR / f"{code}.parquet"
+        )
+        if cause:
+            echecs_publication[code] = cause
 
     # Le traitement s'exécute même si la collecte a des jours en erreur : il agrège
     # ce qui est publié sur data.gouv.fr.
@@ -200,9 +197,6 @@ def scrap_open(run_date: str | None = None) -> None:
         for k in stats
         if (k == "jour_en_erreur" or k.endswith(":jour_en_erreur")) and stats[k] > 0
     }
-    sous_minimum = [
-        k.removesuffix(":sous_minimum") for k in stats if k.endswith(":sous_minimum")
-    ]
     causes = []
     if en_erreur:
         detail = ", ".join(f"{n} {nom}" for nom, n in en_erreur.items())
@@ -210,10 +204,8 @@ def scrap_open(run_date: str | None = None) -> None:
             f"{sum(en_erreur.values())} jour(s) en erreur ({detail} ; listing, "
             "téléchargement ou parsing) : ils seront retentés au prochain run"
         )
-    if sous_minimum:
-        causes.append(
-            f"fichier(s) sous le minimum de lignes, non publié(s) : {', '.join(sous_minimum)}"
-        )
+    for code, cause in echecs_publication.items():
+        causes.append(f"{code} : {cause}")
     if causes:
         raise RuntimeError(" ; ".join(causes) + ".")
 

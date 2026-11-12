@@ -4,6 +4,7 @@ import io
 import re
 from datetime import date, datetime
 from pathlib import Path
+from urllib.parse import urlparse
 
 import httpx
 import pytest
@@ -135,16 +136,19 @@ class FakeDataGouv:
         self.echecs_publication: set[str] = set()
         self.appels: list[str] = []
         self.api_key_vue: list[str | None] = []
+        self.hote_fichiers = "fake.data.gouv.fr"
+
+    def _verifier_cle(self, url, headers):
+        hote = urlparse(url).hostname
+        self.api_key_vue.append(headers.get("X-API-KEY"))
+        if hote == "data.gouv.fr" or hote.endswith(".data.gouv.fr"):
+            assert "X-API-KEY" in headers, f"X-API-KEY absente sur GET {url}"
+        else:
+            assert "X-API-KEY" not in headers, f"clé API envoyée à {hote}"
 
     def get(self, url, headers):
         self.appels.append(url)
-        self.api_key_vue.append(headers.get("X-API-KEY"))
-        assert "X-API-KEY" in headers, f"X-API-KEY absente sur GET {url}"
-        if url.startswith("https://fake.data.gouv.fr/fichiers/"):
-            rid = url.rsplit("/", 1)[1]
-            if rid in self.en_erreur:
-                return httpx.Response(500)
-            return httpx.Response(200, content=self.fichiers[rid])
+        self._verifier_cle(url, headers)
         m = re.search(r"/datasets/[^/]+/resources/([^/]+)/$", url)
         assert m, url
         rid = m.group(1)
@@ -153,8 +157,18 @@ class FakeDataGouv:
         if rid not in self.fichiers:
             return httpx.Response(404)
         return httpx.Response(
-            200, json={"url": f"https://fake.data.gouv.fr/fichiers/{rid}"}
+            200, json={"url": f"https://{self.hote_fichiers}/fichiers/{rid}"}
         )
+
+    def telecharger(self, url, headers, dest):
+        """Équivalent de http_telecharger : écrit dest si 200, renvoie le statut."""
+        self.appels.append(url)
+        self._verifier_cle(url, headers)
+        rid = url.rsplit("/", 1)[1]
+        if rid in self.en_erreur:
+            return 500
+        Path(dest).write_bytes(self.fichiers[rid])
+        return 200
 
     def update_resource(self, dataset_id, resource_id, file_path, api_key):
         assert api_key is not None, "clé API absente sur le PUT"
@@ -174,6 +188,7 @@ def fake_datagouv(monkeypatch):
     monkeypatch.setattr(sources_publiees.config, "DATAGOUVFR_API_KEY", "cle-test")
     fake = FakeDataGouv()
     monkeypatch.setattr(sources_publiees, "http_get", fake.get)
+    monkeypatch.setattr(sources_publiees, "http_telecharger", fake.telecharger)
     monkeypatch.setattr(sources_publiees, "update_resource", fake.update_resource)
     # Publication du dataset a (publish_deao_to_datagouv)
     monkeypatch.setattr(publish, "update_resource", fake.update_resource)
