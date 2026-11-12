@@ -222,14 +222,16 @@ def wait_for_either_element(driver, timeout=10) -> tuple[str or None, int]:
         wait = WebDriverWait(driver, timeout)
         result = wait.until(
             lambda d: (
-                d.find_element(By.ID, download_button_id)
-                if d.find_elements(By.ID, download_button_id)
-                else None
-            )
-            or (
-                d.find_element(By.CLASS_NAME, "alert")
-                if d.find_elements(By.CLASS_NAME, "alert")
-                else None
+                (
+                    d.find_element(By.ID, download_button_id)
+                    if d.find_elements(By.ID, download_button_id)
+                    else None
+                )
+                or (
+                    d.find_element(By.CLASS_NAME, "alert")
+                    if d.find_elements(By.CLASS_NAME, "alert")
+                    else None
+                )
             )
         )
         if result.text:
