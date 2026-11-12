@@ -107,7 +107,7 @@ RESOURCE_CACHE_DIR = make_path_from_env(
 RESOURCE_CACHE_DIR.mkdir(exist_ok=True, parents=True)
 ALL_CONFIG["RESOURCE_CACHE_DIR"] = RESOURCE_CACHE_DIR
 
-DIST_DIR = make_path_from_env("DECP_DIST_DIR", BASE_DIR / "dist")
+DIST_DIR = make_path_from_env("DECP_DIST_DIR", BASE_DIR / "dist" / "decp")
 DIST_DIR.mkdir(exist_ok=True, parents=True, mode=0o777)
 ALL_CONFIG["DIST_DIR"] = DIST_DIR
 
@@ -371,8 +371,8 @@ DEAO_DATA_DIR = make_path_from_env("DEAO_DATA_DIR", DATA_DIR / "deao")
 DEAO_DATA_DIR.mkdir(exist_ok=True, parents=True)
 DEAO_PARTITIONS_DIR = DEAO_DATA_DIR / "avis"
 DEAO_PARTITIONS_DIR.mkdir(exist_ok=True, parents=True)
-DEAO_DIST_DIR = make_path_from_env("DEAO_DIST_DIR", DIST_DIR / "deao")
-DEAO_DIST_DIR.mkdir(exist_ok=True, parents=True)
+DEAO_DIST_DIR = make_path_from_env("DEAO_DIST_DIR", BASE_DIR / "dist" / "deao")
+DEAO_DIST_DIR.mkdir(exist_ok=True, parents=True, mode=0o777)
 ALL_CONFIG["DEAO_DATA_DIR"] = DEAO_DATA_DIR
 ALL_CONFIG["DEAO_DIST_DIR"] = DEAO_DIST_DIR
 
