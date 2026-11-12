@@ -1,12 +1,20 @@
+from collections import Counter
 from datetime import date, datetime
 from pathlib import Path
 
 import polars as pl
 import pytest
 
-from src.tasks.deao.consolidate import consolidate, resolve_roots, statut_expr
+from src.tasks.deao.consolidate import (
+    RecouvrementIncoherent,
+    consolidate,
+    resolve_roots,
+    statut_expr,
+)
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA, PUBLISHED_FIELDS, conform_avis
 from src.tasks.deao.sources.boamp.parse import parse_day
+from src.tasks.deao.sources.joue.identifiants import resoudre_avis_precedents
+from src.tasks.deao.sources.joue.parse import parse_day as parse_day_joue
 from src.tasks.deao.values import PARIS
 
 FIXTURES = Path(__file__).parent / "data" / "deao"
@@ -336,3 +344,64 @@ def test_consolidate_fixtures():
     assert set(out.filter(pl.col("idAvisInitial") == "26-98723")["statut"]) == {
         "ouvert"
     }
+
+
+def _boamp(*numeros: str) -> pl.DataFrame:
+    df, _ = parse_day(
+        {f"{n}.xml": (FIXTURES / f"{n}.xml").read_bytes() for n in numeros}
+    )
+    return df
+
+
+def _joue(*numeros: str) -> pl.DataFrame:
+    df, _ = parse_day_joue(
+        {f"{n}.xml": (FIXTURES / "joue" / f"{n}.xml").read_bytes() for n in numeros}
+    )
+    return resoudre_avis_precedents(df, Counter(), resolver=lambda ids: {})
+
+
+def _union(*dfs: pl.DataFrame) -> pl.DataFrame:
+    return pl.concat(dfs, how="vertical_relaxed")
+
+
+def test_chaine_joue_recoupant_boamp_ecartee():
+    df = _union(_boamp("26-87868", "26-99074"), _joue("631605-2026", "709755-2026"))
+    c = consolidate(df, RUN, 90)
+    assert not c.df.filter(pl.col("sourceDataset") == "joue").height
+    assert c.df.filter(pl.col("sourceDataset") == "boamp").height
+    assert c.stats["joue:chaine_recouvrement"] == 1
+
+
+def test_chaine_joue_seule_conservee():
+    df = _union(_boamp("26-87868"), _joue("631605-2026", "677195-2026", "706679-2026"))
+    c = consolidate(df, RUN, 90)
+    joue = c.df.filter(pl.col("sourceDataset") == "joue")["uid"].to_list()
+    assert joue and all(u.startswith("joue_677195-2026_") for u in joue)
+    assert c.stats["joue:chaine_recouvrement"] == 1
+    assert c.stats["joue:chaine_conservee"] == 1
+
+
+def test_garde_fou_partitions_boamp_anciennes():
+    boamp = _boamp("26-87868", "26-99074").with_columns(
+        pl.lit(None, dtype=pl.String).alias("idEforms")
+    )
+    with pytest.raises(RecouvrementIncoherent):
+        consolidate(_union(boamp, _joue("631605-2026")), RUN, 90)
+
+
+def test_garde_fou_aucun_recouvrement():
+    with pytest.raises(RecouvrementIncoherent):
+        consolidate(
+            _union(_boamp("26-87868"), _joue("677195-2026", "706679-2026")), RUN, 90
+        )
+
+
+def test_sans_joue_pas_de_garde_fou():
+    consolidate(_boamp("26-87868"), RUN, 90)
+    consolidate(
+        _boamp("26-87868").with_columns(
+            pl.lit(None, dtype=pl.String).alias("idEforms")
+        ),
+        RUN,
+        90,
+    )

@@ -107,6 +107,52 @@ def resolve_roots(
     return roots
 
 
+class RecouvrementIncoherent(RuntimeError):
+    """Le recouvrement BOAMP/JOUE est incohérent avec les données BOAMP présentes."""
+
+
+def ecarter_recouvrement(avis: pl.DataFrame, stats: Counter) -> pl.DataFrame:
+    """Écarte les chaînes `joue` déjà publiées par le BOAMP (« le BOAMP fait foi »).
+
+    Une chaîne `joue` est écartée si l'un de ses avis a un `idEforms` ou un
+    `idEformsPrecedent` présent parmi les `idEforms` des lignes `boamp`. `avis` porte
+    déjà `idAvisInitial`.
+
+    Garde-fou (si des lignes `joue` existent) : des lignes `boamp` eForms sans aucun
+    `idEforms` (partitions écrites avant la colonne) ou aucune chaîne `joue` écartée trahissent un recouvrement
+    non détecté, qui publierait des doublons : on lève `RecouvrementIncoherent`.
+    """
+    boamp = avis.filter(pl.col("sourceDataset") == "boamp")
+    ids_boamp = set(boamp["idEforms"].drop_nulls().to_list())
+    joue = avis.filter(pl.col("sourceDataset") == "joue")
+
+    ecartees = (
+        joue.filter(
+            pl.col("idEforms").is_in(ids_boamp)
+            | pl.col("idEformsPrecedent").is_in(ids_boamp)
+        )
+        .select(CHAIN_KEYS)
+        .unique()
+    )
+    n_joue = joue.select(CHAIN_KEYS).unique().height
+    stats["joue:chaine_recouvrement"] += ecartees.height
+    stats["joue:chaine_conservee"] += n_joue - ecartees.height
+
+    # Sans ligne JOUE, il n'y a rien à dédoublonner : pas de garde-fou.
+    if joue.height and boamp.filter(pl.col("formatSource") == "eforms").height:
+        if not ids_boamp:
+            raise RecouvrementIncoherent(
+                "Lignes BOAMP eForms sans aucun idEforms : partitions antérieures à "
+                "la colonne idEforms, à régénérer avant de consolider avec le JOUE."
+            )
+        if not ecartees.height:
+            raise RecouvrementIncoherent(
+                "Aucune chaîne JOUE ne recoupe le BOAMP alors que des avis eForms "
+                "BOAMP existent : recouvrement non détecté, publication interrompue."
+            )
+    return avis.join(ecartees, on=CHAIN_KEYS, how="anti")
+
+
 def statut_expr(run_date: date, delai_jours: int) -> pl.Expr:
     """Statut de l'appel d'offres à `run_date` (voir la spec, « Cycle de vie »)."""
     jours_depuis_publication = (
@@ -191,6 +237,7 @@ def consolidate(avis: pl.DataFrame, run_date: date, delai_jours: int) -> Consoli
     avis = avis.join(
         resolve_roots(avis, stats=stats), on=["sourceDataset", "idAvis"], how="left"
     )
+    avis = ecarter_recouvrement(avis, stats)
     chains = _chain_aggregates(avis)
 
     seulement_annulations = chains.filter(pl.col("_seulementAnnulations"))
