@@ -48,7 +48,7 @@ def parse_avis(xml: bytes, filename: str, compteur: Counter) -> list[dict]:
 
     classement = classify_joue(notice)
     if not classement.retenu:
-        compteur[f"exclu:{classement.nature}"] += 1
+        compteur[f"exclu:{classement.nature or 'sans_type'}"] += 1
         return []
 
     try:

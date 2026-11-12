@@ -111,6 +111,10 @@ def deao_processing(run_date: str | None = None) -> None:
     logger.info("🚀  Début du flow deao_processing")
     print_all_config()
 
+    if not DEAO_SOURCES:
+        raise ValueError(
+            f"DEAO_SOURCES vide : aucune source à traiter (attendu : {', '.join(SOURCES)})."
+        )
     inconnues = [nom for nom in DEAO_SOURCES if nom not in SOURCES]
     if inconnues:
         raise ValueError(

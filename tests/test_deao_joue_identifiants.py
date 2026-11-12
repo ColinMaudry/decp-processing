@@ -77,3 +77,18 @@ def test_api_en_erreur_non_cachee(s3_identifiants, fake_ted, no_sleep):  # noqa:
     fake_ted.identifiants_en_erreur.add(UUID)
     assert resoudre_avec_cache([UUID]) == {}
     assert charger_cache_identifiants().height == 0
+
+
+def test_lignes_boamp_et_joue_sans_precedent_inchangees():
+    from tests.test_deao_consolidate import avis, frame
+
+    df = frame(
+        [
+            avis(idAvis="B2", avisPrecedent="B1"),
+            avis(sourceDataset="joue", idAvis="J1", idEforms="e-1"),
+        ]
+    )
+    out = resoudre_avis_precedents(
+        df, Counter(), resolver=lambda ids: pytest.fail("pas d'API")
+    )
+    assert out.equals(df)

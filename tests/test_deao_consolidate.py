@@ -8,6 +8,7 @@ import pytest
 from src.tasks.deao.consolidate import (
     RecouvrementIncoherent,
     consolidate,
+    ecarter_recouvrement,
     resolve_roots,
     statut_expr,
 )
@@ -385,15 +386,43 @@ def test_garde_fou_partitions_boamp_anciennes():
     boamp = _boamp("26-87868", "26-99074").with_columns(
         pl.lit(None, dtype=pl.String).alias("idEforms")
     )
-    with pytest.raises(RecouvrementIncoherent):
+    with pytest.raises(RecouvrementIncoherent, match="idEforms manquant"):
         consolidate(_union(boamp, _joue("631605-2026")), RUN, 90)
 
 
 def test_garde_fou_aucun_recouvrement():
-    with pytest.raises(RecouvrementIncoherent):
+    with pytest.raises(RecouvrementIncoherent, match="Aucune chaîne JOUE"):
         consolidate(
             _union(_boamp("26-87868"), _joue("677195-2026", "706679-2026")), RUN, 90
         )
+
+
+def _lignes_recouvrement(n_recents: int, n_anciens_sans_id: int) -> pl.DataFrame:
+    """BOAMP eForms récents (avec idEforms) + anciens (idEforms nul) + JOUE recoupant le 1er récent."""
+    rows = [avis(idAvis=f"R{i}", idEforms=f"e-{i}") for i in range(n_recents)]
+    rows += [avis(idAvis=f"A{i}", idEforms=None) for i in range(n_anciens_sans_id)]
+    rows.append(
+        avis(
+            sourceDataset="joue",
+            idAvis="J1",
+            idEforms="e-0",
+            formatSource="eforms",
+        )
+    )
+    return frame(rows).with_columns(idAvisInitial=pl.col("idAvis"))
+
+
+def test_garde_fou_partitions_boamp_mixtes():
+    """Récents avec idEforms (re-crawl) + anciens majoritaires sans : doublons probables."""
+    df = _lignes_recouvrement(n_recents=5, n_anciens_sans_id=50)
+    with pytest.raises(RecouvrementIncoherent, match="idEforms manquant"):
+        ecarter_recouvrement(df, Counter())
+
+
+def test_garde_fou_tolere_une_ligne_eforms_sans_idEforms():
+    df = _lignes_recouvrement(n_recents=150, n_anciens_sans_id=1)
+    out = ecarter_recouvrement(df, Counter())
+    assert not out.filter(pl.col("sourceDataset") == "joue").height
 
 
 def test_sans_joue_pas_de_garde_fou():

@@ -266,3 +266,22 @@ def test_acheteur_etranger_sans_geo():
     # pays nul = français : traitement inchangé
     assert out["acheteur_id"][0] == "20007695800011"
     assert out["acheteur_departement_code"][2] == "29"
+
+
+def test_neutralisation_independante_du_perimetre_de_requete(monkeypatch):
+    """PAYS_FRANCAIS fixe la neutralisation ; JOUE_COUNTRY_CODES ne fait que la requête TED."""
+    from src.tasks.deao import enrich
+
+    monkeypatch.setattr(enrich, "JOUE_COUNTRY_CODES", ("FRA",), raising=False)
+    df = pl.DataFrame(
+        {
+            "acheteur_pays": ["PYF", "DEU"],
+            "acheteur_id": ["a", "b"],
+            "acheteur_adresse_voie": ["v", "v"],
+            "acheteur_adresse_cp": ["98700", "75001"],
+            "acheteur_adresse_ville": ["x", "y"],
+            "acheteur_adresse_nuts": ["n", "n"],
+        }
+    )
+    out = enrich.neutraliser_acheteurs_etrangers(df)
+    assert out["acheteur_id"].to_list() == ["a", None]

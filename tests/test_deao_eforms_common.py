@@ -50,10 +50,10 @@ def test_notice_id_et_changed_notice_id_boamp_26_99074():
 
 def test_changed_notice_id_retire_le_suffixe_de_version():
     n = etree.fromstring(
-        '<N xmlns:efbc="urn:e"><x><efbc:ChangedNoticeIdentifier>ABC-01'
-        "</efbc:ChangedNoticeIdentifier></x></N>"
+        '<N xmlns:efbc="urn:e"><x><efbc:ChangedNoticeIdentifier>'
+        "ABCDEF01-1234-1234-1234-123456789012-01</efbc:ChangedNoticeIdentifier></x></N>"
     )
-    assert changed_notice_id(n) == "abc"
+    assert changed_notice_id(n) == "abcdef01-1234-1234-1234-123456789012"
 
 
 def test_map_notice_identique_a_map_eforms_hors_url():
@@ -90,3 +90,13 @@ def test_change_reason():
     )
     assert change_reason(n) == "cor-buy"
     assert change_reason(_notice("26-87868.xml")) is None
+
+
+def test_changed_notice_id_uuid_nu_a_dernier_groupe_numerique():
+    uuid = "12345678-1234-1234-1234-123456789012"
+    for valeur, attendu in ((uuid, uuid), (f"{uuid}-01", uuid)):
+        n = etree.fromstring(
+            '<N xmlns:efbc="urn:e"><x><efbc:ChangedNoticeIdentifier>'
+            f"{valeur}</efbc:ChangedNoticeIdentifier></x></N>"
+        )
+        assert changed_notice_id(n) == attendu

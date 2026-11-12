@@ -57,3 +57,13 @@ def test_parse_day_compteurs():
 
 def test_source():
     assert JOUE.nom == "joue"
+
+
+def test_avis_sans_type_compte_exclu_sans_type():
+    from collections import Counter
+
+    from src.tasks.deao.sources.joue.parse import parse_avis
+
+    c = Counter()
+    assert parse_avis(b"<Notice/>", "x.xml", c) == []
+    assert c["exclu:sans_type"] == 1 and "exclu:None" not in c

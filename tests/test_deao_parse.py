@@ -127,7 +127,14 @@ def test_parse_day_id_eforms_et_acheteur_pays():
 
 
 def test_parse_day_inchange_hors_nouvelles_colonnes():
-    """Régression de la refonte : sortie figée (parse_day_expected.parquet)."""
+    """Régression de la refonte : sortie figée (parse_day_expected.parquet).
+
+    À régénérer uniquement quand le contrat de sortie de parse_day change
+    volontairement (colonne ajoutée/retirée, règle de mapping BOAMP modifiée), après
+    relecture du diff : `parse_day({p.name: p.read_bytes() for p in
+    FIXTURES.glob("*.xml")})[0].drop(nouvelles).write_parquet(
+    FIXTURES / "parse_day_expected.parquet")`. Ne jamais le régénérer pour faire
+    passer un test sans comprendre l'écart."""
     files = {p.name: p.read_bytes() for p in FIXTURES.glob("*.xml")}
     df, _ = parse_day(files)
     attendu = pl.read_parquet(FIXTURES / "parse_day_expected.parquet")

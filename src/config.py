@@ -348,7 +348,9 @@ JOUE_AVIS_URL_TEMPLATE = os.getenv(
     "JOUE_AVIS_URL_TEMPLATE",
     "https://ted.europa.eu/fr/notice/-/detail/{publication_number}",
 )
-# Pays de l'acheteur ou du lieu d'exécution (France et outre-mer)
+# Pays français (non configurable) : hors de cette liste, l'acheteur est neutralisé.
+PAYS_FRANCAIS = ("FRA", "ATF", "PYF", "NCL", "WLF", "SPM", "BLM", "MAF")
+# Périmètre de la requête TED : pays de l'acheteur ou du lieu d'exécution
 JOUE_COUNTRY_CODES = tuple(
     os.getenv("JOUE_COUNTRY_CODES", "FRA ATF PYF NCL WLF SPM BLM MAF").split()
 )
@@ -373,12 +375,14 @@ ALL_CONFIG["DEAO_DIST_DIR"] = DEAO_DIST_DIR
 BOAMP_S3_PREFIX = os.getenv("BOAMP_S3_PREFIX", "boamp/raw")
 DEAO_GEOCODE_S3_PREFIX = os.getenv("DEAO_GEOCODE_S3_PREFIX", "deao")
 
+
 # Sources lues par le flow (séparées par des virgules) : boamp, joue.
-DEAO_SOURCES = tuple(
-    nom.strip()
-    for nom in os.getenv("DEAO_SOURCES", "boamp,joue").split(",")
-    if nom.strip()
-)
+def parse_deao_sources(valeur: str) -> tuple[str, ...]:
+    """Noms de sources séparés par des virgules, dédupliqués, ordre conservé."""
+    return tuple(dict.fromkeys(n.strip() for n in valeur.split(",") if n.strip()))
+
+
+DEAO_SOURCES = parse_deao_sources(os.getenv("DEAO_SOURCES", "boamp,joue"))
 
 # Reconstruire depuis les archives plutôt que de reprendre les partitions existantes.
 DEAO_REBUILD = os.getenv("DEAO_REBUILD", "false").lower() == "true"

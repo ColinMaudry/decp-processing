@@ -211,6 +211,19 @@ def test_flow_sources_inconnue(flow_env, monkeypatch):
         flow_module.deao_processing(run_date=RUN_DATE)
 
 
+def test_flow_sources_vide(flow_env, monkeypatch):
+    monkeypatch.setattr(flow_module, "DEAO_SOURCES", ())
+    with pytest.raises(ValueError, match="aucune source"):
+        flow_module.deao_processing(run_date=RUN_DATE)
+
+
+def test_liste_sources_dedupliquee_en_gardant_l_ordre():
+    from src.config import parse_deao_sources
+
+    assert parse_deao_sources("joue, boamp,joue,,boamp") == ("joue", "boamp")
+    assert parse_deao_sources(" , ") == ()
+
+
 def test_flow_deux_sources(flow_env, deux_sources):
     flow_module.deao_processing(run_date=RUN_DATE)
     df = pl.read_parquet(flow_env / "deao.parquet")

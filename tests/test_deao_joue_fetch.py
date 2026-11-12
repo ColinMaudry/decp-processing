@@ -3,6 +3,7 @@ from datetime import date
 import httpx
 import pytest
 
+from src.tasks.deao.sources.joue import fetch
 from src.tasks.deao.sources.joue.fetch import (
     download_xml,
     list_day_files,
@@ -54,3 +55,14 @@ def test_recherche_en_erreur_epuise_les_essais(fake_ted, no_sleep):  # noqa: F81
 def test_numero_publication(fake_ted):  # noqa: F811
     assert numero_publication("c2dbf0bf-bd32-4b44-9a85-c27a0f0c3e9b") == "677195-2026"
     assert numero_publication("00000000-0000-0000-0000-000000000000") is None
+
+
+def test_numero_publication_sans_zeros_de_tete(monkeypatch):
+    monkeypatch.setattr(fetch, "_rechercher", lambda q: ["00677195-2026"])
+    assert numero_publication("x") == "677195-2026"
+
+
+def test_query_jour_sans_code_pays(monkeypatch):
+    monkeypatch.setattr(fetch, "JOUE_COUNTRY_CODES", ())
+    with pytest.raises(ValueError, match="JOUE_COUNTRY_CODES"):
+        query_jour(date(2026, 10, 14))

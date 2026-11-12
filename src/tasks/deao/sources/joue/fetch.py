@@ -69,6 +69,8 @@ def http_get(url: str) -> httpx.Response:
 
 
 def query_jour(d: date) -> str:
+    if not JOUE_COUNTRY_CODES:
+        raise ValueError("JOUE_COUNTRY_CODES est vide : aucun pays à interroger.")
     codes = " ".join(JOUE_COUNTRY_CODES)
     return (
         f"(buyer-country IN ({codes}) OR place-of-performance IN ({codes}))"
@@ -112,4 +114,4 @@ def download_xml(base: str | None, name: str) -> bytes:
 def numero_publication(notice_id: str) -> str | None:
     """Numéro de publication d'un avis à partir de son identifiant eForms."""
     numeros = _rechercher(f"notice-identifier={notice_id}")
-    return numeros[0] if numeros else None
+    return numeros[0].lstrip("0") if numeros else None

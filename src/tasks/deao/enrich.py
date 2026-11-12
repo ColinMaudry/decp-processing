@@ -2,7 +2,7 @@ from collections.abc import Callable
 
 import polars as pl
 
-from src.config import JOUE_COUNTRY_CODES
+from src.config import PAYS_FRANCAIS
 from src.tasks.deao.geocode_cache import adresse_cle_expr
 from src.tasks.deao.values import departement_depuis_cp, departement_depuis_nuts
 from src.tasks.enrich import add_etablissement_data, add_unite_legale_data
@@ -240,7 +240,7 @@ def neutraliser_acheteurs_etrangers(df: pl.DataFrame) -> pl.DataFrame:
     if "acheteur_pays" not in df.columns:
         return df
     etranger = pl.col("acheteur_pays").is_not_null() & ~pl.col("acheteur_pays").is_in(
-        list(JOUE_COUNTRY_CODES)
+        list(PAYS_FRANCAIS)
     )
     colonnes = [
         "acheteur_id",

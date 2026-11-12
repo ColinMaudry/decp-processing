@@ -198,7 +198,12 @@ def changed_notice_id(notice) -> str | None:
     valeur = text(find(notice, "ChangedNoticeIdentifier"))
     if valeur is None:
         return None
-    return re.sub(r"-\d+$", "", valeur).lower()
+    return re.sub(
+        r"^([0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})-\d{2}$",
+        r"\1",
+        valeur,
+        flags=re.IGNORECASE,
+    ).lower()
 
 
 def change_reason(notice) -> str | None:

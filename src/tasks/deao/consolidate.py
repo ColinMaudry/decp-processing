@@ -107,6 +107,10 @@ def resolve_roots(
     return roots
 
 
+# Part tolérée de lignes BOAMP eForms sans idEforms (anomalies isolées).
+SEUIL_IDEFORMS_MANQUANTS = 0.01
+
+
 class RecouvrementIncoherent(RuntimeError):
     """Le recouvrement BOAMP/JOUE est incohérent avec les données BOAMP présentes."""
 
@@ -118,9 +122,11 @@ def ecarter_recouvrement(avis: pl.DataFrame, stats: Counter) -> pl.DataFrame:
     `idEformsPrecedent` présent parmi les `idEforms` des lignes `boamp`. `avis` porte
     déjà `idAvisInitial`.
 
-    Garde-fou (si des lignes `joue` existent) : des lignes `boamp` eForms sans aucun
-    `idEforms` (partitions écrites avant la colonne) ou aucune chaîne `joue` écartée trahissent un recouvrement
-    non détecté, qui publierait des doublons : on lève `RecouvrementIncoherent`.
+    Garde-fou (si des lignes `joue` existent) : une part de lignes `boamp` eForms sans
+    `idEforms` supérieure à SEUIL_IDEFORMS_MANQUANTS (partitions écrites avant la
+    colonne, même partiellement re-crawlées) ou aucune chaîne `joue` écartée trahissent
+    un recouvrement non détecté, qui publierait des doublons : on lève
+    `RecouvrementIncoherent`.
     """
     boamp = avis.filter(pl.col("sourceDataset") == "boamp")
     ids_boamp = set(boamp["idEforms"].drop_nulls().to_list())
@@ -139,11 +145,15 @@ def ecarter_recouvrement(avis: pl.DataFrame, stats: Counter) -> pl.DataFrame:
     stats["joue:chaine_conservee"] += n_joue - ecartees.height
 
     # Sans ligne JOUE, il n'y a rien à dédoublonner : pas de garde-fou.
-    if joue.height and boamp.filter(pl.col("formatSource") == "eforms").height:
-        if not ids_boamp:
+    eforms = boamp.filter(pl.col("formatSource") == "eforms")
+    if joue.height and eforms.height:
+        sans_id = eforms["idEforms"].is_null().sum()
+        if sans_id / eforms.height > SEUIL_IDEFORMS_MANQUANTS:
             raise RecouvrementIncoherent(
-                "Lignes BOAMP eForms sans aucun idEforms : partitions antérieures à "
-                "la colonne idEforms, à régénérer avant de consolider avec le JOUE."
+                f"idEforms manquant sur {sans_id} des {eforms.height} lignes BOAMP "
+                f"eForms (seuil {SEUIL_IDEFORMS_MANQUANTS:.0%}) : partitions "
+                "antérieures à la colonne idEforms, à régénérer (DEAO_REBUILD=true) "
+                "avant de consolider avec le JOUE."
             )
         if not ecartees.height:
             raise RecouvrementIncoherent(
