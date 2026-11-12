@@ -133,6 +133,13 @@ façon dont un rectificatif d'un sous-type exclu se présente sont à établir s
 par le builder. La règle de fond est celle du BOAMP : ce qui est retenu, c'est ce qui
 décrit ou modifie un appel d'offres ou une pré-information.
 
+Précision (plan d'implémentation) : le classement se fait sur le type de formulaire,
+`cbc:NoticeTypeCode/@listName` (`planning` → pré-information simple ; `competition` →
+appel à la concurrence, y compris pré-information valant mise en concurrence ; toute autre
+valeur → exclu), et sur le code motif `cancel` pour les annulations (vérifié sur l'API :
+`cancel`, `cor-buy`, `update-add`…). C'est équivalent aux plages de sous-types ci-dessus,
+et ça couvre aussi les sous-types « E » hors directives (ex. `E3`, listName `competition`).
+
 Ce découpage est **aligné sur le filtre BOAMP**, vérifié sur les avis eForms du BOAMP du
 01 au 21/10/2026 : sous-types 1-10 → `PRE-INFORMATION`, 15 → `QUALIFICATION`, 16-20 et 23
 → `APPEL_OFFRE` (retenus) ; 25-28 → `EX_ANTE_VOLONTAIRE`, 29-36 → `ATTRIBUTION`, 38 →
