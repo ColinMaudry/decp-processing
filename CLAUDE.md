@@ -55,7 +55,7 @@ pre-commit run --all-files
 - `src/flows/` — Prefect `@flow` definitions. Each is a top-level pipeline:
   - `decp_processing.py` — main daily pipeline (list resources → batch download/clean → concat → enrich with SIRENE → write parquet/CSV → optionally publish).
   - `sirene_preprocess.py` — monthly job; produces parquet of SIRENE unités légales + établissements under `SIRENE_DATA_DIR` (one folder per month). The main flow auto-triggers this if the directory for the current month is missing.
-  - `scrap.py` — dispatches to one of the per-platform scrapers in `src/tasks/scrap/` based on `SCRAPING_TARGET`. Modes: `month` (default), `year`, `all`.
+  - `scrap.py` — dispatches to one of the per-platform scrapers in `src/tasks/scrap/decp/` based on `SCRAPING_TARGET`. Modes: `month` (default), `year`, `all`.
   - `get_cog.py` — fetches the Code Officiel Géographique (commune codes).
 - `src/deployments.py` — declares Prefect deployments with cron schedules (prod runs `cron="0 5 * * *"` on `main` branch from GitHub). Edits to schedules/env vars happen here, not in flows.
 

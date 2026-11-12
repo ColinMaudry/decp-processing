@@ -1,6 +1,6 @@
 import httpx
 
-from src.tasks.scrap.marches_securises import (
+from src.tasks.scrap.decp.marches_securises import (
     atline_to_decp,
     build_uid,
     get_marches_page,
@@ -149,7 +149,7 @@ class TestGetMarchesPage:
 
         monkeypatch.setattr(httpx.Client, "post", fake_post)
         monkeypatch.setattr(
-            "src.tasks.scrap.marches_securises.time.sleep", lambda s: None
+            "src.tasks.scrap.decp.marches_securises.time.sleep", lambda s: None
         )
         client = httpx.Client()
         assert get_marches_page(client, "tok", "2018-11-01", "2018-11-30", 1) is None
@@ -167,18 +167,19 @@ class TestScrapMonth:
             return {"donnees": [], "nb_total": 0}
 
         monkeypatch.setattr(
-            "src.tasks.scrap.marches_securises.get_marches_page", fake_get_marches_page
+            "src.tasks.scrap.decp.marches_securises.get_marches_page",
+            fake_get_marches_page,
         )
         monkeypatch.setattr(
-            "src.tasks.scrap.marches_securises.get_atline_token", lambda c: "tok"
+            "src.tasks.scrap.decp.marches_securises.get_atline_token", lambda c: "tok"
         )
         monkeypatch.setattr(
-            "src.tasks.scrap.marches_securises.publish_scrap_to_datagouv",
+            "src.tasks.scrap.decp.marches_securises.publish_scrap_to_datagouv",
             lambda *a, **k: None,
         )
         if emails is not None:
             monkeypatch.setattr(
-                "src.tasks.scrap.marches_securises.notify_no_data",
+                "src.tasks.scrap.decp.marches_securises.notify_no_data",
                 lambda *a, **k: emails.append(a),
             )
         scrap_marches_securises_month.fn("2018", "11", tmp_path)
