@@ -6,8 +6,6 @@ from datetime import date, timedelta
 from enum import StrEnum
 from pathlib import Path
 
-from prefect import task
-
 from src.config import (
     BOAMP_RECRAWL_DAYS,
     DEAO_PARTITIONS_DIR,
@@ -136,7 +134,6 @@ def process_batch(items: list[tuple[date, Action, bool]]) -> Counter:
     return total
 
 
-@task
 def process_batch_task(items: list[tuple[date, Action, bool]]) -> Counter:
     return process_batch(items)
 
@@ -149,5 +146,5 @@ def acquire_boamp(start: date, end: date, rebuild: bool) -> Counter:
     items = [(d, action, d in archived_days) for d, action in plan]
     total: Counter = Counter()
     for i in range(0, len(items), BATCH_DAYS):
-        total.update(process_batch_task(items[i : i + BATCH_DAYS]))
+        total.update(process_batch(items[i : i + BATCH_DAYS]))
     return total
