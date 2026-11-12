@@ -357,6 +357,11 @@ JOUE_COUNTRY_CODES = tuple(
 )
 JOUE_S3_PREFIX = os.getenv("JOUE_S3_PREFIX", "joue/raw")
 JOUE_MAX_WORKERS = int(os.getenv("JOUE_MAX_WORKERS", "4"))
+# Débit vers TED (issue #203) : le CDN de ted.europa.eu renvoie des 429 au-delà de
+# ~2 requêtes/s par IP, sans en-tête Retry-After. Intervalle minimal entre deux requêtes
+# (partagé par tous les fils) et attente de base avant un nouvel essai après une 429.
+JOUE_INTERVALLE_REQUETES_S = float(os.getenv("JOUE_INTERVALLE_REQUETES_S", "0.6"))
+JOUE_ATTENTE_429_S = float(os.getenv("JOUE_ATTENTE_429_S", "5"))
 
 # ---------------------------------------------------------------------------
 # DEAO (flow deao_processing) — Données essentielles d'appels d'offres, issue #178

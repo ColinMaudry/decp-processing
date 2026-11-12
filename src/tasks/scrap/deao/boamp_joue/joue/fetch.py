@@ -1,5 +1,8 @@
 """Accès réseau à l'API et au site TED pour la source JOUE (issue #165)."""
 
+import threading
+import time
+from collections.abc import Callable
 from datetime import date
 
 import httpx
@@ -13,7 +16,9 @@ from tenacity import (
 from src.config import (
     HTTP_CLIENT,
     HTTP_HEADERS,
+    JOUE_ATTENTE_429_S,
     JOUE_COUNTRY_CODES,
+    JOUE_INTERVALLE_REQUETES_S,
     TED_API_URL,
     TED_NOTICE_XML_URL,
 )
@@ -21,11 +26,41 @@ from src.config import (
 PAGE_SIZE = 250
 
 
+class Limiteur:
+    """Impose un intervalle minimal entre deux requêtes, tous fils confondus."""
+
+    def __init__(
+        self,
+        intervalle: float,
+        horloge: Callable[[], float] = time.monotonic,
+        dormir: Callable[[float], None] = time.sleep,
+    ):
+        self.intervalle = intervalle
+        self.horloge = horloge
+        self.dormir = dormir
+        self._verrou = threading.Lock()
+        self._prochain = 0.0
+
+    def attendre(self) -> None:
+        with self._verrou:
+            maintenant = self.horloge()
+            attente = self._prochain - maintenant
+            if attente > 0:
+                self.dormir(attente)
+                maintenant += attente
+            self._prochain = maintenant + self.intervalle
+
+
+_LIMITEUR = Limiteur(JOUE_INTERVALLE_REQUETES_S)
+
+
 def _post_raw(url: str, payload: dict) -> httpx.Response:
+    _LIMITEUR.attendre()
     return HTTP_CLIENT.post(url, json=payload, headers=HTTP_HEADERS, timeout=60)
 
 
 def _get_raw(url: str) -> httpx.Response:
+    _LIMITEUR.attendre()
     return HTTP_CLIENT.get(url, headers=HTTP_HEADERS, follow_redirects=True, timeout=60)
 
 
@@ -50,8 +85,11 @@ def _a_reessayer(exc: BaseException) -> bool:
 
 _retry = retry(
     retry=retry_if_exception(_a_reessayer),
-    stop=stop_after_attempt(5),
-    wait=wait_exponential(multiplier=1, max=60),
+    stop=stop_after_attempt(6),
+    # Pas de Retry-After chez TED : attente croissante à partir de JOUE_ATTENTE_429_S.
+    wait=wait_exponential(
+        multiplier=JOUE_ATTENTE_429_S, min=JOUE_ATTENTE_429_S, max=60
+    ),
     reraise=True,
 )
 
