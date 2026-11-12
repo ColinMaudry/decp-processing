@@ -3,6 +3,7 @@
 import io
 import re
 from datetime import date, datetime
+from pathlib import Path
 
 import httpx
 import pytest
@@ -120,3 +121,57 @@ def no_sleep(monkeypatch):
 
     for fn in (fetch.http_get, fetch.http_post):
         monkeypatch.setattr(fn.retry, "sleep", lambda _: None)
+
+
+class FakeDataGouv:
+    """Faux data.gouv.fr (dataset b) : aller-retour publication -> lecture."""
+
+    def __init__(self):
+        # contenu des ressources, par resource_id
+        self.fichiers: dict[str, bytes] = {}
+        # (dataset_id, resource_id, nom du fichier) à chaque publication
+        self.publies: list[tuple[str, str, str]] = []
+        self.en_erreur: set[str] = set()
+        self.echecs_publication: set[str] = set()
+        self.appels: list[str] = []
+        self.api_key_vue: list[str | None] = []
+
+    def get(self, url, headers):
+        self.appels.append(url)
+        self.api_key_vue.append(headers.get("X-API-KEY"))
+        assert "X-API-KEY" in headers, f"X-API-KEY absente sur GET {url}"
+        if url.startswith("https://fake.data.gouv.fr/fichiers/"):
+            rid = url.rsplit("/", 1)[1]
+            if rid in self.en_erreur:
+                return httpx.Response(500)
+            return httpx.Response(200, content=self.fichiers[rid])
+        m = re.search(r"/datasets/[^/]+/resources/([^/]+)/$", url)
+        assert m, url
+        rid = m.group(1)
+        if rid in self.en_erreur:
+            return httpx.Response(500)
+        if rid not in self.fichiers:
+            return httpx.Response(404)
+        return httpx.Response(
+            200, json={"url": f"https://fake.data.gouv.fr/fichiers/{rid}"}
+        )
+
+    def update_resource(self, dataset_id, resource_id, file_path, api_key):
+        assert api_key is not None, "clé API absente sur le PUT"
+        self.publies.append((dataset_id, resource_id, Path(file_path).name))
+        if resource_id in self.echecs_publication:
+            return {"success": False}
+        self.fichiers[resource_id] = Path(file_path).read_bytes()
+        return {"success": True}
+
+
+@pytest.fixture
+def fake_datagouv(monkeypatch):
+    from src.tasks.deao import sources_publiees
+
+    monkeypatch.setattr(sources_publiees.config, "DEAO_CLOSED_DATASET_ID", "ds-b")
+    monkeypatch.setattr(sources_publiees.config, "DATAGOUVFR_API_KEY", "cle-test")
+    fake = FakeDataGouv()
+    monkeypatch.setattr(sources_publiees, "http_get", fake.get)
+    monkeypatch.setattr(sources_publiees, "update_resource", fake.update_resource)
+    return fake
