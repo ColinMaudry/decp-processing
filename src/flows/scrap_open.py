@@ -5,9 +5,10 @@ from datetime import date
 
 import httpx
 import polars as pl
-from prefect import flow
+from prefect import flow, tags
 from tenacity import RetryError
 
+from src import config
 from src.config import (
     BOAMP_START_DATE,
     DATA_DIR,
@@ -19,6 +20,7 @@ from src.config import (
     LOG_LEVEL,
     SIRENE_DATA_DIR,
 )
+from src.flows.deao_processing import deao_processing
 from src.flows.sirene_preprocess import sirene_preprocess
 from src.tasks.deao.acquire import acquire
 from src.tasks.deao.consolidate import consolidate
@@ -29,10 +31,8 @@ from src.tasks.deao.schema import (
     AVIS_LOT_SCHEMA,
     PUBLISHED_FIELDS,
     empty_avis_frame,
-    write_table_schema,
 )
-from src.tasks.output import sink_to_files
-from src.tasks.publish import publish_deao_to_datagouv, should_publish_deao
+from src.tasks.deao.sources_publiees import publication_autorisee, publier_fichier
 from src.tasks.scrap.deao.boamp_joue.boamp.parse import source_file_expr
 from src.tasks.scrap.deao.boamp_joue.boamp.source import BOAMP
 from src.tasks.scrap.deao.boamp_joue.joue.identifiants import resoudre_avis_precedents
@@ -161,20 +161,36 @@ def scrap_open(run_date: str | None = None) -> None:
 
     publier_rapport(lignes_rapport(stats, df))
 
-    logger.info(f"Écriture de {df.height} lignes dans {DEAO_DIST_DIR}...")
-    DEAO_DIST_DIR.mkdir(parents=True, exist_ok=True)
     df = df.with_columns(source_file_expr(today.year))
-    sink_to_files(selection_publiee(df).lazy(), DEAO_DIST_DIR / "deao")
-    write_table_schema(DEAO_DIST_DIR / "schema.json")
-
-    if should_publish_deao(df.height):
-        logger.info("Publication DEAO sur data.gouv.fr...")
-        publish_deao_to_datagouv(DEAO_DIST_DIR)
-    else:
+    DEAO_DIST_DIR.mkdir(parents=True, exist_ok=True)
+    autorisee = publication_autorisee()
+    if not autorisee:
         logger.info(
-            "Publication DEAO désactivée (DECP_PROCESSING_PUBLISH, DEAO_OPEN_DATASET_ID "
-            f"ou {df.height} lignes < DEAO_MIN_ROWS_TO_PUBLISH)."
+            "Publication des fichiers par source désactivée "
+            "(DECP_PROCESSING_PUBLISH ou SOLO_DEAO_SCRAPS)."
         )
+    entrees = {e.code: e for e in config.DEAO_REGISTRE}
+    for code in DEAO_SOURCES:
+        lignes = selection_publiee(df.filter(pl.col("sourceDataset") == code))
+        chemin = DEAO_DIST_DIR / f"{code}.parquet"
+        logger.info(f"Écriture de {lignes.height} lignes {code} dans {chemin}...")
+        lignes.write_parquet(chemin, compression="zstd")
+        entree = entrees[code]
+        if not autorisee:
+            continue
+        if lignes.height < entree.min_rows:
+            stats[f"{code}:sous_minimum"] += 1
+            logger.error(
+                f"{code} : {lignes.height} lignes < minimum {entree.min_rows}, "
+                "fichier non publié."
+            )
+            continue
+        publier_fichier(config.DEAO_CLOSED_DATASET_ID, entree.resource_id, chemin)
+
+    # Le traitement s'exécute même si la collecte a des jours en erreur : il agrège
+    # ce qui est publié sur data.gouv.fr.
+    with tags("appels-offres", "traitement"):
+        deao_processing(run_date=run_date)
 
     # R20 : les jours sains sont écrits et publiés, mais le run échoue visiblement.
     en_erreur = {
@@ -184,11 +200,21 @@ def scrap_open(run_date: str | None = None) -> None:
         for k in stats
         if (k == "jour_en_erreur" or k.endswith(":jour_en_erreur")) and stats[k] > 0
     }
+    sous_minimum = [
+        k.removesuffix(":sous_minimum") for k in stats if k.endswith(":sous_minimum")
+    ]
+    causes = []
     if en_erreur:
         detail = ", ".join(f"{n} {nom}" for nom, n in en_erreur.items())
-        raise RuntimeError(
+        causes.append(
             f"{sum(en_erreur.values())} jour(s) en erreur ({detail} ; listing, "
-            "téléchargement ou parsing) : ils seront retentés au prochain run."
+            "téléchargement ou parsing) : ils seront retentés au prochain run"
         )
+    if sous_minimum:
+        causes.append(
+            f"fichier(s) sous le minimum de lignes, non publié(s) : {', '.join(sous_minimum)}"
+        )
+    if causes:
+        raise RuntimeError(" ; ".join(causes) + ".")
 
     logger.info("☑️  Fin du flow scrap_open.")
