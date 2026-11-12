@@ -1,4 +1,4 @@
-"""Archive brute des XML DILA sur S3 : un tar compressé zstd par jour."""
+"""Archive brute des XML d'une source sur S3 : un tar compressé zstd par jour."""
 
 import io
 import re
@@ -7,7 +7,7 @@ from datetime import date
 
 import zstandard
 
-from src.config import DEAO_S3_PREFIX, S3_BUCKET
+from src.config import S3_BUCKET
 from src.tasks.utils import s3_client
 
 
@@ -36,17 +36,17 @@ def unpack(data: bytes) -> dict[str, bytes]:
     return files
 
 
-def archive_key(d: date) -> str:
-    return f"{DEAO_S3_PREFIX}/{d:%Y}/{d:%m}/{d:%d}.tar.zst"
+def archive_key(prefix: str, d: date) -> str:
+    return f"{prefix}/{d:%Y}/{d:%m}/{d:%d}.tar.zst"
 
 
-def list_archived_days() -> set[date]:
+def list_archived_days(prefix: str) -> set[date]:
     pattern = re.compile(
-        rf"^{re.escape(DEAO_S3_PREFIX)}/(\d{{4}})/(\d{{2}})/(\d{{2}})\.tar\.zst$"
+        rf"^{re.escape(prefix)}/(\d{{4}})/(\d{{2}})/(\d{{2}})\.tar\.zst$"
     )
     days = set()
     paginator = s3_client().get_paginator("list_objects_v2")
-    for page in paginator.paginate(Bucket=S3_BUCKET, Prefix=f"{DEAO_S3_PREFIX}/"):
+    for page in paginator.paginate(Bucket=S3_BUCKET, Prefix=f"{prefix}/"):
         for obj in page.get("Contents", []):
             m = pattern.match(obj["Key"])
             if m:
@@ -57,10 +57,12 @@ def list_archived_days() -> set[date]:
     return days
 
 
-def read_day_archive(d: date) -> dict[str, bytes]:
-    obj = s3_client().get_object(Bucket=S3_BUCKET, Key=archive_key(d))
+def read_day_archive(prefix: str, d: date) -> dict[str, bytes]:
+    obj = s3_client().get_object(Bucket=S3_BUCKET, Key=archive_key(prefix, d))
     return unpack(obj["Body"].read())
 
 
-def write_day_archive(d: date, files: dict[str, bytes]) -> None:
-    s3_client().put_object(Bucket=S3_BUCKET, Key=archive_key(d), Body=pack(files))
+def write_day_archive(prefix: str, d: date, files: dict[str, bytes]) -> None:
+    s3_client().put_object(
+        Bucket=S3_BUCKET, Key=archive_key(prefix, d), Body=pack(files)
+    )

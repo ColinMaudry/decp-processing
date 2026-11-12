@@ -36,7 +36,7 @@ class _Paginator:
 
 @pytest.fixture
 def fake_s3(monkeypatch):
-    from src.tasks.deao.sources.boamp import archive
+    from src.tasks.deao import archive
 
     fake = FakeS3()
     monkeypatch.setattr(archive, "s3_client", lambda: fake)

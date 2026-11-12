@@ -1,4 +1,5 @@
 # ruff: noqa: F811
+import dataclasses
 from datetime import date
 from pathlib import Path
 
@@ -6,20 +7,24 @@ import httpx
 import polars as pl
 import pytest
 
-from src.tasks.deao.sources.boamp import acquire, fetch
-from src.tasks.deao.sources.boamp.acquire import (
+from src.tasks.deao import acquire
+from src.tasks.deao.acquire import (
     Action,
-    acquire_boamp,
     local_days,
     partition_path,
     plan_days,
     process_day,
 )
-from src.tasks.deao.sources.boamp.archive import (
+from src.tasks.deao.acquire import (
+    acquire as acquire_source,
+)
+from src.tasks.deao.archive import (
     list_archived_days,
     read_day_archive,
     write_day_archive,
 )
+from src.tasks.deao.sources.boamp import fetch
+from src.tasks.deao.sources.boamp.source import BOAMP
 from tests.deao_fakes import fake_s3  # noqa: F401
 
 DATA = Path(__file__).parent / "data" / "deao"
@@ -107,20 +112,20 @@ def test_download_xml_erreur(web):
 
 
 def test_local_days_ignore_le_reste(partitions):
-    p = partition_path(date(2026, 10, 14))
+    p = partition_path("boamp", date(2026, 10, 14))
     p.parent.mkdir(parents=True)
     p.touch()
     p.with_suffix(".parquet.tmp").touch()
     (partitions / "boamp" / "notes.parquet").touch()
-    assert local_days() == {date(2026, 10, 14)}
+    assert local_days("boamp") == {date(2026, 10, 14)}
 
 
 def test_process_day_jour_sans_dossier_ecrit_marqueur(partitions, web, fake_s3):  # noqa: F811
     d = date(2026, 1, 1)
-    process_day(d, Action.CRAWL, archived=False)
-    assert pl.read_parquet(partition_path(d)).height == 0
-    assert list_archived_days() == {d}
-    assert read_day_archive(d) == {}
+    process_day(BOAMP, d, Action.CRAWL, archived=False)
+    assert pl.read_parquet(partition_path("boamp", d)).height == 0
+    assert list_archived_days("boamp/raw") == {d}
+    assert read_day_archive("boamp/raw", d) == {}
 
 
 def test_process_day_crawl_ecrit_archive_et_partition(partitions, web, fake_s3):  # noqa: F811
@@ -128,20 +133,20 @@ def test_process_day_crawl_ecrit_archive_et_partition(partitions, web, fake_s3):
     xml = XML_FILES[0].read_bytes()
     web.pages[_url(d)] = (200, _index("26-1.xml"))
     web.pages[_url(d) + "26-1.xml"] = (200, xml)
-    process_day(d, Action.CRAWL, archived=False)
-    assert read_day_archive(d) == {"26-1.xml": xml}
-    assert partition_path(d).exists()
+    process_day(BOAMP, d, Action.CRAWL, archived=False)
+    assert read_day_archive("boamp/raw", d) == {"26-1.xml": xml}
+    assert partition_path("boamp", d).exists()
 
 
 def test_process_day_recrawl_differentiel(partitions, web, fake_s3):  # noqa: F811
     d = date(2026, 10, 14)
-    write_day_archive(d, {"26-99870.xml": XML_FILES[0].read_bytes()})
+    write_day_archive("boamp/raw", d, {"26-99870.xml": XML_FILES[0].read_bytes()})
     web.pages[_url(d)] = (200, _index("26-99870.xml", "26-99891.xml"))
     web.pages[_url(d) + "26-99891.xml"] = (200, XML_FILES[1].read_bytes())
-    process_day(d, Action.RECRAWL, archived=True)
+    process_day(BOAMP, d, Action.RECRAWL, archived=True)
     assert [c for c in web.calls if c.endswith(".xml")] == [_url(d) + "26-99891.xml"]
-    assert set(read_day_archive(d)) == {"26-99870.xml", "26-99891.xml"}
-    assert partition_path(d).exists()
+    assert set(read_day_archive("boamp/raw", d)) == {"26-99870.xml", "26-99891.xml"}
+    assert partition_path("boamp", d).exists()
 
 
 def test_process_day_recrawl_sans_nouveau_ne_reecrit_pas_l_archive(
@@ -150,12 +155,12 @@ def test_process_day_recrawl_sans_nouveau_ne_reecrit_pas_l_archive(
     fake_s3,  # noqa: F811
 ):
     d = date(2026, 10, 14)
-    write_day_archive(d, {"26-1.xml": XML_FILES[0].read_bytes()})
+    write_day_archive("boamp/raw", d, {"26-1.xml": XML_FILES[0].read_bytes()})
     before = dict(fake_s3.objects)
     web.pages[_url(d)] = (200, _index("26-1.xml"))
-    process_day(d, Action.RECRAWL, archived=True)
+    process_day(BOAMP, d, Action.RECRAWL, archived=True)
     assert fake_s3.objects == before
-    assert partition_path(d).exists()
+    assert partition_path("boamp", d).exists()
 
 
 def test_process_day_from_archive_sans_reseau(partitions, monkeypatch, fake_s3):  # noqa: F811
@@ -164,9 +169,9 @@ def test_process_day_from_archive_sans_reseau(partitions, monkeypatch, fake_s3):
 
     monkeypatch.setattr(fetch, "http_get", boom)
     d = date(2026, 10, 14)
-    write_day_archive(d, {"26-1.xml": XML_FILES[0].read_bytes()})
-    process_day(d, Action.FROM_ARCHIVE, archived=True)
-    assert partition_path(d).exists()
+    write_day_archive("boamp/raw", d, {"26-1.xml": XML_FILES[0].read_bytes()})
+    process_day(BOAMP, d, Action.FROM_ARCHIVE, archived=True)
+    assert partition_path("boamp", d).exists()
 
 
 def test_process_day_echec_telechargement_n_ecrit_rien(partitions, web, fake_s3):  # noqa: F811
@@ -175,29 +180,29 @@ def test_process_day_echec_telechargement_n_ecrit_rien(partitions, web, fake_s3)
     web.pages[_url(d) + "26-1.xml"] = (200, XML_FILES[0].read_bytes())
     web.pages[_url(d) + "26-2.xml"] = (500, b"")
     with pytest.raises(Exception):
-        process_day(d, Action.CRAWL, archived=False)
-    assert not partition_path(d).exists()
+        process_day(BOAMP, d, Action.CRAWL, archived=False)
+    assert not partition_path("boamp", d).exists()
     assert not list(partitions.rglob("*"))
-    assert d not in list_archived_days()
+    assert d not in list_archived_days("boamp/raw")
 
 
 def test_process_day_echec_listing_n_ecrit_rien(partitions, web, fake_s3):  # noqa: F811
     d = date(2026, 10, 14)
     web.pages[_url(d)] = (503, "")
     with pytest.raises(Exception):
-        process_day(d, Action.CRAWL, archived=False)
+        process_day(BOAMP, d, Action.CRAWL, archived=False)
     assert not list(partitions.rglob("*"))
-    assert list_archived_days() == set()
+    assert list_archived_days("boamp/raw") == set()
 
 
 def test_acquire_rebuild_supprime_les_partitions(partitions, web, fake_s3, monkeypatch):  # noqa: F811
     monkeypatch.setattr(acquire, "BOAMP_RECRAWL_DAYS", 0)
     d = date(2026, 1, 10)
-    write_day_archive(d, {"26-1.xml": XML_FILES[0].read_bytes()})
-    old = partition_path(d)
+    write_day_archive("boamp/raw", d, {"26-1.xml": XML_FILES[0].read_bytes()})
+    old = partition_path("boamp", d)
     old.parent.mkdir(parents=True)
     pl.DataFrame({"stale": [1]}).write_parquet(old)
-    c = acquire_boamp(d, d, rebuild=True)
+    c = acquire_source(BOAMP, d, d, rebuild=True)
     assert "stale" not in pl.read_parquet(old).columns
     assert c["jour_en_erreur"] == 0
     assert web.calls == []
@@ -206,26 +211,26 @@ def test_acquire_rebuild_supprime_les_partitions(partitions, web, fake_s3, monke
 def test_acquire_compte_les_jours_en_erreur(partitions, web, fake_s3, monkeypatch):  # noqa: F811
     monkeypatch.setattr(acquire, "BOAMP_RECRAWL_DAYS", 0)
     web.pages[_url(date(2026, 1, 11))] = (500, "")
-    c = acquire_boamp(date(2026, 1, 10), date(2026, 1, 11), rebuild=False)
+    c = acquire_source(BOAMP, date(2026, 1, 10), date(2026, 1, 11), rebuild=False)
     assert c["jour_en_erreur"] == 1
-    assert local_days() == {date(2026, 1, 10)}
+    assert local_days("boamp") == {date(2026, 1, 10)}
 
 
 def test_recrawl_echec_second_telechargement_laisse_tout_intact(
     partitions, web, fake_s3
 ):  # noqa: F811
     d = date(2026, 10, 14)
-    write_day_archive(d, {"26-1.xml": XML_FILES[0].read_bytes()})
-    process_day(d, Action.FROM_ARCHIVE, archived=True)
+    write_day_archive("boamp/raw", d, {"26-1.xml": XML_FILES[0].read_bytes()})
+    process_day(BOAMP, d, Action.FROM_ARCHIVE, archived=True)
     before_objects = dict(fake_s3.objects)
-    before_part = partition_path(d).read_bytes()
+    before_part = partition_path("boamp", d).read_bytes()
     web.pages[_url(d)] = (200, _index("26-1.xml", "26-2.xml", "26-3.xml"))
     web.pages[_url(d) + "26-2.xml"] = (200, XML_FILES[1].read_bytes())
     web.pages[_url(d) + "26-3.xml"] = (500, b"")
     with pytest.raises(Exception):
-        process_day(d, Action.RECRAWL, archived=True)
+        process_day(BOAMP, d, Action.RECRAWL, archived=True)
     assert fake_s3.objects == before_objects
-    assert partition_path(d).read_bytes() == before_part
+    assert partition_path("boamp", d).read_bytes() == before_part
 
 
 def test_recrawl_non_archive_ecrit_archive_complete(partitions, web, fake_s3):  # noqa: F811
@@ -233,22 +238,22 @@ def test_recrawl_non_archive_ecrit_archive_complete(partitions, web, fake_s3):  
     web.pages[_url(d)] = (200, _index("26-1.xml", "26-2.xml"))
     web.pages[_url(d) + "26-1.xml"] = (200, XML_FILES[0].read_bytes())
     web.pages[_url(d) + "26-2.xml"] = (200, XML_FILES[1].read_bytes())
-    process_day(d, Action.RECRAWL, archived=False)
-    assert set(read_day_archive(d)) == {"26-1.xml", "26-2.xml"}
+    process_day(BOAMP, d, Action.RECRAWL, archived=False)
+    assert set(read_day_archive("boamp/raw", d)) == {"26-1.xml", "26-2.xml"}
 
 
 def test_rebuild_jour_vide_archive_sans_reseau(partitions, monkeypatch, fake_s3):  # noqa: F811
     monkeypatch.setattr(acquire, "BOAMP_RECRAWL_DAYS", 0)
     d = date(2026, 1, 10)
-    write_day_archive(d, {})
+    write_day_archive("boamp/raw", d, {})
 
     def boom(url):
         raise AssertionError("réseau interdit")
 
     monkeypatch.setattr(fetch, "http_get", boom)
-    c = acquire_boamp(d, d, rebuild=True)
+    c = acquire_source(BOAMP, d, d, rebuild=True)
     assert c["jour_en_erreur"] == 0
-    assert pl.read_parquet(partition_path(d)).height == 0
+    assert pl.read_parquet(partition_path("boamp", d)).height == 0
 
 
 def test_process_day_echec_parsing_archive_ecrite_sans_partition(
@@ -265,19 +270,28 @@ def test_process_day_echec_parsing_archive_ecrite_sans_partition(
     def boom(files):
         raise RuntimeError("parsing")
 
-    monkeypatch.setattr(acquire, "parse_day", boom)
+    source = dataclasses.replace(BOAMP, parse_day=boom)
     with pytest.raises(RuntimeError):
-        process_day(d, Action.CRAWL, archived=False)
-    assert read_day_archive(d) == {"26-1.xml": xml}
-    assert not partition_path(d).exists()
+        process_day(source, d, Action.CRAWL, archived=False)
+    assert read_day_archive("boamp/raw", d) == {"26-1.xml": xml}
+    assert not partition_path("boamp", d).exists()
     assert not list(partitions.rglob("*.parquet*"))
 
 
 def test_process_day_compte_les_jours_vides(partitions, web, fake_s3):  # noqa: F811
     vide = date(2026, 1, 1)
-    c = process_day(vide, Action.CRAWL, archived=False)
+    c = process_day(BOAMP, vide, Action.CRAWL, archived=False)
     assert c["jour_vide"] == 1
     d = date(2026, 10, 14)
     web.pages[_url(d)] = (200, _index("26-1.xml"))
     web.pages[_url(d) + "26-1.xml"] = (200, XML_FILES[0].read_bytes())
-    assert process_day(d, Action.CRAWL, archived=False)["jour_vide"] == 0
+    assert process_day(BOAMP, d, Action.CRAWL, archived=False)["jour_vide"] == 0
+
+
+def test_partition_path_par_source():
+    assert partition_path("joue", date(2026, 10, 14)).parts[-4:] == (
+        "joue",
+        "2026",
+        "10",
+        "14.parquet",
+    )

@@ -1,6 +1,6 @@
 from datetime import date
 
-from src.tasks.deao.sources.boamp.archive import (
+from src.tasks.deao.archive import (
     archive_key,
     list_archived_days,
     pack,
@@ -22,8 +22,10 @@ def test_pack_vide():
 
 
 def test_write_read_list(fake_s3):  # noqa: F811
-    write_day_archive(date(2026, 10, 14), {"26-1.xml": b"<a/>"})
-    assert archive_key(date(2026, 10, 14)) == "boamp/raw/2026/10/14.tar.zst"
-    assert read_day_archive(date(2026, 10, 14)) == {"26-1.xml": b"<a/>"}
+    write_day_archive("boamp/raw", date(2026, 10, 14), {"26-1.xml": b"<a/>"})
+    assert (
+        archive_key("boamp/raw", date(2026, 10, 14)) == "boamp/raw/2026/10/14.tar.zst"
+    )
+    assert read_day_archive("boamp/raw", date(2026, 10, 14)) == {"26-1.xml": b"<a/>"}
     fake_s3.put_object(Bucket="b", Key="boamp/raw/readme.txt", Body=b"")
-    assert list_archived_days() == {date(2026, 10, 14)}
+    assert list_archived_days("boamp/raw") == {date(2026, 10, 14)}

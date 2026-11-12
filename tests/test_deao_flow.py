@@ -8,9 +8,10 @@ import httpx
 import polars as pl
 import pytest
 
+from src.tasks.deao import acquire
 from src.tasks.deao.geocode_cache import ADRESSE_GEOCODE_SCHEMA
 from src.tasks.deao.schema import AVIS_LOT_SCHEMA, PUBLISHED_FIELDS, conform_avis
-from src.tasks.deao.sources.boamp import acquire, fetch
+from src.tasks.deao.sources.boamp import fetch
 from tests.deao_fakes import fake_s3  # noqa: F401
 from tests.test_deao_enrich import COG, _lf_etab, _lf_ul
 

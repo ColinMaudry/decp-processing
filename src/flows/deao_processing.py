@@ -19,6 +19,7 @@ from src.config import (
     SIRENE_DATA_DIR,
 )
 from src.flows.sirene_preprocess import sirene_preprocess
+from src.tasks.deao.acquire import acquire
 from src.tasks.deao.consolidate import consolidate
 from src.tasks.deao.enrich import enrich_acheteurs
 from src.tasks.deao.geocode_cache import ADRESSE_GEOCODE_SCHEMA, geocoder_adresses
@@ -29,8 +30,8 @@ from src.tasks.deao.schema import (
     empty_avis_frame,
     write_table_schema,
 )
-from src.tasks.deao.sources.boamp.acquire import acquire_boamp
 from src.tasks.deao.sources.boamp.parse import source_file_expr
+from src.tasks.deao.sources.boamp.source import BOAMP
 from src.tasks.output import sink_to_files
 from src.tasks.publish import publish_deao_to_datagouv, should_publish_deao
 from src.tasks.utils import get_logger, print_all_config
@@ -115,7 +116,7 @@ def deao_processing(run_date: str | None = None) -> None:
 
     logger.info(f"Acquisition BOAMP {BOAMP_START_DATE} → {today}...")
     stats.update(
-        acquire_boamp(date.fromisoformat(BOAMP_START_DATE), today, DEAO_REBUILD)
+        acquire(BOAMP, date.fromisoformat(BOAMP_START_DATE), today, DEAO_REBUILD)
     )
 
     logger.info("Lecture des partitions et consolidation...")

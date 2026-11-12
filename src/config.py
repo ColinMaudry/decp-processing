@@ -352,7 +352,7 @@ ALL_CONFIG["DEAO_DIST_DIR"] = DEAO_DIST_DIR
 
 # Préfixes S3 : archives quotidiennes des avis bruts (<préfixe>/<AAAA>/<MM>/<JJ>.tar.zst)
 # et résultats de géocodage.
-DEAO_S3_PREFIX = os.getenv("DEAO_S3_PREFIX", "boamp/raw")
+BOAMP_S3_PREFIX = os.getenv("BOAMP_S3_PREFIX", "boamp/raw")
 DEAO_GEOCODE_S3_PREFIX = os.getenv("DEAO_GEOCODE_S3_PREFIX", "deao")
 
 # Reconstruire depuis les archives plutôt que de reprendre les partitions existantes.
