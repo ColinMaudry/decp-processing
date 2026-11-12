@@ -1,0 +1,92 @@
+"""Flow scrap_closed : scrapers de plateformes fermées, puis traitement (issue #178)."""
+
+from datetime import date
+
+import polars as pl
+from prefect import flow, tags
+
+from src import config
+from src.config import LOG_LEVEL, MAX_PREFECT_WORKERS
+from src.flows.deao_processing import deao_processing
+from src.tasks.deao.schema import published_schema
+from src.tasks.deao.sources_publiees import publication_autorisee, publier_fichier
+from src.tasks.scrap.deao.contrat import SCRAPERS
+from src.tasks.utils import get_logger, run_in_pool
+
+# Les références de module (SCRAPERS, deao_processing) et config.* sont lues à
+# l'appel : les tests les substituent.
+
+
+def _codes_a_executer() -> list[str]:
+    solo = [s.strip() for s in config.SOLO_DEAO_SCRAPS if s.strip()]
+    if solo:
+        return solo
+    return [e.code for e in config.DEAO_REGISTRE if not e.open_data and not e.skip]
+
+
+@flow(log_prints=True)
+def scrap_closed(run_date: str | None = None) -> None:
+    logger = get_logger(level=LOG_LEVEL)
+    logger.info("🚀  Début du flow scrap_closed")
+    today = date.fromisoformat(run_date) if run_date else date.today()
+    entrees = {e.code: e for e in config.DEAO_REGISTRE}
+    codes = _codes_a_executer()
+    erreurs: dict[str, str] = {}
+    schema = published_schema()
+    autorisee = publication_autorisee()
+
+    for code in codes:
+        if code not in SCRAPERS:
+            erreurs[code] = "aucun scraper enregistré"
+        elif code not in entrees:
+            erreurs[code] = "source absente du registre"
+    a_lancer = [c for c in codes if c not in erreurs]
+
+    def executer(code: str) -> pl.DataFrame:
+        return SCRAPERS[code](today)
+
+    resultats = run_in_pool(
+        executer,
+        a_lancer,
+        max_workers=MAX_PREFECT_WORKERS,
+        logger=logger,
+        label=lambda c: f"scraper {c}",
+    )
+    reussis = {code: df for code, df in resultats}
+    for code in a_lancer:
+        if code not in reussis:
+            erreurs[code] = "le scraper a échoué"
+
+    if not autorisee:
+        logger.info(
+            "Publication des fichiers par source désactivée "
+            "(DECP_PROCESSING_PUBLISH ou SOLO_DEAO_SCRAPS)."
+        )
+    config.DEAO_DIST_DIR.mkdir(parents=True, exist_ok=True)
+    for code, df in reussis.items():
+        if set(df.columns) != set(schema):
+            ecart = sorted(set(df.columns) ^ set(schema))
+            erreurs[code] = f"colonnes non conformes au schéma publié ({ecart})"
+            continue
+        lignes = df.select(pl.col(c).cast(t) for c, t in schema.items())
+        chemin = config.DEAO_DIST_DIR / f"{code}.parquet"
+        logger.info(f"Écriture de {lignes.height} lignes {code} dans {chemin}...")
+        lignes.write_parquet(chemin, compression="zstd")
+        if not autorisee:
+            continue
+        entree = entrees[code]
+        if lignes.height < entree.min_rows:
+            erreurs[code] = (
+                f"{lignes.height} lignes < minimum {entree.min_rows}, non publié"
+            )
+            continue
+        publier_fichier(config.DEAO_CLOSED_DATASET_ID, entree.resource_id, chemin)
+
+    # Le traitement agrège ce qui est publié sur data.gouv.fr, même en cas d'échec partiel.
+    with tags("appels-offres", "traitement"):
+        deao_processing(run_date=run_date)
+
+    if erreurs:
+        detail = " ; ".join(f"{c} : {m}" for c, m in erreurs.items())
+        raise RuntimeError(f"scrap_closed en échec pour : {detail}.")
+    logger.info("☑️  Fin du flow scrap_closed.")

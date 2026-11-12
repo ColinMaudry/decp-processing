@@ -5,6 +5,7 @@ from src.flows.deao_processing import deao_processing
 from src.flows.decp_processing import decp_processing
 from src.flows.get_cog import get_cog
 from src.flows.scrap import scrap
+from src.flows.scrap_closed import scrap_closed
 from src.flows.scrap_open import scrap_open
 from src.flows.sirene_preprocess import sirene_preprocess
 from src.tasks.bucket_sync import (
@@ -19,6 +20,7 @@ FUNCTIONS = {
     "decp_processing": decp_processing,
     "deao_processing": deao_processing,
     "scrap_open": scrap_open,
+    "scrap_closed": scrap_closed,
     "get_cog": get_cog,
     "scrap": scrap,
     "upload_resource_cache": upload_resource_cache,
