@@ -239,3 +239,30 @@ def test_enrich_acheteurs_nombre_de_lignes_modifie(monkeypatch):
     df = _df(acheteur_id=["20007695800011"], acheteur_nom=["Nom avis"])
     with pytest.raises(RuntimeError, match="nombre de lignes"):
         enrich.enrich_acheteurs(df, _lf_ul(), _lf_etab(), COG, geocoder=None)
+
+
+def test_acheteur_etranger_sans_geo():
+    df = _df(
+        acheteur_id=["20007695800011", None, None],
+        acheteur_nom=["Mairie de Test", "Mairie de Test", "Mairie de Test"],
+        acheteur_adresse_voie=["1 rue de Siam", "ul. Testowa 1", "2 rue Ancienne"],
+        acheteur_adresse_cp=["31000", "31-000", "29200"],
+        acheteur_adresse_ville=["Toulouse", "Varsovie", "Brest"],
+        acheteur_adresse_nuts=[None, "PL911", None],
+    ).with_columns(acheteur_pays=pl.Series(["FRA", "POL", None], dtype=pl.String))
+    postcodes: list = []
+
+    def geocoder_espion(adresses: pl.DataFrame) -> pl.DataFrame:
+        postcodes.extend(adresses["postcode"].to_list())
+        return _geocoder_factice([])(adresses)
+
+    out = enrich_acheteurs(df, _lf_ul(), _lf_etab(), COG, geocoder=geocoder_espion)
+    pol = out.filter(pl.col("acheteur_pays") == "POL").row(0, named=True)
+    assert pol["acheteur_id"] is None and pol["acheteur_id_source"] is None
+    assert pol["acheteur_departement_code"] is None
+    assert pol["acheteur_adresse_cp"] is None
+    assert all("31-000" not in q for q in postcodes)
+    assert postcodes == ["29200"]
+    # pays nul = français : traitement inchangé
+    assert out["acheteur_id"][0] == "20007695800011"
+    assert out["acheteur_departement_code"][2] == "29"

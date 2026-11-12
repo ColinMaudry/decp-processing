@@ -2,6 +2,7 @@ from collections.abc import Callable
 
 import polars as pl
 
+from src.config import JOUE_COUNTRY_CODES
 from src.tasks.deao.geocode_cache import adresse_cle_expr
 from src.tasks.deao.values import departement_depuis_cp, departement_depuis_nuts
 from src.tasks.enrich import add_etablissement_data, add_unite_legale_data
@@ -230,6 +231,29 @@ def enrichir_geographie(
     return df
 
 
+def neutraliser_acheteurs_etrangers(df: pl.DataFrame) -> pl.DataFrame:
+    """Met à nul identifiant et adresse des acheteurs hors périmètre français.
+
+    Leurs codes postaux ressemblent parfois à des codes français : ils ne doivent
+    produire ni SIRET, ni département, ni requête de géocodage. Un pays nul
+    (anciennes partitions) vaut France."""
+    if "acheteur_pays" not in df.columns:
+        return df
+    etranger = pl.col("acheteur_pays").is_not_null() & ~pl.col("acheteur_pays").is_in(
+        list(JOUE_COUNTRY_CODES)
+    )
+    colonnes = [
+        "acheteur_id",
+        "acheteur_adresse_voie",
+        "acheteur_adresse_cp",
+        "acheteur_adresse_ville",
+        "acheteur_adresse_nuts",
+    ]
+    return df.with_columns(
+        pl.when(etranger).then(None).otherwise(pl.col(c)).alias(c) for c in colonnes
+    )
+
+
 def enrich_acheteurs(
     df: pl.DataFrame,
     lf_unites_legales: pl.LazyFrame,
@@ -238,6 +262,7 @@ def enrich_acheteurs(
     geocoder: Callable[[pl.DataFrame], pl.DataFrame],
 ) -> pl.DataFrame:
     n = df.height
+    df = neutraliser_acheteurs_etrangers(df)
     df = appliquer_dictionnaire_siret(df)
     df = enrichir_sirene(df, lf_unites_legales, lf_etablissements)
     df = enrichir_geographie(df, df_cog, geocoder)
