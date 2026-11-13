@@ -33,8 +33,16 @@ def normaliser_nom_expr(col: str) -> pl.Expr:
     )
 
 
-def appliquer_dictionnaire_siret(df: pl.DataFrame) -> pl.DataFrame:
-    df = df.with_columns(
+_CLE_DICTIONNAIRE = ["_nom_norm", "acheteur_adresse_cp"]
+_SCHEMA_DICTIONNAIRE = {
+    "_nom_norm": pl.String,
+    "acheteur_adresse_cp": pl.String,
+    "_siret_dico": pl.String,
+}
+
+
+def _avec_nom_norm(df: pl.DataFrame) -> pl.DataFrame:
+    return df.with_columns(
         normaliser_nom_expr("acheteur_nom").alias("_nom_norm"),
     ).with_columns(
         pl.when(pl.col("_nom_norm") == "")
@@ -42,19 +50,54 @@ def appliquer_dictionnaire_siret(df: pl.DataFrame) -> pl.DataFrame:
         .otherwise(pl.col("_nom_norm"))
         .alias("_nom_norm")
     )
-    cle = ["_nom_norm", "acheteur_adresse_cp"]
-    dictionnaire = (
+
+
+def _dictionnaire_depuis_normalise(df: pl.DataFrame) -> pl.DataFrame:
+    """Apprend le dictionnaire sur un frame portant déjà `_nom_norm`."""
+    return (
         df.filter(
             pl.col("acheteur_id").is_not_null()
             & pl.col("_nom_norm").is_not_null()
             & pl.col("acheteur_adresse_cp").is_not_null()
         )
-        .group_by(cle)
+        .group_by(_CLE_DICTIONNAIRE)
         .agg(pl.col("acheteur_id").unique())
         .filter(pl.col("acheteur_id").list.len() == 1)
-        .select(*cle, pl.col("acheteur_id").list.first().alias("_siret_dico"))
+        .select(
+            *_CLE_DICTIONNAIRE, pl.col("acheteur_id").list.first().alias("_siret_dico")
+        )
     )
-    df = df.join(dictionnaire, on=cle, how="left", nulls_equal=False)
+
+
+def dictionnaire_siret(df: pl.DataFrame) -> pl.DataFrame:
+    """Dictionnaire (nom normalisé, code postal) -> SIRET, pour les seules clés
+    à SIRET unique, appris sur les lignes à identifiant, nom et code postal."""
+    return _dictionnaire_depuis_normalise(_avec_nom_norm(df))
+
+
+def dictionnaire_depuis_publie(df_publie: pl.DataFrame) -> pl.DataFrame:
+    """Dictionnaire appris sur un fichier publié (acheteur_nom, acheteur_codePostal,
+    acheteur_id). Vide si le fichier n'a pas encore la colonne acheteur_codePostal."""
+    if "acheteur_codePostal" not in df_publie.columns:
+        return pl.DataFrame(schema=_SCHEMA_DICTIONNAIRE)
+    return dictionnaire_siret(
+        df_publie.select(
+            "acheteur_nom",
+            "acheteur_id",
+            pl.col("acheteur_codePostal").alias("acheteur_adresse_cp"),
+        )
+    )
+
+
+def appliquer_dictionnaire_siret(
+    df: pl.DataFrame, dictionnaire: pl.DataFrame | None = None
+) -> pl.DataFrame:
+    """Complète acheteur_id par le dictionnaire (appris sur `df` s'il n'est pas fourni).
+    Un acheteur_id déjà présent est conservé (source 'avis')."""
+    df = _avec_nom_norm(df)
+    if dictionnaire is None:
+        dictionnaire = _dictionnaire_depuis_normalise(df)
+    df = df.join(dictionnaire, on=_CLE_DICTIONNAIRE, how="left", nulls_equal=False)
     return df.with_columns(
         pl.when(pl.col("acheteur_id").is_not_null())
         .then(pl.lit("avis"))
@@ -260,10 +303,11 @@ def enrich_acheteurs(
     lf_etablissements: pl.LazyFrame,
     df_cog: pl.DataFrame,
     geocoder: Callable[[pl.DataFrame], pl.DataFrame],
+    dictionnaire: pl.DataFrame | None = None,
 ) -> pl.DataFrame:
     n = df.height
     df = neutraliser_acheteurs_etrangers(df)
-    df = appliquer_dictionnaire_siret(df)
+    df = appliquer_dictionnaire_siret(df, dictionnaire)
     df = enrichir_sirene(df, lf_unites_legales, lf_etablissements)
     df = enrichir_geographie(df, df_cog, geocoder)
     if df.height != n:

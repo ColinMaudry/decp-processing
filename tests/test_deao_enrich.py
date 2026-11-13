@@ -6,6 +6,8 @@ import pytest
 from src.config import BASE_DIR
 from src.tasks.deao.enrich import (
     appliquer_dictionnaire_siret,
+    dictionnaire_depuis_publie,
+    dictionnaire_siret,
     enrich_acheteurs,
     enrichir_sirene,
     normaliser_nom_expr,
@@ -294,3 +296,85 @@ def test_code_postal_publie_et_neutralise_a_l_etranger():
     ).with_columns(acheteur_pays=pl.Series(["FRA", "DEU"]))
     out = enrich_acheteurs(df, _lf_ul(), _lf_etab(), COG, _geocoder_factice([]))
     assert out["acheteur_codePostal"].to_list() == ["35000", None]
+
+
+def test_dictionnaire_externe_applique():
+    publie = pl.DataFrame(
+        {
+            "acheteur_nom": ["Rennes Métropole"],
+            "acheteur_codePostal": ["35000"],
+            "acheteur_id": ["24350013900189"],
+        }
+    )
+    lignes = pl.DataFrame(
+        {
+            "acheteur_nom": ["RENNES METROPOLE"],
+            "acheteur_adresse_cp": ["35000"],
+            "acheteur_id": [None],
+        },
+        schema_overrides={"acheteur_id": pl.String},
+    )
+    out = appliquer_dictionnaire_siret(lignes, dictionnaire_depuis_publie(publie))
+    assert out["acheteur_id"].to_list() == ["24350013900189"]
+    assert out["acheteur_id_source"].to_list() == ["dictionnaire"]
+
+
+def test_dictionnaire_ambigu_ignore():
+    publie = pl.DataFrame(
+        {
+            "acheteur_nom": ["Mairie", "MAIRIE"],
+            "acheteur_codePostal": ["35000", "35000"],
+            "acheteur_id": ["11111111111111", "22222222222222"],
+        }
+    )
+    lignes = pl.DataFrame(
+        {
+            "acheteur_nom": ["mairie"],
+            "acheteur_adresse_cp": ["35000"],
+            "acheteur_id": [None],
+        },
+        schema_overrides={"acheteur_id": pl.String},
+    )
+    out = appliquer_dictionnaire_siret(lignes, dictionnaire_depuis_publie(publie))
+    assert out["acheteur_id"].to_list() == [None]
+    assert out["acheteur_id_source"].to_list() == [None]
+
+
+def test_dictionnaire_externe_conserve_acheteur_id_existant():
+    dico = pl.DataFrame(
+        {
+            "_nom_norm": ["mairie"],
+            "acheteur_adresse_cp": ["35000"],
+            "_siret_dico": ["22222222222222"],
+        }
+    )
+    lignes = pl.DataFrame(
+        {
+            "acheteur_nom": ["Mairie"],
+            "acheteur_adresse_cp": ["35000"],
+            "acheteur_id": ["11111111111111"],
+        }
+    )
+    out = appliquer_dictionnaire_siret(lignes, dico)
+    assert out["acheteur_id"].to_list() == ["11111111111111"]
+    assert out["acheteur_id_source"].to_list() == ["avis"]
+
+
+def test_dictionnaire_depuis_publie_sans_code_postal():
+    publie = pl.DataFrame({"acheteur_nom": ["A"], "acheteur_id": ["1"]})
+    dico = dictionnaire_depuis_publie(publie)
+    assert dico.height == 0
+    assert dico.columns == ["_nom_norm", "acheteur_adresse_cp", "_siret_dico"]
+
+
+def test_dictionnaire_siret_apprend_cle_unique():
+    df = pl.DataFrame(
+        {
+            "acheteur_nom": ["Mairie", "MAIRIE", "Autre", None],
+            "acheteur_adresse_cp": ["35000", "35000", None, "35000"],
+            "acheteur_id": ["1", "1", "2", "3"],
+        }
+    )
+    dico = dictionnaire_siret(df)
+    assert dico.columns == ["_nom_norm", "acheteur_adresse_cp", "_siret_dico"]
+    assert dico.rows() == [("mairie", "35000", "1")]
