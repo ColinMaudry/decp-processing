@@ -427,7 +427,7 @@ git commit -m "DEAO : parsing HTML des plateformes Atexo (résultats, détail, l
   - `ClientAtexo.detail(ref_cons: str, org_cons: str) -> DetailConsultation` (GET `{url_base}/entreprise/consultation/{ref}?orgAcronyme={org}`) ;
   - `ClientAtexo.lots(ref_cons: str, org_cons: str) -> list[Lot]` (GET `{url_base}/index.php?page=Entreprise.PopUpDetailLots&orgAccronyme={org}&id={ref}&lang=`) ;
   - `ClientAtexo.telecharger_dce(ref_cons: str, org_cons: str, dest_dir: Path) -> DceTelecharge` avec `DceTelecharge(chemin: Path, nom_fichier: str, content_type: str, id_dce: str | None)` — écrit en streaming dans `dest_dir`, jamais en mémoire ;
-  - config : `CLOSED_INTERVALLE_REQUETES_S` (float, défaut `0.1`, décision de l'utilisateur : intervalle minimal entre deux requêtes vers une même plateforme ; chaque `ClientAtexo` a son propre `Limiteur`, les deux plateformes tournant en parallèle), `CLOSED_USER_AGENT` (défaut : un User-Agent de navigateur générique), `DEAO_DCE_S3_PREFIX` (défaut `dce`), `DEAO_SCRAP_PARTIR_DE_ZERO` (bool, défaut `false`, utilisé Task 9). Documentées dans `template.env` (section DEAO, commentées avec leur défaut).
+  - config : `CLOSED_INTERVALLE_REQUETES_S` (float, défaut `0.2`, décision de l'utilisateur : intervalle minimal entre deux requêtes vers une même plateforme ; chaque `ClientAtexo` a son propre `Limiteur`, les deux plateformes tournant en parallèle), `CLOSED_USER_AGENT` (défaut : un User-Agent de navigateur générique), `DEAO_DCE_S3_PREFIX` (défaut `dce`), `DEAO_SCRAP_PARTIR_DE_ZERO` (bool, défaut `false`, utilisé Task 9). Documentées dans `template.env` (section DEAO, commentées avec leur défaut).
 - Nouvelles tentatives : tenacity sur 429, 5xx et erreurs de transport, 5 essais, attente exponentielle de 5 s à 60 s ; 4xx autres que 429 : pas de nouvel essai.
 
 - [ ] **Step 1: Repérage en direct des postbacks (pas de code produit)**
@@ -652,7 +652,7 @@ git commit -m "DEAO : scrapers megalis_bretagne et maximilien branchés sur scra
 
 - [ ] **Step 6: Essai réel sans publication** (vérification, pas de commit)
 
-Run : `DEAO_SCRAP_PARTIR_DE_ZERO=true SOLO_DEAO_SCRAPS=maximilien DECP_PROCESSING_PUBLISH=False uv run python run_flow.py scrap_closed` (Maximilien, ~370 consultations : une page détail par consultation plus les lots, quelques minutes à 0,1 s entre requêtes).
+Run : `DEAO_SCRAP_PARTIR_DE_ZERO=true SOLO_DEAO_SCRAPS=maximilien DECP_PROCESSING_PUBLISH=False uv run python run_flow.py scrap_closed` (Maximilien, ~370 consultations : une page détail par consultation plus les lots, quelques minutes à 0,2 s entre requêtes).
 Expected : `dist/deao/maximilien.parquet` écrit, nombre de consultations distinctes égal au nombre annoncé, `acheteur_id` renseigné pour une part non nulle des lignes, aucun objet S3 déposé ; le `deao_processing` final s'exécute (la source `maximilien` peut y être écartée faute de fichier publié : attendu en SOLO). Reporter les chiffres dans le rapport de tâche.
 
 ---

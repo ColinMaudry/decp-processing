@@ -184,7 +184,7 @@ Un client Atexo générique (base URL en paramètre) et une configuration par pl
 Les deux plateformes tournent en parallèle (`run_in_pool` de `scrap_closed`) ; au sein
 d'une plateforme, les requêtes sont séquentielles.
 
-Politesse : un intervalle minimal de **0,1 s** entre deux requêtes vers une même
+Politesse : un intervalle minimal de **0,2 s** entre deux requêtes vers une même
 plateforme (`CLOSED_INTERVALLE_REQUETES_S`, décision de l'utilisateur ; réutiliser le
 `Limiteur` de `joue/fetch.py`), User-Agent réglable (`CLOSED_USER_AGENT`), nouvelles
 tentatives espacées sur 429 / 5xx.
