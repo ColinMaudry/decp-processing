@@ -240,3 +240,22 @@ def test_limiteur_appele_a_chaque_requete(tmp_path):
     client.telecharger_dce("242039", "a1w", tmp_path)
 
     assert limiteur.appels == len(site.requetes) == 9
+
+
+def test_recherche_bloc_ampute_incomplete():
+    page = _page("megalis_resultats_20.html", 20, 20)
+    arbre = lxml_html.fromstring(page)
+    bloc = arbre.xpath('//div[contains(@class, "item_consultation")]')[5]
+    for ligne in bloc.xpath('.//div[contains(@class, "objet-line")]'):
+        ligne.getparent().remove(ligne)
+    site = FauxSite(
+        {
+            "ctl0$CONTENU_PAGE$AdvancedSearch$lancerRecherche": _page(
+                "megalis_resultats_20.html", 20, 10
+            ),
+            f"{R}listePageSizeTop": lxml_html.tostring(arbre, encoding="unicode"),
+        }
+    )
+    with pytest.raises(RechercheIncomplete) as exc:
+        _client(site).rechercher()
+    assert exc.value.annoncees == 20

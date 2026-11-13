@@ -243,12 +243,20 @@ def _parse_bloc(bloc) -> ConsultationListe:
 
 
 def parse_resultats(html: str) -> list[ConsultationListe]:
-    """Consultations d'une page de résultats (liste vide si aucun résultat)."""
+    """Consultations d'une page de résultats (liste vide si aucun résultat).
+
+    Un bloc illisible lève ValueError : la recherche est alors incomplète (rien n'est
+    annulé) au lieu d'échouer sur une erreur imprévue."""
     arbre = _arbre(html)
-    return [
-        _parse_bloc(b)
-        for b in arbre.xpath('//div[contains(@class, "item_consultation")]')
-    ]
+    consultations = []
+    for i, bloc in enumerate(
+        arbre.xpath('//div[contains(@class, "item_consultation")]'), start=1
+    ):
+        try:
+            consultations.append(_parse_bloc(bloc))
+        except Exception as e:
+            raise ValueError(f"Bloc de consultation n° {i} illisible : {e!r}") from e
+    return consultations
 
 
 def _valeur_libelle(arbre, libelle: str):

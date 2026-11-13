@@ -3,6 +3,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import pytest
+from lxml import html as lxml_html
 
 from src.tasks.scrap.deao.atexo.parse import (
     DetailConsultation,
@@ -128,3 +129,18 @@ def test_nombre_resultats_page_inattendue_leve():
 )
 def test_date_fr_abreviations_supplementaires(texte, attendu):
     assert date_fr(texte) == attendu
+
+
+def _sans_objet_line(html: str, n: int) -> str:
+    """Page de résultats dont le bloc n° `n` a perdu sa ligne « objet »."""
+    arbre = lxml_html.fromstring(html)
+    bloc = arbre.xpath('//div[contains(@class, "item_consultation")]')[n]
+    for ligne in bloc.xpath('.//div[contains(@class, "objet-line")]'):
+        ligne.getparent().remove(ligne)
+    return lxml_html.tostring(arbre, encoding="unicode")
+
+
+def test_bloc_ampute_leve_value_error():
+    html = _sans_objet_line(lire("megalis_resultats.html"), 3)
+    with pytest.raises(ValueError, match="Bloc de consultation n° 4 illisible"):
+        parse_resultats(html)
