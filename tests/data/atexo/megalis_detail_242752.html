@@ -1,0 +1,2401 @@
+    <!DOCTYPE html>
+<html lang="">
+    <head>
+
+                <meta charset="UTF-8"/>
+        <meta name="description" content="entreprise">
+        <meta http-equiv="X-UA-Compatible" content="IE=11" />
+        <title>            Détail d&#039;une consultation
+    </title>
+            <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+
+                        <link rel="stylesheet" href="/themes/css/bootstrap.css?k=2026-00.05.01">
+            <link rel="stylesheet" href="/app/assets/css/entreprise.css?k=2026-00.05.01">
+            <link rel="stylesheet" href="/themes/css/ng-style-mpe.css?k=2026-00.05.01">
+            <link rel="stylesheet" href="/themes/css/ng-style.css?k=2026-00.05.01">
+                            <link rel="stylesheet" href="/themes//css/mpe-new-client.css?k=2026-00.05.01">
+
+    <link rel="stylesheet" href="/build/liste-depot.3c1fc035.css?k=2026-00.05.01">
+    <link rel="stylesheet" href="/themes/css/leaflet.css?k=2026-00.05.01" />
+<link rel="stylesheet" href="/themes/css/MarkerCluster.css?k=2026-00.05.01" type="text/css" />
+<link rel="stylesheet" href="/themes/css/leaflet.awesome-markers.css?k=2026-00.05.01" type="text/css" />
+<link rel="stylesheet" href="/themes/css/upload/jquery.fileupload-ui-noscript.css?k=2026-00.05.01" type="text/css"
+      media="all"/>
+<link rel="stylesheet" href="/themes/css/upload/jquery.fileupload-ui.css?k=2026-00.05.01" type="text/css"
+      media="all"/>
+<link rel="stylesheet" href="/themes/css/vue-multiselect.min.css?k=2026-00.05.01" type="text/css" />
+<link rel="stylesheet" href="/consultation_depot/assets/css/bootstrap.css?k=2026-00.05.01" type="text/css"/>
+
+<link rel="stylesheet" href="/consultation_depot/assets/css/chosen.css?k=2026-00.05.01" type="text/css"/>
+<link rel="stylesheet" href="/consultation_depot/assets/css/ng-styles.css?k=2026-00.05.01" type="text/css"/>
+<link rel="stylesheet" href="/themes/css/ng-style.css?k=2026-00.05.01" type="text/css"  media="all"/>
+<link rel="stylesheet" href="/consultation_depot/assets/css/print.css?k=2026-00.05.01" type="text/css" media="print"/>
+<link rel="stylesheet" href="/consultation_depot/assets/modules/font-awesome/css/font-awesome.css?k=2026-00.05.01"/>
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+<link rel="stylesheet" href="/consultation_depot/assets/modules/jquery-file-upload/css/jquery.fileupload.css?k=2026-00.05.01"/>
+<link rel="stylesheet" href="/consultation_depot/assets/modules/jquery-file-upload/css/jquery.fileupload-ui.css?k=2026-00.05.01"/>
+<link rel="stylesheet" href="/consultation_depot/assets/css/atx-bloc-highlighted-popup.css?k=2026-00.05.01"/>
+<link rel="stylesheet" href="/consultation_depot/assets/css/modal-code-dce-access.css?k=2026-00.05.01"/>
+<link rel="stylesheet" href="/consultation_depot/assets/css/modal-warning.css?k=2026-00.05.01"/>
+                                                <script src="/build/runtime.4c1b5377.js?k=2026-00.05.01"></script><script src="/build/4692.ea0baeb8.js?k=2026-00.05.01"></script><script src="/build/webpack-jquery.79c0f3fb.js?k=2026-00.05.01"></script>
+                            <script src="/build/5360.327a2067.js?k=2026-00.05.01"></script><script src="/build/authentification.5cdf9be6.js?k=2026-00.05.01"></script>
+                        <script type="text/javascript" src="/app/js/jquery-compatibility.js?k=2026-00.05.01"></script>
+            <script type="text/javascript" src="/themes/js/bootstrap.min.js?k=2026-00.05.01"></script>
+            <script type="text/javascript" src="/app/js/atexo.common.js?k=2026-00.05.01"></script>
+
+    <script type="text/javascript" src="/consultation_depot/assets/js/jquery-compatibility.js?k=2026-00.05.01"></script>
+<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+<script type="text/javascript" src="/consultation_depot/assets/js/jquery-ui.js?k=2026-00.05.01"></script>
+<!-- FOSJsRoutingBundle -->
+<script type="text/javascript" src="/bundles/fosjsrouting/js/router.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/js/routing?callback=fos.Router.setData"></script>
+<!-- /FOSJsRoutingBundle -->
+<script type="text/javascript" src="/themes/js/vue.min.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/upload/vendor/jquery.ui.widget.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/upload/jquery.iframe-transport.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/upload/jquery.fileupload.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/jquery.numberformatter-1.2.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/jquery.treeTable.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/chosen.jquery.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/leaflet.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/leaflet.awesome-markers.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/leaflet.markercluster.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/jquery.tagsinput.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/jquery.dotdotdot.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/jquery.placeholder.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/scripts.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/codeCpv.fr.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/atexoRef.fr.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/atexoScript.fr.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/popup.inc.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/scripts-eval.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/atexoFileUpload.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/jquery.maskedinput-1.3.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/tab.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/loader.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/atexoApplet.fr.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/jquery.autocomplete.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/data.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/modernizr.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/themes/js/printThis/printThis.js?k=2026-00.05.01"></script>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico?k=2026-00.05.01"/>
+        <script>
+            var lang = "fr";
+            var pfUrl = "/";
+            var isAgent = false;
+        </script>
+    </head>
+    <body class="">
+
+
+
+
+    <header class="header" role="banner">
+        <div class="navbar-default navbar-section">
+            <div class="container  header-top">
+                <div class="pull-left relative header-left">
+    <div class="pull-left">
+        <a href="/entreprise"
+           alt="Accueil"
+           title="Accueil"
+           class="btn btn-link">
+            <img class="img-responsive header-img "
+                 src="/themes//images/img/logo-replace.png"
+                 alt="Accueil">
+        </a>
+    </div>
+</div>                            </div>
+        </div>
+    </header>
+
+    <div class="" id="skippy">
+        <a href="#horizonatal-menu"
+           class="sr-only sr-only-focusable clearfix btn-lg btn-block btn-xs">
+            Aller au menu
+        </a>
+        <a href="#middle"
+           class="sr-only sr-only-focusable clearfix btn-lg btn-block btn-xs">
+            Aller au contenu
+        </a>
+    </div>
+
+    <div class="nav-wrapper d-block">
+        <nav class="navbar horizonatal-menu" role="navigation" data-spy="affix" data-offset-top="20" id="horizonatal-menu">
+            <div class="container d-block">
+                <div class="top top-user-profile pull-right " id="ctl0_bandeauEntrepriseWithoutMenuSf_ctl0">
+                    <div id="user-infos" class="user-toogle-infos">
+                                                    <div id="ctl0_bandeauEntrepriseWithoutMenuSf_panelDisconnected" class="bloc-user-login">
+    <div class="bootstrap">
+        <div class="kt-profile" data-widget="profile" data-status="online"
+             data-json='{"profile":{"name":"", "lastname":"" } }'>
+            <div class="atx-popover-markup-login-usr">
+                <div class="trigger-btn selector btn-toggle-info_user kt-profile-dropdown-toggle"
+                                          aria-expanded="false" id="kt-profile-dropdown-Disconnected">
+                    <a href="/entreprise/login" data-placement="bottom" class="btn-block btn-login">
+                        <span class="text">
+                            <span class="hidden-xs">Se connecter</span>
+                            <span class="visible-xs pull-left">
+                                <i class="fa fa-user-o"></i>
+                            </span>
+                                                    </span>
+                    </a>
+                </div>
+
+                            </div>
+        </div>
+    </div>
+    <div id="ctl0_bandeauEntrepriseWithoutMenuSf_nonAuthentifie">
+        <div class="panel-user-infos">
+            <div class="panel-user-infos-arrow"></div>
+            <div class="content"></div>
+        </div>
+    </div>
+</div>                                            </div>
+                </div>
+                <div class="navbar-header">
+                    <div class="wrapper pull-right">
+                        <a class="mobile-help m-r-4" onclick="goToUtah()" aria-label="Contact"><i class="fa fa-phone"></i></a>
+                        <a class="mobile-search atx-popover-markup-login-usr m-r-2" href="/entreprise/login" aria-label="entreprise-auth"><i class="fa fa-user"></i></a>
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                                data-target="#navbar-collapse" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar top-bar"></span>
+                            <span class="icon-bar middle-bar"></span>
+                            <span class="icon-bar bottom-bar"></span>
+                        </button>
+                    </div>
+                    <a class="navbar-brand"
+                       href="/entreprise">
+                        <img src="/themes//images/img/logo_mobile.png"/>
+                    </a>
+                </div>
+                                    <div class="collapse navbar-collapse p-0" id="navbar-collapse">
+                        <ul class="nav navbar-nav">
+                                                            <li class="hide">
+    <a href="#" class="dropdown-toggle pull-left"
+       data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Mon panier
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                <li class="dropdown-header">
+                    <div class="h4">
+                        Consultations en cours
+                    </div>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise">
+                        <span class="fa fa-chevron-right"></span>
+                        Toutes les consultations
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;retraits">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansRetraits">
+                        sans retrait
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;questions">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansQuestions">
+                        sans question posée
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;depots">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansDepots">
+                        sans dépôt
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;echanges">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansEchanges">
+                        sans message échangé
+                    </a>
+                </li>
+                <li role="separator" class="divider"></li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;panierEntreprise&amp;dateFinEnd">
+                        <span class="fa fa-chevron-right"></span>
+                        Consultations clôturées
+                    </a>
+                </li>
+                <li role="separator" class="divider"></li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;searchAnnCons&amp;panierEntreprise">
+                        <span class="fa fa-chevron-right"></span>
+                        Recherche avancée
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+    </ul>
+</li>
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left"
+       data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Annonces
+        <span class="fa fa-chevron-down pull-right arrow-position"></span></a>
+
+    <ul class="dropdown-menu mega-dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled clearfix">
+                <li class="col-md-4">
+                    <ul class="list-unstyled">
+                        <li class="dropdown-header">
+                            <div class="h4">
+                                Consultations en cours
+                            </div>
+                        </li>
+                        <li>
+                            <div class="input-group form-group form-group-sm">
+                                <form class="input-group form-group form-group-sm"
+                                      action="/espace-entreprise/search"
+                                      method="get">
+                                    <label class="sr-only"
+                                           for="ctl0_bandeauEntrepriseWithoutMenuSf_quickSearch">
+                                        Recherche rapide
+                                    </label>
+                                    <input name="keyWord"
+                                           type="text"
+                                           aria-placeholder="Recherche rapide"
+                                           id="ctl0_bandeauEntrepriseWithoutMenuSf_quickSearch"
+                                           class="form-control input-quickSearch"
+                                           placeholder="Recherche rapide ..."
+                                           onfocus=""
+                                           onblur=""
+                                           title="Recherche rapide"
+                                    />
+                                    <span class="input-group-btn align-right">
+                                                                <button class="btn btn-sm btn-primary button-quickSearch"
+                                                                        type="submit"
+                                                                        id="btnGoToQuickResultSearch">
+                                                                    <i class="fa fa-search"></i>
+                                                                </button>
+                                                            </span>
+                                </form>
+                            </div>
+                        </li>
+                        <li>
+                                                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AllCons">
+                                    <span class="fa fa-chevron-right"></span>
+                                    Toutes les consultations
+                                </a>
+                                                    </li>
+                        <li>
+                                                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;searchAnnCons&type=multicriteres">
+                                    <span class="fa fa-chevron-right"></span>
+                                    Recherche avancée
+                                </a>
+                                                    </li>
+                        <li>
+                                                            <a id="btnReview"
+                                   href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;searchAnnCons&type=restreinte">
+                                    <span class="fa fa-chevron-right"></span>
+                                    Recherche d&#039;une procédure restreinte
+                                </a>
+                                                    </li>
+                    </ul>
+                </li>
+                <li class="col-md-4">
+                    <ul class="list-unstyled">
+                        <li class="dropdown-header">
+                            <div class="h4">
+                                Autres annonces
+                            </div>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AvisInformation">
+                                <span class="fa fa-chevron-right"></span>
+                                Toutes les annonces d&#039;information
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AvisAttribution">
+                                <span class="fa fa-chevron-right"></span>
+                                Toutes les annonces d&#039;attribution
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AllAnn">
+                                <span class="fa fa-chevron-right"></span>
+                                Recherche avancée
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="col-md-4">
+                    <ul class="list-unstyled">
+                        <li class="dropdown-header"
+                            style="display:block">
+                            <div class="h4">
+                                Données essentielles des marchés conclus
+                            </div>
+                        </li>
+                        <li style="display:block">
+                            <div id="ctl0_bandeauEntrepriseWithoutMenuSf_panelArticle133">
+                                                                    <div>
+                                        <a href="/?page=Entreprise.EntrepriseRechercherListeMarches&search">
+                                            <span class="fa fa-chevron-right"></span>
+                                            Recherche avancée
+                                        </a>
+                                    </div>
+
+
+                                                            </div>
+                        </li>
+                        <li class="dropdown-header">
+                            <div class="h4">
+                                Enchères
+                            </div>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseParticipationEnchere">
+                                <span class="fa fa-chevron-right"></span>
+                                Participation
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="col-md-12">
+                    <ul class="list-unstyled clearfix">
+
+                        <li class="dropdown-header clearfix">
+                            <div class="h4 pull-left">
+                                Mes alertes et recherches sauvegardées
+                            </div>
+                            <a href="/?page=Entreprise.EntrepriseGestionRecherches"
+                               class="pull-right btn btn-link btn-sm">
+                                <i class="fa fa-cog"></i>
+                                Gérer mes alertes et recherches sauvegardées
+                            </a>
+                        </li>
+                                            </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>
+                                                            <li class="hide">
+    <a href="/entreprise/dossier-volumineux/gestion/">
+        Dossiers volumineux
+    </a>
+</li>
+                                                            <li class="hide">
+    <a class="btn"  href="/?page=Entreprise.RechercheCollaborateur">
+        Recherche de collaboration
+    </a>
+</li>
+                                                            <li style="display:none;">
+    <a class="btn" href="/?page=Entreprise.EntrepriseVisualiserEntitesAchatsRecherche">
+        Entités d&#039;Achat
+    </a>
+</li>
+
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" role="button"
+       aria-haspopup="true" aria-expanded="false">
+        Signature
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                <li>
+                                            <a href="/entreprise/signer-document">
+                            <span class="fa fa-chevron-right"></span>
+                            Signer un document
+                        </a>
+                                    </li>
+                <li>
+                    <a href=" /entreprise/verification-signature ">
+                        <span class="fa fa-chevron-right"></span>
+                        Vérifier la signature
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" role="button"
+       aria-haspopup="true" aria-expanded="false">
+        Aide
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                <li>
+                    <a href="/?page=Entreprise.EntreprisePremiereVisite">
+                        <span class="fa fa-chevron-right"></span>
+                        Première visite
+                    </a>
+                </li>
+                <li>
+                    <a href="/entreprise/aide/guide">
+                        <span class="fa fa-chevron-right"></span>
+                        Guides d&#039;utilisation
+                    </a>
+                </li>
+                <li>
+                    <a href="/entreprise/aide/assistance-telephonique">
+                        <span class="fa fa-chevron-right"></span>
+                        Assistance
+                    </a>
+                </li>
+                <li style="display:none;">
+                    <a href="/?page=Entreprise.DocumentsDeReference&callFrom=entreprise"
+                       title="Documents de référence (nouvelle fenêtre)">
+                        <span class="fa fa-chevron-right"></span>
+                        Documents de référence
+                    </a>
+                </li>
+                                <li style="display:block;"></li>
+                <li style="display:block;">
+                    <a href="/entreprise/aide/outils-informatiques">
+                        <span class="fa fa-chevron-right"></span>
+                        Outils informatiques
+                    </a>
+                </li>
+
+                            </ul>
+        </li>
+    </ul>
+</li>
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left"
+       data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Se préparer à répondre
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                                <li>
+                    <a href="/entreprise/footer/diagnostic-poste">
+                        <span class="fa fa-chevron-right"></span>
+                        Tester la configuration de mon poste
+                    </a>
+                </li>
+                                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;AllCons&amp;orgTest">
+                        <span class="fa fa-chevron-right"></span>
+                        Consultations de test
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>
+                                                                                </ul>
+                    </div>
+                            </div>
+        </nav>
+    </div>
+    <div id="infoErrone" class="m-t-7">
+
+    </div>
+
+<div class="m-t-7">
+
+    </div>
+
+        <div id="acces-tel" class="help-bar">
+        <ul>
+            <li>
+                <a href="/entreprise/aide/assistance-telephonique" target="_blank" class="assistance" data-tnr="accesFaq">
+                <span class="text">
+					Assistance
+                    <span>: 02 23 48 04 54 / Assistance dédiée aux marchés de la formation professionnelle : 01 53 43 05 44</span>
+			    </span>
+
+                </a>
+            </li>
+        </ul>
+        <!-- Fin acces UTAH -->
+    </div>
+
+                <div class="container clearfix">
+            <nav role="navigation">
+                <div class="breadcrumb">
+                    <a href="/">Accueil</a> /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AllCons">Consultations</a>
+                                            / Répondre
+                                    </div>
+            </nav>
+        </div>
+
+        <div class="m-b-10 container container--690-sm" id="layout-entreprise">
+                <main id="middle" class="atx-middle" role="main">
+            <script type="application/javascript">
+            var consulation_ref='242752';
+            var organisme = 'a4h';
+            var depotAutomatique = 0;
+            var pageTransmissionAffichee = 0;
+            var jetonSignatureMaxFileSize = 1048576;
+        </script>
+        <div class="form-bloc form-horizontal recap-infos-consultation" id="recap-consultation">
+    <div class="panel panel-default" id="collapseHeading">
+        <div class="panel-heading clearfix" role="button" data-toggle="collapse" href="#collapseInfo" aria-expanded="false" aria-controls="collapseInfo">
+            <h1 class="h4 panel-title">
+                Détail de la consultation
+            </h1>
+        </div>
+
+        <div class="panel-body">
+            <div class="recap-bloc">
+                <div class="clearfix item_consultation">
+                    <!--BEGIN DATE LIMITE REMISE DES PLIS-->
+                    <div class="col-md-10">
+                        <div class="row">
+                            <label class="col-md-4 col-xs-12 spacing-helper-m">
+                                Date et heure limite de remise des plis :
+                            </label>
+                            <span class="col-md-8 col-xs-12">
+                                <span class="green bold">13/11/2026 16:45</span>
+
+                                                                    <img
+                                        src="/consultation_depot/assets/images/reponse-elec-oblig-avec-signature.gif?k=2026-00.05.01"
+                                        alt="Réponse électronique obligatoire pour cette consultation. Dispositions sur la signature électronique, se référer au RC ou à l&#039;AAC."
+                                        class="certificat indent-10">
+
+                            </span>
+                        </div>
+                    </div>
+                    <!--END DATE LIMITE REMISE DES PLIS-->
+
+                    <!--BEGIN REFERENCE-->
+                    <div class="col-md-10 text-justify">
+                        <div class="row">
+                            <label class="col-md-4 col-xs-12 spacing-helper-m">
+                                Référence :
+                            </label>
+                            <span class="col-md-8 col-xs-12">
+                                26190042
+                            </span>
+                        </div>
+                    </div>
+                    <!--END REFERENCE-->
+
+                    <!--BEGIN INTITULE-->
+                    <div class="col-md-10 text-justify">
+                        <div class="row">
+                            <label class="col-md-4 col-xs-12 spacing-helper-m">
+                                Intitulé :
+                            </label>
+                            <div class="col-md-8 col-xs-12">
+                                <span class="words-break-and-wrap">RUE CORENTIN CARRE A RENNES - GESTION DES PROBLEMATIQUES EAUX PLUVIALES ET DE DEBORDEMENT DU RESEAU UNITAIRE</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!--END INTITULE-->
+
+                    <!--BEGIN OBJET-->
+                    <div class="col-md-10 text-justify">
+                        <div class="row">
+                            <label class="col-md-4 col-xs-12 spacing-helper-m">Objet :</label>
+                            <div class="col-md-8 col-xs-12">
+                                <span class="words-break-and-wrap">RUE CORENTIN CARRE A RENNES - GESTION DES PROBLÉMATIQUES EAUX PLUVIALES ET DE DÉBORDEMENT DU RÉSEAU UNITAIRE</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!--END OBJET-->
+
+                    <!--BEGIN ORGANISME-->
+                    <div class="col-md-10 text-justify">
+                        <div class="row">
+                            <label class="col-md-4 col-xs-12 spacing-helper-m">Organisme :</label>
+                            <span class="col-md-8 col-xs-12">
+                                RENNES METROPOLE (35000 - Rennes )                            </span>
+                        </div>
+                    </div>
+                    <!--END ORGANISME-->
+
+
+
+                </div>
+            </div>
+            <ul class="panel-collapse collapseBody list-unstyled clearfix collapse" id="collapseInfo" role="tabpanel" aria-labelledby="collapseInfo" aria-expanded="false">
+                <li>
+                    <hr/>
+                </li>
+                <div class="row">
+                    <li class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="clearfix">
+                                                            </li>
+                            <li class="clearfix">
+                                                            </li>
+                            <li class="clearfix">
+                                <label class="col-md-4 col-xs-12 spacing-helper-m">
+                                    Entité publique :
+                                </label>
+                                <div class="col-md-8 col-xs-12">
+                                    RENNES METROPOLE
+                                </div>
+                            </li>
+                            <li class="clearfix">
+                                <label class="col-md-4 col-xs-12 spacing-helper-m">
+                                    Service :
+                                </label>
+                                <div class="col-md-8 col-xs-12">
+                                                                            RENNES METROPOLE / / / DEIMAR - PISU/DEI/ Service Marchés publics
+                                                                    </div>
+                            </li>
+                            <li class="clearfix">
+                                <label class="col-md-4 col-xs-12 spacing-helper-m">
+                                    Type d&#039;annonce :
+                                </label>
+                                <div class="col-md-8 col-xs-12">
+                                    Annonce de consultation
+                                </div>
+                            </li>
+                            <li class="clearfix">
+                                <label class="col-md-4 col-xs-12 spacing-helper-m">
+                                    Procédure :
+                                </label>
+                                <div class="col-md-8 col-xs-12">
+
+                                                                                                            </div>
+                            </li>
+                                                    </ul>
+                    </li>
+                    <li class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="clearfix">
+                                <label class="col-md-4 col-xs-12 spacing-helper-m">
+                                    Catégorie principale :
+                                </label>
+                                <div class="col-md-8 col-xs-12">
+                                    Travaux
+                                </div>
+                            </li>
+                            <li class="clearfix">
+                                <label class="col-md-4 col-xs-12 spacing-helper-m">
+                                    Allotissement :
+                                </label>
+                                <div class="col-md-8 col-xs-12">
+                                                                            <span>
+                                            <a href="javascript:popUpSetSize('/?page=Entreprise.PopUpDetailLots&amp;orgAccronyme=a4h&amp;id=242752','800','275','yes');">
+                                                <i class="fa fa-cubes text-warning m-r-1"></i>
+                                                2
+                                                                                                    Lots
+                                                                                            </a>
+                                        </span>
+                                                                    </div>
+                            </li>
+                            <!-- TODO if module lieux d'execution activé -->
+                                                            <li class="clearfix">
+                                    <label class="col-md-4 col-xs-12 spacing-helper-m">
+                                        Lieu d&#039;exécution :
+                                    </label>
+                                    <div class="col-md-8 col-xs-12">
+                                        (35) Ille-et-Vilaine
+                                    </div>
+                                </li>
+                                                        <!-- TODO if module CodeNutLtReferentiel activé Cf atexo.referentiels -->
+                                                        <!-- TODO if module AffichageCodeCpv activé Cf atexo.referentiels -->
+                                                            <li class="clearfix">
+                                    <label class="col-md-4 col-xs-12 spacing-helper-m">
+                                        Code CPV :
+                                    </label>
+                                    <div class="col-md-8 col-xs-12">
+                                        <span data-code-cpv="45232410">45232410 (Code principal)</span>
+                                                                                    <br/>
+                                                                                                                                        <span data-code-cpv=""></span>
+                                                                                                                        </div>
+                                </li>
+                                                        <!-- TODO if module ConsultationDomainesActivites ou ConsultationDomainesActivitesLtReferentiel activé Cf atexo.referentiels -->
+                                                        <!-- TODO if module ConsultationDomainesActivites ou ConsultationDomainesActivitesLtReferentiel activé Cf atexo.referentiels -->
+                                                        <!-- TODO if module ConsultationAdresseRetraisDossiers active -->
+                                                        <!-- TODO if module ConsultationPrixAcquisition active -->
+                                                        <!-- TODO if module ConsultationLieuOuverturePlis active -->
+                                                        <!-- TODO if module ConsultationPrixAcquisition active + recuperer TDonneesCompletementaire -->
+                                                        <!-- TODO if module ConsultationCautionProvisoire active + recuperer TDonneesCompletementaire -->
+                                                        <!-- TODO if module ConsultationQualification active  -->
+                                                        <!-- TODO if module ConsultationAgrement active  -->
+                                                                                </ul>
+                    </li>
+                </div>
+            </ul>
+        </div>
+    </div>
+</div>        <!--Début Bloc Infos Temps-->
+<div class="panel panel-default">
+    <div class="panel-body">
+        <p><strong>Temps restant pour répondre</strong> (délai d&#039;acheminement inclus) : Dans  5 heure(s) 17 minute(s)</p>
+        <span><strong>Temps d&#039;acheminement</strong> avec un débit de 128 kbs, il faut 1 minute par Mo de réponse (estimation donnée à titre indicatif) </span>
+        <a href="#" class="pull-right" data-toggle="modal" data-target="#ModalInfosFichiers" ><i
+                    class="fa fa-caret-right m-r-1" title="En savoir plus sur le temps d&#039;acheminement"></i>En savoir plus</a>
+    </div>
+</div>
+
+<div class="modal fade"  id="ModalInfosFichiers"  tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Informations sur le temps d&#039;acheminement</h4>
+            </div>
+            <div class="modal-body">
+                <p class="text-left">Les tailles des fichiers sont exprimés usuellement en octets (ko ou Mo).<br/><br/>Les débits de bande passante sont exprimés usuellement en bits par seconde (kbps ou Mbps).</p>
+                <p>Un octet vaut 8 bits, cela signifie que pour télécharger un fichier d&#039;1 Mo avec une bande passante effective de 128 kbps, il faut (1 000 000*8)/128 000= 62,5 secondes (estimation donnée à titre indicatif).</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="closeModal">Fermer</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Fin Bloc Infos Temps-->        <!--Début Bloc Test Config-->
+<div class="bloc-preparation clearfix alert alert-info">
+    <div class="h5 pull-left text-info-consultation" style="color: black;">
+        <p class="m-b-0"><strong> SE PREPARER A L&#039;AVANCE A REPONDRE - N&#039;ATTENDEZ PAS LE DERNIER JOUR</strong></p>
+        <a href="javascript:popUpOpen('/index.php?page=Entreprise.ConditionsUtilisation&calledFrom=entreprise','yes');"
+           class="p-l-1 text-primary">
+            <span data-toggle="tooltip" title="en savoir plus (nouvelle fenêtre)">
+                En savoir plus
+            </span>
+        </a>
+    </div>
+
+        <a href="/entreprise/footer/diagnostic-poste" class="btn btn-primary btn-sm pull-right">
+        <i class="fa fa-cog p-r-1"></i>
+        Tester ma configuration
+    </a>
+        <a href="/index.php?page=Entreprise.EntrepriseAdvancedSearch&AllCons&orgTest" class="btn btn-primary btn-sm pull-right m-r-2">
+        <i class="fa fa-forward p-r-1"></i>
+        Consultation de test
+    </a>
+</div>
+<!--Fin Bloc Test Config-->
+                    <!--Début Bloc Bourse Cotraitance-->
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="page-header clearfix m-t-0">
+            <h2 class="h4 pull-left">
+                Bourse à la cotraitance
+                <i title="L&#039;inscription permet d&#039;accéder à la liste détaillée des entreprises inscrites à la bourse à la cotraitance pour cette consultation."
+                   class="fa fa-question-circle text-info" aria-hidden="true"></i>
+            </h2>
+            <div class="boutons">
+                                    <!--DEBUT BTN S'INSCRIRE-->
+                    <a href="/index.php?page=Entreprise.EntrepriseInscriptionBourseCotraitance&id=242752&orgAcronyme=a4h&inscription"
+                       type="button" class="btn btn-primary btn-sm pull-right m-t-1">
+                        <i class="fa fa-user m-r-1"></i> S&#039;inscrire
+                    </a>
+                    <!--FIN BTN S'INSCRIRE-->
+                            </div>
+        </div>
+        <div class="clearfix">
+            <div class="pull-left">
+                <img src="/themes/images/icone-cotraitance-1.png"  alt="" />
+            </div>
+            <div class="pull-left m-l-1">
+                Aucune entreprise inscrite à la bourse à la cotraitance pour cette consultation.
+            </div>
+        </div>
+        <div class="clearfix">
+                    </div>
+    </div>
+</div>
+
+<!--Debut Modal Confirmation-Suppression-->
+<div class="modal fade" id="modalDesinscription" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="text-danger" id="gridSystemModalLabel">
+                    Etes-vous certain de vouloir vous désinscrire?
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="clearfix">
+                    <button type="button" class="btn btn-default btn-sm pull-left" data-dismiss="modal">Annuler</button>
+                                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Fin Modal  Confirmation-Suppression-->
+<!--Fin Bloc Bourse Cotraitance-->                <!-- LES ONGLETS -->
+        <div class="clearfix">
+    <div id="tabNav" class="content-advancedSearch">
+        <!--Debut navigation onglets-->
+        <div class="content-detailConsult" id="form-nav">
+            <div id="error_message">
+                            </div>
+            <!--SELECT FOR MOBILE VIEW-->
+            <form>
+                <select id="selectDetailConsultation--m" class="form-control m-b-2">
+                    <option value='0'>Publicité / Téléchargement</option>
+                    <option value='1'>Question</option>
+                    <option value='2'>Dépôt</option>
+                    <option value='3'>Messagerie sécurisée</option>
+                </select>
+            </form>
+            <ul class="nav nav-tabs" id="targetDetailConsultation--m" role="tablist">
+                <li class="active" role="tab">
+                    <a id="pub-tab" data-toggle="tab" href="#pub"
+                       aria-controls="pub-tab" aria-selected="true">
+                        <i class="fa fa-upload m-r-1" aria-hidden="true"></i>
+                        Publicité / Téléchargement
+                    </a>
+                </li>
+                <li role="tab">
+                    <a id="question-tab" data-toggle="tab" href="#question"
+                       aria-controls="question-tab" aria-selected="false">
+                        <i class="fa fa-question-circle m-r-1" aria-hidden="true"></i>
+                        Question
+                    </a>
+                </li>
+                <li role="tab">
+                    <a id="depot-tab" data-toggle="tab" href="#depot"
+                       aria-controls="depot-tab" aria-selected="false">
+                        <i class="fa fa-download m-r-1" aria-hidden="true"></i>
+                        Dépôt
+                    </a>
+                </li>
+                <li  role="tab">
+                    <a id="messagerie-tab" data-toggle="tab" href="#messagerie"
+                       aria-controls="messagerie-tab" aria-selected="false">
+                        <i class="fa fa-comments" aria-hidden="true"></i>
+                        Messagerie sécurisée
+                    </a>
+                </li>
+            </ul>
+            <div class="form-field form-horizontal">
+                <div class="tab-content" id="tab-consultation-content">
+                    <!--BEGIN LAYER 1-->
+                    <div class="panel panel-default panel-content tab-pane fade in active" id="pub" role="tabpanel" aria-labelledby="publicite-tab">
+                        <div class="panel-body">
+                            <!--Debut Layer 2-->
+<div class="bloc-rmc">
+    <div class="section clearfix">
+        <div class="section-heading page-header m-t-1 p-b-0">
+            <h2 class="h4">
+                Téléchargement
+            </h2>
+        </div>
+        <div class="section-body clearfix">
+            <!--Debut Bloc documents Avis-->
+            <div class="col-md-6">
+                <div class="content">
+                    <h3 class="page-header m-t-0">
+                        Avis de publicité
+                    </h3>
+                                        <div>
+
+                                            </div>
+                                                                <ul class="list-unstyled">
+
+                                <li class="picto-link">
+                                                                            <i class="fa fa-external-link text-primary m-r-1" alt=""></i>
+                                        <a id="linkDownloadAvis"
+                                           title="Fichier joint - Avis complémentaire en ligne"
+                                           href="/entreprise/consultation/242752/avis/56251/telechargement/1">
+                                            Fichier joint - Avis complémentaire en ligne
+                                        </a>
+                                                                    </li>
+                                                                                </ul>
+                                    </div>
+            </div>
+            <!--Fin Bloc documents Avis-->
+
+            <!--Debut Bloc documents Avis-->
+            <div class="col-md-6 p-0">
+                <div id="panelPieces">
+                    <!--Debut Bloc Pieces Consultation-->
+                    <h3 id="divPiecesConsultation" class="page-header m-t-0">
+                        Pièces de la consultation
+                    </h3>
+
+                                            <ul class="list-unstyled">
+                                                            <li class="picto-link">
+                                    <i class="fa fa-download text-primary m-r-1"  aria-hidden="true" alt=""></i>
+                                    <a id="linkDownloadReglement" class="ltr" href="/index.php?page=Entreprise.EntrepriseDownloadReglement&amp;id=MjQyNzUy&amp;orgAcronyme=a4h">
+                                        Règlement de consultation - 336,47 Ko
+                                    </a>
+                                </li>
+
+                                                            <li class="picto-link">
+                                    <i class="fa fa-download text-primary m-r-1"  aria-hidden="true" alt=""></i>
+                                    <span class="ltr">
+                                                                                    <a href="/index.php?page=Entreprise.EntrepriseDemandeTelechargementDce&amp;id=242752&amp;orgAcronyme=a4h" id="linkDownloadDce">Dossier de consultation - 72,09 Mo</a>
+                                                                            </span>
+                                </li>
+                                                                                        <li class="picto-link">
+                                    <i class="fa fa-download text-primary m-r-1"  aria-hidden="true" alt=""></i>
+                                    <a id="linkDownloadComplement" href="/index.php?page=Entreprise.EntrepriseDownloadComplement&amp;id=MjQyNzUy&amp;orgAcronyme=a4h">
+                                        En savoir plus sur la consultation - 57,51 Ko
+                                    </a>
+                                </li>
+
+                                                    </ul>
+                                        <!--Fin Bloc Pieces Consultation-->
+                </div>
+            </div>
+            <!--Fin Bloc documents Avis-->
+        </div>
+    </div>
+    <!--Debut Bloc Pieces telechargees-->
+    <div class="section clearfix">
+        <div class="section-heading page-header p-b-0 m-t-2">
+            <h2 class="h4">
+                Liste des pièces téléchargées
+            </h2>
+        </div>
+        <div class="section-body">
+                            <div class="alert alert-warning text-black" id="panelNoElementFoundTelechargement">
+                    <b >Aucun résultat trouvé</b>
+                </div>
+                    </div>
+        <input type="submit" name="ctl0$CONTENU_PAGE$refreshRepeaterTelechargement" value=""
+               id="ctl0_CONTENU_PAGE_refreshRepeaterTelechargement" style="display:none">
+        <span id="ctl0_CONTENU_PAGE_javascriptTelechargement"></span>
+    </div>
+    <!--Fin Bloc Pieces telechargees-->
+</div>
+                        </div>
+                    </div>
+                    <!--END LAYER 1-->
+
+                    <!--BEGIN LAYER 2-->
+                    <div class="panel panel-default panel-content tab-pane fade in" id="question" role="tabpanel" aria-labelledby="question-tab">
+                        <div class="panel-body">
+                            <!--Debut Layer 2-->
+<div class="section bloc-rmc">
+        <!--Debut Bloc Poser question-->
+    <div class="section-heading page-header clearfix m-t-1 p-b-0">
+        <h3 class="h4 pull-left">
+            Liste des questions posées
+        </h3>
+        <div class="pull-right">
+            <a href="/entreprise/question/poser/0f1e9565-c06a-4918-8076-7d4a7b656e28"
+               class="btn btn-primary btn-sm"
+               data-test-id="btn-poser-question">
+                <i class="fa fa-comments"></i>
+                Poser une question
+            </a>
+        </div>
+    </div>
+    <!--Fin Bloc Poser question-->
+        <!--Debut Bloc questions posees-->
+    <div class="bloc m-b-0">
+        <div class="table-bloc">
+                            <div class="alert alert-warning text-center m-b-0 m-t-3" data-test-id="alert-aucun-resultat">Aucun résultat trouvé</div>
+                    </div>
+    </div>
+    <!--Fin Bloc questions posees-->
+</div>
+<!--Fin Layer 2-->                        </div>
+                    </div>
+                    <!--END LAYER 2-->
+
+                    <!--BEGIN LAYER 3-->
+                    <div class="panel panel-default panel-content entreprise-etape-depot tab-pane fade in" id="depot" role="tabpanel" aria-labelledby="depot-tab">
+                        <div class="panel-body">
+
+                                                            <div
+                                        class="section bloc-rmc panel-group"
+                                        id="accordion"
+                                        role="tablist"
+                                        aria-multiselectable="true">
+
+                                                                                                                                                <div class="alert alert-danger">
+                                                        <span class="bold">Vous devez être connecté pour accéder aux actions ci-dessous.</span>
+                                                    </div>
+
+                                                <!-- Vérifier les informations Etablissement et Entreprise de l'inscrit -->
+
+
+                                                                                                    <!-- Start bloc select lot -->
+<link rel="stylesheet" href="/consultation_depot/assets/css/chosen.css?k=2026-00.05.01" type="text/css"/>
+
+<script type="text/javascript" src="/consultation_depot/assets/js/chosen.jquery.js?k=2026-00.05.01"></script>
+
+<script>
+</script>
+<div id="candidature-selection-lots" class="m-t-3">
+    </div>
+
+<!--End Modal select-lot-->
+<!-- End bloc select lot -->
+<script src="/build/1083.f7f04fc5.js?k=2026-00.05.01"></script><script src="/build/2348.edf47088.js?k=2026-00.05.01"></script><script src="/build/3806.0a2d5716.js?k=2026-00.05.01"></script><script src="/build/8601.20c277a9.js?k=2026-00.05.01"></script><script src="/build/9193.31467734.js?k=2026-00.05.01"></script><script src="/build/8996.1d8cb6b9.js?k=2026-00.05.01"></script><script src="/build/8112.cd6bc238.js?k=2026-00.05.01"></script><script src="/build/7064.f3f8146d.js?k=2026-00.05.01"></script><script src="/build/depot-candidature.aa506193.js?k=2026-00.05.01"></script>
+<link rel="stylesheet" href="/build/depot-candidature.a6977263.css?k=2026-00.05.01">
+
+
+                                                                                                    <script type="text/javascript" src="/groupement/assets/js/groupement.js?k=2026-00.05.01"></script>
+
+<form id="form-reponse">
+    <input type="hidden" id="form_uid_response" name="reponse[uid_response]" value="311ce4b427334944c87befb545b7b5ff-d48db762-df4c-11f1-a53e-00505685859d-6af6e6122b0657.71003229"/>
+    <input type="hidden" id="form_groupement_csrf_token" value="c35c9aaf.5_qjkxIXDNLNKhKhcz0UqIIpc4fOODhgvHQVIiJXxIE.qYDO9kU6WZSnaXvTGgxe0MNDNcqEfAEujh5EYEQksumSm47mXV0-6vt9Uw"/>
+    <input
+        type="hidden"
+        value="0"
+        name="idGroupeEntreprise"
+        id="id_groupe_entreprise"
+    />
+    </form>
+
+<div id="app">
+    <groupement
+        :is-user-defined=" false "
+        :etape="2"
+        :is-candidature-dume-online="0"
+        :id-role-juridique-mandataire="1"
+        :id-type-groupement-solidaire="1"
+        :id-type-groupement-conjoint-non-solidaire="2"
+        :id-type-groupement-conjoint-solidaire="3"
+        :data-groupement="null"
+        uid="311ce4b427334944c87befb545b7b5ff-d48db762-df4c-11f1-a53e-00505685859d-6af6e6122b0657.71003229"
+        :consultation-id="242752"
+        :candidature-uuid="null"
+        :alloti="1"
+        :from-form=" false "
+        csrf-token="c35c9aaf.5_qjkxIXDNLNKhKhcz0UqIIpc4fOODhgvHQVIiJXxIE.qYDO9kU6WZSnaXvTGgxe0MNDNcqEfAEujh5EYEQksumSm47mXV0-6vt9Uw"
+    />
+</div>
+
+<link rel="stylesheet" href="/build/declaration-group.7ece6571.css?k=2026-00.05.01">
+<script src="/build/declaration-group.43d86f7e.js?k=2026-00.05.01"></script>
+
+
+<div class=" opacity-bloc m-t-3 m-b-2">
+    <div class="panel panel-default panel-step" id="repondre_consultation">
+        <div class="panel-heading">
+            <h2 class="h4 panel-title">
+                Étape 3 : Répondre à la consultation
+            </h2>
+        </div>
+        <div class="panel-body p-t-1">
+            <div class="pull-left">
+                Accéder au service de dépôt d&#039;un pli
+            </div>
+            <!-- ajouter onclick sur le bouton et location='' -->
+            <button class="btn btn-sm btn-primary pull-right" disabled id="button_repondre_conultation">
+                                    Répondre à la consultation
+                            </button>
+        </div>
+    </div>
+</div>
+
+<!--Debut Modal Repondre à la consultation-->
+<div class="modal fade" id="modal-alert-repondre-consultation" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="gridSystemModalLabel">Note importante</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="alert alert-danger clearfix">
+                            <div class="pull-left">
+                                <i class="fa fa-times-circle m-r-1" aria-hidden="true"></i>
+                                Vous avez choisi de renseigner votre DUME en ligne : merci de confirmer que les informations renseignées dans le DUME sont exactes et peuvent être utilisées dans le cadre de votre réponse.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" aria-label="Close">
+                    Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Fin Modal Repondre à la consultation-->
+
+<!-- Modal Warning -->
+<div class="modal fade" id="modal-warning" tabindex="-1" role="dialog" aria-labelledby="modalWarningLabel" aria-describedby="modalWarningDesc">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="modalWarningLabel" tabindex="-1">Confirmation avant saisie de votre réponse</h4>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning" id="modalWarningDesc">
+                    <i class="fa fa-exclamation-triangle m-r-1" aria-hidden="true"></i>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">
+                    Annuler
+                </button>
+                <button type="button" class="btn btn-primary pull-right" id="modal-validate-btn">
+                    Valider
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+                                        <!-- Start bloc contenus transmis -->
+<script>
+    J(document).ready(function () {
+                    J('#id-collapse-bloc-contenus-transmis').append(
+                '<div class="alert alert-danger text-center m-b-0">' +
+                'S&#039;Authentifier' +
+                '<div/>'
+            );
+            });
+</script>
+
+<div class="panel panel-default">
+    <div class="bloc-header panel-heading atx-btn-toggle" data-toggle="collapse" data-target="#id-collapse-bloc-contenus-transmis" role="button"
+         aria-expanded="false" aria-controls="id-collapse-bloc-contenus-transmis" id="contenus-transmis">
+           Contenus transmis
+    </div>
+    <div class="bloc-body collapse panel-body" id="id-collapse-bloc-contenus-transmis"></div>
+</div>
+<!-- End bloc contenus transmis -->                                                                    </div>
+                                                    </div>
+                    </div>
+                    <!--END LAYER 3-->
+
+                    <!--BEGIN LAYER 4-->
+                    <div class="panel panel-default panel-content tab-pane fade in" id="messagerie" role="tabpanel" aria-labelledby="messagerie-tab">
+                        <div class="panel-body">
+                                                            <!--Debut MESSEC V2-->
+    <div class="alert alert-warning h5">
+        Aucun résultat trouvé
+    </div>
+<!--Fin MESSEC-->
+                                                    </div>
+                    </div>
+                    <!--END LAYER 4-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    label.normal {
+        font-weight: normal;
+    }
+</style>
+<script>
+    J(function() {
+        var anchorName = getUrlHash();
+        var newDepot = true;
+        var activeNewDepot = false;
+
+                sessionStorage.removeItem('depotUuidCandidature');
+
+                sessionStorage.removeItem('depotUuidCandidature');
+
+        if (anchorName == "question") {
+            J("#question-tab").trigger("click");
+        }
+        if (anchorName == "depot" || (newDepot && activeNewDepot)) {
+            J("#depot-tab").trigger("click");
+        }
+        if (anchorName == "messagerie") {
+            J("#messagerie-tab").trigger("click");
+        }
+    });
+</script>
+        <!-- FIN DES ONGLETS -->
+        <!-- Start bloc link line -->
+<div class="link-line clearfix">
+
+
+</div>
+
+<!-- End bloc link line -->
+
+<!--BEGIN BTN RETOUR / NOUVELLE RECHERCHE / AJOUTER AU PANIER TOP-->
+<div class="actions-page-fixed">
+
+    <div class="relative">
+        <button class="btn-link dropdown-toggle" type="button" aria-label="dropdownButton" id="dropdownSecondMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <div class="btn btn-success btn-lg btn-nav" title="Menu Recherche">
+                <i class="fa fa-bars"></i>
+            </div>
+        </button>
+
+
+        <ul class="list-unstyled clearfix m-t-2 dropdown-toggle-menu" aria-labelledby="dropdownSecondMenu">
+            <li class="clearfix">
+                <a href="/index.php?page=Entreprise.EntrepriseAdvancedSearch&WithCritere&searchAnnCons"
+                   class="btn-link">
+                    <div class='btn btn-default' title='Retour'>
+                        <i class="fa fa-arrow-left"></i>
+                        <span class="sr-only">Retour</span>
+                    </div>
+                </a>
+            </li>
+
+
+            <li class="clearfix">
+                <a href="/index.php?page=Entreprise.EntrepriseAdvancedSearch&searchAnnCons"
+                   title="Faire une nouvelle recherche" class="btn-link">
+                    <div class='btn btn-default'  title='Faire une nouvelle recherche'>
+                        <i class="fa fa-arrow-right"></i>
+                        <span class="sr-only">Faire une nouvelle recherche</span>
+                    </div>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+</div>
+<!--END BTN RETOUR / NOUVELLE RECHERCHE / AJOUTER AU PANIER TOP-->        </main>
+        </div>
+
+                                            <div class="clearfix">&nbsp;</div>
+<footer class="footer" role="contentinfo">
+    <div class="content footer_content text-center">
+        <div class="list-unstyled clearfix container">
+            <div class="footer-menu">
+                <ul class="list-unstyled">
+                                            <li>
+                            <a class="link-footer" href="/entreprise/footer/info-site">
+                                InfoSite et RGPD
+                            </a>
+                        </li>
+
+                                            <li>
+                            <a class="link-footer"
+                               href="/entreprise/footer/conditions-utilisation">
+                                Conditions d'utilisation
+                            </a>
+                        </li>
+
+                    <li>
+                        <a class="link-footer"
+                           href="/entreprise/footer/prerequis-techniques">
+                            Pré-requis techniques
+                        </a>
+                    </li>
+
+
+                    <li>
+                        <a class="link-footer"
+                           href="/entreprise/footer/accessibilite">
+                            Accessibilité
+                        </a>
+                    </li>
+
+                                            <li>
+                            <a class="link-footer"
+                               href="/entreprise/footer/info-acrgs">
+                                Autorités de certification européennes
+                            </a>
+                        </li>
+
+
+                </ul>
+            </div>
+
+            <div>
+
+
+            </div>
+                            <div id="ctl0_ctl4_panelNaviguationMulilingue" class="footer-multilingual">
+                                            <div class="item-lang on lang-switcher"
+                             data-lang="fr">
+                            <a href="/language">
+                                <input type="button" name="ctl0$ctl4$langages$ctl2$flagImg"
+                                       value="fr"
+                                       id="ctl0_ctl4_langages_ctl2_flagImg"
+                                       class="language-choice flage-FR"
+                                />
+                            </a>
+                        </div>
+                                            <div class="item-lang on lang-switcher"
+                             data-lang="en">
+                            <a href="/language/en">
+                                <input type="button" name="ctl0$ctl4$langages$ctl3$flagImg"
+                                       value="en"
+                                       id="ctl0_ctl4_langages_ctl3_flagImg"
+                                       class="language-choice flage-EN"
+                                />
+                            </a>
+                        </div>
+                                            <div class="item-lang on lang-switcher"
+                             data-lang="es">
+                            <a href="/language/es">
+                                <input type="button" name="ctl0$ctl4$langages$ctl4$flagImg"
+                                       value="es"
+                                       id="ctl0_ctl4_langages_ctl4_flagImg"
+                                       class="language-choice flage-ES"
+                                />
+                            </a>
+                        </div>
+                                    </div>
+
+        </div>
+    </div>
+</footer>
+<div class="footer_go_top out" id="js-footer_go_top">
+    <a href="#" class="btn btn-primary btn-go-to-top animated" id="js-btn-go_to_top"
+       title="Retour en haut">
+        <i class="fa fa-angle-up"></i>
+    </a>
+</div>
+
+
+                                            <script src="/app/js/ng-script.js?k=2026-00.05.01"></script>
+
+    <script src="/build/2628.128319a2.js?k=2026-00.05.01"></script><script src="/build/8629.ef4e94e3.js?k=2026-00.05.01"></script><script src="/build/6511.798ce2ab.js?k=2026-00.05.01"></script><script src="/build/1339.c590c0a5.js?k=2026-00.05.01"></script><script src="/build/liste-depot.8659f448.js?k=2026-00.05.01"></script>
+                            <!-- JS ?? -->
+
+<script id="template-upload-piece-libre" type="text/x-tmpl">
+       {% var surchargeReferentiels = true; %}
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <div class="templ-fileupload template-upload piece-libre">
+        <div class="container-fluid">
+            <div class="row row-piece">
+                <div class="col-md-5 row-file_name name">
+                    <div class="pull-left options">
+                        <i class="pull-left fa fa-file-text-o atx-text-success icon"></i>
+                        <span class="type-piece">Pièce libre :</span>
+                    </div>
+                    <span title="{%=file.name%}" class="name name-link">{%=file.name%}</span>
+                    <strong class="error text-danger"></strong>
+                   {% if (file.doublon) { %}
+                        <div class="error-area" attr-error="1"><span class="label label-danger">Erreur</span> Un fichier portant le même nom a déjà été déposé. Chaque fichier de l'enveloppe doit avoir un nom unique.</div>
+                    {% } %}
+                    {% if (file.tailleDepasse) { %}
+                        <div class="error-area" attr-error="0"><span class="label label-danger">Erreur</span> Le poids du fichier déposé est supérieur à celui autorisé sur la plateforme (1Go). </div>
+                    {% } %}
+                </div>
+                <div class="col-md-2 row-file_progress">
+                    <div class="progress progress-striped {% if (file.doublon || file.maxFileSizeSize || file.tailleDepasse) { %}{% }else{ %}active{% } %}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <div class="progress-bar {% if (file.error || file.errorDoublon || file.doublon || file.tailleDepasse) { %}progress-bar-danger {% }else{ %} progress-bar-success {% } %}"
+                        style="width:{% if (file.doublon || file.maxFileSizeSize || file.tailleDepasse) { %}100{% }else{ %}0{% } %}%;"></div>
+                    </div>
+                    <span class="size">{%=o.formatFileSize(file.size)%}</span>
+                </div>
+
+
+    <div class="col-md-4 row-file_signature">
+    {% if(file.infos_certificat && file.infos_certificat.signatureValide != null && file.infos_certificat.emetteur != null && file.infos_certificat.periodiciteValide != null) { %}
+    <div class="statut pull-left">
+        <span><img src="/consultation_depot/assets/images/picto-signature.gif?k=2026-00.05.01" alt="Signature électronique" title="Signature électronique"></span>
+        {% if(surchargeReferentiels) { %}
+        {% if(file.infos_certificat.signatureValide && file.infos_certificat.repertoiresChaineCertification != null && typeof(file.infos_certificat.repertoiresChaineCertification[0].statut) != "undefined" && file.infos_certificat.repertoiresChaineCertification[0].statut == "OK" && file.infos_certificat.periodiciteValide && file.infos_certificat.absenceRevocationCRL == 0) { %}
+        <i class="fa fa-check-circle text-success" title="Signature valide - Vérification OK"></i>
+        {% }else if(file.infos_certificat.signatureValide  == false || (file.infos_certificat.repertoiresChaineCertification != null && typeof(file.infos_certificat.repertoiresChaineCertification[0].statut) != "undefined" && file.infos_certificat.repertoiresChaineCertification[0].statut == "KO") || !file.infos_certificat.periodiciteValide || file.infos_certificat.absenceRevocationCRL == 2) { %}
+        <i class="fa fa-times-circle text-danger" title="Signature invalide ou aucune signature reconnue pour ce fichier - Vérification KO"></i>
+        {% }else{ %}
+        <i class="fa fa-times-circle text-warning" title="Fichier signé. Signature incertaine - Vérification incertaine"></i>
+        {% } %}
+        {% } else { %}
+        {% if(file.infos_certificat.signatureValide && file.infos_certificat.chaineDeCertificationValide == 0 && file.infos_certificat.periodiciteValide && file.infos_certificat.absenceRevocationCRL == 0) { %}
+        <i class="fa fa-check-circle text-success" title="Signature valide - Vérification OK"></i>
+        {% }else if(file.infos_certificat.signatureValide  == false || file.infos_certificat.chaineDeCertificationValide == 2 || !file.infos_certificat.periodiciteValide || file.infos_certificat.absenceRevocationCRL == 2) { %}
+        <i class="fa fa-times-circle text-danger" title="Signature invalide ou aucune signature reconnue pour ce fichier - Vérification KO"></i>
+        {% }else{ %}
+        <i class="fa fa-times-circle text-warning" title="Fichier signé. Signature incertaine - Vérification incertaine"></i>
+        {% } %}
+        {% } %}
+    </div>
+         <div class="name col--fixed-width pull-left p-l-1">
+             <a href="javascript:void(0)" title="Voir le détail de la signature" data-infos-signature="{%=JSON.stringify(file.infos_certificat)%}">
+                 <i class="fa fa-search-plus"></i>
+                 CN : {%=file.infos_certificat.signatairePartiel%} ( AC :  {%=file.infos_certificat.emetteur.split(",")[0]%})</a>
+         </div>
+             {% }else{ %}
+         <div class="statut">
+         </div>
+             {% } %}
+     </div>
+
+                <div class="col-md-1  row-file_actions text-right">
+                    <div class="actions center">
+                        {% if (!i) { %}
+                            <a href="#" title="Annuler le téléchargement" class="btn btn-sm btn-default atx-text-warning atx-btn-icon atx-btn-circle cancel">
+                                <i class="fa fa-ban atx-text-warning"></i>
+                            </a>
+                        {% } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% } %}
+
+</script>
+
+<!--DEBUT PIECE AVEC BOUTON AJOUTER UN JETON DE SIGNATURE-->
+<script id="template-download-piece-libre" type="text/x-tmpl">
+       {% var surchargeReferentiels = true; %}
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <div data-lot="lot-{%=file.lot%}" class="templ-fileupload template-download piece-libre">
+        <div class="container-fluid">
+            <div class="row row-piece"style="padding: 0 !important;"{% if (file.fichier) { %} data-fichier="{%=file.fichier%}"{% } %}><div class="list-group-item clearfix">
+                <div class="col-md-5 row-file_name"{% if (file.fichier) { %} data-fichier="{%=file.fichier%}"{% } %}><div class="">
+                    <div class="pull-left optionsm-r-1">
+                        <i class="m-r-1 fa fa-file-text-o atx-text-success icontext-success"></i>
+                        <span class="type-piece">Pièce libre :</span>
+                    </div>
+                    {% if (file.url) { %}
+                        <a href="{%=file.url%}" title="{%=file.name%}" class="name name-link" download="{%=file.name%}" {%=file.thumbnailUrl?"data-gallery":""%}>{%=file.name%}</a>
+                    {% } else { %}
+                        <span title="{%=file.name%}" class="name name-link">{%=file.name%}</span>
+                    {% } %}
+                    {% if (file.error) { %}
+                        <div class="error-area"  attr-error="0"><span class="label label-danger">Erreur</span> Veuillez relancer le chargement</div>
+                    {% } %}
+                {% if (file.errorDoublon || file.doublon) { %}
+                        <div class="error-area" attr-error="1"><span class="label label-danger">Erreur</span> Un fichier portant le même nom a déjà été déposé. Chaque fichier de l'enveloppe doit avoir un nom unique.</div>
+                    {% } %}
+                    {% if (file.tailleDepasse) { %}
+                        <div class="error-area" attr-error="0"><span class="label label-danger">Erreur</span> Le poids du fichier déposé est supérieur à celui autorisé sur la plateforme (1Go). </div>
+                    {% } %}</div>
+                    </div>
+                <div class="col-md-2 row-file_progress">
+                    <div class="progress progress-striped" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+                    <div class="progress-bar {% if (file.error || file.errorDoublon || file.tailleDepasse) { %}progress-bar-danger {% }else{ %} progress-bar-success {% } %}" style="width:100%;"></div>
+                    </div>
+                    <span class="size">{%=o.formatFileSize(file.size)%}</span>
+                </div>
+
+
+    <div class="col-md-4 row-file_signature">
+    {% if(file.infos_certificat && file.infos_certificat.signatureValide != null && file.infos_certificat.emetteur != null && file.infos_certificat.periodiciteValide != null) { %}
+    <div class="statut pull-left">
+        <span><img src="/consultation_depot/assets/images/picto-signature.gif?k=2026-00.05.01" alt="Signature électronique" title="Signature électronique"></span>
+        {% if(surchargeReferentiels) { %}
+        {% if(file.infos_certificat.signatureValide && file.infos_certificat.repertoiresChaineCertification != null && typeof(file.infos_certificat.repertoiresChaineCertification[0].statut) != "undefined" && file.infos_certificat.repertoiresChaineCertification[0].statut == "OK" && file.infos_certificat.periodiciteValide && file.infos_certificat.absenceRevocationCRL == 0) { %}
+        <i class="fa fa-check-circle text-success" title="Signature valide - Vérification OK"></i>
+        {% }else if(file.infos_certificat.signatureValide  == false || (file.infos_certificat.repertoiresChaineCertification != null && typeof(file.infos_certificat.repertoiresChaineCertification[0].statut) != "undefined" && file.infos_certificat.repertoiresChaineCertification[0].statut == "KO") || !file.infos_certificat.periodiciteValide || file.infos_certificat.absenceRevocationCRL == 2) { %}
+        <i class="fa fa-times-circle text-danger" title="Signature invalide ou aucune signature reconnue pour ce fichier - Vérification KO"></i>
+        {% }else{ %}
+        <i class="fa fa-times-circle text-warning" title="Fichier signé. Signature incertaine - Vérification incertaine"></i>
+        {% } %}
+        {% } else { %}
+        {% if(file.infos_certificat.signatureValide && file.infos_certificat.chaineDeCertificationValide == 0 && file.infos_certificat.periodiciteValide && file.infos_certificat.absenceRevocationCRL == 0) { %}
+        <i class="fa fa-check-circle text-success" title="Signature valide - Vérification OK"></i>
+        {% }else if(file.infos_certificat.signatureValide  == false || file.infos_certificat.chaineDeCertificationValide == 2 || !file.infos_certificat.periodiciteValide || file.infos_certificat.absenceRevocationCRL == 2) { %}
+        <i class="fa fa-times-circle text-danger" title="Signature invalide ou aucune signature reconnue pour ce fichier - Vérification KO"></i>
+        {% }else{ %}
+        <i class="fa fa-times-circle text-warning" title="Fichier signé. Signature incertaine - Vérification incertaine"></i>
+        {% } %}
+        {% } %}
+    </div>
+         <div class="name col--fixed-width pull-left p-l-1">
+             <a href="javascript:void(0)" title="Voir le détail de la signature" data-infos-signature="{%=JSON.stringify(file.infos_certificat)%}">
+                 <i class="fa fa-search-plus"></i>
+                 CN : {%=file.infos_certificat.signatairePartiel%} ( AC :  {%=file.infos_certificat.emetteur.split(",")[0]%})</a>
+         </div>
+             {% }else{ %}
+         <div class="statut">
+         </div>
+             {% } %}
+     </div>
+
+                <div class="col-md-1  row-file_actions text-right">
+                    <div class="actions center">
+                        {% if (file.deleteUrl) { %}
+                            <a href="#"
+                                title="Supprimer la pièce"
+                                class="btn btn-primary btn-sm delete"
+                                data-type-fichier="PRI"
+                                data-type="{%=file.deleteType%}"
+                                id="{%=file.id_blob%}"
+                                data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %}
+                                data-xhr-fields="{"withCredentials":true}"{% } %}>
+                                <i class="fa fa-trash-o"></i>
+                            </a>
+                        {% } else { %}
+                            <a href="#" title="annuler le téléchargement" class="cancel">
+                                <i class="fa fa-ban text-warning"></i>
+                            </a>
+                        {% } %}
+                    </div>
+                </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% } %}
+
+</script>
+
+<script id="template-upload-acte-engagement" type="text/x-tmpl">
+       {% var surchargeReferentiels = true; %}
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <div class="templ-fileupload template-upload acte-engagement">
+        <div class="container-fluid">
+            <div class="row row-acte">
+                <div class="col-md-5 row-file_name ">
+                    <div class="pull-left options">
+                        <span class="pull-left m-r-1"><img src="/consultation_depot/assets/images/picto-piece-typee.png?k=2026-00.05.01"
+                                           alt="Acte d'engagement"/></span>
+                        <span class="type-piece">Acte d'engagement : </span>
+                    </div>
+                    <span title="{%=file.name%}" class="name name-link">{%=file.name%}</span>
+                    <strong class="error text-danger"></strong>
+                    {% if (file.doublon) { %}
+                        <div class="error-area"><span class="label label-danger">Erreur</span> Un fichier portant le même nom a déjà été déposé. Chaque fichier de l'enveloppe doit avoir un nom unique.</div>
+                {% } %}
+                </div>
+                <div class="col-md-2 row-file_progress">
+                    <div class="progress progress-striped {% if (file.doublon) { %}{% }else{ %}active{% } %}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <div class="progress-bar {% if (file.error || file.errorDoublon || file.doublon) { %}progress-bar-danger {% }else{ %} progress-bar-success {% } %}"
+                        style="width:{% if (file.doublon) { %}100{% }else{ %}0{% } %}%;"></div>
+                    </div>
+                    <span class="size">{%=o.formatFileSize(file.size)%}</span>
+                </div>
+
+
+    <div class="col-md-4 row-file_signature">
+    {% if(file.infos_certificat && file.infos_certificat.signatureValide != null && file.infos_certificat.emetteur != null && file.infos_certificat.periodiciteValide != null) { %}
+    <div class="statut pull-left">
+        <span><img src="/consultation_depot/assets/images/picto-signature.gif?k=2026-00.05.01" alt="Signature électronique" title="Signature électronique"></span>
+        {% if(surchargeReferentiels) { %}
+        {% if(file.infos_certificat.signatureValide && file.infos_certificat.repertoiresChaineCertification != null && typeof(file.infos_certificat.repertoiresChaineCertification[0].statut) != "undefined" && file.infos_certificat.repertoiresChaineCertification[0].statut == "OK" && file.infos_certificat.periodiciteValide && file.infos_certificat.absenceRevocationCRL == 0) { %}
+        <i class="fa fa-check-circle text-success" title="Signature valide - Vérification OK"></i>
+        {% }else if(file.infos_certificat.signatureValide  == false || (file.infos_certificat.repertoiresChaineCertification != null && typeof(file.infos_certificat.repertoiresChaineCertification[0].statut) != "undefined" && file.infos_certificat.repertoiresChaineCertification[0].statut == "KO") || !file.infos_certificat.periodiciteValide || file.infos_certificat.absenceRevocationCRL == 2) { %}
+        <i class="fa fa-times-circle text-danger" title="Signature invalide ou aucune signature reconnue pour ce fichier - Vérification KO"></i>
+        {% }else{ %}
+        <i class="fa fa-times-circle text-warning" title="Fichier signé. Signature incertaine - Vérification incertaine"></i>
+        {% } %}
+        {% } else { %}
+        {% if(file.infos_certificat.signatureValide && file.infos_certificat.chaineDeCertificationValide == 0 && file.infos_certificat.periodiciteValide && file.infos_certificat.absenceRevocationCRL == 0) { %}
+        <i class="fa fa-check-circle text-success" title="Signature valide - Vérification OK"></i>
+        {% }else if(file.infos_certificat.signatureValide  == false || file.infos_certificat.chaineDeCertificationValide == 2 || !file.infos_certificat.periodiciteValide || file.infos_certificat.absenceRevocationCRL == 2) { %}
+        <i class="fa fa-times-circle text-danger" title="Signature invalide ou aucune signature reconnue pour ce fichier - Vérification KO"></i>
+        {% }else{ %}
+        <i class="fa fa-times-circle text-warning" title="Fichier signé. Signature incertaine - Vérification incertaine"></i>
+        {% } %}
+        {% } %}
+    </div>
+         <div class="name col--fixed-width pull-left p-l-1">
+             <a href="javascript:void(0)" title="Voir le détail de la signature" data-infos-signature="{%=JSON.stringify(file.infos_certificat)%}">
+                 <i class="fa fa-search-plus"></i>
+                 CN : {%=file.infos_certificat.signatairePartiel%} ( AC :  {%=file.infos_certificat.emetteur.split(",")[0]%})</a>
+         </div>
+             {% }else{ %}
+         <div class="statut">
+         </div>
+             {% } %}
+     </div>
+
+                <div class="col-md-1  row-file_actions text-right">
+                    <div class="actions center">
+                        {% if (!i) { %}
+                            <a href="#" title="Annuler le téléchargement" class="btn atx-text-warning atx-btn-icon atx-btn-circle cancel">
+                                <i class="fa fa-ban atx-text-warning"></i>
+                            </a>
+                        {% } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% } %}
+
+</script>
+<!-- The template to display files available for download -->
+
+<!--FIN PIECE AVEC BOUTON AJOUTER UN JETON DE SIGNATURE-->
+<script id="template-download-acte-engagement" type="text/x-tmpl">
+       {% var surchargeReferentiels = true; %}
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <div data-lot="lot-{%=file.lot%}" class="templ-fileupload acte-engagement template-download template-download-acte"{% if (file.fichier) { %} data-fichier="{%=file.fichier%}"{% } %}>
+        <div class="container-fluid">
+            <div class="row row-acte"{% if (file.fichier) { %} data-fichier="{%=file.fichier%}" data-is-acte="true"{% } %}>
+                <div class="list-group-item clearfix">
+                <div class="col-md-5 row-file_name"{% if (file.fichier) { %} data-fichier="{%=file.fichier%}"{% } %}>
+                    <div class="pull-left options">
+                        <span class="pull-left m-r-1"><img src="/consultation_depot/assets/images/picto-piece-typee.png?k=2026-00.05.01"
+                                           alt="Acte d'engagement"/></span>
+                        <span class="type-piece">Acte d'engagement : </span>
+                    </div>
+                    {% if (file.url) { %}
+                        <a href="{%=file.url%}" title="{%=file.name%}" class="name name-link" download="{%=file.name%}" {%=file.thumbnailUrl?"data-gallery":""%}>{%=file.name%}</a>
+                    {% } else { %}
+                        <span title="{%=file.name%}" class="name name-link">{%=file.name%}</span>
+                    {% } %}
+                    {% if (file.error) { %}
+                        <div><span class="label label-danger">Erreur</span> Veuillez relancer le chargement</div>
+                    {% } %}
+                    {% if (file.errorDoublon || file.doublon) { %}
+                        <div><span class="label label-danger">Erreur</span> Un fichier portant le même nom a déjà été déposé. Chaque fichier de l'enveloppe doit avoir un nom unique.</div>
+                    {% } %}
+                </div>
+                <div class="col-md-2 row-file_progress">
+                    <div class="progress progress-striped" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+                        <div class="progress-bar {% if (file.error || file.errorDoublon) { %}progress-bar-danger {% }else{ %} progress-bar-success {% } %}" style="width:100%;"></div>
+                    </div>
+                    <span class="size">{%=o.formatFileSize(file.size)%}</span>
+                </div>
+
+
+    <div class="col-md-4 row-file_signature">
+    {% if(file.infos_certificat && file.infos_certificat.signatureValide != null && file.infos_certificat.emetteur != null && file.infos_certificat.periodiciteValide != null) { %}
+    <div class="statut pull-left">
+        <span><img src="/consultation_depot/assets/images/picto-signature.gif?k=2026-00.05.01" alt="Signature électronique" title="Signature électronique"></span>
+        {% if(surchargeReferentiels) { %}
+        {% if(file.infos_certificat.signatureValide && file.infos_certificat.repertoiresChaineCertification != null && typeof(file.infos_certificat.repertoiresChaineCertification[0].statut) != "undefined" && file.infos_certificat.repertoiresChaineCertification[0].statut == "OK" && file.infos_certificat.periodiciteValide && file.infos_certificat.absenceRevocationCRL == 0) { %}
+        <i class="fa fa-check-circle text-success" title="Signature valide - Vérification OK"></i>
+        {% }else if(file.infos_certificat.signatureValide  == false || (file.infos_certificat.repertoiresChaineCertification != null && typeof(file.infos_certificat.repertoiresChaineCertification[0].statut) != "undefined" && file.infos_certificat.repertoiresChaineCertification[0].statut == "KO") || !file.infos_certificat.periodiciteValide || file.infos_certificat.absenceRevocationCRL == 2) { %}
+        <i class="fa fa-times-circle text-danger" title="Signature invalide ou aucune signature reconnue pour ce fichier - Vérification KO"></i>
+        {% }else{ %}
+        <i class="fa fa-times-circle text-warning" title="Fichier signé. Signature incertaine - Vérification incertaine"></i>
+        {% } %}
+        {% } else { %}
+        {% if(file.infos_certificat.signatureValide && file.infos_certificat.chaineDeCertificationValide == 0 && file.infos_certificat.periodiciteValide && file.infos_certificat.absenceRevocationCRL == 0) { %}
+        <i class="fa fa-check-circle text-success" title="Signature valide - Vérification OK"></i>
+        {% }else if(file.infos_certificat.signatureValide  == false || file.infos_certificat.chaineDeCertificationValide == 2 || !file.infos_certificat.periodiciteValide || file.infos_certificat.absenceRevocationCRL == 2) { %}
+        <i class="fa fa-times-circle text-danger" title="Signature invalide ou aucune signature reconnue pour ce fichier - Vérification KO"></i>
+        {% }else{ %}
+        <i class="fa fa-times-circle text-warning" title="Fichier signé. Signature incertaine - Vérification incertaine"></i>
+        {% } %}
+        {% } %}
+    </div>
+         <div class="name col--fixed-width pull-left p-l-1">
+             <a href="javascript:void(0)" title="Voir le détail de la signature" data-infos-signature="{%=JSON.stringify(file.infos_certificat)%}">
+                 <i class="fa fa-search-plus"></i>
+                 CN : {%=file.infos_certificat.signatairePartiel%} ( AC :  {%=file.infos_certificat.emetteur.split(",")[0]%})</a>
+         </div>
+             {% }else{ %}
+         <div class="statut">
+         </div>
+             {% } %}
+     </div>
+
+                <div class="col-md-1  row-file_actions text-right">
+                    <div class="actions center">
+                        {% if (file.deleteUrl) { %}
+                            <a href="#" title="Supprimer la pièce" class="btn btn-primary btn-sm delete" data-type-fichier="ACE" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields="{"withCredentials":true}"{% } %}>
+                                <i class="fa fa-trash-o" data-acte="true"></i>
+                            </a>
+                        {% } else { %}
+                            <a href="#" title="annuler le téléchargement" class="cancel">
+                                <i class="fa fa-ban atx-text-warning"></i>
+                            </a>
+                        {% } %}
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% } %}
+
+</script>
+<script id="template-upload-annexe-financier" type="text/x-tmpl">
+
+         {% var surchargeReferentiels = true; %}
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <div class="templ-fileupload template-upload annexe-financier">
+        <div class="container-fluid">
+            <div class="row row-afi">
+                <div class="col-md-5 row-file_name ">
+                    <div class="pull-left options">
+                        <span class="pull-left m-r-1"><img src="/consultation_depot/assets/images/picto-piece-typee.png?k=2026-00.05.01"
+                                           alt="Annexe financière (DPGF, BPU/DQE, au format .xlsx)"/></span>
+                        <span class="type-piece">Annexe financière (DPGF, BPU/DQE, au format .xlsx) : </span>
+                    </div>
+                    <span title="{%=file.name%}" class="name name-link">{%=file.name%}</span>
+                    <strong class="error text-danger"></strong>
+                    {% if (file.doublon) { %}
+                        <div class="error-area"><span class="label label-danger">Erreur</span> Un fichier portant le même nom a déjà été déposé. Chaque fichier de l'enveloppe doit avoir un nom unique.</div>
+                {% } %}
+                </div>
+                <div class="col-md-2 row-file_progress">
+                    <div class="progress progress-striped {% if (file.doublon) { %}{% }else{ %}active{% } %}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <div class="progress-bar {% if (file.error || file.errorDoublon || file.doublon) { %}progress-bar-danger {% }else{ %} progress-bar-success {% } %}"
+                        style="width:{% if (file.doublon) { %}100{% }else{ %}0{% } %}%;"></div>
+                    </div>
+                    <span class="size">{%=o.formatFileSize(file.size)%}</span>
+                </div>
+
+
+    <div class="col-md-4 row-file_signature">
+    {% if(file.infos_certificat && file.infos_certificat.signatureValide != null && file.infos_certificat.emetteur != null && file.infos_certificat.periodiciteValide != null) { %}
+    <div class="statut pull-left">
+        <span><img src="/consultation_depot/assets/images/picto-signature.gif?k=2026-00.05.01" alt="Signature électronique" title="Signature électronique"></span>
+        {% if(surchargeReferentiels) { %}
+        {% if(file.infos_certificat.signatureValide && file.infos_certificat.repertoiresChaineCertification != null && typeof(file.infos_certificat.repertoiresChaineCertification[0].statut) != "undefined" && file.infos_certificat.repertoiresChaineCertification[0].statut == "OK" && file.infos_certificat.periodiciteValide && file.infos_certificat.absenceRevocationCRL == 0) { %}
+        <i class="fa fa-check-circle text-success" title="Signature valide - Vérification OK"></i>
+        {% }else if(file.infos_certificat.signatureValide  == false || (file.infos_certificat.repertoiresChaineCertification != null && typeof(file.infos_certificat.repertoiresChaineCertification[0].statut) != "undefined" && file.infos_certificat.repertoiresChaineCertification[0].statut == "KO") || !file.infos_certificat.periodiciteValide || file.infos_certificat.absenceRevocationCRL == 2) { %}
+        <i class="fa fa-times-circle text-danger" title="Signature invalide ou aucune signature reconnue pour ce fichier - Vérification KO"></i>
+        {% }else{ %}
+        <i class="fa fa-times-circle text-warning" title="Fichier signé. Signature incertaine - Vérification incertaine"></i>
+        {% } %}
+        {% } else { %}
+        {% if(file.infos_certificat.signatureValide && file.infos_certificat.chaineDeCertificationValide == 0 && file.infos_certificat.periodiciteValide && file.infos_certificat.absenceRevocationCRL == 0) { %}
+        <i class="fa fa-check-circle text-success" title="Signature valide - Vérification OK"></i>
+        {% }else if(file.infos_certificat.signatureValide  == false || file.infos_certificat.chaineDeCertificationValide == 2 || !file.infos_certificat.periodiciteValide || file.infos_certificat.absenceRevocationCRL == 2) { %}
+        <i class="fa fa-times-circle text-danger" title="Signature invalide ou aucune signature reconnue pour ce fichier - Vérification KO"></i>
+        {% }else{ %}
+        <i class="fa fa-times-circle text-warning" title="Fichier signé. Signature incertaine - Vérification incertaine"></i>
+        {% } %}
+        {% } %}
+    </div>
+         <div class="name col--fixed-width pull-left p-l-1">
+             <a href="javascript:void(0)" title="Voir le détail de la signature" data-infos-signature="{%=JSON.stringify(file.infos_certificat)%}">
+                 <i class="fa fa-search-plus"></i>
+                 CN : {%=file.infos_certificat.signatairePartiel%} ( AC :  {%=file.infos_certificat.emetteur.split(",")[0]%})</a>
+         </div>
+             {% }else{ %}
+         <div class="statut">
+         </div>
+             {% } %}
+     </div>
+
+                <div class="col-md-1  row-file_actions text-right">
+                    <div class="actions center">
+                        {% if (!i) { %}
+                            <!-- Annuler le téléchargement -->
+                            <a href="#" title="ANNULER_TELECHARGEMENT" class="btn atx-text-warning atx-btn-icon atx-btn-circle cancel">
+                                <i class="fa fa-ban atx-text-warning"></i>
+                            </a>
+                        {% } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% } %}
+
+</script>
+
+<!--FIN PIECE AVEC BOUTON AJOUTER UN JETON DE SIGNATURE-->
+<script id="template-download-annexe-financier" type="text/x-tmpl">
+    {% var surchargeReferentiels = true; %}
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <div data-lot="lot-{%=file.lot%}" class="templ-fileupload afi-engagement template-download template-download-afi"{% if (file.fichier) { %} data-fichier="{%=file.fichier%}"{% } %}>
+        <div class="container-fluid">
+            <div class="row row-afi"{% if (file.fichier) { %} data-fichier="{%=file.fichier%}" data-is-afi="true"{% } %}>
+                <div class="list-group-item clearfix">
+                <div class="col-md-5 row-file_name"{% if (file.fichier) { %} data-fichier="{%=file.fichier%}"{% } %}>
+                    <div class="pull-left options">
+                        <span class="pull-left m-r-1"><img src="/consultation_depot/assets/images/picto-piece-typee.png?k=2026-00.05.01"
+                                           alt="Annexe financière (DPGF, BPU/DQE, au format .xlsx)"/></span>
+                        <span class="type-piece">Annexe financière (DPGF, BPU/DQE, au format .xlsx) : </span>
+                    </div>
+                    {% if (file.url) { %}
+                        <a href="{%=file.url%}" title="{%=file.name%}"
+                         class="name name-link"
+                         download="{%=file.name%}" {%=file.thumbnailUrl?"data-gallery":""%}>{%=file.name%}</a>
+                    {% } else { %}
+                        <span title="{%=file.name%}" class="name name-link">{%=file.name%}</span>
+                    {% } %}
+                    {% if (file.error) { %}
+                        <div><span class="label label-danger">Erreur</span> Veuillez relancer le chargement</div>
+                    {% } %}
+                    {% if (file.errorDoublon || file.doublon) { %}
+                        <div><span class="label label-danger">Erreur</span> Un fichier portant le même nom a déjà été déposé. Chaque fichier de l'enveloppe doit avoir un nom unique.</div>
+                    {% } %}
+                </div>
+                <div class="col-md-2 row-file_progress">
+                    <div class="progress progress-striped" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+                        <div class="progress-bar
+                        {% if (file.error || file.errorDoublon) { %}progress-bar-danger {% }else{ %} progress-bar-success {% } %}"
+                        style="width:100%;"></div>
+                    </div>
+                    <span class="size">{%=o.formatFileSize(file.size)%}</span>
+                </div>
+
+
+    <div class="col-md-4 row-file_signature">
+    {% if(file.infos_certificat && file.infos_certificat.signatureValide != null && file.infos_certificat.emetteur != null && file.infos_certificat.periodiciteValide != null) { %}
+    <div class="statut pull-left">
+        <span><img src="/consultation_depot/assets/images/picto-signature.gif?k=2026-00.05.01" alt="Signature électronique" title="Signature électronique"></span>
+        {% if(surchargeReferentiels) { %}
+        {% if(file.infos_certificat.signatureValide && file.infos_certificat.repertoiresChaineCertification != null && typeof(file.infos_certificat.repertoiresChaineCertification[0].statut) != "undefined" && file.infos_certificat.repertoiresChaineCertification[0].statut == "OK" && file.infos_certificat.periodiciteValide && file.infos_certificat.absenceRevocationCRL == 0) { %}
+        <i class="fa fa-check-circle text-success" title="Signature valide - Vérification OK"></i>
+        {% }else if(file.infos_certificat.signatureValide  == false || (file.infos_certificat.repertoiresChaineCertification != null && typeof(file.infos_certificat.repertoiresChaineCertification[0].statut) != "undefined" && file.infos_certificat.repertoiresChaineCertification[0].statut == "KO") || !file.infos_certificat.periodiciteValide || file.infos_certificat.absenceRevocationCRL == 2) { %}
+        <i class="fa fa-times-circle text-danger" title="Signature invalide ou aucune signature reconnue pour ce fichier - Vérification KO"></i>
+        {% }else{ %}
+        <i class="fa fa-times-circle text-warning" title="Fichier signé. Signature incertaine - Vérification incertaine"></i>
+        {% } %}
+        {% } else { %}
+        {% if(file.infos_certificat.signatureValide && file.infos_certificat.chaineDeCertificationValide == 0 && file.infos_certificat.periodiciteValide && file.infos_certificat.absenceRevocationCRL == 0) { %}
+        <i class="fa fa-check-circle text-success" title="Signature valide - Vérification OK"></i>
+        {% }else if(file.infos_certificat.signatureValide  == false || file.infos_certificat.chaineDeCertificationValide == 2 || !file.infos_certificat.periodiciteValide || file.infos_certificat.absenceRevocationCRL == 2) { %}
+        <i class="fa fa-times-circle text-danger" title="Signature invalide ou aucune signature reconnue pour ce fichier - Vérification KO"></i>
+        {% }else{ %}
+        <i class="fa fa-times-circle text-warning" title="Fichier signé. Signature incertaine - Vérification incertaine"></i>
+        {% } %}
+        {% } %}
+    </div>
+         <div class="name col--fixed-width pull-left p-l-1">
+             <a href="javascript:void(0)" title="Voir le détail de la signature" data-infos-signature="{%=JSON.stringify(file.infos_certificat)%}">
+                 <i class="fa fa-search-plus"></i>
+                 CN : {%=file.infos_certificat.signatairePartiel%} ( AC :  {%=file.infos_certificat.emetteur.split(",")[0]%})</a>
+         </div>
+             {% }else{ %}
+         <div class="statut">
+         </div>
+             {% } %}
+     </div>
+
+                <div class="col-md-1  row-file_actions text-right">
+                    <div class="actions center">
+                        {% if (file.deleteUrl) { %}
+                            <a href="#" title="Supprimer la pièce"
+                             class="btn btn-primary btn-sm delete"
+                             data-type-fichier="AFI"
+                             data-type="{%=file.deleteType%}"
+                             data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields="{"withCredentials":true}"{% } %}>
+                                <i class="fa fa-trash-o" data-afi="true"></i>
+                            </a>
+                        {% } else { %}
+                            <a href="#" title="ANNULER_TELECHARGEMENT" class="cancel">
+                                <i class="fa fa-ban atx-text-warning"></i>
+                            </a>
+                        {% } %}
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% } %}
+
+</script>
+    <script id="template-upload-jeton" type="text/x-tmpl">
+
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <div class="templ-fileupload jeton template-upload-jeton template-upload">
+        <div class="row row-piece">
+            <div class="col-md-5 row-file_name">
+                <div class="name col--fixed-width-long">
+                <div class="pull-left options">
+                    <span class="type-piece m-r-1">Jeton : </span>
+                </div>
+                <span title="{%=file.name%}" class="name name-link">{%=file.name%}</span>
+                <br/>
+                <strong class="error text-danger"></strong>
+              </div>
+                 {% if (file.doublon) { %}
+                        <div class="error-area" attr-error="1"><span class="label label-danger">Erreur</span> Un fichier portant le même nom a déjà été déposé. Chaque fichier de l'enveloppe doit avoir un nom unique.</div>
+                 {% } %}
+                 {% if (file.tailleDepasse) { %}
+                        <div class="error-area" attr-error="0"><span class="label label-danger">Erreur</span> Le poids du fichier déposé est supérieur à celui autorisé sur la plateforme (1Go). </div>
+                 {% } %}
+            </div>
+            <div class="col-md-2 row-file_progress">
+                <div class="progress progress-striped {% if (file.doublon || file.maxFileSizeSize || file.tailleDepasse) { %}{% }else{ %}active{% } %}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div class="progress-bar {% if (file.error|| file.errorDoublon || file.doublon || file.tailleDepasse) { %}progress-bar-danger {% }else{ %} progress-bar-success {% } %}" style="width:{% if (file.doublon || file.maxFileSizeSize || file.tailleDepasse) { %}100{% }else{ %}0{% } %}%;"></div>
+                </div>
+                <span class="size">{%=o.formatFileSize(file.size)%}</span>
+            </div>
+            <div class="col-md-4 row-file_signature">
+                <div class="statut pull-left m-r-1">
+                    <i  class="fa fa-ban " title="En attente de réception du jeton"></i>
+                </div>
+                <div class="name col--fixed-width">
+                    <span class="atx-text-default">En attente de réception du jeton</span>
+                </div>
+            </div>
+            <div class="col-md-1  row-file_actions text-right">
+                <div class="actions center">
+
+                {% if (!i && !o.options.autoUpload) { %}
+                <a href="#" title="Démarrer" class="btn btn-primary start start-sending-token hidden">
+                    <i class="glyphicon glyphicon-upload"></i>
+                </a>
+                {% } %}
+                {% if (!i) { %}
+                <a href="#" title="Annuler le téléchargement" class="btn atx-text-warning atx-btn-icon atx-btn-circle cancel">
+                    <i class="fa fa-ban atx-text-warning"></i>
+                </a>
+                {% } %}
+            </div>
+        </div>
+    </div>
+</div>
+{% } %}
+
+</script>
+
+    <script id="template-download-jeton" type="text/x-tmpl">
+          {% var surchargeReferentiels = true; %}
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+<div data-lot="lot-{%=file.lot%}" class="templ-fileupload jeton template-download template-download-jeton"{% if (file.fichier_source) { %} data-fichier="{%=file.fichier%}"{% } %}>
+ <div class="row"{% if (file.fichier_source) { %} data-fichier="{%=file.fichier%}" data-is-jeton="true"{% } %}>
+    <div class="list-group-item clearfix">
+        <div class="col-md-5 row-file_name"{% if (file.fichier) { %} data-fichier="{%=file.fichier%}"{% } %}>
+            <div class="name col--fixed-width-long">
+                <div class="pull-left options">
+                    <span class="type-piece">Jeton : </span>
+                </div>
+
+                {% if (file.url) { %}
+                <a href="{%=file.url%}" title="{%=file.name%}" class="name name-link" download="{%=file.name%}" {%=file.thumbnailUrl?"data-gallery":""%}>{%=file.name%}</a>
+                {% } else { %}
+                <span title="{%=file.name%}" class="name name-link">{%=file.name%}</span>
+            {% } %}
+            {% if (file.error) { %}
+               <div><span class="label label-danger">Erreur</span> Veuillez relancer le chargement</div>
+            {% } %}
+     {% if (file.errorDoublon|| file.doublon ) { %}
+                <div><span class="label label-danger">Erreur</span> Un fichier portant le même nom a déjà été déposé. Chaque fichier de l'enveloppe doit avoir un nom unique.</div>
+            {% } %}
+            {% if (file.tailleDepasse) { %}
+                <div><span class="label label-danger">Erreur</span> Le poids du fichier déposé est supérieur à celui autorisé sur la plateforme (1Go). </div>
+            {% } %}</div>
+     </div>
+        <div class="col-md-2 row-file_progress">
+        <div class="progress progress-striped" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+            <div class="progress-bar {% if (file.error|| file.errorDoublon || file.tailleDepasse) { %}progress-bar-danger {% }else{ %} progress-bar-success {% } %}" style="width:100%;"></div>
+        </div>
+        <span class="size">{%=o.formatFileSize(file.size)%}</span>
+    </div>
+     <div class="col-md-4 row-file_signature">
+         {% if(file.infos_certificat && file.infos_certificat.signatureValide != null && file.infos_certificat.emetteur != null && file.infos_certificat.periodiciteValide != null) { %}
+         <div class="statut pull-left m-r-1">
+             <span><img src="/consultation_depot/assets/images/picto-signature.gif?k=2026-00.05.01" alt="Signature électronique" title="Signature électronique"></span>
+             {% if(surchargeReferentiels) { %}
+                 {% if(file.infos_certificat.signatureValide && file.infos_certificat.repertoiresChaineCertification != null && typeof(file.infos_certificat.repertoiresChaineCertification[0].statut) != "undefined" && file.infos_certificat.repertoiresChaineCertification[0].statut == "OK" && file.infos_certificat.periodiciteValide && file.infos_certificat.absenceRevocationCRL == 0) { %}
+                 <i class="fa fa-check-circle text-success" data-tnr="succesSignature" title="Signature valide - Vérification OK"></i>
+                 {% }else if(file.infos_certificat.signatureValide  == false || (file.infos_certificat.repertoiresChaineCertification != null && typeof(file.infos_certificat.repertoiresChaineCertification[0].statut) != "undefined" && file.infos_certificat.repertoiresChaineCertification[0].statut == "KO") || !file.infos_certificat.periodiciteValide || file.infos_certificat.absenceRevocationCRL == 2) { %}
+                 <i class="fa fa-times-circle text-danger" title="Signature invalide ou aucune signature reconnue pour ce fichier - Vérification KO"></i>
+                 {% }else{ %}
+                 <i class="fa fa-times-circle text-warning" title="Fichier signé. Signature incertaine - Vérification incertaine"></i>
+                 {% } %}
+             {% } else { %}
+                 {% if(file.infos_certificat.signatureValide && file.infos_certificat.chaineDeCertificationValide == 0 && file.infos_certificat.periodiciteValide && file.infos_certificat.absenceRevocationCRL == 0) { %}
+                 <i class="fa fa-check-circle text-success" title="Signature valide - Vérification OK"></i>
+                 {% }else if(file.infos_certificat.signatureValide  == false || file.infos_certificat.chaineDeCertificationValide == 2 || !file.infos_certificat.periodiciteValide || file.infos_certificat.absenceRevocationCRL == 2) { %}
+                 <i class="fa fa-times-circle text-danger" title="Signature invalide ou aucune signature reconnue pour ce fichier - Vérification KO"></i>
+                 {% }else{ %}
+                 <i class="fa fa-times-circle text-warning" title="Fichier signé. Signature incertaine - Vérification incertaine"></i>
+                 {% } %}
+             {% } %}
+         </div>
+         <div class="name col--fixed-width">
+             <a href="javascript:void(0)" title="Voir le détail de la signature" data-infos-signature="{%=JSON.stringify(file.infos_certificat)%}">
+                 <i class="fa fa-search-plus"></i>
+                 CN : {%=file.infos_certificat.signatairePartiel%} ( AC :  {%=file.infos_certificat.emetteur.split(",")[0]%})</a>
+         </div>
+             {% }else{ %}
+         <div class="statut pull-left m-r-1">
+             <span><img src="/consultation_depot/assets/images/picto-aucune-signature.gif?k=2026-00.05.01" alt="Aucun jeton associé" title="Aucun jeton associé"></span>
+             <i class="fa fa-ban " title="Aucune signature identifiée"></i>
+         </div>
+         <div class="name">
+             <span class="atx-text-default">Validité de la signature non vérifiable</span>
+         </div>
+             {% } %}
+     </div>
+     <div class="col-md-1  row-file_actions text-right">
+        <div class="actions center">
+            {% if (file.deleteUrl) { %}
+                <a href="#"
+                    title="Supprimer la pièce"
+                    class="btn btn-primary btn-sm delete"
+                    data-type-fichier="SIG"
+                    id="{%=file.id_blob%}"
+                    data-type="{%=file.deleteType%}"
+                    data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %}
+                    data-xhr-fields="{"withCredentials":true}"{% } %}
+                    >
+                    <i class="fa fa-trash-o"></i>
+                </a>
+                {% } else {  %}
+                <a href="#" title="Annuler le téléchargement" class="btn text-warning atx-btn-icon atx-btn-circle cancel">
+                    <i class="fa fa-ban text-warning"></i>
+                </a>
+                {% } %}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+{% } %}
+
+</script>
+<script id="template-popin-details-signature" type="text/x-tmpl">
+
+<!--Debut Message-->
+{%
+    var $resNok = 0;
+    var $resUnkown = 0;
+
+    %}
+            {%
+                if(o.repertoiresChaineCertification != null && typeof(o.repertoiresChaineCertification[0].statut) != "undefined" && o.repertoiresChaineCertification[0].statut == "KO") {
+                   $resNok = 1;
+                } else if((o.repertoiresChaineCertification == null) || (o.repertoiresChaineCertification != null && typeof(o.repertoiresChaineCertification[0].statut) != "undefined" && o.repertoiresChaineCertification[0].statut != "OK")) {
+                   $resUnkown = 1;
+                }
+            %}
+             {%
+    if(o.absenceRevocationCRL == 2) {
+        $resNok = 1;
+    } else if(o.absenceRevocationCRL != 0) {
+        $resUnkown = 1;
+    }
+    if(o.signatureValide == false) {
+        $resNok = 1;
+    } else if(o.signatureValide != true) {
+        $resUnkown = 1;
+    }
+    if(!o.periodiciteValide) {
+        $resNok = 1;
+    }
+
+    if($resNok == 1) {
+        var statut = 1;
+    } else if($resUnkown == 1) {
+        var statut = 2;
+    } else {
+        var statut = 3;
+    }
+%}
+
+<div id="divMsgPopin" class="bloc-message form-bloc-conf {% if($resNok == 1) { %}msg-erreur{% } else if($resUnkown == 1) { %}msg-avertissement{% } else { %}msg-confirmation{% } %}">
+    <div class="content">
+        <div class="message bloc-700">
+            <!--Debut Message-->
+            <span>
+                {%
+                    if(statut == 3) { %}
+                    <div class="alert alert-success">
+                    <i class="fa fa-check-circle m-r-1"></i>
+                    Tous les contrôles de validité de cette signature ont été passés avec succès.</div>
+                    {% } else { %}
+
+            {% if(o.repertoiresChaineCertification != null && typeof(o.repertoiresChaineCertification[0].statut) != "undefined" && o.repertoiresChaineCertification[0].statut == "KO") { %}
+                <p>Le référentiel de ce certificat n'est pas conforme à la législation en vigueur et au référentiel général de sécurité (RGS).</p>
+            {% } else if((o.repertoiresChaineCertification == null) || (o.repertoiresChaineCertification != null && typeof(o.repertoiresChaineCertification[0].statut) != "undefined" && o.repertoiresChaineCertification[0].statut != "OK")) { %}
+                <p>L'autorité de certification ayant délivré le certificat du signataire n'est pas référencée sur cette plateforme. Dans un tel cas, le soumissionnaire doit fournir au pouvoir adjudicateur les éléments permettant d'attester de la conformité du certificat avec le référentiel général de sécurité (RGS).</p>
+            {% } %}
+                    {%    if(o.absenceRevocationCRL == 2) { %}
+                    <p>Cette signature est invalide car le certificat du signataire apparaît comme révoqué par l'autorité de certification l'ayant délivré.</p>
+                    {% } else if(o.absenceRevocationCRL != 0) { %}
+                    <p>Liste de non-révocation de l'autorité de certification indisponible au moment du contrôle rendant la vérification de la non-révocation du certificat impossible.Veuillez recontrôler la validité de la signature ultérieurement (via l'outil de signature).</p>
+                    {% }
+                        if(o.signatureValide == false) { %}
+                    <div class="alert alert-danger"><i class="fa fa-times-circle m-r-1"></i>Le fichier de signature ne correspond pas au fichier signé ou n'est pas intègre.</div>
+                    {% } else if(o.signatureValide != true) { %}
+                    <p>Les fichiers déchiffrés ne sont pas disponibles sur la plateforme, par conséquent, le contrôle de l'intégrité du fichier signé est impossible. Si le pli a été ouvert hors ligne ou à distance, l'outil 'Vérifier la signature' permet de contrôler la non-répudiation. L'utilisation de la fonction 'Importer les fichiers' permet également de contrôler la non-répudiation.</p>
+                    {% }
+                        if(!o.periodiciteValide) { %}
+                    <p>Cette signature est invalide car la date de validité du certificat du signataire est expirée.</p>
+                    {% }
+                    }
+                %}
+            </span>
+            <!--Fin Message-->
+        </div>
+    </div>
+</div>
+
+<!--Fin Message-->
+<div class="bloc" {% if (o.isSignaturePADES){ %}style="display:none" {% } %}>
+    <p>
+        <strong>Jeton de signature :</strong>
+        <span id="pathFileJeton">{%=o.name%}</span>
+</div>
+<div class="bloc">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="title">Certificat du signataire
+                <i class="fa fa-question-circle m-l-1 text-info" data-toggle="tooltip" title="Les informations présentées dans ce bloc sont les informations présentées en lecture directe du certificat électronique utilisé lors de la signature du document."></i>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Certificat émis à :</strong><br/>
+                    <span id="detailSignataire">
+                        {% var $signataireComplet = o.signataireDetails; %}
+                        {%  if($signataireComplet.alternativeName) { %}
+                            {%=$signataireComplet.alternativeName%}</br>
+                        {% } %}
+                        CN={%=$signataireComplet.cn%}</br>
+                        {%
+                            if ($signataireComplet.ou) {
+                                var $ou = $signataireComplet.ou.split(",");
+                                for (var i=0; i<$ou.length; i++)
+                                {
+                        %}
+                                    OU={%=$ou[i]%}</br>
+                        {%
+                                }
+                            }
+                        %}
+                        O={%=$signataireComplet.o%}</br>
+                        C={%=$signataireComplet.c%}</br>
+                    </span>
+                </div>
+                <div class="col-md-6">
+                    <strong>Certificat émis par :</strong><br/>
+                    <span id="detailEmisPar">
+                        {% var $emetteur = o.emetteur.split(",");
+                        for (var i=0; i<$emetteur.length; i++) { %}
+                        {%=$emetteur[i]%}</br>
+                        {% } %}
+                    </span>
+                </div>
+            </div>
+            <div class="row">
+            <div class="col-md-12">
+                <strong>Date de validité
+                    <com:TLabel id="dateControlevaliditeCr"/>
+                    :</strong><br/>
+                Du : <span id="date_Du">{% $dateValiditeDu = new Date(o.dateValiditeDu); print(formatIsoDate($dateValiditeDu)); %}</span><br/>
+                Au : <span id="date_Au">{% $dateValiditeAu = new Date(o.dateValiditeAu); print(formatIsoDate($dateValiditeAu)); %}</span><br/>
+            </div></div>
+        </div>
+    </div>
+</div>
+<div class="bloc row">
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="title">
+                    Contrôles de validité du certificat
+                    <i class="fa fa-question-circle m-l-1 text-info" data-toggle="tooltip" title="Les contrôles suivants sont relatifs à la validité d'un certificat au moment de son contrôle. Pour être valide, un certificat ne doit pas être expiré, révoqué, et doit être délivré par une autorité de certification reconnue et appartenant au référentiel général de sécurité (RGS). Les listes de confiance européennes (TSL) sont consultées pour établir ces contrôles."></i>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="clearfix">
+
+                    Contrôles réalisés le : {% $dateControle = new Date(); var $dateControleIso = addZero($dateControle.getDate()) + "/" + addZero($dateControle.getMonth()+1) + "/" +
+                    $dateControle.getFullYear() + " " + addZero($dateControle.getHours()) + ":" + addZero($dateControle.getMinutes()) + ":" + addZero($dateControle.getSeconds());print($dateControleIso); %}<br/>
+                    Période de validité : {% if(o.periodiciteValide) { %}<img src="/consultation_depot/assets/images/picto-check-ok-small.gif?k=2026-00.05.01"
+                                                                                           alt="Vérification OK" id="periodeValidite" title="Vérification OK"/> {% } else
+                    { %}<img src="/consultation_depot/assets/images/picto-check-not-ok.gif?k=2026-00.05.01" alt="Vérification non OK" id="periodeValidite"
+                             title="Vérification non OK"/>{% } %}<br/>
+                    Chaîne de certification :
+            {% if(o.repertoiresChaineCertification != null && typeof(o.repertoiresChaineCertification[0].statut) != "undefined" && o.repertoiresChaineCertification[0].statut == "OK") { %}
+                <img src="/consultation_depot/assets/images/picto-check-ok-small.gif?k=2026-00.05.01" alt="Vérification OK" id="chaine" title="Vérification OK"/>
+            {% } else if(o.repertoiresChaineCertification != null && typeof(o.repertoiresChaineCertification[0].statut) != "undefined" && o.repertoiresChaineCertification[0].statut == "KO") { %}
+                <img src="/consultation_depot/assets/images/picto-check-not-ok.gif?k=2026-00.05.01" alt="Vérification non OK" id="chaine" title="Vérification non OK"/>
+            {% } else { %}
+                <img src="/consultation_depot/assets/images/picto-validation-incertaine.gif?k=2026-00.05.01" alt="Vérification incertaine" id="chaine" title="Vérification incertaine"/>
+            {% } %}<br/>
+                    <div class="indent-arrow">Référentiel du certificat :   <span class="" >{% if(o.repertoiresChaineCertification != null && typeof(o.repertoiresChaineCertification[0].nom) != "undefined") { %}{%= o.repertoiresChaineCertification[0].nom  %}{% } else { %}Certificat inconnu{% } %}</span></div>
+                    Non révocation : {% if(o.absenceRevocationCRL == 0) { %}<img src="/consultation_depot/assets/images/picto-check-ok-small.gif?k=2026-00.05.01"
+                                                                                                        alt="Vérification OK" id="CRL" title="Vérification OK"/> {% } else
+                    { %}<img src="/consultation_depot/assets/images/picto-check-not-ok.gif?k=2026-00.05.01" alt="Vérification non OK" id="CRL"
+                             title="Vérification non OK"/>{% } %}<br/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="title">
+                    Contrôles de l'intégrité du fichier signé
+                    <i class="fa fa-question-circle m-l-1 text-info" data-toggle="tooltip" title="Ce contrôle compare le fichier signé aux informations contenues dans la signature qui l'accompagne. Il assure ainsi la conformité et l'intégrité de cette dernière."></i>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="clearfix">
+                    Contrôles réalisés le : {% print($dateControleIso); %}<br/>
+                    Non répudiation {% if(o.signatureValide) { %}<img src="/consultation_depot/assets/images/picto-check-ok-small.gif?k=2026-00.05.01"
+                                                                                             alt="Vérification OK" id="periodeValidite" title="Vérification OK"/> {% }
+                    else { %}<img src="/consultation_depot/assets/images/picto-check-not-ok.gif?k=2026-00.05.01" alt="Vérification non OK" id="periodeValidite"
+                                  title="Vérification non OK"/>{% } %} <br/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</script>
+
+<script id="template-popin-confirmation-depot-reponse-electronique" type="text/x-tmpl">
+
+        <!--Debut bloc detail-->
+        <div class="bloc-detail">
+            <div class="alert alert-warning">
+                <div class="content">
+                    <div class="message bloc-700">
+                        <!--Debut Message-->
+                        <div class="max-height-overflow max-height-400">
+                        <div id="ctl0_CONTENU_PAGE_panelMessagePbSignature">
+
+                            {% if (typeof o.infoSignature != "undefined") { %}
+                                {% if (o.signatureOffre == "1") { %}
+                                <p>ATTENTION : Au moins un problème de signature a été détecté au niveau des pièces constituant votre réponse.</p>
+                                {% } else { %}
+                                    <p>INFORMATION : la signature électronique est autorisée mais non requise pour cette consultation.</p>
+                                {% } %}
+                                <div class="spacer-small"></div>
+                                {% if (typeof o.infoSignature.infoSignatureInvalide != "undefined" && o.infoSignature.infoSignatureInvalide.length > 0) { %}
+                                    {% if (o.signatureOffre == "2") { %}
+                                    <p><strong>ATTENTION : Le ou les fichiers suivants sont accompagnés de signatures invalides :</strong></p>
+                                    {% } else { %}
+                                        <p><strong>INFORMATION : Le ou les fichiers suivants sont accompagnés de signatures invalides :</strong></p>
+                                    {% } %}
+                                    <div class="spacer-mini"></div>
+                                    <ul>
+                                        {% for (var i=0; i<o.infoSignature.infoSignatureInvalide.length; i++) { %}
+                                            <li>{%=o.infoSignature.infoSignatureInvalide[i]%}</li>
+                                        {% } %}
+                                    </ul>
+                                {% } %}
+                                {% if (typeof o.infoSignature.infoSignatureUnknown != "undefined" && o.infoSignature.infoSignatureUnknown.length > 0) { %}
+                                    {% if (o.signatureOffre == "1") { %}
+                                    <p><strong>ATTENTION : Le ou les fichiers suivants sont accompagnés de signatures dont la validité est incertaine :</strong></p>
+                                    {% } else { %}
+                                        <p><strong>INFORMATION : Le ou les fichiers suivants sont accompagnés de signatures dont la validité est incertaine :</strong></p>
+                                    {% } %}
+                                    <div class="spacer-mini"></div>
+                                    <ul>
+                                        {% for (var i=0; i<o.infoSignature.infoSignatureUnknown.length; i++) { %}
+                                            <li>{%=o.infoSignature.infoSignatureUnknown[i]%}</li>
+                                        {% } %}
+                                    </ul>
+                                {% } %}
+                                {% if (typeof o.infoSignature.infoSignatureNonVerifiable != "undefined" && o.infoSignature.infoSignatureNonVerifiable.length > 0) { %}
+                                    {% if (o.signatureOffre == "1") { %}
+                                    <p><strong>ATTENTION : Le ou les fichiers suivants sont accompagnés de signatures non vérifiables :</strong></p>
+                                    {% } else { %}
+                                        <p><strong>INFORMATION : Le ou les fichiers suivants sont accompagnés de signatures non vérifiables :</strong></p>
+                                    {% } %}
+                                    <div class="spacer-mini"></div>
+                                    <ul>
+                                        {% for (var i=0; i<o.infoSignature.infoSignatureNonVerifiable.length; i++) { %}
+                                            <li>{%=o.infoSignature.infoSignatureNonVerifiable[i]%}</li>
+                                        {% } %}
+                                    </ul>
+                                {% } %}
+                                {% if (typeof o.infoSignature.infoSignatureVide != "undefined" && o.infoSignature.infoSignatureVide.length > 0) { %}
+                                    {% if (o.signatureOffre == "1") { %}
+                                    <p><strong>ATTENTION : Le ou les fichiers suivants ne sont pas signés :</strong></p>
+                                    {% } else { %}
+                                        <p><strong>INFORMATION : Le ou les fichiers suivants ne sont pas signés :</strong></p>
+                                    {% } %}
+                                    <div class="spacer-mini"></div>
+                                    <ul>
+                                        {% for (var i=0; i<o.infoSignature.infoSignatureVide.length; i++) { %}
+                                            <li>{%=o.infoSignature.infoSignatureVide[i]%}</li>
+                                        {% } %}
+                                    </ul>
+                                {% } %}
+                            {% } %}
+
+                            {% if (typeof o.emptyFile != "undefined" && o.emptyFile.length > 0) { %}
+                                <p>ATTENTION : ATTENTION : Le ou les fichiers suivants sont vides (0 Ko) :</p>
+                                <div class="spacer-small"></div>
+                                <ul>
+                                    {% for (var i=0; i<o.emptyFile.length; i++) { %}
+                                        <li>{%=o.emptyFile[i]%}</li>
+                                    {% } %}
+
+                                </ul>
+                            {% } %}
+
+                        </div>
+                    </div>
+                    <!--Fin Message-->
+                </div>
+            </div>
+        </div>
+        <!--Fin bloc detail-->
+</script>
+
+<script type="text/javascript">
+    J(document).ready(function () {
+        J('[data-toggle="tooltip"]').tooltip();
+    });
+    //use for page : consultation-phase-tab.html.twig
+    var lotsNumParam = "";
+    var journeeDeLAnnee = 3600
+    var time = 1794565650000
+    var jetonForm = null;
+    //dateBandeau(,);
+        jetonForm = '<div class="templ-fileupload template-upload template-container-upload-jeton">' +
+        '<div class="container-fluid">' +
+        '<div class="row row-jeton">' +
+        '<div class="col-md-12">'+
+        '<div class="fileupload-table table table-striped"><div role="presentation"></div></div>' +
+        '<div class="fileupload-buttonbar">' +
+        '<form action="#" method="POST" enctype="multipart/form-data" class="form-jeton-upload"'+
+        'data-upload-template-id="template-upload-jeton"' +
+        'data-download-template-id="template-download-jeton"' +
+        'data-drop-zone="null"' +
+        'data-url="/entreprise/consultation/depotUpload/242752/upload"' +
+        'data-type="SIG" '+
+        '>'+
+        '<input type="hidden" name="type_enveloppe" value="0"/>' +
+        '<input type="hidden" name="files_collections" value=""/> ' +
+        '<input type="hidden" name="info_index_enveloppe" value=""/>' +
+        '<input type="hidden" name="enveloppe" value="0"/>' +
+        '<input type="hidden" name="offre_id" value="0"/>' +
+        '<input type="hidden"  name="type_fichier" value="f03bf0a406949e2e52b355042e7b255b69c4360f"/>' +
+        '<input type="hidden"  name="fichier" value="0"/>' +
+        '<input type="hidden" name="uid_response" value="311ce4b427334944c87befb545b7b5ff-d48db762-df4c-11f1-a53e-00505685859d-6af6e6122b0657.71003229"/>'+
+        '<input type="hidden" name="pere_deleted" value="0"/>'+
+        '<div class="row">' +
+        '<div class="col-md-5">' +
+        '<span class="btn btn-primary btn-xs fileinput-button pull-right">' +
+        '<i class="fa fa-tag" style="margin-right:3px"><i class="fa fa-plus"></i></i>' +
+        '<span>Ajouter le jeton de signature</span>' +
+        '<input class="fileupload" type="file" name="file_jeton_lot" />' +
+        '</span>' +
+        '</div>' +
+        '</div>'+
+        '</form>' +
+        '</div>' +
+        '</div>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+    </script>
+<!-- The Templates plugin is included to render the upload/download listings -->
+<script type="text/javascript" src="/consultation_depot/assets/js/tmpl.js?k=2026-00.05.01"></script>
+<!-- The Load Image plugin is included for the preview images and image resizing functionality -->
+<script type="text/javascript" src="/consultation_depot/assets/js/load-image.all.min.js?k=2026-00.05.01"></script>
+<!-- The File Upload processing plugin -->
+<script type="text/javascript" src="/consultation_depot/assets/modules/jquery-file-upload/js/jquery.fileupload-process.js?k=2026-00.05.01"></script>
+<!-- The File Upload validation plugin -->
+<script type="text/javascript" src="/consultation_depot/assets/modules/jquery-file-upload/js/jquery.fileupload-validate.js?k=2026-00.05.01"></script>
+<!-- The File Upload user interface plugin -->
+<script type="text/javascript" src="/consultation_depot/assets/modules/jquery-file-upload/js/jquery.fileupload-ui.js?k=2026-00.05.01"></script>
+<!-- The main application script -->
+<script type="text/javascript" src="/consultation_depot/assets/js/atexo.events.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/consultation_depot/assets/js/atexo.jquery.upload.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/consultation_depot/assets/js/atexo.jquery.upload.jeton.js?k=2026-00.05.01"></script>
+<!-- The XDomainRequest Transport is included for cross-domain file deletion for IE 8 and IE 9 -->
+<!--[if (gte IE 8)&(lt IE 10)]>
+    <script type="text/javascript" src="/consultation_depot/assets/modules/jquery-file-upload/js/cors/jquery.xdr-transport.js?k=2026-00.05.01"></script>
+    <![endif]-->
+<!-- Chosen Module -->
+<script type="text/javascript" src="/consultation_depot/assets/js/atexo.scripts.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/consultation_depot/assets/js/atx-bloc-highlighted-popup.js?k=2026-00.05.01"></script>
+<script type="text/javascript" src="/consultation_depot/assets/js/modal-code-dce-access.js?k=2026-00.05.01"></script>
+
+
+    </body>
+</html>
