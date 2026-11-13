@@ -71,7 +71,20 @@ _TELECHARGEMENT_COMPLET = "ctl0$CONTENU_PAGE$EntrepriseDownloadDce$completeDownl
 
 
 class RechercheIncomplete(RuntimeError):
-    """La recherche n'a pas pu lire toutes les consultations annoncées."""
+    """La recherche n'a pas pu lire toutes les consultations annoncées.
+
+    `consultations` : celles lues avant l'arrêt ; `annoncees` : le compteur du site
+    (None s'il n'a pas été lu)."""
+
+    def __init__(
+        self,
+        message: str,
+        consultations: list[ConsultationListe] | None = None,
+        annoncees: int | None = None,
+    ):
+        super().__init__(message)
+        self.consultations = consultations or []
+        self.annoncees = annoncees
 
 
 class DceIndisponible(RuntimeError):
@@ -158,14 +171,21 @@ class ClientAtexo:
 
     def rechercher(self) -> list[ConsultationListe]:
         """Toutes les consultations en cours, dédupliquées sur refCons."""
+        consultations: dict[str, ConsultationListe] = {}
+        annoncees: list[int] = []
         try:
-            return self._rechercher()
+            return self._rechercher(consultations, annoncees)
         except (httpx.HTTPError, ValueError) as exc:
             raise RechercheIncomplete(
-                f"Recherche interrompue sur {self.url_base} : {exc}"
+                f"Recherche interrompue sur {self.url_base} : {exc}",
+                list(consultations.values()),
+                annoncees[0] if annoncees else None,
             ) from exc
 
-    def _rechercher(self) -> list[ConsultationListe]:
+    def _rechercher(
+        self, consultations: dict[str, ConsultationListe], annoncees: list[int]
+    ) -> list[ConsultationListe]:
+        """Remplit `consultations` au fil des pages et `annoncees` du compteur du site."""
         url = f"{self.url_base}/?page=Entreprise.EntrepriseAdvancedSearch&searchAnnCons"
         html = self._requete("GET", url).text
         html = self._postback(
@@ -180,6 +200,7 @@ class ClientAtexo:
             },
         )
         total = nombre_resultats(html)
+        annoncees.append(total)
         if total == 0:
             return []
 
@@ -189,7 +210,6 @@ class ClientAtexo:
             f"{_RESULTATS}listePageSizeTop",
             **{f"{_RESULTATS}listePageSizeTop": str(RESULTATS_PAR_PAGE)},
         )
-        consultations: dict[str, ConsultationListe] = {}
         page = 1
         while True:
             lues = parse_resultats(html)
@@ -208,9 +228,14 @@ class ClientAtexo:
         if len(consultations) != total:
             raise RechercheIncomplete(
                 f"{len(consultations)} consultations distinctes lues sur {total} "
-                f"annoncées ({self.url_base})"
+                f"annoncées ({self.url_base})",
+                list(consultations.values()),
+                total,
             )
         return list(consultations.values())
+
+    def close(self) -> None:
+        self.http.close()
 
     def detail(self, ref_cons: str, org_cons: str) -> DetailConsultation:
         url = (

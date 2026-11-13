@@ -138,3 +138,9 @@ def test_scraper_avec_autre_source_dataset_non_publie(env):
         flow_module.scrap_closed()
     assert publication.publies == []
     assert appels == [None]
+
+
+def test_scrapers_atexo_enregistres():
+    from src.tasks.scrap.deao.contrat import SCRAPERS
+
+    assert {"megalis_bretagne", "maximilien"} <= set(SCRAPERS)

@@ -5,9 +5,14 @@ from datetime import date
 
 import polars as pl
 
+from src.tasks.scrap.deao.atexo.scraper import scraper_atexo
+
 # Un scraper reçoit la date du run et renvoie les lignes au schéma
 # `published_schema()`, avec `sourceDataset` = code de la source du registre.
 Scraper = Callable[[date], pl.DataFrame]
 
-# Vide en v1 : un futur scraper s'y ajoute par son `code` de registre.
-SCRAPERS: dict[str, Scraper] = {}
+# Un scraper s'y ajoute par son `code` de registre. Construction paresseuse : aucun
+# accès au registre, au réseau ni à S3 à l'import.
+SCRAPERS: dict[str, Scraper] = {
+    code: scraper_atexo(code) for code in ("megalis_bretagne", "maximilien")
+}

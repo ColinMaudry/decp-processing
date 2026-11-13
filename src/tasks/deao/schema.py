@@ -105,6 +105,16 @@ def published_schema() -> dict[str, pl.DataType]:
     return dict(_PUBLISHED_DTYPES)
 
 
+def selection_publiee(df: pl.DataFrame) -> pl.DataFrame:
+    """Colonnes du schéma publié, dans son ordre et à ses types (null si absentes)."""
+    return df.select(
+        pl.col(f.name).cast(f.dtype)
+        if f.name in df.columns
+        else pl.lit(None, dtype=f.dtype).alias(f.name)
+        for f in PUBLISHED_FIELDS
+    )
+
+
 def open_schema() -> dict[str, pl.DataType]:
     """Champs publiés en Open Data : le schéma publié sans les champs `closed_only`."""
     return {f.name: f.dtype for f in PUBLISHED_FIELDS if not f.closed_only}

@@ -26,10 +26,10 @@ from src.tasks.deao.consolidate import consolidate
 from src.tasks.deao.enrich import enrich_acheteurs
 from src.tasks.deao.geocode_cache import geocoder_adresses
 from src.tasks.deao.report import lignes_rapport, publier_rapport
-from src.tasks.deao.schema import (
+from src.tasks.deao.schema import (  # noqa: F401 (selection_publiee réexporté)
     AVIS_LOT_SCHEMA,
-    PUBLISHED_FIELDS,
     empty_avis_frame,
+    selection_publiee,
 )
 from src.tasks.deao.sources_publiees import ecrire_et_publier, publication_autorisee
 from src.tasks.scrap.deao.boamp_joue.boamp.parse import source_file_expr
@@ -63,15 +63,6 @@ def lire_partitions(sources: tuple[str, ...]) -> pl.DataFrame:
         missing_columns="insert",
         extra_columns="ignore",
     ).collect()
-
-
-def selection_publiee(df: pl.DataFrame) -> pl.DataFrame:
-    return df.select(
-        pl.col(f.name).cast(f.dtype)
-        if f.name in df.columns
-        else pl.lit(None, dtype=f.dtype).alias(f.name)
-        for f in PUBLISHED_FIELDS
-    )
 
 
 def _geocoder_tolerant(today: date, stats: Counter):

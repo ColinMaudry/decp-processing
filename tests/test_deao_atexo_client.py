@@ -154,14 +154,19 @@ def test_recherche_incomplete_leve():
             "page3": _page("megalis_resultats_20.html", 45, 0),
         }
     )
-    with pytest.raises(RechercheIncomplete):
+    with pytest.raises(RechercheIncomplete) as exc:
         _client(site).rechercher()
+    # Les consultations lues restent disponibles pour le scraper.
+    assert len(exc.value.consultations) == 20
+    assert exc.value.annoncees == 45
 
 
 def test_recherche_page_en_erreur_leve(no_sleep):
     site = FauxSite({k: v for k, v in _pages_25().items() if k != "page2"})
-    with pytest.raises(RechercheIncomplete):
+    with pytest.raises(RechercheIncomplete) as exc:
         _client(site).rechercher()
+    assert len(exc.value.consultations) == 20
+    assert exc.value.annoncees == 25
 
 
 def test_recherche_sans_resultat():
