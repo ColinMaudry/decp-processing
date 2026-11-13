@@ -14,6 +14,7 @@ from botocore.exceptions import ClientError
 class FakeS3:
     def __init__(self):
         self.objects: dict[str, bytes] = {}
+        self.extra_args: dict[str, dict] = {}
 
     def put_object(self, Bucket, Key, Body, **kwargs):
         self.objects[Key] = Body if isinstance(Body, bytes) else Body.read()
@@ -24,6 +25,17 @@ class FakeS3:
                 {"Error": {"Code": "NoSuchKey", "Message": Key}}, "GetObject"
             )
         return {"Body": io.BytesIO(self.objects[Key])}
+
+    def upload_file(self, Filename, Bucket, Key, ExtraArgs=None):
+        self.objects[Key] = Path(Filename).read_bytes()
+        self.extra_args[Key] = ExtraArgs or {}
+
+    def head_object(self, Bucket, Key, **kwargs):
+        if Key not in self.objects:
+            raise ClientError(
+                {"Error": {"Code": "404", "Message": "Not Found"}}, "HeadObject"
+            )
+        return {"Metadata": self.extra_args.get(Key, {}).get("Metadata", {})}
 
     def get_paginator(self, operation):
         assert operation == "list_objects_v2"
