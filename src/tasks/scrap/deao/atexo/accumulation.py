@@ -83,6 +83,20 @@ def recherche_complete(
     return nb_lus == nb_annonces and nb_lus >= 0.5 * ouvertes
 
 
+def annulations_du_passage(
+    precedent: pl.DataFrame, fusionne: pl.DataFrame
+) -> tuple[int, int]:
+    """(consultations ouvertes connues passées à « annule », consultations ouvertes
+    connues) : sert à repérer une annulation massive suspecte."""
+    if not precedent.height:
+        return 0, 0
+    ouvertes = precedent.filter(pl.col("statut") == "ouvert")["id"].unique()
+    annulees = fusionne.filter(
+        (pl.col("statut") == "annule") & pl.col("id").is_in(ouvertes.implode())
+    )["id"].n_unique()
+    return annulees, ouvertes.len()
+
+
 def fusionner(
     precedent: pl.DataFrame,
     nouvelles: pl.DataFrame,

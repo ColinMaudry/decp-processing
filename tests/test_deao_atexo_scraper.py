@@ -369,3 +369,35 @@ def test_lignes_en_echec_connue_conservee(env, monkeypatch):
     )
     assert dict(zip(df["id"], df["objet"])) == {"1": "Modifié", "2": "Intitulé 2"}
     assert set(df["statut"]) == {"ouvert"}
+
+
+class _Journal:
+    def __init__(self):
+        self.avertissements: list[str] = []
+
+    def warning(self, message):
+        self.avertissements.append(message)
+
+    def __getattr__(self, nom):
+        return lambda *a, **k: None
+
+
+def test_annulations_massives_journalisees(env, monkeypatch):
+    datagouv, _, _ = env
+    premier = _lancer(FauxClient([_cons(str(i)) for i in range(10)]))
+    _publier(datagouv, "res-megalis", premier)
+    journal = _Journal()
+    monkeypatch.setattr(scraper, "get_logger", lambda level: journal)
+    df = _lancer(FauxClient([_cons(str(i)) for i in range(8)]))
+    assert (df["statut"] == "annule").sum() == 2
+    assert any("2 consultations ouvertes sur 10" in m for m in journal.avertissements)
+
+
+def test_annulations_sous_le_seuil_non_journalisees(env, monkeypatch):
+    datagouv, _, _ = env
+    premier = _lancer(FauxClient([_cons(str(i)) for i in range(10)]))
+    _publier(datagouv, "res-megalis", premier)
+    journal = _Journal()
+    monkeypatch.setattr(scraper, "get_logger", lambda level: journal)
+    _lancer(FauxClient([_cons(str(i)) for i in range(9)]))
+    assert not any("annulées" in m for m in journal.avertissements)

@@ -28,6 +28,7 @@ from src.tasks.deao.sources_publiees import (
     telecharger_fichier_source,
 )
 from src.tasks.scrap.deao.atexo.accumulation import (
+    annulations_du_passage,
     dce_a_telecharger,
     fusionner,
     instant_du_passage,
@@ -66,6 +67,9 @@ _SCHEMA_LIGNES = {
     },
 }
 _COLONNES_DICTIONNAIRE = ("acheteur_nom", "acheteur_id", "acheteur_codePostal")
+# Part des consultations ouvertes connues annulées en un passage au-delà de laquelle
+# on avertit (une page de liste tronquée sans erreur ressemblerait à cela).
+_SEUIL_ANNULATIONS = 0.1
 
 # Les deux plateformes tournent en parallèle : un seul prétraitement SIRENE.
 _VERROU_SIRENE = threading.Lock()
@@ -302,6 +306,13 @@ def _passage(
         config.DEAO_STATUT_DELAI_JOURS,
         instant,
     )
+
+    annulees, ouvertes = annulations_du_passage(precedent, df)
+    if ouvertes and annulees > _SEUIL_ANNULATIONS * ouvertes:
+        logger.warning(
+            f"{code} : {annulees} consultations ouvertes sur {ouvertes} annulées "
+            f"en un passage (plus de {_SEUIL_ANNULATIONS:.0%}), à vérifier."
+        )
 
     inconnues = {
         k.removeprefix("procedure_inconnue:"): v

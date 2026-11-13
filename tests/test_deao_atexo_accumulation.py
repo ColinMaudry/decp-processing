@@ -6,6 +6,7 @@ import pytest
 
 from src.tasks.deao.schema import published_schema
 from src.tasks.scrap.deao.atexo.accumulation import (
+    annulations_du_passage,
     dce_a_telecharger,
     fusionner,
     instant_du_passage,
@@ -215,3 +216,17 @@ def test_instant_du_passage():
     fin = instant_du_passage(date(2026, 11, 10), maintenant)
     assert fin.date() == date(2026, 11, 10) and fin.hour == 23
     assert fin.tzinfo is not None
+
+
+def test_annulations_du_passage():
+    precedent = pl.concat(
+        [
+            _df(*[_cons(str(i)) for i in range(9)], statut="ouvert"),
+            _df(_cons("deja"), statut="annule"),
+            _df(_cons("close", limite=PASSE), statut="clos"),
+        ]
+    )
+    # 3 ouvertes connues disparaissent ; « deja » était déjà annulée.
+    res = fusionner(precedent, _df(), {str(i) for i in range(3, 9)}, TODAY, True)
+    assert annulations_du_passage(precedent, res) == (3, 9)
+    assert annulations_du_passage(_df(), res) == (0, 0)
