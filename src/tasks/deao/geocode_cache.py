@@ -1,6 +1,9 @@
 import io
+import tempfile
+import threading
 from collections.abc import Callable
 from datetime import date, timedelta
+from pathlib import Path
 
 import polars as pl
 from botocore.exceptions import ClientError
@@ -16,6 +19,10 @@ from src.tasks.publish import publish_to_s3
 from src.tasks.utils import s3_client
 
 CACHE_FILENAME = "adresse_geocode.parquet"
+
+# scrap_closed géocode depuis plusieurs fils (une plateforme par fil) : le cycle
+# lecture S3 → géocodage → écriture → téléversement ne doit pas s'entrelacer.
+_VERROU_CACHE = threading.Lock()
 
 ADRESSE_GEOCODE_SCHEMA = {
     "adresse_cle": pl.String,
@@ -96,19 +103,25 @@ def geocoder_adresses(
     adresses = adresses.filter(pl.col("adresse_cle").is_not_null()).unique(
         subset="adresse_cle", keep="first", maintain_order=True
     )
-    cache = charger_cache()
-    delta = a_geocoder(adresses, cache, today, GEOCODING_RETRY_DAYS)
-    if delta.height == 0:
-        return cache
+    with _VERROU_CACHE:
+        cache = charger_cache()
+        delta = a_geocoder(adresses, cache, today, GEOCODING_RETRY_DAYS)
+        if delta.height == 0:
+            return cache
 
-    nouveaux = geocode(delta).select(list(ADRESSE_GEOCODE_SCHEMA))
-    cache = pl.concat(
-        [
-            cache.join(nouveaux.select("adresse_cle"), on="adresse_cle", how="anti"),
-            nouveaux,
-        ]
-    ).sort("adresse_cle")
-    path = DEAO_DATA_DIR / CACHE_FILENAME
-    cache.write_parquet(path)
-    publish_to_s3(path, prefix=DEAO_GEOCODE_S3_PREFIX)
-    return cache
+        nouveaux = geocode(delta).select(list(ADRESSE_GEOCODE_SCHEMA))
+        cache = pl.concat(
+            [
+                cache.join(
+                    nouveaux.select("adresse_cle"), on="adresse_cle", how="anti"
+                ),
+                nouveaux,
+            ]
+        ).sort("adresse_cle")
+        # Fichier propre à l'appel (même nom : il donne la clé S3), copie locale ensuite.
+        with tempfile.TemporaryDirectory(dir=DEAO_DATA_DIR) as dossier:
+            temporaire = Path(dossier) / CACHE_FILENAME
+            cache.write_parquet(temporaire)
+            publish_to_s3(temporaire, prefix=DEAO_GEOCODE_S3_PREFIX)
+            temporaire.replace(DEAO_DATA_DIR / CACHE_FILENAME)
+        return cache

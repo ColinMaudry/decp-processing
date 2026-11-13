@@ -1,5 +1,8 @@
 import io
+import threading
+import time
 from datetime import date
+from pathlib import Path
 
 import polars as pl
 import pytest
@@ -194,3 +197,47 @@ def test_geocoder_adresses_erreur_s3_remonte(monkeypatch, tmp_path, code):
     with pytest.raises(ClientError):
         geocoder_adresses(adresses, TODAY, geocode=lambda d: d)
     assert published == []
+
+
+def _geocode_lent(delta):
+    time.sleep(0.2)
+    return pl.DataFrame(
+        {
+            "adresse_cle": delta["adresse_cle"],
+            "commune_code": ["29103"] * delta.height,
+            "latitude": [1.0] * delta.height,
+            "longitude": [1.0] * delta.height,
+            "score": [0.9] * delta.height,
+            "status": ["success"] * delta.height,
+            "geocoded_at": [TODAY] * delta.height,
+        }
+    )
+
+
+def test_geocoder_adresses_concurrents_sans_perte(monkeypatch, tmp_path):
+    # Deux plateformes géocodent en parallèle : aucune mise à jour du cache perdue.
+    fake = FakeS3()
+    _patch_s3(monkeypatch, None, tmp_path, fake=fake)
+    televerses = []
+
+    def publier(p, prefix=""):
+        televerses.append(Path(p).name)
+        fake.objects[f"{prefix}/{Path(p).name}"] = Path(p).read_bytes()
+
+    monkeypatch.setattr(geocode_cache, "publish_to_s3", publier)
+    fils = [
+        threading.Thread(
+            target=geocoder_adresses,
+            args=(pl.DataFrame({"adresse_cle": [cle]}), TODAY, _geocode_lent),
+        )
+        for cle in ("a", "b")
+    ]
+    for f in fils:
+        f.start()
+    for f in fils:
+        f.join()
+    final = pl.read_parquet(io.BytesIO(fake.objects["deao/adresse_geocode.parquet"]))
+    assert final["adresse_cle"].to_list() == ["a", "b"]
+    # Le fichier téléversé garde le nom de la clé S3.
+    assert televerses == ["adresse_geocode.parquet"] * 2
+    assert (tmp_path / "adresse_geocode.parquet").exists()
