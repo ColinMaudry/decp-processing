@@ -1,11 +1,11 @@
 from src.deployments import deao_deployment_specs
 
 NOMS = {
-    "scrap-open",
-    "scrap-closed",
+    "deao-scrap-open",
+    "deao-scrap-closed",
     "deao-processing",
-    "scrap-open-dev",
-    "scrap-closed-dev",
+    "deao-scrap-open-dev",
+    "deao-scrap-closed-dev",
     "deao-processing-dev",
 }
 
@@ -18,15 +18,19 @@ def test_deao_noms_et_entrypoints():
     specs = _specs()
     assert set(specs) == NOMS
     for nom, s in specs.items():
-        base = nom.removesuffix("-dev").replace("-", "_")
+        # deao-scrap-open → scrap_open ; deao-processing → deao_processing
+        base = nom.removesuffix("-dev")
+        if base.startswith("deao-scrap-"):
+            base = base.removeprefix("deao-")
+        base = base.replace("-", "_")
         assert s["entrypoint"] == f"src/flows/{base}.py:{base}"
         assert s["branch"] == ("dev" if nom.endswith("-dev") else "main")
 
 
 def test_deao_crons_et_pools():
     specs = _specs()
-    assert specs["scrap-open"]["cron"] == "0 8,12,16 * * *"
-    assert specs["scrap-closed"]["cron"] == "0 6 * * *"
+    assert specs["deao-scrap-open"]["cron"] == "0 8,12,16 * * *"
+    assert specs["deao-scrap-closed"]["cron"] == "0 6 * * *"
     assert "cron" not in specs["deao-processing"]
     for s in specs.values():
         assert s["work_pool_name"] == "local"
@@ -34,8 +38,8 @@ def test_deao_crons_et_pools():
 
 def test_deao_concurrence():
     specs = _specs()
-    assert specs["scrap-open"]["concurrency_limit"] == 1
-    assert specs["scrap-closed"]["concurrency_limit"] == 1
+    assert specs["deao-scrap-open"]["concurrency_limit"] == 1
+    assert specs["deao-scrap-closed"]["concurrency_limit"] == 1
 
 
 def test_deao_dev_sans_publication():
@@ -60,14 +64,14 @@ def test_deao_env_dirs():
 
 def test_deao_tags():
     specs = _specs()
-    assert set(specs["scrap-open"]["tags"]) == {
+    assert set(specs["deao-scrap-open"]["tags"]) == {
         "appels-offres",
         "scrap",
         "boamp",
         "joue",
         "prod",
     }
-    assert set(specs["scrap-closed"]["tags"]) == {"appels-offres", "scrap", "prod"}
+    assert set(specs["deao-scrap-closed"]["tags"]) == {"appels-offres", "scrap", "prod"}
     assert set(specs["deao-processing-dev"]["tags"]) == {
         "appels-offres",
         "traitement",
@@ -84,7 +88,7 @@ def test_plus_de_scaleway_pour_deao():
 
 def test_deao_data_dir_distinct_par_environnement():
     specs = _specs()
-    for nom in ("scrap-open", "scrap-closed", "deao-processing"):
+    for nom in ("deao-scrap-open", "deao-scrap-closed", "deao-processing"):
         prod = specs[nom]["job_variables"]["env"]["DEAO_DATA_DIR"]
         dev = specs[f"{nom}-dev"]["job_variables"]["env"]["DEAO_DATA_DIR"]
         assert prod != dev

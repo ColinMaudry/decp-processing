@@ -35,14 +35,6 @@ def test_tags_decp():
         "dev",
     }
     assert set(specs["sirene-preprocess"]["tags"]) == {"referentiel", "prod"}
-    assert set(specs["scrap-marches-securises"]["tags"]) == {
-        "attributions",
-        "scrap",
-        "marches-securises",
-        "prod",
-    }
-    assert "aws" in specs["scrap-aws"]["tags"]
-    assert "dume" in specs["scrap-dume"]["tags"]
     assert not set(specs["scrap"]["tags"]) & SOURCES
     assert not set(specs["scrap-dev"]["tags"]) & SOURCES
 
@@ -58,9 +50,6 @@ def test_decp_specs_inchanges():
         "sirene-preprocess-exec-prod",
         "sirene-preprocess-dev",
         "sirene-preprocess-exec-dev",
-        "scrap-marches-securises",
-        "scrap-aws",
-        "scrap-dume",
         "scrap",
         "scrap-dev",
     }
