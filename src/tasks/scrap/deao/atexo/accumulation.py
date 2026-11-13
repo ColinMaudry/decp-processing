@@ -52,15 +52,21 @@ def dce_a_telecharger(
 
 
 def recherche_complete(
-    nb_lus: int, nb_annonces: int, precedent: pl.DataFrame, today: date
+    nb_lus: int,
+    nb_annonces: int,
+    precedent: pl.DataFrame,
+    today: date,
+    delai_jours: int = DEAO_STATUT_DELAI_JOURS,
 ) -> bool:
     """Garde-fou : la recherche a tout lu et n'a pas renvoyé un nombre anormalement bas
-    de consultations par rapport aux précédentes encore ouvertes."""
-    ouvertes = (
-        precedent.filter(pl.col("statut") == "ouvert")["id"].n_unique()
-        if precedent.height
-        else 0
-    )
+    de consultations par rapport aux précédentes encore ouvertes à `today`."""
+    ouvertes = 0
+    if precedent.height:
+        ouvertes = (
+            precedent.filter(pl.col("statut") != "annule")
+            .filter(statut_temporel_expr(today, delai_jours) == "ouvert")["id"]
+            .n_unique()
+        )
     return nb_lus == nb_annonces and nb_lus >= 0.5 * ouvertes
 
 
@@ -99,4 +105,6 @@ def fusionner(
         .otherwise(statut_temporel_expr(today, delai_jours))
         .alias("statut")
     )
+    # `uid` doit rester unique (une consultation lue deux fois pendant la pagination).
+    df = df.unique("uid", keep="last", maintain_order=True)
     return _conformer(df.drop("statut_prec")).sort("uid")

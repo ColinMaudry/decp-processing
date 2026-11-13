@@ -125,7 +125,7 @@ def test_recherche_complete_seuil():
 def test_recherche_complete_compte_les_ouvertes_seulement():
     precedent = pl.concat(
         [
-            _df(*[_cons(str(i)) for i in range(100)], statut="clos"),
+            _df(*[_cons(str(i), limite=PASSE) for i in range(100)], statut="clos"),
             _df(_cons("a"), statut="ouvert"),
         ]
     )
@@ -163,3 +163,19 @@ def test_lots_a_relire():
 )
 def test_dce_a_telecharger(affichee, archivee, url, attendu):
     assert dce_a_telecharger(affichee, archivee, url) is attendu
+
+
+def test_recherche_complete_ignore_les_echues_et_compte_par_consultation():
+    lots = [Lot("1", "a", None, None, None), Lot("2", "b", None, None, None)]
+    echues = _df(*[_cons(str(i), limite=PASSE) for i in range(100)], statut="ouvert")
+    allotie = _df(_cons("a", nombre_lots=2), statut="ouvert", lots=lots)
+    precedent = pl.concat([echues, allotie])
+    # 100 échues (statut figé « ouvert ») ne comptent pas ; la consultation allotie compte pour 1
+    assert recherche_complete(1, 1, precedent, TODAY) is True
+    assert recherche_complete(0, 0, precedent, TODAY) is False
+
+
+def test_fusionner_uid_unique_si_consultation_lue_deux_fois():
+    nouvelles = pl.concat([_df(_cons("1")), _df(_cons("1")), _df(_cons("2"))])
+    res = fusionner(_df(), nouvelles, {"1", "2"}, TODAY, True)
+    assert res["uid"].n_unique() == res.height == 2
