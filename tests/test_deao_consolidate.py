@@ -66,8 +66,8 @@ def test_resolve_roots_chaine_racine_absente_et_cycle():
         ]
     )
     roots = resolve_roots(df)
-    assert set(roots.columns) == {"sourceDataset", "idAvis", "idAvisInitial"}
-    r = dict(roots.select("idAvis", "idAvisInitial").iter_rows())
+    assert set(roots.columns) == {"sourceDataset", "idAvis", "id"}
+    r = dict(roots.select("idAvis", "id").iter_rows())
     assert r["C"] == "A" and r["B"] == "A" and r["E"] == "Z"
     assert r["X"] == "X" and r["Y"] == "Y"
 
@@ -136,6 +136,7 @@ def test_colonnes_de_sortie():
     out = consolidate(frame([avis()]), RUN, 90).df
     enrichissement = {
         "acheteur_id_source",
+        "acheteur_codePostal",
         "acheteur_categorie",
         "acheteur_latitude",
         "acheteur_longitude",
@@ -144,6 +145,7 @@ def test_colonnes_de_sortie():
         f.name
         for f in PUBLISHED_FIELDS
         if f.name not in enrichissement
+        and not f.closed_only
         and not f.name.startswith(
             ("acheteur_commune_", "acheteur_departement_", "acheteur_region_")
         )
@@ -335,16 +337,14 @@ def test_consolidate_fixtures():
         date(2026, 9, 12),
         date(2026, 10, 14),
     )
-    assert out.filter(pl.col("idAvisInitial") == "26-99177")[
-        "statut"
-    ].unique().to_list() == ["annule"]
-    assert out.filter(pl.col("idAvisInitial") == "26-92574").height == 8
-    assert set(
-        out.filter(pl.col("idAvisInitial").is_in(["26-97189", "26-94806"]))["statut"]
-    ) == {"pre-information"}
-    assert set(out.filter(pl.col("idAvisInitial") == "26-98723")["statut"]) == {
-        "ouvert"
+    assert out.filter(pl.col("id") == "26-99177")["statut"].unique().to_list() == [
+        "annule"
+    ]
+    assert out.filter(pl.col("id") == "26-92574").height == 8
+    assert set(out.filter(pl.col("id").is_in(["26-97189", "26-94806"]))["statut"]) == {
+        "pre-information"
     }
+    assert set(out.filter(pl.col("id") == "26-98723")["statut"]) == {"ouvert"}
 
 
 def _boamp(*numeros: str) -> pl.DataFrame:
@@ -409,7 +409,7 @@ def _lignes_recouvrement(n_recents: int, n_anciens_sans_id: int) -> pl.DataFrame
             formatSource="eforms",
         )
     )
-    return frame(rows).with_columns(idAvisInitial=pl.col("idAvis"))
+    return frame(rows).with_columns(id=pl.col("idAvis"))
 
 
 def test_garde_fou_partitions_boamp_mixtes():

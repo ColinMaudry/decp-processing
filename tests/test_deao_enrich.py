@@ -285,3 +285,12 @@ def test_neutralisation_independante_du_perimetre_de_requete(monkeypatch):
     )
     out = enrich.neutraliser_acheteurs_etrangers(df)
     assert out["acheteur_id"].to_list() == ["a", None]
+
+
+def test_code_postal_publie_et_neutralise_a_l_etranger():
+    df = _df(
+        acheteur_nom=["X", "Y"],
+        acheteur_adresse_cp=["35000", "10115"],
+    ).with_columns(acheteur_pays=pl.Series(["FRA", "DEU"]))
+    out = enrich_acheteurs(df, _lf_ul(), _lf_etab(), COG, _geocoder_factice([]))
+    assert out["acheteur_codePostal"].to_list() == ["35000", None]

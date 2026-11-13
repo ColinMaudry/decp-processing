@@ -257,14 +257,14 @@ def test_flow_deux_sources(flow_env, deux_sources):
     )
     assert df["uid"].is_unique().all()
     assert set(df["sourceDataset"]) == {"boamp", "joue"}
-    joue = set(df.filter(pl.col("sourceDataset") == "joue")["idAvisInitial"])
+    joue = set(df.filter(pl.col("sourceDataset") == "joue")["id"])
     assert {"677195-2026", "599757-2026", "631605-2026"} & joue == {
         "677195-2026",
         "599757-2026",
     }
-    assert df.filter(pl.col("idAvisInitial") == "599757-2026")[
-        "statut"
-    ].unique().to_list() == ["annule"]
+    assert df.filter(pl.col("id") == "599757-2026")["statut"].unique().to_list() == [
+        "annule"
+    ]
 
 
 def test_scrap_open_publie_deux_fichiers(flow_env, deux_sources, publication):
@@ -274,7 +274,7 @@ def test_scrap_open_publie_deux_fichiers(flow_env, deux_sources, publication):
         ("ds-b", _rid("joue")),
     }
     joue = pl.read_parquet(flow_env / "joue.parquet")
-    assert "631605-2026" not in set(joue["idAvisInitial"])
+    assert "631605-2026" not in set(joue["id"])
     assert joue.height > 0
     assert dict(joue.schema) == published_schema()
     assert list(joue.columns) == list(published_schema())

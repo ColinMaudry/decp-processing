@@ -35,6 +35,7 @@ class Field:
     description: str
     short_title: str | None = None
     enum: tuple[str, ...] | None = None
+    closed_only: bool = False
 
 
 def _charger_schema() -> list[dict]:
@@ -50,6 +51,7 @@ PUBLISHED_FIELDS: tuple[Field, ...] = tuple(
         description=champ["description"],
         short_title=champ.get("short_title"),
         enum=tuple(champ["enum"]) if "enum" in champ else None,
+        closed_only=champ.get("closed_only", False),
     )
     for champ in _charger_schema()
 )
@@ -103,6 +105,11 @@ def published_schema() -> dict[str, pl.DataType]:
     return dict(_PUBLISHED_DTYPES)
 
 
+def open_schema() -> dict[str, pl.DataType]:
+    """Champs publiés en Open Data : le schéma publié sans les champs `closed_only`."""
+    return {f.name: f.dtype for f in PUBLISHED_FIELDS if not f.closed_only}
+
+
 def conform_avis(df: pl.DataFrame) -> pl.DataFrame:
     """Complète (null), caste et ordonne un DataFrame selon AVIS_LOT_SCHEMA."""
     inconnues = [c for c in df.columns if c not in AVIS_LOT_SCHEMA]
@@ -123,10 +130,15 @@ def empty_avis_frame() -> pl.DataFrame:
 
 
 def write_table_schema(path: Path) -> Path:
-    """Écrit le Table Schema JSON du schéma publié (copie de reference/schema_deao.json,
-    mise en forme comme le schema.json de DECP)."""
+    """Écrit le Table Schema JSON du schéma Open Data (reference/schema_deao.json sans les
+    champs `closed_only`, mise en forme comme le schema.json de DECP)."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
-        json.dump({"fields": _charger_schema()}, f, indent=4, ensure_ascii=False)
+        json.dump(
+            {"fields": [c for c in _charger_schema() if not c.get("closed_only")]},
+            f,
+            indent=4,
+            ensure_ascii=False,
+        )
     return path

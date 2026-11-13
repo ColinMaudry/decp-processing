@@ -13,12 +13,13 @@ import polars as pl
 from src.tasks.deao.schema import PUBLISHED_FIELDS
 from src.tasks.utils import get_logger
 
-CHAIN_KEYS = ["sourceDataset", "idAvisInitial"]
+CHAIN_KEYS = ["sourceDataset", "id"]
 LOT_KEYS = [*CHAIN_KEYS, "lotId"]
 
 # Colonnes publiées calculées à l'étape d'enrichissement, absentes à ce stade.
 _ENRICHMENT_PREFIXES = (
     "acheteur_id_source",
+    "acheteur_codePostal",
     "acheteur_categorie",
     "acheteur_commune_",
     "acheteur_departement_",
@@ -36,7 +37,9 @@ INTERNAL_COLUMNS = [
     "acheteur_pays",
 ]
 OUTPUT_COLUMNS = [
-    f.name for f in PUBLISHED_FIELDS if not f.name.startswith(_ENRICHMENT_PREFIXES)
+    f.name
+    for f in PUBLISHED_FIELDS
+    if not f.closed_only and not f.name.startswith(_ENRICHMENT_PREFIXES)
 ] + INTERNAL_COLUMNS
 
 # Ordre « du plus ancien au plus récent » : date de publication (nulle en premier, donc
@@ -53,7 +56,7 @@ class Consolidation:
 def resolve_roots(
     avis: pl.DataFrame, max_iter: int = 20, stats: Counter | None = None
 ) -> pl.DataFrame:
-    """Racine (`idAvisInitial`) de chaque avis, par remontée itérative de `avisPrecedent`.
+    """Racine (`id`) de chaque avis, par remontée itérative de `avisPrecedent`.
 
     Un `avisPrecedent` absent des données reste la racine (uid stable). Les avis encore
     instables après `max_iter` itérations sont pris dans un cycle : ils deviennent leur
@@ -64,13 +67,13 @@ def resolve_roots(
     )
     parents = links.filter(pl.col("avisPrecedent").is_not_null()).select(
         "sourceDataset",
-        pl.col("idAvis").alias("idAvisInitial"),
+        pl.col("idAvis").alias("id"),
         pl.col("avisPrecedent").alias("_parent"),
     )
     roots = links.select(
         "sourceDataset",
         "idAvis",
-        pl.coalesce("avisPrecedent", "idAvis").alias("idAvisInitial"),
+        pl.coalesce("avisPrecedent", "idAvis").alias("id"),
     )
     unstable = pl.Series(dtype=pl.Boolean)
     for _ in range(max_iter):
@@ -81,7 +84,7 @@ def resolve_roots(
         roots = step.select(
             "sourceDataset",
             "idAvis",
-            pl.coalesce("_parent", "idAvisInitial").alias("idAvisInitial"),
+            pl.coalesce("_parent", "id").alias("id"),
         )
     else:
         step = roots.join(parents, on=CHAIN_KEYS, how="left")
@@ -99,8 +102,8 @@ def resolve_roots(
             "idAvis",
             pl.when(unstable)
             .then(pl.col("idAvis"))
-            .otherwise(pl.col("idAvisInitial"))
-            .alias("idAvisInitial"),
+            .otherwise(pl.col("id"))
+            .alias("id"),
         )
     if stats is not None:
         stats["cycle"] += n_cycles
@@ -120,7 +123,7 @@ def ecarter_recouvrement(avis: pl.DataFrame, stats: Counter) -> pl.DataFrame:
 
     Une chaîne `joue` est écartée si l'un de ses avis a un `idEforms` ou un
     `idEformsPrecedent` présent parmi les `idEforms` des lignes `boamp`. `avis` porte
-    déjà `idAvisInitial`.
+    déjà `id`.
 
     Garde-fou (si des lignes `joue` existent) : une part de lignes `boamp` eForms sans
     `idEforms` supérieure à SEUIL_IDEFORMS_MANQUANTS (partitions écrites avant la
@@ -188,7 +191,7 @@ def statut_expr(run_date: date, delai_jours: int) -> pl.Expr:
 
 def _chain_aggregates(avis: pl.DataFrame) -> pl.DataFrame:
     """Colonnes de cycle de vie, une ligne par chaîne d'avis."""
-    est_racine = pl.col("idAvis") == pl.col("idAvisInitial")
+    est_racine = pl.col("idAvis") == pl.col("id")
     return (
         avis.unique(["sourceDataset", "idAvis"], keep="first")
         .with_columns(est_racine.alias("_estRacine"))

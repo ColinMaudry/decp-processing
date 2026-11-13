@@ -4,7 +4,7 @@
       "type": "string",
       "name": "uid",
       "title": "Identifiant unique",
-      "description": "Identifiant unique de l'appel d'offres et du lot, de la forme <sourceDataset>_<idAvisInitial>_<lotId> (sourceDataset : boamp ou joue ; idAvisInitial : IDWEB pour boamp, numéro de publication pour joue). Stable tant que l'avis initial (ou, à défaut, le plus ancien avis connu) de la chaîne d'avis ne change pas.",
+      "description": "Identifiant unique de l'appel d'offres et du lot, de la forme <sourceDataset>_<id>_<lotId> (sourceDataset : boamp, joue ou une plateforme de profil d'acheteur ; id : IDWEB pour boamp, numéro de publication pour joue, identifiant de la consultation pour une plateforme). Stable tant que l'avis initial (ou, à défaut, le plus ancien avis connu) de la chaîne d'avis ne change pas, pour boamp et joue.",
       "short_title": "Id. unique"
     },
     {
@@ -34,6 +34,13 @@
       "title": "Nom acheteur",
       "description": "Nom de l'acheteur : dénomination SIRENE si le SIRET de l'acheteur est trouvé dans SIRENE, sinon nom tel que renseigné dans l'avis.",
       "short_title": "Acheteur"
+    },
+    {
+      "type": "string",
+      "name": "acheteur_codePostal",
+      "title": "Code postal de l'acheteur",
+      "description": "Code postal de l'adresse de l'acheteur indiquée dans l'avis ou sur la plateforme ; nul pour un acheteur étranger.",
+      "short_title": null
     },
     {
       "type": "string",
@@ -210,7 +217,7 @@
       "type": "string",
       "name": "statut",
       "title": "Statut",
-      "description": "Statut de l'appel d'offres à la date du traitement. 'annule' si un avis d'annulation existe ; 'pre-information' pour un avis de pré-information (seule date connue : la publication) ; sinon, si la date limite de réponse est renseignée : 'clos' si elle est passée, 'ouvert' sinon ; si elle est nulle : 'ouvert' si l'avis initial date de moins de 90 jours (DEAO_STATUT_DELAI_JOURS), 'clos' au-delà. Limite : un rectificatif legacy qui repousse la date limite ne la met pas à jour (texte libre), l'appel d'offres peut donc passer 'clos' à tort ; 'rectifie' et 'infosRectificatifs' permettent de le repérer.",
+      "description": "Statut de l'appel d'offres à la date du traitement. 'annule' si un avis d'annulation existe (pour une plateforme de profil d'acheteur, si la consultation a disparu de la plateforme avant sa date limite) ; 'pre-information' pour un avis de pré-information (seule date connue : la publication) ; sinon, si la date limite de réponse est renseignée : 'clos' si elle est passée, 'ouvert' sinon ; si elle est nulle : 'ouvert' si l'avis initial date de moins de 90 jours (DEAO_STATUT_DELAI_JOURS), 'clos' au-delà. Limite : un rectificatif legacy qui repousse la date limite ne la met pas à jour (texte libre), l'appel d'offres peut donc passer 'clos' à tort ; 'rectifie' et 'infosRectificatifs' permettent de le repérer.",
       "short_title": null,
       "enum": ["ouvert", "clos", "annule", "pre-information"]
     },
@@ -238,6 +245,22 @@
     },
     {
       "type": "string",
+      "name": "urlDce",
+      "title": "URL du DCE archivé",
+      "description": "Adresse de téléchargement public du dossier de consultation des entreprises archivé (dernière version connue), pour les consultations des plateformes de profil d'acheteur.",
+      "short_title": null,
+      "closed_only": true
+    },
+    {
+      "type": "string",
+      "name": "urlReglementConsultation",
+      "title": "URL du règlement de consultation",
+      "description": "Adresse du règlement de consultation sur la plateforme de profil d'acheteur.",
+      "short_title": null,
+      "closed_only": true
+    },
+    {
+      "type": "string",
       "name": "urlAvis",
       "title": "URL de l'avis",
       "description": "Lien vers le dernier avis de la chaîne d'avis : boamp.fr pour la source boamp, ted.europa.eu pour la source joue.",
@@ -246,16 +269,16 @@
     },
     {
       "type": "string",
-      "name": "idAvisInitial",
-      "title": "Identifiant de l'avis initial",
-      "description": "Identifiant de l'avis initial de la chaîne d'avis ; à défaut, de l'avis le plus ancien connu. IDWEB pour la source boamp, numéro de publication (ex. 677195-2026) pour la source joue.",
-      "short_title": "Avis initial"
+      "name": "id",
+      "title": "Identifiant appel d'offres",
+      "description": "Identifiant de l'appel d'offres au sein de sa source (sourceDataset), commun à tous ses lots : pour boamp, IDWEB de l'avis initial de la chaîne d'avis (à défaut, du plus ancien avis connu) ; pour joue, numéro de publication de l'avis initial (ex. 677195-2026) ; pour une plateforme de profil d'acheteur, identifiant de la consultation sur la plateforme.",
+      "short_title": "Identifiant AO"
     },
     {
       "type": "string",
       "name": "idDernierAvis",
       "title": "Identifiant du dernier avis",
-      "description": "Identifiant du dernier avis de la chaîne d'avis : IDWEB pour la source boamp, numéro de publication pour la source joue.",
+      "description": "Identifiant du dernier avis de la chaîne d'avis : IDWEB pour la source boamp, numéro de publication pour la source joue ; nul pour une plateforme de profil d'acheteur.",
       "short_title": "Dernier avis"
     },
     {
@@ -269,7 +292,7 @@
       "type": "string",
       "name": "sourceDataset",
       "title": "Source dataset",
-      "description": "Code de la source dont proviennent les données de cet appel d'offres : boamp (BOAMP, DILA) ou joue (Journal officiel de l'Union européenne, via TED).",
+      "description": "Code de la source dont proviennent les données de cet appel d'offres : boamp (BOAMP, DILA), joue (Journal officiel de l'Union européenne, via TED), megalis_bretagne ou maximilien (plateformes de profil d'acheteur).",
       "short_title": null
     },
     {

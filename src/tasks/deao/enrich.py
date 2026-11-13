@@ -270,4 +270,6 @@ def enrich_acheteurs(
         raise RuntimeError(
             f"L'enrichissement acheteur a modifié le nombre de lignes ({n} → {df.height})"
         )
-    return df.drop(_TROUVE)
+    return df.with_columns(acheteur_codePostal=pl.col("acheteur_adresse_cp")).drop(
+        _TROUVE
+    )
