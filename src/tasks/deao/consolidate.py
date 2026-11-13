@@ -166,17 +166,14 @@ def ecarter_recouvrement(avis: pl.DataFrame, stats: Counter) -> pl.DataFrame:
     return avis.join(ecartees, on=CHAIN_KEYS, how="anti")
 
 
-def statut_expr(run_date: date, delai_jours: int) -> pl.Expr:
-    """Statut de l'appel d'offres à `run_date` (voir la spec, « Cycle de vie »)."""
+def statut_temporel_expr(run_date: date, delai_jours: int) -> pl.Expr:
+    """Statut « ouvert » / « clos » d'après la date limite ou, à défaut, l'ancienneté de la
+    publication (partagé avec les plateformes, qui n'ont pas d'avis d'annulation)."""
     jours_depuis_publication = (
         pl.lit(run_date) - pl.col("datePublicationInitiale")
     ).dt.total_days()
     return (
-        pl.when(pl.col("annule"))
-        .then(pl.lit("annule"))
-        .when(pl.col("preInformation"))
-        .then(pl.lit("pre-information"))
-        .when(pl.col("dateLimiteReponse").is_not_null())
+        pl.when(pl.col("dateLimiteReponse").is_not_null())
         .then(
             pl.when(pl.col("dateLimiteReponse").dt.date() < run_date)
             .then(pl.lit("clos"))
@@ -185,6 +182,17 @@ def statut_expr(run_date: date, delai_jours: int) -> pl.Expr:
         .when(jours_depuis_publication < delai_jours)
         .then(pl.lit("ouvert"))
         .otherwise(pl.lit("clos"))
+    )
+
+
+def statut_expr(run_date: date, delai_jours: int) -> pl.Expr:
+    """Statut de l'appel d'offres à `run_date` (voir la spec, « Cycle de vie »)."""
+    return (
+        pl.when(pl.col("annule"))
+        .then(pl.lit("annule"))
+        .when(pl.col("preInformation"))
+        .then(pl.lit("pre-information"))
+        .otherwise(statut_temporel_expr(run_date, delai_jours))
         .alias("statut")
     )
 
