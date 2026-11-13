@@ -166,21 +166,28 @@ Un client Atexo générique (base URL en paramètre) et une configuration par pl
 
 1. GET de la page de recherche, POST de la recherche sur une plage de dates limites large
    (toutes les consultations en cours), pagination à 20 par page.
-2. Pour chaque consultation **nouvelle** (`refCons` inconnu) ou dont la date limite a
-   changé : GET de la page détail (CPV, entité, service, taille du DCE).
-3. DCE : téléchargement anonyme et dépôt dans S3 si la consultation est nouvelle ou si
-   la taille affichée du DCE (ou la date limite) a changé ; l'objet S3 est remplacé.
+2. Pour **chaque** consultation en cours, à chaque passage (décision de l'utilisateur) :
+   GET de la page détail (CPV, entité, service, taille du DCE). La fenêtre des lots
+   n'est relue que pour une consultation nouvelle, ou dont la date limite ou le nombre
+   de lots a changé.
+3. DCE : téléchargement anonyme et dépôt dans S3 si aucun DCE n'est encore archivé ou si
+   la taille affichée diffère de celle de l'archive (gardée en métadonnée de l'objet
+   S3) ; l'objet S3 est remplacé. Limite assumée : un DCE modifié à taille affichée
+   identique n'est pas vu.
 4. Fusion avec les consultations déjà connues (fichier publié de la source sur le dataset
-   b, relu au début du passage ; s'il n'existe pas encore, on part de zéro),
+   b, relu au début du passage ; s'il n'existe pas encore, on part de zéro, sur demande
+   explicite `DEAO_SCRAP_PARTIR_DE_ZERO=true`, pour qu'une panne de data.gouv.fr
+   n'écrase pas l'historique),
    normalisation au schéma publié, enrichissement acheteur, puis retour du DataFrame au
    flow (contrat `Scraper`).
 
 Les deux plateformes tournent en parallèle (`run_in_pool` de `scrap_closed`) ; au sein
 d'une plateforme, les requêtes sont séquentielles.
 
-Politesse : un intervalle minimal entre requêtes par plateforme (réutiliser l'idée du
-`Limiteur` de `joue/fetch.py`), User-Agent identifiable, nouvelles tentatives espacées
-sur 429 / 5xx.
+Politesse : un intervalle minimal de **0,1 s** entre deux requêtes vers une même
+plateforme (`CLOSED_INTERVALLE_REQUETES_S`, décision de l'utilisateur ; réutiliser le
+`Limiteur` de `joue/fetch.py`), User-Agent réglable (`CLOSED_USER_AGENT`), nouvelles
+tentatives espacées sur 429 / 5xx.
 
 ### Granularité
 
@@ -370,7 +377,7 @@ avec l'accumulation, ce seuil ne fera que s'éloigner.
 ## Laissé au builder
 
 - Découpage exact des modules, noms des fonctions.
-- Détection du changement de DCE (taille affichée, date limite, ou les deux).
+
 - Normalisation des valeurs de `procedure` et `type` vers les valeurs BOAMP.
 - Intervalle entre requêtes et nombre de tentatives.
 - Garde-fou contre un faux `annule` (seuil de résultats, pagination incomplète).

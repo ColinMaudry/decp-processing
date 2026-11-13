@@ -427,7 +427,7 @@ git commit -m "DEAO : parsing HTML des plateformes Atexo (résultats, détail, l
   - `ClientAtexo.detail(ref_cons: str, org_cons: str) -> DetailConsultation` (GET `{url_base}/entreprise/consultation/{ref}?orgAcronyme={org}`) ;
   - `ClientAtexo.lots(ref_cons: str, org_cons: str) -> list[Lot]` (GET `{url_base}/index.php?page=Entreprise.PopUpDetailLots&orgAccronyme={org}&id={ref}&lang=`) ;
   - `ClientAtexo.telecharger_dce(ref_cons: str, org_cons: str, dest_dir: Path) -> DceTelecharge` avec `DceTelecharge(chemin: Path, nom_fichier: str, content_type: str, id_dce: str | None)` — écrit en streaming dans `dest_dir`, jamais en mémoire ;
-  - config : `ATEXO_INTERVALLE_REQUETES_S` (float, défaut `1.0`), `ATEXO_USER_AGENT` (défaut : un User-Agent de navigateur générique), `DEAO_DCE_S3_PREFIX` (défaut `dce`), `DEAO_SCRAP_PARTIR_DE_ZERO` (bool, défaut `false`, utilisé Task 9). Documentées dans `template.env` (section DEAO, commentées avec leur défaut).
+  - config : `CLOSED_INTERVALLE_REQUETES_S` (float, défaut `0.1`, décision de l'utilisateur : intervalle minimal entre deux requêtes vers une même plateforme ; chaque `ClientAtexo` a son propre `Limiteur`, les deux plateformes tournant en parallèle), `CLOSED_USER_AGENT` (défaut : un User-Agent de navigateur générique), `DEAO_DCE_S3_PREFIX` (défaut `dce`), `DEAO_SCRAP_PARTIR_DE_ZERO` (bool, défaut `false`, utilisé Task 9). Documentées dans `template.env` (section DEAO, commentées avec leur défaut).
 - Nouvelles tentatives : tenacity sur 429, 5xx et erreurs de transport, 5 essais, attente exponentielle de 5 s à 60 s ; 4xx autres que 429 : pas de nouvel essai.
 
 - [ ] **Step 1: Repérage en direct des postbacks (pas de code produit)**
@@ -537,7 +537,8 @@ git commit -m "DEAO : archivage public des DCE Atexo dans S3"
 
   - `PROCEDURES: dict[str, str]` — `MAPA` → « Procédure adaptée », `AOO` → « Appel d'offres ouvert », `AOR` → « Appel d'offres restreint », `PN`/`PCN`/`PNSM` → « Procédure négociée », `DC` → « Dialogue compétitif », `CONC` → « Concession », tout autre code (dont `AUT`, `SAD-A`) → « Autre procédure » avec compteur `procedure_inconnue:{code}`. Compléter la table d'après les codes réellement présents sur les deux plateformes (relever la liste lors de l'étape 1 de Task 6).
   - `lignes_consultation(code: str, url_base: str, c: ConsultationListe, detail: DetailConsultation | None, lots: list[Lot], url_dce: str | None) -> list[dict]` — une ligne par lot (ou une ligne `lotId="0"`), colonnes publiées hors enrichissement plus `acheteur_adresse_cp`, `acheteur_adresse_ville`, `acheteur_pays` (`"FRA"`) : `uid`, `id`=`ref_cons`, `idDernierAvis` nul, `referenceAcheteur`, `acheteur_nom`=`organisme`, `objet`=`intitule`, `description`=`objet`, `lotId`, `lotIntitule`, `type`=`categorie`, `codeCPV` (lot puis détail), `procedure`, `datePublicationInitiale`, `dateLimiteReponse`, `lieuExecution_code`=premier département, `lieuExecution_typeCode`=« Code département », `urlConsultation`=`{url_base}/entreprise/consultation/{ref}?orgAcronyme={org}`, `urlReglementConsultation`=`{url_base}/index.php?page=Entreprise.EntrepriseDownloadReglement&id={base64(ref)}&orgAcronyme={org}`, `urlDce`, `rectifie`=False, `infosRectificatifs`=[], `avisLies`=[], `sourceDataset`=`code`, `sourceFile` nul.
-  - `a_rafraichir(liste: list[ConsultationListe], precedent: pl.DataFrame) -> set[str]` — `ref_cons` nouveaux, ou dont la date limite diffère de `dateLimiteReponse` du précédent, ou dont une ligne précédente a `urlDce` nul.
+  - `lots_a_relire(liste: list[ConsultationListe], precedent: pl.DataFrame) -> set[str]` — `ref_cons` dont la fenêtre des lots doit être (re)lue : nouveaux, ou dont la date limite diffère de `dateLimiteReponse` du précédent, ou dont `nombre_lots` diffère du nombre de lots du précédent (lignes `lotId != "0"`). Les autres reprennent les lots (numéro, intitulé, CPV) du précédent.
+  - `dce_a_telecharger(taille_affichee: str | None, taille_archivee: str | None, url_dce_precedente: str | None) -> bool` — vrai si aucun DCE n'est archivé (`taille_archivee` nul ou `url_dce_precedente` nulle) ou si la taille affichée diffère de la taille archivée ; faux si `taille_affichee` est nulle (pas de DCE en ligne).
   - `recherche_complete(nb_lus: int, nb_annonces: int, precedent: pl.DataFrame, today: date) -> bool` — vrai si `nb_lus == nb_annonces` et `nb_lus >= 0.5 × (consultations précédentes encore ouvertes à today)`.
   - `fusionner(precedent: pl.DataFrame, nouvelles: pl.DataFrame, ids_vus: set[str], today: date, complete: bool) -> pl.DataFrame` — `nouvelles` remplace toutes les lignes précédentes de même `id` ; les autres lignes précédentes sont gardées ; statut : `annule` si (`id` ∉ `ids_vus`, `complete`, date limite ≥ today, et statut précédent ≠ `clos`) ou si déjà `annule` et toujours absent ; sinon `clos` si date limite < today, `ouvert` sinon (une consultation `annule` revue redevient `ouvert`/`clos`). Résultat au `published_schema()`, trié par `uid`.
 
@@ -557,7 +558,13 @@ def test_disparue_apres_date_limite_close(): ...  # → "clos"
 def test_recherche_incomplete_aucune_annulation(): ...  # complete=False → reste "ouvert"
 def test_annulee_revue_redevient_ouverte(): ...
 def test_recherche_complete_seuil(): ...  # 620 ouvertes précédemment, 200 lues == 200 annoncées → False
-def test_a_rafraichir(): ...  # nouvelle, date limite changée, urlDce nul → dans l'ensemble ; inchangée → hors
+def test_lots_a_relire(): ...  # nouvelle, date limite changée, nombre de lots changé → dans l'ensemble ; inchangée → hors
+@pytest.mark.parametrize("affichee,archivee,url,attendu", [
+    ("72,09 Mo", None, None, True), ("72,09 Mo", "72,09 Mo", "https://s3/x.zip", False),
+    ("73,10 Mo", "72,09 Mo", "https://s3/x.zip", True), ("72,09 Mo", "72,09 Mo", None, True),
+    (None, None, None, False),
+])
+def test_dce_a_telecharger(affichee, archivee, url, attendu): ...
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
@@ -600,7 +607,7 @@ Déroulé d'un passage (`scraper(today)`) :
 2. Précédent : `telecharger_fichier_source(entree, DEAO_DATA_DIR / "sources")` ; `FichierSourceIndisponible` → si `config.DEAO_SCRAP_PARTIR_DE_ZERO`, précédent vide au schéma publié (avec un `logger.warning`) ; sinon l'exception remonte (le scraper échoue, rien n'est écrasé).
 3. Dictionnaire SIRET : `boamp.parquet` téléchargé de la même façon → `dictionnaire_depuis_publie` ; en échec, `logger.warning` et pas de dictionnaire.
 4. `client.rechercher()` ; `RechercheIncomplete` → on poursuit avec les consultations lues mais `complete=False`.
-5. Pour chaque `ref_cons` de `a_rafraichir` : `detail`, `lots` si `nombre_lots > 0` ; DCE si `publication_autorisee()` et `S3_BUCKET` défini : `cle = cle_dce(code, id_dce or ref_cons, nom)` ; télécharger puis déposer si `taille_archivee(cle) != detail.taille_dce` ou si `urlDce` précédent nul ; sinon réutiliser `url_publique(cle)`. Dossier temporaire : `DEAO_DATA_DIR / "dce_tmp" / code`, vidé en fin de passage. Toute erreur sur une consultation est attrapée et comptée (`detail_en_erreur`, `dce_en_erreur`) : consultation nouvelle sans détail → ignorée ce passage ; consultation connue → lignes précédentes conservées ; DCE en échec → `urlDce` nul.
+5. Pour **chaque** consultation lue (décision de l'utilisateur : surveiller les DCE à chaque passage) : `detail` ; `lots` si `nombre_lots > 0` et `ref_cons ∈ lots_a_relire(...)`, sinon lots repris du précédent ; DCE si `publication_autorisee()` et `S3_BUCKET` défini : `cle = cle_dce(code, id_dce or ref_cons, nom)` (pour une consultation déjà archivée, la clé est retrouvée à partir de `urlDce` du précédent) ; télécharger puis déposer si `dce_a_telecharger(detail.taille_dce, taille_archivee(cle), urlDce précédente)` ; sinon réutiliser `urlDce` du précédent. Dossier temporaire : `DEAO_DATA_DIR / "dce_tmp" / code`, vidé en fin de passage. Toute erreur sur une consultation est attrapée et comptée (`detail_en_erreur`, `dce_en_erreur`) : consultation nouvelle sans détail → ignorée ce passage ; consultation connue → lignes précédentes conservées ; DCE en échec → `urlDce` nul.
 6. Lignes (`lignes_consultation`) → `enrich_acheteurs(..., dictionnaire=…)` → `selection_publiee` → `fusionner(precedent, nouvelles, ids_vus, today, complete)`.
 7. Log de synthèse : consultations lues / annoncées, rafraîchies, DCE déposés et volume (Mo), compteurs d'erreur.
 
@@ -616,6 +623,8 @@ def test_dce_depose_si_publication(...): ...  # publication autorisée → objet
 def test_dce_non_depose_en_dev(...): ...  # DECP_PROCESSING_PUBLISH faux → aucun objet S3, urlDce nul
 def test_dce_en_echec_retente(...): ...  # 1er passage : dépôt lève → urlDce nul ; 2e passage : déposé
 def test_dce_inchange_non_retelecharge(...): ...  # taille_archivee == taille affichée et urlDce présent → pas de téléchargement
+def test_dce_modifie_meme_date_limite_retelecharge(...): ...  # 2e passage, date limite inchangée, taille affichée différente → nouveau dépôt, même clé
+def test_detail_lu_a_chaque_passage_lots_non_relus(...): ...  # 2e passage inchangé → client.detail appelé pour chaque consultation, client.lots jamais
 
 # tests/test_deao_scrap_closed.py
 def test_scrapers_atexo_enregistres():
@@ -643,7 +652,7 @@ git commit -m "DEAO : scrapers megalis_bretagne et maximilien branchés sur scra
 
 - [ ] **Step 6: Essai réel sans publication** (vérification, pas de commit)
 
-Run : `DEAO_SCRAP_PARTIR_DE_ZERO=true SOLO_DEAO_SCRAPS=maximilien DECP_PROCESSING_PUBLISH=False uv run python run_flow.py scrap_closed` (Maximilien, ~370 consultations : environ 15 min à 1 requête/s).
+Run : `DEAO_SCRAP_PARTIR_DE_ZERO=true SOLO_DEAO_SCRAPS=maximilien DECP_PROCESSING_PUBLISH=False uv run python run_flow.py scrap_closed` (Maximilien, ~370 consultations : une page détail par consultation plus les lots, quelques minutes à 0,1 s entre requêtes).
 Expected : `dist/deao/maximilien.parquet` écrit, nombre de consultations distinctes égal au nombre annoncé, `acheteur_id` renseigné pour une part non nulle des lignes, aucun objet S3 déposé ; le `deao_processing` final s'exécute (la source `maximilien` peut y être écartée faute de fichier publié : attendu en SOLO). Reporter les chiffres dans le rapport de tâche.
 
 ---
