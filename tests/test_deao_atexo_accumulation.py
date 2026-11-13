@@ -8,6 +8,7 @@ from src.tasks.deao.schema import published_schema
 from src.tasks.scrap.deao.atexo.accumulation import (
     dce_a_telecharger,
     fusionner,
+    instant_du_passage,
     lots_a_relire,
     recherche_complete,
 )
@@ -179,3 +180,38 @@ def test_fusionner_uid_unique_si_consultation_lue_deux_fois():
     nouvelles = pl.concat([_df(_cons("1")), _df(_cons("1")), _df(_cons("2"))])
     res = fusionner(_df(), nouvelles, {"1", "2"}, TODAY, True)
     assert res["uid"].n_unique() == res.height == 2
+
+
+MIDI_DU_JOUR = datetime(2026, 11, 13, 12, 0, tzinfo=PARIS)
+
+
+def test_disparue_apres_l_heure_limite_du_jour_close():
+    precedent = _df(_cons("1", limite=MIDI_DU_JOUR), statut="ouvert")
+    apres_midi = datetime(2026, 11, 13, 14, 0, tzinfo=PARIS)
+    res = fusionner(precedent, _df(), set(), TODAY, True, instant=apres_midi)
+    assert _statuts(res) == {"1": "clos"}
+    # et le reste aux passages suivants
+    res = fusionner(res, _df(), set(), date(2026, 11, 20), True)
+    assert _statuts(res) == {"1": "clos"}
+
+
+def test_disparue_avant_l_heure_limite_du_jour_annulee():
+    precedent = _df(_cons("1", limite=MIDI_DU_JOUR), statut="ouvert")
+    matin = datetime(2026, 11, 13, 10, 0, tzinfo=PARIS)
+    res = fusionner(precedent, _df(), set(), TODAY, True, instant=matin)
+    assert _statuts(res) == {"1": "annule"}
+
+
+def test_run_date_explicite_fin_de_journee():
+    # Sans instant : fin du jour `today`, la limite de midi est passée.
+    precedent = _df(_cons("1", limite=MIDI_DU_JOUR), statut="ouvert")
+    res = fusionner(precedent, _df(), set(), TODAY, True)
+    assert _statuts(res) == {"1": "clos"}
+
+
+def test_instant_du_passage():
+    maintenant = datetime(2026, 11, 13, 14, 30, tzinfo=PARIS)
+    assert instant_du_passage(TODAY, maintenant) == maintenant
+    fin = instant_du_passage(date(2026, 11, 10), maintenant)
+    assert fin.date() == date(2026, 11, 10) and fin.hour == 23
+    assert fin.tzinfo is not None

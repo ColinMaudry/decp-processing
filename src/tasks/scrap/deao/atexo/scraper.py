@@ -30,6 +30,7 @@ from src.tasks.deao.sources_publiees import (
 from src.tasks.scrap.deao.atexo.accumulation import (
     dce_a_telecharger,
     fusionner,
+    instant_du_passage,
     lots_a_relire,
     recherche_complete,
 )
@@ -264,6 +265,8 @@ def _passage(
     shutil.rmtree(dossier_tmp, ignore_errors=True)
     dossier_tmp.mkdir(parents=True)
     client = client_factory(entree.url_base)
+    # Instant de lecture de la liste : une date limite passée à cet instant clôt.
+    instant = instant_du_passage(today)
     try:
         consultations, annoncees, lignes = _collecter(
             client, entree, precedent, dossier_tmp, stats
@@ -297,6 +300,7 @@ def _passage(
         today,
         complete,
         config.DEAO_STATUT_DELAI_JOURS,
+        instant,
     )
 
     inconnues = {

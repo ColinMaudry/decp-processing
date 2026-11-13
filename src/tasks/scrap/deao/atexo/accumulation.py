@@ -1,6 +1,6 @@
 """Accumulation des consultations d'une plateforme Atexo d'un passage à l'autre."""
 
-from datetime import date
+from datetime import date, datetime, time
 
 import polars as pl
 
@@ -8,7 +8,7 @@ from src.config import DEAO_STATUT_DELAI_JOURS
 from src.tasks.deao.consolidate import statut_temporel_expr
 from src.tasks.deao.schema import published_schema
 from src.tasks.scrap.deao.atexo.dce import normaliser_taille
-from src.tasks.scrap.deao.atexo.parse import ConsultationListe
+from src.tasks.scrap.deao.atexo.parse import FUSEAU, ConsultationListe
 
 
 def _conformer(df: pl.DataFrame) -> pl.DataFrame:
@@ -18,6 +18,19 @@ def _conformer(df: pl.DataFrame) -> pl.DataFrame:
         else pl.lit(None, dtype=dtype).alias(nom)
         for nom, dtype in published_schema().items()
     )
+
+
+def instant_du_passage(today: date, maintenant: datetime | None = None) -> datetime:
+    """Instant auquel la liste est lue : maintenant pour un passage du jour, fin de la
+    journée `today` pour un `run_date` explicite."""
+    maintenant = (maintenant or datetime.now(FUSEAU)).astimezone(FUSEAU)
+    if maintenant.date() == today:
+        return maintenant
+    return _fin_de_journee(today)
+
+
+def _fin_de_journee(jour: date) -> datetime:
+    return datetime.combine(jour, time.max, tzinfo=FUSEAU)
 
 
 def lots_a_relire(liste: list[ConsultationListe], precedent: pl.DataFrame) -> set[str]:
@@ -77,8 +90,15 @@ def fusionner(
     today: date,
     complete: bool,
     delai_jours: int = DEAO_STATUT_DELAI_JOURS,
+    instant: datetime | None = None,
 ) -> pl.DataFrame:
-    """Remplace les lignes des consultations relues, garde les autres et recalcule le statut."""
+    """Remplace les lignes des consultations relues, garde les autres et recalcule le statut.
+
+    `instant` : moment de la lecture de la liste (défaut : fin de la journée `today`) ;
+    une date limite passée à cet instant, même plus tôt dans la journée, clôt la
+    consultation au lieu de l'annuler."""
+    if instant is None:
+        instant = _fin_de_journee(today)
     precedent = _conformer(precedent)
     nouvelles = _conformer(nouvelles)
     ids_nouveaux = nouvelles["id"].to_list()
@@ -93,15 +113,20 @@ def fusionner(
     df = df.join(statut_prec, on="id", how="left")
     # Pour les lignes gardées, `statut` est déjà le statut précédent.
     prec = pl.coalesce(pl.col("statut_prec"), pl.col("statut"))
-    limite = pl.col("dateLimiteReponse").dt.date()
+    limite = pl.col("dateLimiteReponse")
+    echue = limite <= pl.lit(
+        instant.astimezone(FUSEAU), dtype=df.schema["dateLimiteReponse"]
+    )
     vu = pl.col("id").is_in(list(ids_vus))
     # Jamais « annule » sans date limite : dans le doute, on n'annule pas.
-    annule = (
-        pl.lit(complete) & limite.is_not_null() & (limite >= today) & (prec != "clos")
-    ) | (prec == "annule")
+    annule = (pl.lit(complete) & limite.is_not_null() & ~echue & (prec != "clos")) | (
+        prec == "annule"
+    )
     df = df.with_columns(
         pl.when(~vu & annule.fill_null(False))
         .then(pl.lit("annule"))
+        .when(echue.fill_null(False))
+        .then(pl.lit("clos"))
         .otherwise(statut_temporel_expr(today, delai_jours))
         .alias("statut")
     )
