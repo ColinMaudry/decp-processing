@@ -13,8 +13,10 @@ from lxml import html as lxml_html
 FUSEAU = ZoneInfo("Europe/Paris")
 
 MOIS = {
+    "jan": 1,
     "janv": 1,
     "janvier": 1,
+    "fev": 2,
     "févr": 2,
     "fevr": 2,
     "février": 2,
@@ -24,9 +26,11 @@ MOIS = {
     "mai": 5,
     "juin": 6,
     "juil": 7,
+    "juill": 7,
     "juillet": 7,
     "août": 8,
     "aout": 8,
+    "sep": 9,
     "sept": 9,
     "septembre": 9,
     "oct": 10,
@@ -148,7 +152,10 @@ def nombre_resultats(html: str) -> int:
         m = re.search(r"\d+", _texte(el))
         if m:
             return int(m[0])
-    return 0
+    texte = _texte(arbre)
+    if "Aucun résultat" in texte:
+        return 0
+    raise ValueError(f"Compteur de résultats introuvable, page : {texte[:200]!r}")
 
 
 def _date_bloc(noeud) -> str:

@@ -110,3 +110,21 @@ def test_champs_formulaire_recherche():
     champs = champs_formulaire(lire("megalis_resultats.html"))
     assert "PRADO_PAGESTATE" in champs
     assert "ctl0$CONTENU_PAGE$resultSearch$numPageTop" in champs
+
+
+def test_nombre_resultats_page_inattendue_leve():
+    with pytest.raises(ValueError, match="Erreur"):
+        nombre_resultats("<html><body>Erreur</body></html>")
+
+
+@pytest.mark.parametrize(
+    "texte,attendu",
+    [
+        ("5 Juill. 2026", date(2026, 7, 5)),
+        ("5 Sep. 2026", date(2026, 9, 5)),
+        ("5 Jan. 2026", date(2026, 1, 5)),
+        ("5 Fev. 2026", date(2026, 2, 5)),
+    ],
+)
+def test_date_fr_abreviations_supplementaires(texte, attendu):
+    assert date_fr(texte) == attendu
