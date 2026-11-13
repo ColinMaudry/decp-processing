@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+<title>Portail des marchés publics</title>
+
+
+
+
+			<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+			<title>
+				Portail des marchés publics
+			</title>
+
+
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/vue-multiselect.min.css?k=2026-00.05.01" type="text/css" />
+			<link rel="stylesheet" type="text/css" href="https://marches.megalis.bretagne.bzh/themes/css/ng-style-mpe.css?k=2026-00.05.01" media="all"/>
+			<link rel="stylesheet" type="text/css" href="https://marches.megalis.bretagne.bzh/themes/css/ng-style.css?k=2026-00.05.01" media="all"/>
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/chosen.css?k=2026-00.05.01" type="text/css" />
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/leaflet.css?k=2026-00.05.01" />
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/MarkerCluster.css?k=2026-00.05.01" type="text/css" />
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/leaflet.awesome-markers.css?k=2026-00.05.01" type="text/css" />
+
+
+                    <link rel="stylesheet" href="app/assets/css/entreprise.css?k=2026-00.05.01" type="text/css" >
+
+
+			<!-- end bloc -->
+			<link rel="stylesheet" type="text/css"
+				  href="https://marches.megalis.bretagne.bzh/themes/css/upload/jquery.fileupload-ui-noscript.css?k=2026-00.05.01"
+				  media="all"/>
+			<link rel="stylesheet" type="text/css"
+				  href="https://marches.megalis.bretagne.bzh/themes/css/upload/jquery.fileupload-ui.css?k=2026-00.05.01"
+				  media="all"/>
+
+
+</head>
+
+<body class=' ' >
+
+<script>
+	var pfUrl = "/";
+	var isAgent = false;
+</script>
+
+
+
+
+<!--Debut Bandeau-->
+<!--Begin BandeauEntreprise-->
+
+
+
+
+    <header class="header" role="banner">
+        <div class="navbar-default navbar-section">
+            <div class="container  header-top">
+                <div class="pull-left relative header-left">
+    <div class="pull-left">
+        <a href="/entreprise"
+           alt="Accueil"
+           title="Accueil"
+           class="btn btn-link">
+            <img class="img-responsive header-img "
+                 src="/themes//images/img/logo-replace.png"
+                 alt="Accueil">
+        </a>
+    </div>
+</div>                            </div>
+        </div>
+    </header>
+
+    <div class="" id="skippy">
+        <a href="#horizonatal-menu"
+           class="sr-only sr-only-focusable clearfix btn-lg btn-block btn-xs">
+            Aller au menu
+        </a>
+        <a href="#middle"
+           class="sr-only sr-only-focusable clearfix btn-lg btn-block btn-xs">
+            Aller au contenu
+        </a>
+    </div>
+
+    <div class="nav-wrapper d-block">
+        <nav class="navbar horizonatal-menu" role="navigation" data-spy="affix" data-offset-top="20" id="horizonatal-menu">
+            <div class="container d-block">
+                <div class="top top-user-profile pull-right " id="ctl0_bandeauEntrepriseWithoutMenuSf_ctl0">
+                    <div id="user-infos" class="user-toogle-infos">
+                                                    <div id="ctl0_bandeauEntrepriseWithoutMenuSf_panelDisconnected" class="bloc-user-login">
+    <div class="bootstrap">
+        <div class="kt-profile" data-widget="profile" data-status="online"
+             data-json='{"profile":{"name":"", "lastname":"" } }'>
+            <div class="atx-popover-markup-login-usr">
+                <div class="trigger-btn selector btn-toggle-info_user kt-profile-dropdown-toggle"
+                                          aria-expanded="false" id="kt-profile-dropdown-Disconnected">
+                    <a href="/index.php/entreprise/login" data-placement="bottom" class="btn-block btn-login">
+                        <span class="text">
+                            <span class="hidden-xs">Se connecter</span>
+                            <span class="visible-xs pull-left">
+                                <i class="fa fa-user-o"></i>
+                            </span>
+                                                    </span>
+                    </a>
+                </div>
+
+                            </div>
+        </div>
+    </div>
+    <div id="ctl0_bandeauEntrepriseWithoutMenuSf_nonAuthentifie">
+        <div class="panel-user-infos">
+            <div class="panel-user-infos-arrow"></div>
+            <div class="content"></div>
+        </div>
+    </div>
+</div>                                            </div>
+                </div>
+                <div class="navbar-header">
+                    <div class="wrapper pull-right">
+                        <a class="mobile-help m-r-4" onclick="goToUtah()" aria-label="Contact"><i class="fa fa-phone"></i></a>
+                        <a class="mobile-search atx-popover-markup-login-usr m-r-2" href="/index.php/entreprise/login" aria-label="entreprise-auth"><i class="fa fa-user"></i></a>
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                                data-target="#navbar-collapse" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar top-bar"></span>
+                            <span class="icon-bar middle-bar"></span>
+                            <span class="icon-bar bottom-bar"></span>
+                        </button>
+                    </div>
+                    <a class="navbar-brand"
+                       href="/entreprise">
+                        <img src="/themes//images/img/logo_mobile.png"/>
+                    </a>
+                </div>
+                                    <div class="collapse navbar-collapse p-0" id="navbar-collapse">
+                        <ul class="nav navbar-nav">
+                                                            <li class="hide">
+    <a href="#" class="dropdown-toggle pull-left"
+       data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Mon panier
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                <li class="dropdown-header">
+                    <div class="h4">
+                        Consultations en cours
+                    </div>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise">
+                        <span class="fa fa-chevron-right"></span>
+                        Toutes les consultations
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;retraits">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansRetraits">
+                        sans retrait
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;questions">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansQuestions">
+                        sans question posée
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;depots">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansDepots">
+                        sans dépôt
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;echanges">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansEchanges">
+                        sans message échangé
+                    </a>
+                </li>
+                <li role="separator" class="divider"></li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;panierEntreprise&amp;dateFinEnd">
+                        <span class="fa fa-chevron-right"></span>
+                        Consultations clôturées
+                    </a>
+                </li>
+                <li role="separator" class="divider"></li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;searchAnnCons&amp;panierEntreprise">
+                        <span class="fa fa-chevron-right"></span>
+                        Recherche avancée
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+    </ul>
+</li>
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left"
+       data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Annonces
+        <span class="fa fa-chevron-down pull-right arrow-position"></span></a>
+
+    <ul class="dropdown-menu mega-dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled clearfix">
+                <li class="col-md-4">
+                    <ul class="list-unstyled">
+                        <li class="dropdown-header">
+                            <div class="h4">
+                                Consultations en cours
+                            </div>
+                        </li>
+                        <li>
+                            <div class="input-group form-group form-group-sm">
+                                <form class="input-group form-group form-group-sm"
+                                      action="/index.php/espace-entreprise/search"
+                                      method="get">
+                                    <label class="sr-only"
+                                           for="ctl0_bandeauEntrepriseWithoutMenuSf_quickSearch">
+                                        Recherche rapide
+                                    </label>
+                                    <input name="keyWord"
+                                           type="text"
+                                           aria-placeholder="Recherche rapide"
+                                           id="ctl0_bandeauEntrepriseWithoutMenuSf_quickSearch"
+                                           class="form-control input-quickSearch"
+                                           placeholder="Recherche rapide ..."
+                                           onfocus=""
+                                           onblur=""
+                                           title="Recherche rapide"
+                                    />
+                                    <span class="input-group-btn align-right">
+                                                                <button class="btn btn-sm btn-primary button-quickSearch"
+                                                                        type="submit"
+                                                                        id="btnGoToQuickResultSearch">
+                                                                    <i class="fa fa-search"></i>
+                                                                </button>
+                                                            </span>
+                                </form>
+                            </div>
+                        </li>
+                        <li>
+                                                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AllCons">
+                                    <span class="fa fa-chevron-right"></span>
+                                    Toutes les consultations
+                                </a>
+                                                    </li>
+                        <li>
+                                                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;searchAnnCons&type=multicriteres">
+                                    <span class="fa fa-chevron-right"></span>
+                                    Recherche avancée
+                                </a>
+                                                    </li>
+                        <li>
+                                                            <a id="btnReview"
+                                   href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;searchAnnCons&type=restreinte">
+                                    <span class="fa fa-chevron-right"></span>
+                                    Recherche d&#039;une procédure restreinte
+                                </a>
+                                                    </li>
+                    </ul>
+                </li>
+                <li class="col-md-4">
+                    <ul class="list-unstyled">
+                        <li class="dropdown-header">
+                            <div class="h4">
+                                Autres annonces
+                            </div>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AvisInformation">
+                                <span class="fa fa-chevron-right"></span>
+                                Toutes les annonces d&#039;information
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AvisAttribution">
+                                <span class="fa fa-chevron-right"></span>
+                                Toutes les annonces d&#039;attribution
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AllAnn">
+                                <span class="fa fa-chevron-right"></span>
+                                Recherche avancée
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="col-md-4">
+                    <ul class="list-unstyled">
+                        <li class="dropdown-header"
+                            style="display:block">
+                            <div class="h4">
+                                Données essentielles des marchés conclus
+                            </div>
+                        </li>
+                        <li style="display:block">
+                            <div id="ctl0_bandeauEntrepriseWithoutMenuSf_panelArticle133">
+                                                                    <div>
+                                        <a href="/?page=Entreprise.EntrepriseRechercherListeMarches&search">
+                                            <span class="fa fa-chevron-right"></span>
+                                            Recherche avancée
+                                        </a>
+                                    </div>
+
+
+                                                            </div>
+                        </li>
+                        <li class="dropdown-header">
+                            <div class="h4">
+                                Enchères
+                            </div>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseParticipationEnchere">
+                                <span class="fa fa-chevron-right"></span>
+                                Participation
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="col-md-12">
+                    <ul class="list-unstyled clearfix">
+
+                        <li class="dropdown-header clearfix">
+                            <div class="h4 pull-left">
+                                Mes alertes et recherches sauvegardées
+                            </div>
+                            <a href="/?page=Entreprise.EntrepriseGestionRecherches"
+                               class="pull-right btn btn-link btn-sm">
+                                <i class="fa fa-cog"></i>
+                                Gérer mes alertes et recherches sauvegardées
+                            </a>
+                        </li>
+                                            </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>
+                                                            <li class="hide">
+    <a href="/index.php/entreprise/dossier-volumineux/gestion/">
+        Dossiers volumineux
+    </a>
+</li>
+                                                            <li class="hide">
+    <a class="btn"  href="/?page=Entreprise.RechercheCollaborateur">
+        Recherche de collaboration
+    </a>
+</li>
+                                                            <li style="display:none;">
+    <a class="btn" href="/?page=Entreprise.EntrepriseVisualiserEntitesAchatsRecherche">
+        Entités d&#039;Achat
+    </a>
+</li>
+
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" role="button"
+       aria-haspopup="true" aria-expanded="false">
+        Signature
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                <li>
+                                            <a href="/index.php/entreprise/signer-document">
+                            <span class="fa fa-chevron-right"></span>
+                            Signer un document
+                        </a>
+                                    </li>
+                <li>
+                    <a href=" /index.php/entreprise/verification-signature ">
+                        <span class="fa fa-chevron-right"></span>
+                        Vérifier la signature
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" role="button"
+       aria-haspopup="true" aria-expanded="false">
+        Aide
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                <li>
+                    <a href="/?page=Entreprise.EntreprisePremiereVisite">
+                        <span class="fa fa-chevron-right"></span>
+                        Première visite
+                    </a>
+                </li>
+                <li>
+                    <a href="/index.php/entreprise/aide/guide">
+                        <span class="fa fa-chevron-right"></span>
+                        Guides d&#039;utilisation
+                    </a>
+                </li>
+                <li>
+                    <a href="/index.php/entreprise/aide/assistance-telephonique">
+                        <span class="fa fa-chevron-right"></span>
+                        Assistance
+                    </a>
+                </li>
+                <li style="display:none;">
+                    <a href="/?page=Entreprise.DocumentsDeReference&callFrom=entreprise"
+                       title="Documents de référence (nouvelle fenêtre)">
+                        <span class="fa fa-chevron-right"></span>
+                        Documents de référence
+                    </a>
+                </li>
+                                <li style="display:block;"></li>
+                <li style="display:block;">
+                    <a href="/index.php/entreprise/aide/outils-informatiques">
+                        <span class="fa fa-chevron-right"></span>
+                        Outils informatiques
+                    </a>
+                </li>
+
+                            </ul>
+        </li>
+    </ul>
+</li>
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left"
+       data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Se préparer à répondre
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                                <li>
+                    <a href="/index.php/entreprise/footer/diagnostic-poste">
+                        <span class="fa fa-chevron-right"></span>
+                        Tester la configuration de mon poste
+                    </a>
+                </li>
+                                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;AllCons&amp;orgTest">
+                        <span class="fa fa-chevron-right"></span>
+                        Consultations de test
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>
+                                                                                </ul>
+                    </div>
+                            </div>
+        </nav>
+    </div>
+    <div id="infoErrone" class="m-t-7">
+
+    </div>
+
+<div class="m-t-7">
+
+    </div>
+<!--End BandeauEntreprise-->
+<!--Begin BandeauAgent-->
+
+<!--End BandeauAgent-->
+<!--Begin BandeauAgentSocleInterne-->
+
+<!--End BandeauAgent-->
+<!--Fin Bandeau-->
+
+<main role = "main">
+<form id="ctl0_ctl1" method="post" action="/index.php?page=Entreprise.EntrepriseDemandeTelechargementDce&amp;id=242039&amp;orgAcronyme=a1w" name="main_form" autocomplete="on"><script src="/assets/db823f34/jquery.min.js"></script>
+<script src="/assets/df1e7875/prado.min.js"></script>
+<script src="/assets/df1e7875/controls/controls.min.js"></script>
+<script src="/assets/b61c3793/jquery-ui.min.js"></script>
+<script src="/assets/df1e7875/activecontrols/ajax3.min.js"></script>
+<script src="/assets/df1e7875/activecontrols/activecontrols3.min.js"></script>
+
+
+
+
+<script src="/assets/7b30d930/bootstrap.min.js"></script>
+
+
+<script type="text/javascript">
+    var J = jQuery.noConflict();
+</script>
+
+
+<script src="/assets/7b30d930/sdk.js"></script>
+
+<script src="/assets/7b30d930/bootboxjs.js"></script>
+
+<script src="/assets/286d531d/jquery.iframe-transport.js"></script>
+
+<script src="/assets/286d531d/jquery.fileupload.js"></script>
+
+<script src="/assets/7b30d930/jquery.placeholder.js"></script>
+
+<script src="/assets/7b30d930/chosen.jquery.js"></script>
+
+<script src="/assets/7b30d930/modernizr.js"></script>
+
+<script src="/assets/c9ed3ec4/printThis.js"></script>
+
+<script src="/assets/7b30d930/placeholder.js"></script>
+
+
+<script src="/assets/7b30d930/scripts.js"></script>
+
+<script src="/assets/7b30d930/popup.inc.js"></script>
+
+<script src="/assets/7b30d930/scripts-eval.js"></script>
+
+<script src="/assets/7b30d930/atexoFileUpload.js"></script>
+
+<script src="/assets/7b30d930/scripts-lieux-execution.js"></script>
+
+<script src="/assets/7b30d930/tab.js"></script>
+
+<script src="/assets/7b30d930/loader.js"></script>
+
+<script src="/assets/7b30d930/data.js"></script>
+
+<script src="/assets/7b30d930/standard.js"></script>
+
+<script src="/assets/c9ed3ec4/printThis.js"></script>
+
+<script src="/assets/7b30d930/attachmentMessec.js"></script>
+
+
+<script src="/assets/7b30d930/jquery.numberformatter-1.2.js"></script>
+
+<script src="/assets/7b30d930/OptionTransfer.js"></script>
+
+<script src="/assets/7b30d930/scripts-lieux-execution.js"></script>
+
+<script src="/assets/7b30d930/popUpInvites.js"></script>
+
+<script src="https://marches.megalis.bretagne.bzh/themes/js/atexoScript.fr.js?k=2026-00.05.01"></script>
+
+<script src="https://marches.megalis.bretagne.bzh/themes/js/codeCpv.fr.js?k=2026-00.05.01"></script>
+
+<script src="https://marches.megalis.bretagne.bzh/themes/js/atexoRef.fr.js?k=2026-00.05.01"></script>
+
+
+        <script src="https://marches.megalis.bretagne.bzh/themes/js/calendrier.fr.js?k=2026-00.05.01"></script>
+
+
+<script src="https://marches.megalis.bretagne.bzh/themes/js/atexoApplet.fr.js?k=2026-00.05.01"></script>
+
+
+<script src="/assets/7b30d930/vue.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/assets/7b30d930/prototype-noconflict.header.js"></script>
+
+
+
+
+
+
+
+	<!--Debut partie centrale-->
+	<div id="middle" class="clear-top atx-middle" style="">
+	    <div id="infoErrone" class="mt-2">
+
+    </div>
+
+<div class="mt-2">
+
+    </div>
+
+		<div class="container container--690-sm m-b-10">
+			<div class="clearfix">
+
+
+	<div id="ctl0_CONTENU_PAGE_mainPart" class="main-part">
+		<div class="clearfix">
+			<ul class="breadcrumb">
+				<li>
+					<a href="/entreprise">
+						Accueil
+                    </a>
+				</li>
+				<li>
+					Consultations
+				</li>
+				<li>
+					Dossier de Consultation des Entreprises
+				</li>
+			</ul>
+		</div>
+
+		<!-- Début de l'entête du sommateur de messages d'erreurs -->
+<div id="divValidationSummary" style="display:none" class="bloc-message form-bloc-conf msg-erreur erreur-danger">
+
+    <div role="alert">
+        <div class="h4-alerte">
+            <i class="fa fa-exclamation-triangle m-r-1 hidden"></i>
+            Erreur de saisie.
+        </div>
+        <div class="spacer-small"></div>
+        <div>
+            Veuillez vérifier la saisie des champs suivants :
+            <span id="ctl0_CONTENU_PAGE_ctl6_validationSummary" style="display:none;color:#d9534f;"></span>
+            <span id="ctl0_CONTENU_PAGE_ctl6_serverError"></span>
+        </div>
+    </div>
+</div>
+<!-- Fin du footer du sommateur de messages d'erreurs -->
+		<!--BEGIN RECAP CONSULTATION-->
+<div class="form-bloc form-horizontal recap-infos-consultation" id="recap-consultation">
+	<div class="panel panel-default" id="collapseHeading" >
+		<div class="panel-heading clearfix" role="button" data-toggle="collapse" href="#collapseInfo" aria-expanded="true">
+			<h1 class="h4 panel-title">
+				Détails de la consultation
+			</h1>
+		</div>
+		<div>
+			<div id="collapseBodyInfo" class="panel-collapse recap-body panel-body clearfix collapse in" role="tablist" aria-labelledby="collapseInfo">
+				<div class="recap-bloc">
+					<div class="clearfix item_consultation">
+						<!--BEGIN DATE LIMITE REMISE DES PLIS-->
+						<div class="col-md-10">
+							<span class="col-md-8 col-xs-12">
+								<div id="ctl0_CONTENU_PAGE_ctl7_panelDateLimiteRemisePlis">
+									<label class="control-label">
+										Date et heure limite de remise des plis :
+									</label>
+									<span id="ctl0_CONTENU_PAGE_ctl7_dateHeureLimiteRemisePlis"><span class="text-success"><strong>16/11/2026 16:00</strong></span></span>
+									<span class="small">
+										<span id="ctl0_CONTENU_PAGE_ctl7_libelleHeureLocalisation"> </span>
+									</span>
+									<span class="m-l-1">
+										<img src="https://marches.megalis.bretagne.bzh/themes/images/reponse-elec-oblig-avec-signature.gif" alt="Marché public simplifié" id="ctl0_CONTENU_PAGE_ctl7_pictCertificat" title="Réponse électronique obligatoire pour cette consultation. Dispositions sur la signature électronique, se référer au RC ou à l'AAC." />
+									</span>
+
+
+									<span id="ctl0_CONTENU_PAGE_ctl7_logoDume"><img src="https://marches.megalis.bretagne.bzh/themes/images/logo-dume-publie.png" alt="DUME défini par l'acheteur" title="DUME défini par l'acheteur" class="indent-5 inline-img"/></span>
+
+								</div>
+
+
+							</span>
+						</div>
+						<!--END DATE LIMITE REMISE DES PLIS-->
+
+						<!--BEGIN REFERENCE-->
+						<div class="col-md-10 text-justify">
+							<label class="col-md-4 col-xs-12 spacing-helper-m">
+								Référence :
+							</label>
+							<span class="col-md-8 col-xs-12">
+								 <span id="ctl0_CONTENU_PAGE_ctl7_reference">261531004_AO</span>
+							</span>
+						</div>
+						<!--END REFERENCE-->
+
+						<!--BEGIN INTITULE-->
+						<div class="col-md-10 text-justify">
+							<label class="col-md-4 col-xs-12 spacing-helper-m">
+								Intitulé :
+							</label>
+							<span class="col-md-8 col-xs-12">
+								 <span id="ctl0_CONTENU_PAGE_ctl7_intitule">Prestation de transport et de traitement par valorisation des déchets de balayures issus du nettoyage de voiries Programme 2027-2031</span>
+							</span>
+						</div>
+						<!--END INTITULE-->
+
+						<!--BEGIN OBJET-->
+						<div class="col-md-10 text-justify">
+							<label class="col-md-4 col-xs-12 spacing-helper-m">
+								Objet :
+							</label>
+							<span class="col-md-8 col-xs-12">
+								<span id="ctl0_CONTENU_PAGE_ctl7_objet">Prestation de transport et de traitement par valorisation des déchets de balayures issus du nettoyage de voiries Programme 2027-2031
+</span>
+							</span>
+						</div>
+						<!--END OBJET-->
+					</div>
+					<ul  id="collapseInfo" class="panel-collapse collapseBody list-unstyled clearfix collapse in" role="tablist" aria-labelledby="collapseInfo">
+						<li>
+							<hr />
+						</li>
+						<li class="col-md-6">
+							<ul class="list-unstyled">
+								<li class="clearfix">
+
+								</li>
+								<li class="clearfix">
+
+								</li>
+								<!-- <div id="infosPrincipales" style="display:none;" class="panel-toggle"> -->
+								<li class="clearfix">
+
+								</li>
+								<li class="clearfix">
+									<label class="col-md-4 col-xs-12 spacing-helper-m">
+										Entité publique :
+									</label>
+									<span class="col-md-8 col-xs-12">
+											<span id="ctl0_CONTENU_PAGE_ctl7_entitePublique">COMMUNE DE RENNES</span>
+										</span>
+								</li>
+								<li class="clearfix">
+									<label class="col-md-4 col-xs-12 spacing-helper-m">
+										Service :
+									</label>
+									<span class="col-md-8 col-xs-12">
+										<span id="ctl0_CONTENU_PAGE_ctl7_entiteAchat">COMMUNE DE RENNES / / / DVDA - DV DA : Direction de la Voirie et de l'Assainissement</span>
+									</span>
+								</li>
+								<li class="clearfix">
+									<label class="col-md-4 col-xs-12 spacing-helper-m">
+										Type d'annonce :
+									</label>
+									<span class="col-md-8 col-xs-12">
+										<span id="ctl0_CONTENU_PAGE_ctl7_annonce">Annonce de consultation</span>
+									</span>
+								</li>
+								<li class="clearfix">
+									<label class="col-md-4 col-xs-12 spacing-helper-m">
+										Procédure :
+									</label>
+									<span class="col-md-8 col-xs-12">
+											<span id="ctl0_CONTENU_PAGE_ctl7_typeProcedure">Appel d'offres ouvert</span>
+
+										</span>
+								</li>
+							</ul>
+						</li>
+						<li class="col-md-6">
+							<ul class="list-unstyled">
+								<li class="clearfix">
+									<label class="col-md-4 col-xs-12 spacing-helper-m">
+										Catégorie principale :
+									</label>
+									<span class="col-md-8 col-xs-12">
+										<span id="ctl0_CONTENU_PAGE_ctl7_categoriePrincipale">Services</span>
+									</span>
+								</li>
+								<li class="clearfix">
+									<label class="col-md-4 col-xs-12 spacing-helper-m">
+										Allotissement :
+									</label>
+									<span class="col-md-8 col-xs-12">
+										<a id="ctl0_CONTENU_PAGE_ctl7_linkDetailLots">-</a>
+									</span>
+								</li>
+								<li class="clearfix">
+									<div>
+										<label class="col-md-4 col-xs-12 spacing-helper-m">
+											Code CPV :
+										</label>
+										<span class="col-md-8 col-xs-12">
+											<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRef$UrlRef" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRef_UrlRef" value="/atexo.referentiels/referentiel.jsp?&clef=ctl0_CONTENU_PAGE_ctl7_idAtexoRef&locale=fr&cheminFichierConfigXML=/data/apache2/marches.megalis.bretagne.bzh/htdocs/mpe_sf/legacy/ressources/referentiels-new/cpv-config.xml&urlBase=https://ressources.local-trust.com&styleCSS=/themes/cpv/css/cpv.css" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRef$casRef" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRef_casRef" value="cas4" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRef$codeRefPrinc" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRef_codeRefPrinc" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRef$codesRefSec" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRef_codesRefSec" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRef$defineCodePrincipal" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRef_defineCodePrincipal" value="(Code principal)" />
+<span id="ctl0_CONTENU_PAGE_ctl7_idAtexoRef_scriptRef">90500000</span>
+ (Code principal)
+										</span>
+									</div>
+								</li>
+								<li class="clearfix">
+									<div class="line">
+										<label class="col-md-4 col-xs-12 spacing-helper-m">
+											Lieu d'exécution :
+										</label>
+										<span class="col-md-8 col-xs-12">
+											<span id="ctl0_CONTENU_PAGE_ctl7_lieuxExecutions">(35) Ille-et-Vilaine</span>
+
+										</span>
+										<!--<div id="infosLeiExecution" class="info-bulle" onmouseover="mouseOverBulle();" onmouseout="mouseOutBulle();"><div><span id="ctl0_CONTENU_PAGE_ctl7_lieuxExecutionSuite">(35) Ille-et-Vilaine</span></div></div>-->
+									</div>
+								</li>
+								<li class="clearfix">
+
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+				<div id="ctl0_CONTENU_PAGE_ctl7_infosPrincipales">
+
+
+
+
+
+
+
+					<div id="ctl0_CONTENU_PAGE_ctl7_panelDomaineActivites" class="line" style="display:none;">
+						<div class="intitule-240 bold">Domaines d'activité : </div>
+						<div class="content-bloc bloc-500">
+							<!-- ul class="default-list" -->
+							<span id="ctl0_CONTENU_PAGE_ctl7_domainesActivite"></span>
+							<!-- /ul -->
+						</div>
+					</div>
+					<!-- D?but domaines d'activit?s Lt-Ref -->
+					<div id="ctl0_CONTENU_PAGE_ctl7_panelDomaineActivitesLtRef" class="line" style="display:none;">
+						<div class="intitule-240 bold">Domaines d'activité : </div>
+						<div class="content-bloc bloc-500">
+							<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRefDomaineActivites$UrlRef" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRefDomaineActivites_UrlRef" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRefDomaineActivites$casRef" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRefDomaineActivites_casRef" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRefDomaineActivites$codeRefPrinc" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRefDomaineActivites_codeRefPrinc" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRefDomaineActivites$codesRefSec" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRefDomaineActivites_codesRefSec" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRefDomaineActivites$defineCodePrincipal" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRefDomaineActivites_defineCodePrincipal" value="(Code principal)" />
+<span id="ctl0_CONTENU_PAGE_ctl7_idAtexoRefDomaineActivites_scriptRef"></span>
+
+						</div>
+					</div>
+					<!-- Fin domaines d'activit?s Lt-Ref -->
+					<span class="spacer-small"></span>
+					<div id="ctl0_CONTENU_PAGE_ctl7_adresseRetraitDossier" class="line" style="display:none;">
+						<div class="intitule-240 bold">Adresse de retrait des dossiers : </div>
+						<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_adresseRetraitDossiers"></span></div>
+					</div>
+					<div id="ctl0_CONTENU_PAGE_ctl7_panelAdresseDepotOffre" class="line" style="display:none;">
+						<div class="intitule-240 bold">Adresse de dépôt des offres : </div>
+						<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_adresseDepotOffres"></span></div>
+					</div>
+					<div id="ctl0_CONTENU_PAGE_ctl7_panelLieuOuverturePlis" class="line" style="display:none;">
+						<div class="intitule-240 bold">Lieu d'ouverture des plis : </div>
+						<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_lieuOuverturePlis"></span></div>
+					</div>
+					<span class="spacer-small" ></span>
+					<div id="ctl0_CONTENU_PAGE_ctl7_prixAcquisitionPlans" class="line" style="display:none;">
+						<div class="intitule-240 bold">Prix d'acquisition des plans : </div>
+						<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_prixAcquisitionPlan">0,00 MAD</span></div>
+					</div>
+					<div id="ctl0_CONTENU_PAGE_ctl7_panelConsultationNonAlotti" style="display:;">
+						<div id="ctl0_CONTENU_PAGE_ctl7_panelCautionProvisoire" class="line" style="display:none;">
+							<div class="intitule-240 bold">Caution provisoire : </div>
+							<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_cautionProvisoire"></span></div>
+						</div>
+						<span class="spacer-small"></span>
+						<div id="ctl0_CONTENU_PAGE_ctl7_panelQualification" class="line" style="display:none;">
+							<div class="intitule-240 bold">Qualifications : </div>
+							<div class="content-bloc bloc-500">
+								<!-- ul class="default-list" -->
+								<span id="ctl0_CONTENU_PAGE_ctl7_qualification">-</span>
+								<!-- /ul -->
+							</div>
+						</div>
+						<div id="ctl0_CONTENU_PAGE_ctl7_panelAgrements" class="line" style="display:none;">
+							<div class="intitule-240 bold">Agréments : </div>
+							<div class="content-bloc bloc-500">
+								<!-- ul class="default-list" -->
+								<span id="ctl0_CONTENU_PAGE_ctl7_agrements">-</span>
+								<!-- /ul -->
+							</div>
+						</div>
+						<span class="spacer-small"></span>
+						<div id="ctl0_CONTENU_PAGE_ctl7_panelEchantillons" class="line" style="display:none;">
+							<div class="intitule-240 bold">Echantillons demandés : </div>
+							<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_dateEchantillons">-</span><br /></div>
+						</div>
+						<div id="ctl0_CONTENU_PAGE_ctl7_panelReunion" class="line" style="display:none;">
+							<div class="intitule-240 bold">Réunion : </div>
+							<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_dateReunion">-</span><br /></div>
+						</div>
+						<div id="ctl0_CONTENU_PAGE_ctl7_panelVariante" class="line" style="display:none;">
+							<div class="intitule-240 bold">Variante : </div>
+							<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_varianteValeur">Non</span></div>
+						</div>
+						<span class="spacer-small"></span>
+					</div>
+					<div id="ctl0_CONTENU_PAGE_ctl7_panelContcatAdministratif" class="line" style="display:none;">
+						<div class="intitule-240 bold">Contact Administratif : </div>
+						<div class="content-bloc bloc-500">
+							<span id="ctl0_CONTENU_PAGE_ctl7_contactAdministratif">-</span><br />
+
+						</div>
+					</div>
+					<!--  -->
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!--END RECAP CONSULTATION-->
+        <div id="ctl0_CONTENU_PAGE_panelSourcingFragment">
+		    <hx:include src="/entreprise/sourcing-fragment"></hx:include>
+		</div>
+
+
+
+		<!--Fin line boutons-->
+		<div id="ctl0_CONTENU_PAGE_panelEntrepriseDownloadDce">
+
+			<div class="form-field">
+
+    <!--DEBUT TELECHARGEMENT COMPLET-->
+    <div id="ctl0_CONTENU_PAGE_EntrepriseDownloadDce_panelTelechargementComplet">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="h4 panel-title">
+                Téléchargement complet
+            </div>
+        </div>
+        <div class="panel-body">
+            Cliquez sur le bouton suivant pour télécharger le Dossier de consultation dans son intégralité:
+            <span id="ctl0_CONTENU_PAGE_EntrepriseDownloadDce_nomDce">1-DCE.zip - 1.18 Mo</span>
+
+            <a id="ctl0_CONTENU_PAGE_EntrepriseDownloadDce_completeDownload" class="btn btn-sm btn-primary pull-right" onclick="document.getElementById('ctl0_CONTENU_PAGE_EntrepriseDownloadDce_completeDownload').style.display='none';document.getElementById('ctl0_CONTENU_PAGE_EntrepriseDownloadDce_lienNouveauTelechargement').style.display='';" href="javascript:;//ctl0_CONTENU_PAGE_EntrepriseDownloadDce_completeDownload">Télécharger le Dossier de consultation</a>
+        </div>
+    </div>
+    </div>
+    <!--FIN TELECHARGEMENT COMPLET-->
+
+    <!--DEBUT TELECHARGEMENT PARTIEL-->
+    <div id="ctl0_CONTENU_PAGE_EntrepriseDownloadDce_panelTelechargementPartiel" class="panel panel-default">
+        <div class="panel-heading">
+            <div class="h4 panel-title">
+                Téléchargement partiel
+            </div>
+        </div>
+        <div class="panel-body">
+            Veuillez choisir les pièces du Dossier de consultation que vous désirez télécharger avant de cliquer sur le bouton ci-dessous
+            <div class="arbo-dce"><ul><li><span class="check-bloc"><input  type="checkbox" name="dce_item_1"  id="dce_item_1"  value="1-DCE" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_1'><strong><span class="float-left">1-DCE&nbsp;</span></strong></label><ul><li><span class="check-bloc"><input  type="checkbox" name="dce_item_2"  id="dce_item_2"  value="1-DCE/Candidature" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_2'><strong><span class="float-left">Candidature&nbsp;</span></strong></label><ul><li><span class="check-bloc"><input  type="checkbox" name="dce_item_3"  id="dce_item_3"  value="1-DCE/Candidature/" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_3'><span class="float-left">DC1-10-2016.doc&nbsp;( 54 Ko )</span></label></li><li><span class="check-bloc"><input  type="checkbox" name="dce_item_4"  id="dce_item_4"  value="1-DCE/Candidature/" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_4'><span class="float-left">DC2-2016.doc&nbsp;( 53 Ko )</span></label></li><li><span class="check-bloc"><input  type="checkbox" name="dce_item_5"  id="dce_item_5"  value="1-DCE/Candidature/" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_5'><span class="float-left">GED_Fiche_iParapheur_Guide_Entreprise_Signer.pdf&nbsp;( 473 Ko )</span></label></li><li><span class="check-bloc"><input  type="checkbox" name="dce_item_6"  id="dce_item_6"  value="1-DCE/Candidature/" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_6'><span class="float-left">notice-dc1-2016.pdf&nbsp;( 63 Ko )</span></label></li><li><span class="check-bloc"><input  type="checkbox" name="dce_item_7"  id="dce_item_7"  value="1-DCE/Candidature/" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_7'><span class="float-left">notice-dc2-2016.pdf&nbsp;( 58 Ko )</span></label></li></ul></li><li><span class="check-bloc"><input  type="checkbox" name="dce_item_8"  id="dce_item_8"  value="1-DCE/Pièces_admnistratives" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_8'><strong><span class="float-left">Pièces_admnistratives&nbsp;</span></strong></label><ul><li><span class="check-bloc"><input  type="checkbox" name="dce_item_9"  id="dce_item_9"  value="1-DCE/Pièces_admnistratives/" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_9'><span class="float-left">Acted_engagement (1).docx&nbsp;( 63 Ko )</span></label></li><li><span class="check-bloc"><input  type="checkbox" name="dce_item_10"  id="dce_item_10"  value="1-DCE/Pièces_admnistratives/" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_10'><span class="float-left">Cadre de réponse 1 action découverte métier.docx&nbsp;( 78 Ko )</span></label></li><li><span class="check-bloc"><input  type="checkbox" name="dce_item_11"  id="dce_item_11"  value="1-DCE/Pièces_admnistratives/" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_11'><span class="float-left">Cadre de réponse 2 immersion entreprise.docx&nbsp;( 84 Ko )</span></label></li><li><span class="check-bloc"><input  type="checkbox" name="dce_item_12"  id="dce_item_12"  value="1-DCE/Pièces_admnistratives/" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_12'><span class="float-left">Cadre de réponse 3 action partenariale.docx&nbsp;( 79 Ko )</span></label></li><li><span class="check-bloc"><input  type="checkbox" name="dce_item_13"  id="dce_item_13"  value="1-DCE/Pièces_admnistratives/" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_13'><span class="float-left">Cahierdesclausesadministrativesparticulieres (1).docx&nbsp;( 107 Ko )</span></label></li><li><span class="check-bloc"><input  type="checkbox" name="dce_item_14"  id="dce_item_14"  value="1-DCE/Pièces_admnistratives/" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_14'><span class="float-left">Reglementdelaconsultation (1).docx&nbsp;( 65 Ko )</span></label></li></ul></li><li><span class="check-bloc"><input  type="checkbox" name="dce_item_15"  id="dce_item_15"  value="1-DCE/Pièces_techniques" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_15'><strong><span class="float-left">Pièces_techniques&nbsp;</span></strong></label><ul><li><span class="check-bloc"><input  type="checkbox" name="dce_item_16"  id="dce_item_16"  value="1-DCE/Pièces_techniques/" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_16'><span class="float-left">BPU_DQE_2026.xlsx&nbsp;( 16 Ko )</span></label></li><li><span class="check-bloc"><input  type="checkbox" name="dce_item_17"  id="dce_item_17"  value="1-DCE/Pièces_techniques/" onClick="javascript:CheckUnCheckDCEItems(this.id, '17')"   />
+</span><label class='content-bloc bloc-580 dce_entreprise' for='dce_item_17'><span class="float-left">CCTP.docx&nbsp;( 45 Ko )</span></label></li></ul></li></ul></li></ul></div>
+            <a id="ctl0_CONTENU_PAGE_EntrepriseDownloadDce_telechargementPartiel" class="btn btn-sm btn-primary pull-right" onclick="document.getElementById('ctl0_CONTENU_PAGE_EntrepriseDownloadDce_telechargementPartiel').style.display='none';document.getElementById('ctl0_CONTENU_PAGE_EntrepriseDownloadDce_lienNouveauTelechargement').style.display='';" href="javascript:;//ctl0_CONTENU_PAGE_EntrepriseDownloadDce_telechargementPartiel">
+                <i class="fa fa-download m-r-1"></i>
+                Télécharger les pièces sélectionnées
+            </a>
+            <span id="ctl0_CONTENU_PAGE_EntrepriseDownloadDce_ctl8" style="display:none;color:red;"> </span>
+            <span style="display:none">
+         		            <input name="ctl0$CONTENU_PAGE$EntrepriseDownloadDce$voidControl" type="text" id="ctl0_CONTENU_PAGE_EntrepriseDownloadDce_voidControl" />
+         		        </span>
+            <input type="hidden" name="ctl0$CONTENU_PAGE$EntrepriseDownloadDce$maxIndexPieces" id="ctl0_CONTENU_PAGE_EntrepriseDownloadDce_maxIndexPieces" />
+        </div>
+    </div>
+    <!--FIN TELECHARGEMENT PARTIEL-->
+
+
+
+    <!--DEBUT TELECHARGEMENT _ANNEXES TECHNIQUES-->
+
+    <!--FIN TELECHARGEMENT _ANNEXES TECHNIQUES-->
+
+
+    <div class="clearfix">
+        <a style="display:;"
+           href="index.php?page=Entreprise.EntrepriseDetailConsultation&id=242039&orgAcronyme=a1w"
+           class="btn btn-sm btn-default pull-left" title="Retourner à la fiche Détails de la consultation">
+            Retour
+        </a>
+        <a id="ctl0_CONTENU_PAGE_EntrepriseDownloadDce_lienNouveauTelechargement" class="btn btn-sm btn-primary pull-right" title="Nouveau téléchargement" href="index.php?page=Entreprise.EntrepriseDemandeTelechargementDce&id=242039&orgAcronyme=a1w">
+            <i class="fa fa-download m-r-1"></i>
+            Nouveau téléchargement
+        </a>
+    </div>
+</div>
+<!--Fin colonne droite-->
+<script Text="javascript"> document.getElementById('ctl0_CONTENU_PAGE_EntrepriseDownloadDce_lienNouveauTelechargement').style.display = 'none'; </script>
+<span id="ctl0_CONTENU_PAGE_EntrepriseDownloadDce_script"></span>
+		</div>
+		<div class="breaker"></div>
+	</div>
+	<!--Fin colonne droite-->
+
+	<link rel="stylesheet" href="./app/css/dossierVolumineux.css?k=2026-00.05.01">
+	<script src="./themes/js/assistance-marche-public-prado.js?k=2026-00.05.01"></script>
+
+
+			</div>
+		</div>
+	</div>
+	<!--Fin partie centrale-->
+
+
+
+	<!--Debut Side menu-->
+<div>
+    <div id="acces-tel" class="help-bar" visible="0">
+		<ul>
+			<li style="display:none;">
+				<a href="/?page=Entreprise.EntrepriseFaq" target="_blank" class="faq">
+					TEXT_FAQ
+				</a>
+			</li>
+			<li>
+				<a class="hotline" target="_blank" title="Assistance (nouvelle fenêtre)" href="/index.php/entreprise/aide/assistance-telephonique">
+					<span class="text">
+						Assistance <span>: 02 23 48 04 54 / Assistance dédiée aux marchés de la formation professionnelle : 01 53 43 05 44</span>
+					</span>
+				</a>
+			</li>
+		</ul>
+	</div>
+</div>
+<!--Fin Side menu-->
+	</div>
+<div style="visibility:hidden;">
+<input type="text" style="display:none" autocomplete="off" name="PRADO_PAGESTATE" id="PRADO_PAGESTATE" value="TRONQUE" />
+</div>
+<script src="/assets/df1e7875/validator/validation3.min.js"></script>
+<script>
+/*<![CDATA[*/
+new Prado.ValidationManager({'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TValidationSummary({'ID':"ctl0_CONTENU_PAGE_ctl6_validationSummary",'FormID':"ctl0_ctl1",'ScrollToSummary':true,'DisplayMode':"BulletList",'Refresh':true,'ValidationGroup':"ValidateInfoUser",'Display':"None",'OnHideSummary':function(summary, validators){
+                    document.getElementById('ctl0_CONTENU_PAGE_ctl6_validationSummary').innerHTML='';
+                    document.getElementById('divValidationSummary').style.display='none';
+                 }});
+new Prado.WebUI.TLinkButton({'ID':"ctl0_CONTENU_PAGE_EntrepriseDownloadDce_completeDownload",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseDownloadDce$completeDownload",'CausesValidation':true,'StopEvent':true,'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TLinkButton({'ID':"ctl0_CONTENU_PAGE_EntrepriseDownloadDce_telechargementPartiel",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseDownloadDce$telechargementPartiel",'CausesValidation':true,'ValidationGroup':"ValidateInfoUser",'StopEvent':true,'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TCustomValidator({'ID':"ctl0_CONTENU_PAGE_EntrepriseDownloadDce_ctl8",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ErrorMessage':"Vous devez au moins s\u00e9lectionner une pi\u00e8ce",'ValidationGroup':"ValidateInfoUser",'ControlToValidate':"ctl0_CONTENU_PAGE_EntrepriseDownloadDce_voidControl",'ControlType':"TTextBox",'Enabled':true,'OnValidationError':function(sender, parameter){
+                    document.getElementById('divValidationSummary').style.display='';
+                    document.getElementById('ctl0_CONTENU_PAGE_EntrepriseDownloadDce_telechargementPartiel').style.display='';
+                    document.getElementById('ctl0_CONTENU_PAGE_EntrepriseDownloadDce_lienNouveauTelechargement').style.display='none';
+                        // Laisse Prado finir son scroll, puis fait ton scroll personnalisé
+                        setTimeout(function() {
+                            const target = document.getElementById('divValidationSummary');
+                            const offset = 100; // Hauteur du menu flottant à ajuster
+                            const bodyRect = document.body.getBoundingClientRect().top;
+                            const elementRect = target.getBoundingClientRect().top;
+                            const elementPosition = elementRect - bodyRect;
+                            const offsetPosition = elementPosition - offset;
+
+                            window.scrollTo({
+                                top: offsetPosition,
+                                behavior: 'smooth'
+                            });
+                        }, 30); // Délai suffisant pour que Prado ait fini (ajuste si besoin)
+                 },'ClientValidationFunction':"DownloadPartialDCE"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_EntrepriseDownloadDce_voidControl",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseDownloadDce$voidControl",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+/*]]>*/
+</script>
+</form>
+</main>
+
+<script src="/build/runtime.4c1b5377.js"></script>
+<script src="/build/5360.327a2067.js"></script>
+<script src="/build/1083.f7f04fc5.js"></script>
+<script src="/build/2348.edf47088.js"></script>
+<script src="/build/3806.0a2d5716.js"></script>
+<script src="/build/8601.20c277a9.js"></script>
+<script src="/build/1685.9caf32f3.js"></script>
+<script src="/build/agent-header-statistics.be8d7a1a.js"></script>
+<script src="/build/hinclude.0c37bfd6.js"></script>
+<script src="/build/6964.f3df8713.js"></script>
+<script src="/build/3144.fd886a2a.js"></script>
+<script src="/build/assistance-status-checker.feb392f2.js"></script>
+<script src="/build/force.b462143f.js"></script>
+<script src="/build/4692.ea0baeb8.js"></script>
+<script src="/build/8851.7170f0d0.js"></script>
+<script src="/build/2754.c2d5003c.js"></script>
+<script src="/build/vendor.a62c0775.js"></script>
+
+
+
+<div class="clearfix">&nbsp;</div>
+<footer class="footer" role="contentinfo">
+    <div class="content footer_content text-center">
+        <div class="list-unstyled clearfix container">
+            <div class="footer-menu">
+                <ul class="list-unstyled">
+                                            <li>
+                            <a class="link-footer" href="/index.php/entreprise/footer/info-site">
+                                InfoSite et RGPD
+                            </a>
+                        </li>
+
+                                            <li>
+                            <a class="link-footer"
+                               href="/index.php/entreprise/footer/conditions-utilisation">
+                                Conditions d'utilisation
+                            </a>
+                        </li>
+
+                    <li>
+                        <a class="link-footer"
+                           href="/index.php/entreprise/footer/prerequis-techniques">
+                            Pré-requis techniques
+                        </a>
+                    </li>
+
+
+                    <li>
+                        <a class="link-footer"
+                           href="/index.php/entreprise/footer/accessibilite">
+                            Accessibilité
+                        </a>
+                    </li>
+
+                                            <li>
+                            <a class="link-footer"
+                               href="/index.php/entreprise/footer/info-acrgs">
+                                Autorités de certification européennes
+                            </a>
+                        </li>
+
+
+                </ul>
+            </div>
+
+            <div>
+
+
+            </div>
+                            <div id="ctl0_ctl4_panelNaviguationMulilingue" class="footer-multilingual">
+                                            <div class="item-lang on lang-switcher"
+                             data-lang="fr">
+                            <a href="/index.php/language">
+                                <input type="button" name="ctl0$ctl4$langages$ctl2$flagImg"
+                                       value="fr"
+                                       id="ctl0_ctl4_langages_ctl2_flagImg"
+                                       class="language-choice flage-FR"
+                                />
+                            </a>
+                        </div>
+                                            <div class="item-lang on lang-switcher"
+                             data-lang="en">
+                            <a href="/index.php/language/en">
+                                <input type="button" name="ctl0$ctl4$langages$ctl3$flagImg"
+                                       value="en"
+                                       id="ctl0_ctl4_langages_ctl3_flagImg"
+                                       class="language-choice flage-EN"
+                                />
+                            </a>
+                        </div>
+                                            <div class="item-lang on lang-switcher"
+                             data-lang="es">
+                            <a href="/index.php/language/es">
+                                <input type="button" name="ctl0$ctl4$langages$ctl4$flagImg"
+                                       value="es"
+                                       id="ctl0_ctl4_langages_ctl4_flagImg"
+                                       class="language-choice flage-ES"
+                                />
+                            </a>
+                        </div>
+                                    </div>
+
+        </div>
+    </div>
+</footer>
+<div class="footer_go_top out" id="js-footer_go_top">
+    <a href="#" class="btn btn-primary btn-go-to-top animated" id="js-btn-go_to_top"
+       title="Retour en haut">
+        <i class="fa fa-angle-up"></i>
+    </a>
+</div>
+
+
+
+</div>
+<script  src="https://marches.megalis.bretagne.bzh/themes/js/prototype-noconflict.footer.js?k=2026-00.05.01" charset="UTF-8"></script>
+
+<!-- MainLayout -->
+
+		<script  src="https://marches.megalis.bretagne.bzh/themes/js/ng-script.js?k=2026-00.05.01" charset="UTF-8"></script>
+
+
+
+
+
+</body>
+</html>

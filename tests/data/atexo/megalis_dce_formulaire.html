@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+<title>Portail des marchés publics</title>
+
+
+
+
+			<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+			<title>
+				Portail des marchés publics
+			</title>
+
+
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/vue-multiselect.min.css?k=2026-00.05.01" type="text/css" />
+			<link rel="stylesheet" type="text/css" href="https://marches.megalis.bretagne.bzh/themes/css/ng-style-mpe.css?k=2026-00.05.01" media="all"/>
+			<link rel="stylesheet" type="text/css" href="https://marches.megalis.bretagne.bzh/themes/css/ng-style.css?k=2026-00.05.01" media="all"/>
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/chosen.css?k=2026-00.05.01" type="text/css" />
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/leaflet.css?k=2026-00.05.01" />
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/MarkerCluster.css?k=2026-00.05.01" type="text/css" />
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/leaflet.awesome-markers.css?k=2026-00.05.01" type="text/css" />
+
+
+                    <link rel="stylesheet" href="app/assets/css/entreprise.css?k=2026-00.05.01" type="text/css" >
+
+
+			<!-- end bloc -->
+			<link rel="stylesheet" type="text/css"
+				  href="https://marches.megalis.bretagne.bzh/themes/css/upload/jquery.fileupload-ui-noscript.css?k=2026-00.05.01"
+				  media="all"/>
+			<link rel="stylesheet" type="text/css"
+				  href="https://marches.megalis.bretagne.bzh/themes/css/upload/jquery.fileupload-ui.css?k=2026-00.05.01"
+				  media="all"/>
+
+
+</head>
+
+<body class=' ' >
+
+<script>
+	var pfUrl = "/";
+	var isAgent = false;
+</script>
+
+
+
+
+<!--Debut Bandeau-->
+<!--Begin BandeauEntreprise-->
+
+
+
+
+    <header class="header" role="banner">
+        <div class="navbar-default navbar-section">
+            <div class="container  header-top">
+                <div class="pull-left relative header-left">
+    <div class="pull-left">
+        <a href="/entreprise"
+           alt="Accueil"
+           title="Accueil"
+           class="btn btn-link">
+            <img class="img-responsive header-img "
+                 src="/themes//images/img/logo-replace.png"
+                 alt="Accueil">
+        </a>
+    </div>
+</div>                            </div>
+        </div>
+    </header>
+
+    <div class="" id="skippy">
+        <a href="#horizonatal-menu"
+           class="sr-only sr-only-focusable clearfix btn-lg btn-block btn-xs">
+            Aller au menu
+        </a>
+        <a href="#middle"
+           class="sr-only sr-only-focusable clearfix btn-lg btn-block btn-xs">
+            Aller au contenu
+        </a>
+    </div>
+
+    <div class="nav-wrapper d-block">
+        <nav class="navbar horizonatal-menu" role="navigation" data-spy="affix" data-offset-top="20" id="horizonatal-menu">
+            <div class="container d-block">
+                <div class="top top-user-profile pull-right " id="ctl0_bandeauEntrepriseWithoutMenuSf_ctl0">
+                    <div id="user-infos" class="user-toogle-infos">
+                                                    <div id="ctl0_bandeauEntrepriseWithoutMenuSf_panelDisconnected" class="bloc-user-login">
+    <div class="bootstrap">
+        <div class="kt-profile" data-widget="profile" data-status="online"
+             data-json='{"profile":{"name":"", "lastname":"" } }'>
+            <div class="atx-popover-markup-login-usr">
+                <div class="trigger-btn selector btn-toggle-info_user kt-profile-dropdown-toggle"
+                                          aria-expanded="false" id="kt-profile-dropdown-Disconnected">
+                    <a href="/index.php/entreprise/login" data-placement="bottom" class="btn-block btn-login">
+                        <span class="text">
+                            <span class="hidden-xs">Se connecter</span>
+                            <span class="visible-xs pull-left">
+                                <i class="fa fa-user-o"></i>
+                            </span>
+                                                    </span>
+                    </a>
+                </div>
+
+                            </div>
+        </div>
+    </div>
+    <div id="ctl0_bandeauEntrepriseWithoutMenuSf_nonAuthentifie">
+        <div class="panel-user-infos">
+            <div class="panel-user-infos-arrow"></div>
+            <div class="content"></div>
+        </div>
+    </div>
+</div>                                            </div>
+                </div>
+                <div class="navbar-header">
+                    <div class="wrapper pull-right">
+                        <a class="mobile-help m-r-4" onclick="goToUtah()" aria-label="Contact"><i class="fa fa-phone"></i></a>
+                        <a class="mobile-search atx-popover-markup-login-usr m-r-2" href="/index.php/entreprise/login" aria-label="entreprise-auth"><i class="fa fa-user"></i></a>
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                                data-target="#navbar-collapse" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar top-bar"></span>
+                            <span class="icon-bar middle-bar"></span>
+                            <span class="icon-bar bottom-bar"></span>
+                        </button>
+                    </div>
+                    <a class="navbar-brand"
+                       href="/entreprise">
+                        <img src="/themes//images/img/logo_mobile.png"/>
+                    </a>
+                </div>
+                                    <div class="collapse navbar-collapse p-0" id="navbar-collapse">
+                        <ul class="nav navbar-nav">
+                                                            <li class="hide">
+    <a href="#" class="dropdown-toggle pull-left"
+       data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Mon panier
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                <li class="dropdown-header">
+                    <div class="h4">
+                        Consultations en cours
+                    </div>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise">
+                        <span class="fa fa-chevron-right"></span>
+                        Toutes les consultations
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;retraits">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansRetraits">
+                        sans retrait
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;questions">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansQuestions">
+                        sans question posée
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;depots">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansDepots">
+                        sans dépôt
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;echanges">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansEchanges">
+                        sans message échangé
+                    </a>
+                </li>
+                <li role="separator" class="divider"></li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;panierEntreprise&amp;dateFinEnd">
+                        <span class="fa fa-chevron-right"></span>
+                        Consultations clôturées
+                    </a>
+                </li>
+                <li role="separator" class="divider"></li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;searchAnnCons&amp;panierEntreprise">
+                        <span class="fa fa-chevron-right"></span>
+                        Recherche avancée
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+    </ul>
+</li>
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left"
+       data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Annonces
+        <span class="fa fa-chevron-down pull-right arrow-position"></span></a>
+
+    <ul class="dropdown-menu mega-dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled clearfix">
+                <li class="col-md-4">
+                    <ul class="list-unstyled">
+                        <li class="dropdown-header">
+                            <div class="h4">
+                                Consultations en cours
+                            </div>
+                        </li>
+                        <li>
+                            <div class="input-group form-group form-group-sm">
+                                <form class="input-group form-group form-group-sm"
+                                      action="/index.php/espace-entreprise/search"
+                                      method="get">
+                                    <label class="sr-only"
+                                           for="ctl0_bandeauEntrepriseWithoutMenuSf_quickSearch">
+                                        Recherche rapide
+                                    </label>
+                                    <input name="keyWord"
+                                           type="text"
+                                           aria-placeholder="Recherche rapide"
+                                           id="ctl0_bandeauEntrepriseWithoutMenuSf_quickSearch"
+                                           class="form-control input-quickSearch"
+                                           placeholder="Recherche rapide ..."
+                                           onfocus=""
+                                           onblur=""
+                                           title="Recherche rapide"
+                                    />
+                                    <span class="input-group-btn align-right">
+                                                                <button class="btn btn-sm btn-primary button-quickSearch"
+                                                                        type="submit"
+                                                                        id="btnGoToQuickResultSearch">
+                                                                    <i class="fa fa-search"></i>
+                                                                </button>
+                                                            </span>
+                                </form>
+                            </div>
+                        </li>
+                        <li>
+                                                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AllCons">
+                                    <span class="fa fa-chevron-right"></span>
+                                    Toutes les consultations
+                                </a>
+                                                    </li>
+                        <li>
+                                                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;searchAnnCons&type=multicriteres">
+                                    <span class="fa fa-chevron-right"></span>
+                                    Recherche avancée
+                                </a>
+                                                    </li>
+                        <li>
+                                                            <a id="btnReview"
+                                   href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;searchAnnCons&type=restreinte">
+                                    <span class="fa fa-chevron-right"></span>
+                                    Recherche d&#039;une procédure restreinte
+                                </a>
+                                                    </li>
+                    </ul>
+                </li>
+                <li class="col-md-4">
+                    <ul class="list-unstyled">
+                        <li class="dropdown-header">
+                            <div class="h4">
+                                Autres annonces
+                            </div>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AvisInformation">
+                                <span class="fa fa-chevron-right"></span>
+                                Toutes les annonces d&#039;information
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AvisAttribution">
+                                <span class="fa fa-chevron-right"></span>
+                                Toutes les annonces d&#039;attribution
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AllAnn">
+                                <span class="fa fa-chevron-right"></span>
+                                Recherche avancée
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="col-md-4">
+                    <ul class="list-unstyled">
+                        <li class="dropdown-header"
+                            style="display:block">
+                            <div class="h4">
+                                Données essentielles des marchés conclus
+                            </div>
+                        </li>
+                        <li style="display:block">
+                            <div id="ctl0_bandeauEntrepriseWithoutMenuSf_panelArticle133">
+                                                                    <div>
+                                        <a href="/?page=Entreprise.EntrepriseRechercherListeMarches&search">
+                                            <span class="fa fa-chevron-right"></span>
+                                            Recherche avancée
+                                        </a>
+                                    </div>
+
+
+                                                            </div>
+                        </li>
+                        <li class="dropdown-header">
+                            <div class="h4">
+                                Enchères
+                            </div>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseParticipationEnchere">
+                                <span class="fa fa-chevron-right"></span>
+                                Participation
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="col-md-12">
+                    <ul class="list-unstyled clearfix">
+
+                        <li class="dropdown-header clearfix">
+                            <div class="h4 pull-left">
+                                Mes alertes et recherches sauvegardées
+                            </div>
+                            <a href="/?page=Entreprise.EntrepriseGestionRecherches"
+                               class="pull-right btn btn-link btn-sm">
+                                <i class="fa fa-cog"></i>
+                                Gérer mes alertes et recherches sauvegardées
+                            </a>
+                        </li>
+                                            </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>
+                                                            <li class="hide">
+    <a href="/index.php/entreprise/dossier-volumineux/gestion/">
+        Dossiers volumineux
+    </a>
+</li>
+                                                            <li class="hide">
+    <a class="btn"  href="/?page=Entreprise.RechercheCollaborateur">
+        Recherche de collaboration
+    </a>
+</li>
+                                                            <li style="display:none;">
+    <a class="btn" href="/?page=Entreprise.EntrepriseVisualiserEntitesAchatsRecherche">
+        Entités d&#039;Achat
+    </a>
+</li>
+
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" role="button"
+       aria-haspopup="true" aria-expanded="false">
+        Signature
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                <li>
+                                            <a href="/index.php/entreprise/signer-document">
+                            <span class="fa fa-chevron-right"></span>
+                            Signer un document
+                        </a>
+                                    </li>
+                <li>
+                    <a href=" /index.php/entreprise/verification-signature ">
+                        <span class="fa fa-chevron-right"></span>
+                        Vérifier la signature
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" role="button"
+       aria-haspopup="true" aria-expanded="false">
+        Aide
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                <li>
+                    <a href="/?page=Entreprise.EntreprisePremiereVisite">
+                        <span class="fa fa-chevron-right"></span>
+                        Première visite
+                    </a>
+                </li>
+                <li>
+                    <a href="/index.php/entreprise/aide/guide">
+                        <span class="fa fa-chevron-right"></span>
+                        Guides d&#039;utilisation
+                    </a>
+                </li>
+                <li>
+                    <a href="/index.php/entreprise/aide/assistance-telephonique">
+                        <span class="fa fa-chevron-right"></span>
+                        Assistance
+                    </a>
+                </li>
+                <li style="display:none;">
+                    <a href="/?page=Entreprise.DocumentsDeReference&callFrom=entreprise"
+                       title="Documents de référence (nouvelle fenêtre)">
+                        <span class="fa fa-chevron-right"></span>
+                        Documents de référence
+                    </a>
+                </li>
+                                <li style="display:block;"></li>
+                <li style="display:block;">
+                    <a href="/index.php/entreprise/aide/outils-informatiques">
+                        <span class="fa fa-chevron-right"></span>
+                        Outils informatiques
+                    </a>
+                </li>
+
+                            </ul>
+        </li>
+    </ul>
+</li>
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left"
+       data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Se préparer à répondre
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                                <li>
+                    <a href="/index.php/entreprise/footer/diagnostic-poste">
+                        <span class="fa fa-chevron-right"></span>
+                        Tester la configuration de mon poste
+                    </a>
+                </li>
+                                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;AllCons&amp;orgTest">
+                        <span class="fa fa-chevron-right"></span>
+                        Consultations de test
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>
+                                                                                </ul>
+                    </div>
+                            </div>
+        </nav>
+    </div>
+    <div id="infoErrone" class="m-t-7">
+
+    </div>
+
+<div class="m-t-7">
+
+    </div>
+<!--End BandeauEntreprise-->
+<!--Begin BandeauAgent-->
+
+<!--End BandeauAgent-->
+<!--Begin BandeauAgentSocleInterne-->
+
+<!--End BandeauAgent-->
+<!--Fin Bandeau-->
+
+<main role = "main">
+<form id="ctl0_ctl1" method="post" action="/index.php?page=Entreprise.EntrepriseDemandeTelechargementDce&amp;id=242039&amp;orgAcronyme=a1w" name="main_form" autocomplete="on"><script src="/assets/db823f34/jquery.min.js"></script>
+<script src="/assets/df1e7875/prado.min.js"></script>
+<script src="/assets/df1e7875/controls/controls.min.js"></script>
+<script src="/assets/b61c3793/jquery-ui.min.js"></script>
+<script src="/assets/df1e7875/activecontrols/ajax3.min.js"></script>
+<script src="/assets/df1e7875/activecontrols/activecontrols3.min.js"></script>
+
+
+
+
+<script src="/assets/7b30d930/bootstrap.min.js"></script>
+
+
+<script type="text/javascript">
+    var J = jQuery.noConflict();
+</script>
+
+
+<script src="/assets/7b30d930/sdk.js"></script>
+
+<script src="/assets/7b30d930/bootboxjs.js"></script>
+
+<script src="/assets/286d531d/jquery.iframe-transport.js"></script>
+
+<script src="/assets/286d531d/jquery.fileupload.js"></script>
+
+<script src="/assets/7b30d930/jquery.placeholder.js"></script>
+
+<script src="/assets/7b30d930/chosen.jquery.js"></script>
+
+<script src="/assets/7b30d930/modernizr.js"></script>
+
+<script src="/assets/c9ed3ec4/printThis.js"></script>
+
+<script src="/assets/7b30d930/placeholder.js"></script>
+
+
+<script src="/assets/7b30d930/scripts.js"></script>
+
+<script src="/assets/7b30d930/popup.inc.js"></script>
+
+<script src="/assets/7b30d930/scripts-eval.js"></script>
+
+<script src="/assets/7b30d930/atexoFileUpload.js"></script>
+
+<script src="/assets/7b30d930/scripts-lieux-execution.js"></script>
+
+<script src="/assets/7b30d930/tab.js"></script>
+
+<script src="/assets/7b30d930/loader.js"></script>
+
+<script src="/assets/7b30d930/data.js"></script>
+
+<script src="/assets/7b30d930/standard.js"></script>
+
+<script src="/assets/c9ed3ec4/printThis.js"></script>
+
+<script src="/assets/7b30d930/attachmentMessec.js"></script>
+
+
+<script src="/assets/7b30d930/jquery.numberformatter-1.2.js"></script>
+
+<script src="/assets/7b30d930/OptionTransfer.js"></script>
+
+<script src="/assets/7b30d930/scripts-lieux-execution.js"></script>
+
+<script src="/assets/7b30d930/popUpInvites.js"></script>
+
+<script src="https://marches.megalis.bretagne.bzh/themes/js/atexoScript.fr.js?k=2026-00.05.01"></script>
+
+<script src="https://marches.megalis.bretagne.bzh/themes/js/codeCpv.fr.js?k=2026-00.05.01"></script>
+
+<script src="https://marches.megalis.bretagne.bzh/themes/js/atexoRef.fr.js?k=2026-00.05.01"></script>
+
+
+        <script src="https://marches.megalis.bretagne.bzh/themes/js/calendrier.fr.js?k=2026-00.05.01"></script>
+
+
+<script src="https://marches.megalis.bretagne.bzh/themes/js/atexoApplet.fr.js?k=2026-00.05.01"></script>
+
+
+<script src="/assets/7b30d930/vue.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/assets/7b30d930/prototype-noconflict.header.js"></script>
+
+
+
+
+
+
+
+	<!--Debut partie centrale-->
+	<div id="middle" class="clear-top atx-middle" style="">
+	    <div id="infoErrone" class="mt-2">
+
+    </div>
+
+<div class="mt-2">
+
+    </div>
+
+		<div class="container container--690-sm m-b-10">
+			<div class="clearfix">
+
+
+	<div id="ctl0_CONTENU_PAGE_mainPart" class="main-part">
+		<div class="clearfix">
+			<ul class="breadcrumb">
+				<li>
+					<a href="/entreprise">
+						Accueil
+                    </a>
+				</li>
+				<li>
+					Consultations
+				</li>
+				<li>
+					Dossier de Consultation des Entreprises
+				</li>
+			</ul>
+		</div>
+
+		<!-- Début de l'entête du sommateur de messages d'erreurs -->
+<div id="divValidationSummary" style="display:none" class="bloc-message form-bloc-conf msg-erreur erreur-danger">
+
+    <div role="alert">
+        <div class="h4-alerte">
+            <i class="fa fa-exclamation-triangle m-r-1 hidden"></i>
+            Erreur de saisie.
+        </div>
+        <div class="spacer-small"></div>
+        <div>
+            Veuillez vérifier la saisie des champs suivants :
+            <span id="ctl0_CONTENU_PAGE_ctl6_validationSummary" style="display:none;color:#d9534f;"></span>
+            <span id="ctl0_CONTENU_PAGE_ctl6_serverError"></span>
+        </div>
+    </div>
+</div>
+<!-- Fin du footer du sommateur de messages d'erreurs -->
+		<!--BEGIN RECAP CONSULTATION-->
+<div class="form-bloc form-horizontal recap-infos-consultation" id="recap-consultation">
+	<div class="panel panel-default" id="collapseHeading" >
+		<div class="panel-heading clearfix" role="button" data-toggle="collapse" href="#collapseInfo" aria-expanded="true">
+			<h1 class="h4 panel-title">
+				Détails de la consultation
+			</h1>
+		</div>
+		<div>
+			<div id="collapseBodyInfo" class="panel-collapse recap-body panel-body clearfix collapse in" role="tablist" aria-labelledby="collapseInfo">
+				<div class="recap-bloc">
+					<div class="clearfix item_consultation">
+						<!--BEGIN DATE LIMITE REMISE DES PLIS-->
+						<div class="col-md-10">
+							<span class="col-md-8 col-xs-12">
+								<div id="ctl0_CONTENU_PAGE_ctl7_panelDateLimiteRemisePlis">
+									<label class="control-label">
+										Date et heure limite de remise des plis :
+									</label>
+									<span id="ctl0_CONTENU_PAGE_ctl7_dateHeureLimiteRemisePlis"><span class="text-success"><strong>16/11/2026 16:00</strong></span></span>
+									<span class="small">
+										<span id="ctl0_CONTENU_PAGE_ctl7_libelleHeureLocalisation"> </span>
+									</span>
+									<span class="m-l-1">
+										<img src="https://marches.megalis.bretagne.bzh/themes/images/reponse-elec-oblig-avec-signature.gif" alt="Marché public simplifié" id="ctl0_CONTENU_PAGE_ctl7_pictCertificat" title="Réponse électronique obligatoire pour cette consultation. Dispositions sur la signature électronique, se référer au RC ou à l'AAC." />
+									</span>
+
+
+									<span id="ctl0_CONTENU_PAGE_ctl7_logoDume"><img src="https://marches.megalis.bretagne.bzh/themes/images/logo-dume-publie.png" alt="DUME défini par l'acheteur" title="DUME défini par l'acheteur" class="indent-5 inline-img"/></span>
+
+								</div>
+
+
+							</span>
+						</div>
+						<!--END DATE LIMITE REMISE DES PLIS-->
+
+						<!--BEGIN REFERENCE-->
+						<div class="col-md-10 text-justify">
+							<label class="col-md-4 col-xs-12 spacing-helper-m">
+								Référence :
+							</label>
+							<span class="col-md-8 col-xs-12">
+								 <span id="ctl0_CONTENU_PAGE_ctl7_reference">261531004_AO</span>
+							</span>
+						</div>
+						<!--END REFERENCE-->
+
+						<!--BEGIN INTITULE-->
+						<div class="col-md-10 text-justify">
+							<label class="col-md-4 col-xs-12 spacing-helper-m">
+								Intitulé :
+							</label>
+							<span class="col-md-8 col-xs-12">
+								 <span id="ctl0_CONTENU_PAGE_ctl7_intitule">Prestation de transport et de traitement par valorisation des déchets de balayures issus du nettoyage de voiries Programme 2027-2031</span>
+							</span>
+						</div>
+						<!--END INTITULE-->
+
+						<!--BEGIN OBJET-->
+						<div class="col-md-10 text-justify">
+							<label class="col-md-4 col-xs-12 spacing-helper-m">
+								Objet :
+							</label>
+							<span class="col-md-8 col-xs-12">
+								<span id="ctl0_CONTENU_PAGE_ctl7_objet">Prestation de transport et de traitement par valorisation des déchets de balayures issus du nettoyage de voiries Programme 2027-2031
+</span>
+							</span>
+						</div>
+						<!--END OBJET-->
+					</div>
+					<ul  id="collapseInfo" class="panel-collapse collapseBody list-unstyled clearfix collapse in" role="tablist" aria-labelledby="collapseInfo">
+						<li>
+							<hr />
+						</li>
+						<li class="col-md-6">
+							<ul class="list-unstyled">
+								<li class="clearfix">
+
+								</li>
+								<li class="clearfix">
+
+								</li>
+								<!-- <div id="infosPrincipales" style="display:none;" class="panel-toggle"> -->
+								<li class="clearfix">
+
+								</li>
+								<li class="clearfix">
+									<label class="col-md-4 col-xs-12 spacing-helper-m">
+										Entité publique :
+									</label>
+									<span class="col-md-8 col-xs-12">
+											<span id="ctl0_CONTENU_PAGE_ctl7_entitePublique">COMMUNE DE RENNES</span>
+										</span>
+								</li>
+								<li class="clearfix">
+									<label class="col-md-4 col-xs-12 spacing-helper-m">
+										Service :
+									</label>
+									<span class="col-md-8 col-xs-12">
+										<span id="ctl0_CONTENU_PAGE_ctl7_entiteAchat">COMMUNE DE RENNES / / / DVDA - DV DA : Direction de la Voirie et de l'Assainissement</span>
+									</span>
+								</li>
+								<li class="clearfix">
+									<label class="col-md-4 col-xs-12 spacing-helper-m">
+										Type d'annonce :
+									</label>
+									<span class="col-md-8 col-xs-12">
+										<span id="ctl0_CONTENU_PAGE_ctl7_annonce">Annonce de consultation</span>
+									</span>
+								</li>
+								<li class="clearfix">
+									<label class="col-md-4 col-xs-12 spacing-helper-m">
+										Procédure :
+									</label>
+									<span class="col-md-8 col-xs-12">
+											<span id="ctl0_CONTENU_PAGE_ctl7_typeProcedure">Appel d'offres ouvert</span>
+
+										</span>
+								</li>
+							</ul>
+						</li>
+						<li class="col-md-6">
+							<ul class="list-unstyled">
+								<li class="clearfix">
+									<label class="col-md-4 col-xs-12 spacing-helper-m">
+										Catégorie principale :
+									</label>
+									<span class="col-md-8 col-xs-12">
+										<span id="ctl0_CONTENU_PAGE_ctl7_categoriePrincipale">Services</span>
+									</span>
+								</li>
+								<li class="clearfix">
+									<label class="col-md-4 col-xs-12 spacing-helper-m">
+										Allotissement :
+									</label>
+									<span class="col-md-8 col-xs-12">
+										<a id="ctl0_CONTENU_PAGE_ctl7_linkDetailLots">-</a>
+									</span>
+								</li>
+								<li class="clearfix">
+									<div>
+										<label class="col-md-4 col-xs-12 spacing-helper-m">
+											Code CPV :
+										</label>
+										<span class="col-md-8 col-xs-12">
+											<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRef$UrlRef" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRef_UrlRef" value="/atexo.referentiels/referentiel.jsp?&clef=ctl0_CONTENU_PAGE_ctl7_idAtexoRef&locale=fr&cheminFichierConfigXML=/data/apache2/marches.megalis.bretagne.bzh/htdocs/mpe_sf/legacy/ressources/referentiels-new/cpv-config.xml&urlBase=https://ressources.local-trust.com&styleCSS=/themes/cpv/css/cpv.css" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRef$casRef" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRef_casRef" value="cas4" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRef$codeRefPrinc" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRef_codeRefPrinc" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRef$codesRefSec" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRef_codesRefSec" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRef$defineCodePrincipal" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRef_defineCodePrincipal" value="(Code principal)" />
+<span id="ctl0_CONTENU_PAGE_ctl7_idAtexoRef_scriptRef">90500000</span>
+ (Code principal)
+										</span>
+									</div>
+								</li>
+								<li class="clearfix">
+									<div class="line">
+										<label class="col-md-4 col-xs-12 spacing-helper-m">
+											Lieu d'exécution :
+										</label>
+										<span class="col-md-8 col-xs-12">
+											<span id="ctl0_CONTENU_PAGE_ctl7_lieuxExecutions">(35) Ille-et-Vilaine</span>
+
+										</span>
+										<!--<div id="infosLeiExecution" class="info-bulle" onmouseover="mouseOverBulle();" onmouseout="mouseOutBulle();"><div><span id="ctl0_CONTENU_PAGE_ctl7_lieuxExecutionSuite">(35) Ille-et-Vilaine</span></div></div>-->
+									</div>
+								</li>
+								<li class="clearfix">
+
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+				<div id="ctl0_CONTENU_PAGE_ctl7_infosPrincipales">
+
+
+
+
+
+
+
+					<div id="ctl0_CONTENU_PAGE_ctl7_panelDomaineActivites" class="line" style="display:none;">
+						<div class="intitule-240 bold">Domaines d'activité : </div>
+						<div class="content-bloc bloc-500">
+							<!-- ul class="default-list" -->
+							<span id="ctl0_CONTENU_PAGE_ctl7_domainesActivite"></span>
+							<!-- /ul -->
+						</div>
+					</div>
+					<!-- D?but domaines d'activit?s Lt-Ref -->
+					<div id="ctl0_CONTENU_PAGE_ctl7_panelDomaineActivitesLtRef" class="line" style="display:none;">
+						<div class="intitule-240 bold">Domaines d'activité : </div>
+						<div class="content-bloc bloc-500">
+							<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRefDomaineActivites$UrlRef" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRefDomaineActivites_UrlRef" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRefDomaineActivites$casRef" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRefDomaineActivites_casRef" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRefDomaineActivites$codeRefPrinc" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRefDomaineActivites_codeRefPrinc" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRefDomaineActivites$codesRefSec" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRefDomaineActivites_codesRefSec" />
+<input type="hidden" name="ctl0$CONTENU_PAGE$ctl7$idAtexoRefDomaineActivites$defineCodePrincipal" id="ctl0_CONTENU_PAGE_ctl7_idAtexoRefDomaineActivites_defineCodePrincipal" value="(Code principal)" />
+<span id="ctl0_CONTENU_PAGE_ctl7_idAtexoRefDomaineActivites_scriptRef"></span>
+
+						</div>
+					</div>
+					<!-- Fin domaines d'activit?s Lt-Ref -->
+					<span class="spacer-small"></span>
+					<div id="ctl0_CONTENU_PAGE_ctl7_adresseRetraitDossier" class="line" style="display:none;">
+						<div class="intitule-240 bold">Adresse de retrait des dossiers : </div>
+						<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_adresseRetraitDossiers"></span></div>
+					</div>
+					<div id="ctl0_CONTENU_PAGE_ctl7_panelAdresseDepotOffre" class="line" style="display:none;">
+						<div class="intitule-240 bold">Adresse de dépôt des offres : </div>
+						<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_adresseDepotOffres"></span></div>
+					</div>
+					<div id="ctl0_CONTENU_PAGE_ctl7_panelLieuOuverturePlis" class="line" style="display:none;">
+						<div class="intitule-240 bold">Lieu d'ouverture des plis : </div>
+						<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_lieuOuverturePlis"></span></div>
+					</div>
+					<span class="spacer-small" ></span>
+					<div id="ctl0_CONTENU_PAGE_ctl7_prixAcquisitionPlans" class="line" style="display:none;">
+						<div class="intitule-240 bold">Prix d'acquisition des plans : </div>
+						<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_prixAcquisitionPlan">0,00 MAD</span></div>
+					</div>
+					<div id="ctl0_CONTENU_PAGE_ctl7_panelConsultationNonAlotti" style="display:;">
+						<div id="ctl0_CONTENU_PAGE_ctl7_panelCautionProvisoire" class="line" style="display:none;">
+							<div class="intitule-240 bold">Caution provisoire : </div>
+							<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_cautionProvisoire"></span></div>
+						</div>
+						<span class="spacer-small"></span>
+						<div id="ctl0_CONTENU_PAGE_ctl7_panelQualification" class="line" style="display:none;">
+							<div class="intitule-240 bold">Qualifications : </div>
+							<div class="content-bloc bloc-500">
+								<!-- ul class="default-list" -->
+								<span id="ctl0_CONTENU_PAGE_ctl7_qualification">-</span>
+								<!-- /ul -->
+							</div>
+						</div>
+						<div id="ctl0_CONTENU_PAGE_ctl7_panelAgrements" class="line" style="display:none;">
+							<div class="intitule-240 bold">Agréments : </div>
+							<div class="content-bloc bloc-500">
+								<!-- ul class="default-list" -->
+								<span id="ctl0_CONTENU_PAGE_ctl7_agrements">-</span>
+								<!-- /ul -->
+							</div>
+						</div>
+						<span class="spacer-small"></span>
+						<div id="ctl0_CONTENU_PAGE_ctl7_panelEchantillons" class="line" style="display:none;">
+							<div class="intitule-240 bold">Echantillons demandés : </div>
+							<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_dateEchantillons">-</span><br /></div>
+						</div>
+						<div id="ctl0_CONTENU_PAGE_ctl7_panelReunion" class="line" style="display:none;">
+							<div class="intitule-240 bold">Réunion : </div>
+							<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_dateReunion">-</span><br /></div>
+						</div>
+						<div id="ctl0_CONTENU_PAGE_ctl7_panelVariante" class="line" style="display:none;">
+							<div class="intitule-240 bold">Variante : </div>
+							<div class="content-bloc bloc-500"><span id="ctl0_CONTENU_PAGE_ctl7_varianteValeur">Non</span></div>
+						</div>
+						<span class="spacer-small"></span>
+					</div>
+					<div id="ctl0_CONTENU_PAGE_ctl7_panelContcatAdministratif" class="line" style="display:none;">
+						<div class="intitule-240 bold">Contact Administratif : </div>
+						<div class="content-bloc bloc-500">
+							<span id="ctl0_CONTENU_PAGE_ctl7_contactAdministratif">-</span><br />
+
+						</div>
+					</div>
+					<!--  -->
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!--END RECAP CONSULTATION-->
+        <div id="ctl0_CONTENU_PAGE_panelSourcingFragment">
+		    <hx:include src="/entreprise/sourcing-fragment"></hx:include>
+		</div>
+
+		<div id="ctl0_CONTENU_PAGE_panelEntrepriseFormulaireDemande">
+		<div class="poserQuestion">
+    <!--BEGIN PANEL FORMULAIRE DEMANDE-->
+    <div class="form-field">
+
+
+        <div class="alert alert-info">
+            <h2 class="h4">
+                <span id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_titreFormulaire">Téléchargement du Dossier de Consultation des Entreprises</span>
+            </h2>
+
+            <span id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_descriptionConditions">En cas de modification de la consultation, nous devons être en mesure de vous contacter pour vous transmettre les éléments actualisés.</span>
+            <div id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_descriptionAnonyme" style="display:;">
+                <div id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_blocInscriptionAuthentification" style="display:none;">
+                    <div class="check-bloc">
+                        <input class="check-bloc" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_inscriptionAuthentification" type="radio" name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$RadioGroup" value="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$inscriptionAuthentification" onclick="gererBlocCoordonnees()" />
+                        <label for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_inscriptionAuthentification">
+                            <span id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_textInscriptionAuthentification"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_blocChoixTelechargement">
+                    <div>
+                        <input class="check-bloc" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_choixTelechargement" type="radio" name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$RadioGroup" value="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$choixTelechargement" onclick="gererBlocCoordonnees()" checked="checked" />
+                        <label for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_choixTelechargement">
+                            <span id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_completerFormulaireDemande">Je souhaite compléter le formulaire de demande de renseignements ci-dessous et ainsi être informé en cas de modification de la consultation.</span>
+                        </label>
+                    </div>
+                </div>
+                <div id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_blocChoixAnonyme">
+                    <div>
+                        <input class="check-bloc" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_choixAnonyme" type="radio" name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$RadioGroup" value="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$choixAnonyme" onclick="gererBlocCoordonnees()" />
+                        <label for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_choixAnonyme">
+                            Je souhaite télécharger anonymement le Dossier de Consultation des Entreprises et je ne serai donc pas informé en cas de modification de la consultation.
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_libelleConditionsFormulaireDemandePart2" class="alert alert-danger">
+            <strong>Attention : les informations saisies vous permettront, tout au long de la procédure, de recevoir les mises à jour relatives aux modifications de dates, rectificatifs/compléments du dossier de consultation des entreprises, etc.</strong>
+        </div>
+        <!--BEGIN CONDITION D'UTILISATION-->
+        <div ID="boutonAcceptationCGU">
+            <div class="checkbox">
+                <label for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_accepterConditions">
+                    <input title="J'accepte les conditions générales d'utilisation" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_accepterConditions" type="checkbox" name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$accepterConditions" />
+                    Je reconnais avoir pris connaissance des <a title="Lien CGU (nouvelle fenêtre)" target="_blank" href="index.php?page=Entreprise.ConditionsUtilisation&calledFrom=entreprise">conditions générales d'utilisation</a> de la plateforme de dématérialisation et je les accepte.
+                </label>
+
+                <input type="hidden" name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$clientId" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_clientId" value="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande" />
+                <span id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_conditionsValidator" style="display:none;color:red;"> </span>
+            </div>
+        </div>
+        <!--END CONDITION D'UTILISATION-->
+    </div>
+    <!--END PANEL FORMULAIRE DEMANDE-->
+
+    <!--BEGIN MES COORDONNEES-->
+    <div id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_blocMesCoordonnees" class="form-field form-horizontal" style="display:block;">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h2 class="h3 panel-title">
+                    Mes coordonnées
+                </h2>
+            </div>
+            <div class="panel-body">
+                <!--BEGIN INFO PERSONNELLES-->
+                <fieldset class="clearfix">
+                    <div class="section-heading page-header m-t-3">
+                        <legend>
+                            <h3 class="h4 m-0">
+                                Coordonnées du contact et raison sociale
+                            </h3>
+                        </legend>
+                    </div>
+
+                    <!--BEGIN NOM -->
+                    <fieldset>
+                    <div class="form-group form-group-sm no-margin-right-left row">
+                        <legend for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_nom" class="control-label col-md-2">
+                            NOM
+                            <span class="text-danger">* </span> :
+                        </legend>
+                        <div class="col-md-10">
+                            <input name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$nom" type="text" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_nom" class="form-control" title="Nom" />
+                            <span id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_nomValidator" style="display:none;color:red;"><span class='text-danger check-invalide' title='Champ obligatoire'><i class='fa fa-times-circle-o p-r-1' aria-hidden='true'></i>Champ obligatoire</span></span>
+                        </div>
+                    </div>
+                    </fieldset>
+                    <!--END NOM -->
+
+                    <!--BEGIN PRENOM-->
+                    <fieldset>
+                    <div class="form-group form-group-sm">
+                        <legend class="control-label col-md-2" for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_prenom">
+                            Prénom
+                            <span class="text-danger">* </span> :
+                        </legend>
+                        <div class="col-md-10">
+                            <input name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$prenom" type="text" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_prenom" class="form-control" title="Prénom" />
+                            <span id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_prenomValidator" style="display:none;color:red;"><span class='text-danger check-invalide' title='Champ obligatoire'><i class='fa fa-times-circle-o p-r-1' aria-hidden='true'></i>Champ obligatoire</span></span>
+                        </div>
+                    </div>
+                    </fieldset>
+                    <!--END PRENOM-->
+
+                    <!--BEGIN ADRESSE MAIL-->
+                    <fieldset>
+                    <div class="form-group form-group-sm">
+                        <legend class="control-label col-md-2" for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_email">
+                            Adresse électronique
+                            <span class="text-danger">* </span> :
+                        </legend>
+                        <div class="col-md-10">
+                            <input name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$email" type="text" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_email" class="form-control" title="Adresse électronique" />
+                            <span id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_emailValidator" style="display:none;color:red;"><span title='Format incorrect. Exemple: contact@marches.fr' class='text-danger pull-left'><i class='fa fa-times-circle-o p-r-1' aria-hidden='true'></i>Format incorrect. Exemple: contact@marches.fr</span></span>
+                        </div>
+                    </div>
+                    </fieldset>
+                    <!--END ADRESSE MAIL-->
+
+                    <!--BEGIN RAISON SOCIALE-->
+                    <fieldset>
+                    <div class="form-group form-group-sm">
+                        <legend class="control-label col-md-2" for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_raisonSocial">
+                            Raison sociale
+                            :
+                        </legend>
+                        <div class="col-md-10">
+                            <input name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$raisonSocial" type="text" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_raisonSocial" class="form-control" title="Raison sociale" />
+                        </div>
+                    </div>
+                    </fieldset>
+                    <!--END RAISON SOCIALE-->
+                    <hr/>
+                </fieldset>
+                <!--END INFO PERSONNELLES-->
+
+                <!--BEGIN RADIO BTN-->
+                <div class="clearfix">
+                    <!--BEGIN ENTREPRISE ETABLIE EN FRANCE-->
+                    <div class="">
+                        <div class="radio">
+                            <label for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_france">
+                                <input class="radio" title="Entreprise établie en France" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_france" type="radio" name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$etablissementEntreprise" value="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$france" onclick="isCheckedShowDiv(this,'etablieFrance');isCheckedHideDiv(this,'nonEtablieFrance');" checked="checked" />
+                                Entreprise établie en France
+                            </label>
+                        </div>
+                        <div id="etablieFrance" style="display: block;">
+                            <fieldset>
+                            <div id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_panelSiren">
+                                <div class="form-group form-group-sm m-t-2">
+                                    <legend class="control-label col-md-2" for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_siren">
+                                        SIREN
+                                        /
+                                        SIRET
+                                        :
+                                    </legend>
+                                    <div class="col-md-10 form-inline">
+                                        <input name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$siren" type="text" maxlength="9" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_siren" class="form-control col-md-6" title="SIREN" />
+                                        <input name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$siret" type="text" maxlength="5" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_siret" class="form-control col-md-6" title="SIRET" />
+                                        <span id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_validatorSiren" style="display:none;color:red;"><span title='Champ obligatoire' class='check-invalide'><img src='https://marches.megalis.bretagne.bzh/themes/images/picto-check-not-ok.gif' alt='Champ obligatoire' /></span></span>
+                                        <i class="fa fa-question-circle text-info p-l-1" data-toggle="tooltip" data-placement="right" title="Indiquez ici votre SIREN. Vous pouvez le compléter par les 5 chiffres de votre code établissement pour former votre SIRET."></i>
+                                    </div>
+                                </div>
+                            </div>
+                            </fieldset>
+
+
+                        </div>
+                    </div>
+                    <!--END ENTREPRISE ETABLIE EN FRANCE-->
+
+                    <!--BEGIN ENTREPRISE NON ETABLIE EN FRANCE-->
+                    <div class="">
+                        <div class="radio">
+                            <label for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_etranger">
+                                <input title="Entreprise non établie en France" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_etranger" type="radio" name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$etablissementEntreprise" value="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$etranger" onclick="isCheckedShowDiv(this,'nonEtablieFrance');isCheckedHideDiv(this,'etablieFrance');" />
+                                Entreprise non établie en France
+                            </label>
+                        </div>
+                        <div class="m-t-1 clearfix" id="nonEtablieFrance" style="display:none;">
+                            <div class="form-group form-group-sm">
+                                <label class="control-label col-md-2" for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_pays">
+                                    Pays
+                                    :
+                                </label>
+                                <div class="col-md-10">
+                                    <select name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$pays" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_pays" class="form-control" title="Pays">
+<option value="0">Sélectionnez</option>
+<option value="6235">AFGHANISTAN</option>
+<option value="6236">AFRIQUE DU SUD</option>
+<option value="6237">ÂLAND, ÎLES</option>
+<option value="6238">ALBANIE</option>
+<option value="6239">ALGÉRIE</option>
+<option value="6240">ALLEMAGNE</option>
+<option value="6241">ANDORRE</option>
+<option value="6242">ANGOLA</option>
+<option value="6243">ANGUILLA</option>
+<option value="6244">ANTARCTIQUE</option>
+<option value="6245">ANTIGUA-ET-BARBUDA</option>
+<option value="6246">ANTILLES NÉERLANDAISES</option>
+<option value="6247">ARABIE SAOUDITE</option>
+<option value="6248">ARGENTINE</option>
+<option value="6249">ARMÉNIE</option>
+<option value="6250">ARUBA</option>
+<option value="6251">AUSTRALIE</option>
+<option value="6252">AUTRICHE</option>
+<option value="6253">AZERBA??DJAN</option>
+<option value="6254">BAHAMAS</option>
+<option value="6255">BAHRE??N</option>
+<option value="6256">BANGLADESH</option>
+<option value="6257">BARBADE</option>
+<option value="6258">BÉLARUS</option>
+<option value="6259">BELGIQUE</option>
+<option value="6260">BELIZE</option>
+<option value="6261">BÉNIN</option>
+<option value="6262">BERMUDES</option>
+<option value="6263">BHOUTAN</option>
+<option value="6264">BOLIVIE</option>
+<option value="6265">BOSNIE-HERZÉGOVINE</option>
+<option value="6266">BOTSWANA</option>
+<option value="6267">BOUVET, ÎLE</option>
+<option value="6268">BRÉSIL</option>
+<option value="6269">BRUNÉI DARUSSALAM</option>
+<option value="6270">BULGARIE</option>
+<option value="6271">BURKINA FASO</option>
+<option value="6272">BURUNDI</option>
+<option value="6273">CA??MANES, ÎLES</option>
+<option value="6274">CAMBODGE</option>
+<option value="6275">CAMEROUN</option>
+<option value="6276">CANADA</option>
+<option value="6277">CAP-VERT</option>
+<option value="6278">CENTRAFRICAINE, RÉPUBLIQUE</option>
+<option value="6279">CHILI</option>
+<option value="6280">CHINE</option>
+<option value="6281">CHRISTMAS, ÎLE</option>
+<option value="6282">CHYPRE</option>
+<option value="6283">COCOS (KEELING), ÎLES</option>
+<option value="6284">COLOMBIE</option>
+<option value="6285">COMORES</option>
+<option value="6286">CONGO</option>
+<option value="6287">CONGO, LA RÉPUBLIQUE DÉMOCRATIQUE DU</option>
+<option value="6288">COOK, ÎLES</option>
+<option value="6289">CORÉE, RÉPUBLIQUE DE</option>
+<option value="6290">CORÉE, RÉPUBLIQUE POPULAIRE DÉMOCRATIQUE DE</option>
+<option value="6291">COSTA RICA</option>
+<option value="6292">CÔTE D'IVOIRE</option>
+<option value="6293">CROATIE</option>
+<option value="6294">CUBA</option>
+<option value="6295">DANEMARK</option>
+<option value="6296">DJIBOUTI</option>
+<option value="6297">DOMINICAINE, RÉPUBLIQUE</option>
+<option value="6298">DOMINIQUE</option>
+<option value="6299">ÉGYPTE</option>
+<option value="6300">EL SALVADOR</option>
+<option value="6301">ÉMIRATS ARABES UNIS</option>
+<option value="6302">ÉQUATEUR</option>
+<option value="6303">ÉRYTHRÉE</option>
+<option value="6304">ESPAGNE</option>
+<option value="6305">ESTONIE</option>
+<option value="6306">ÉTATS-UNIS</option>
+<option value="6307">ÉTHIOPIE</option>
+<option value="6308">FALKLAND, ÎLES (MALVINAS)</option>
+<option value="6309">FÉROÉ, ÎLES</option>
+<option value="6310">FIDJI</option>
+<option value="6311">FINLANDE</option>
+<option value="6469">FRANCE</option>
+<option value="6313">GABON</option>
+<option value="6314">GAMBIE</option>
+<option value="6315">GÉORGIE</option>
+<option value="6316">GÉORGIE DU SUD ET LES ÎLES SANDWICH DU SUD</option>
+<option value="6317">GHANA</option>
+<option value="6318">GIBRALTAR</option>
+<option value="6319">GRÈCE</option>
+<option value="6320">GRENADE</option>
+<option value="6321">GROENLAND</option>
+<option value="6322">GUAM</option>
+<option value="6323">GUATEMALA</option>
+<option value="6324">GUERNESEY</option>
+<option value="6325">GUINÉE</option>
+<option value="6327">GUINÉE ÉQUATORIALE</option>
+<option value="6326">GUINÉE-BISSAU</option>
+<option value="6328">GUYANA</option>
+<option value="6329">HA??TI</option>
+<option value="6330">HEARD, ÎLE ET MCDONALD, ÎLES</option>
+<option value="6331">HONDURAS</option>
+<option value="6332">HONG-KONG</option>
+<option value="6333">HONGRIE</option>
+<option value="6334">ÎLE DE MAN</option>
+<option value="6335">ÎLES MINEURES ÉLOIGNÉES DES ÉTATS-UNIS</option>
+<option value="6336">ÎLES VIERGES BRITANNIQUES</option>
+<option value="6337">ÎLES VIERGES DES ÉTATS-UNIS</option>
+<option value="6338">INDE</option>
+<option value="6339">INDONÉSIE</option>
+<option value="6340">IRAN, RÉPUBLIQUE ISLAMIQUE D'</option>
+<option value="6341">IRAQ</option>
+<option value="6342">IRLANDE</option>
+<option value="6343">ISLANDE</option>
+<option value="6344">ISRAËL</option>
+<option value="6345">ITALIE</option>
+<option value="6346">JAMA??QUE</option>
+<option value="6347">JAPON</option>
+<option value="6348">JERSEY</option>
+<option value="6349">JORDANIE</option>
+<option value="6350">KAZAKHSTAN</option>
+<option value="6351">KENYA</option>
+<option value="6352">KIRGHIZISTAN</option>
+<option value="6353">KIRIBATI</option>
+<option value="6354">KOWE??T</option>
+<option value="6355">LAO, RÉPUBLIQUE DÉMOCRATIQUE POPULAIRE</option>
+<option value="6356">LESOTHO</option>
+<option value="6357">LETTONIE</option>
+<option value="6358">LIBAN</option>
+<option value="6359">LIBÉRIA</option>
+<option value="6360">LIBYENNE, JAMAHIRIYA ARABE</option>
+<option value="6361">LIECHTENSTEIN</option>
+<option value="6362">LITUANIE</option>
+<option value="6363">LUXEMBOURG</option>
+<option value="6364">MACAO</option>
+<option value="6365">MACÉDOINE, L'EX-RÉPUBLIQUE YOUGOSLAVE DE</option>
+<option value="6366">MADAGASCAR</option>
+<option value="6367">MALAISIE</option>
+<option value="6368">MALAWI</option>
+<option value="6369">MALDIVES</option>
+<option value="6370">MALI</option>
+<option value="6371">MALTE</option>
+<option value="6372">MARIANNES DU NORD, ÎLES</option>
+<option value="6373">MAROC</option>
+<option value="6374">MARSHALL, ÎLES</option>
+<option value="6375">MAURICE</option>
+<option value="6376">MAURITANIE</option>
+<option value="6377">MEXIQUE</option>
+<option value="6378">MICRONÉSIE, ÉTATS FÉDÉRÉS DE</option>
+<option value="6379">MOLDOVA, RÉPUBLIQUE DE</option>
+<option value="6380">MONACO</option>
+<option value="6381">MONGOLIE</option>
+<option value="6382">MONTÉNÉGRO</option>
+<option value="6383">MONTSERRAT</option>
+<option value="6384">MOZAMBIQUE</option>
+<option value="6385">MYANMAR</option>
+<option value="6386">NAMIBIE</option>
+<option value="6387">NAURU</option>
+<option value="6388">NÉPAL</option>
+<option value="6389">NICARAGUA</option>
+<option value="6390">NIGER</option>
+<option value="6391">NIGÉRIA</option>
+<option value="6392">NIUÉ</option>
+<option value="6393">NORFOLK, ÎLE</option>
+<option value="6394">NORVÈGE</option>
+<option value="6395">NOUVELLE-ZÉLANDE</option>
+<option value="6396">OCÉAN INDIEN, TERRITOIRE BRITANNIQUE DE L'</option>
+<option value="6397">OMAN</option>
+<option value="6398">OUGANDA</option>
+<option value="6399">OUZBÉKISTAN</option>
+<option value="6400">PAKISTAN</option>
+<option value="6401">PALAOS</option>
+<option value="6402">PALESTINIEN OCCUPÉ, TERRITOIRE</option>
+<option value="6403">PANAMA</option>
+<option value="6404">PAPOUASIE-NOUVELLE-GUINÉE</option>
+<option value="6405">PARAGUAY</option>
+<option value="6406">PAYS-BAS</option>
+<option value="6407">PÉROU</option>
+<option value="6408">PHILIPPINES</option>
+<option value="6409">PITCAIRN</option>
+<option value="6410">POLOGNE</option>
+<option value="6411">PORTO RICO</option>
+<option value="6412">PORTUGAL</option>
+<option value="6413">QATAR</option>
+<option value="6414">ROUMANIE</option>
+<option value="6415">ROYAUME-UNI</option>
+<option value="6416">RUSSIE, FÉDÉRATION DE</option>
+<option value="6417">RWANDA</option>
+<option value="6418">SAHARA OCCIDENTAL</option>
+<option value="6421">SAINT-KITTS-ET-NEVIS</option>
+<option value="6422">SAINT-MARIN</option>
+<option value="6423">SAINT-SIÈGE (ÉTAT DE LA CITÉ DU VATICAN)</option>
+<option value="6424">SAINT-VINCENT-ET-LES GRENADINES</option>
+<option value="6419">SAINTE-HÉLÈNE</option>
+<option value="6420">SAINTE-LUCIE</option>
+<option value="6425">SALOMON, ÎLES</option>
+<option value="6426">SAMOA</option>
+<option value="6427">SAMOA AMÉRICAINES</option>
+<option value="6428">SAO TOMÉ-ET-PRINCIPE</option>
+<option value="6429">SÉNÉGAL</option>
+<option value="6430">SERBIE</option>
+<option value="6431">SEYCHELLES</option>
+<option value="6432">SIERRA LEONE</option>
+<option value="6433">SINGAPOUR</option>
+<option value="6434">SLOVAQUIE</option>
+<option value="6435">SLOVÉNIE</option>
+<option value="6436">SOMALIE</option>
+<option value="6437">SOUDAN</option>
+<option value="6438">SRI LANKA</option>
+<option value="6439">SUÈDE</option>
+<option value="6440">SUISSE</option>
+<option value="6441">SURINAME</option>
+<option value="6442">SVALBARD ET ÎLE JAN MAYEN</option>
+<option value="6443">SWAZILAND</option>
+<option value="6444">SYRIENNE, RÉPUBLIQUE ARABE</option>
+<option value="6446">TA??WAN, PROVINCE DE CHINE</option>
+<option value="6445">TADJIKISTAN</option>
+<option value="6447">TANZANIE, RÉPUBLIQUE-UNIE DE</option>
+<option value="6448">TCHAD</option>
+<option value="6449">TCHÈQUE, RÉPUBLIQUE</option>
+<option value="6450">THA??LANDE</option>
+<option value="6451">TIMOR-LESTE</option>
+<option value="6452">TOGO</option>
+<option value="6453">TOKELAU</option>
+<option value="6454">TONGA</option>
+<option value="6455">TRINITÉ-ET-TOBAGO</option>
+<option value="6456">TUNISIE</option>
+<option value="6457">TURKMÉNISTAN</option>
+<option value="6458">TURKS ET CA??QUES, ÎLES</option>
+<option value="6459">TURQUIE</option>
+<option value="6460">TUVALU</option>
+<option value="6461">UKRAINE</option>
+<option value="6462">URUGUAY</option>
+<option value="6463">VANUATU</option>
+<option value="6464">VENEZUELA</option>
+<option value="6465">VIET NAM</option>
+<option value="6466">YÉMEN</option>
+<option value="6467">ZAMBIE</option>
+<option value="6468">ZIMBABWE</option>
+</select>
+                                </div>
+                            </div>
+                            <div class="form-group form-group-sm">
+                                <label class="control-label col-md-2" for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_idNational">
+                                    N° d'enregistrement national
+                                    :
+                                </label>
+                                <div class="col-md-10">
+                                    <input name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$idNational" type="text" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_idNational" class="form-control" title="N° d'enregistrement national" />
+                                    <span class="example small">
+									( Ex : N° d'enregistrement national, DUNS <span lang='en' >Number</span>, numéro local, etc. )
+								</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--END ENTREPRISE NON ETABLIE EN FRANCE-->
+                    <hr/>
+                </div>
+                <!--END RADIO BTN-->
+
+                <!--BEGIN INFO ADRESSE-->
+                <fieldset class="clearfix form-group form-group-sm">
+                    <div class="section-heading page-header m-t-3">
+                        <legend>
+                            <h3 class="h4 m-0">
+                                Coordonnées d'entreprise
+                            </h3>
+                        </legend>
+                    </div>
+                    <div class="col-md-6">
+                        <!--BEGIN ADRESSE-->
+                        <fieldset>
+                        <div class="form-group form-group-sm">
+                            <legend class="control-label col-md-4" for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_address">
+                                Adresse
+                                :
+                            </legend>
+                            <div class="col-md-8">
+                                <input name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$address" type="text" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_address" class="form-control" />
+                            </div>
+                        </div>
+                        </fieldset>
+                        <!--END ADRESSE-->
+
+                        <!--BEGIN ADRESSE SUITE-->
+                        <fieldset>
+                        <div class="form-group form-group-sm">
+                            <legend class="control-label col-md-4" for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_address2">
+                                Adresse (suite)
+                                :
+                            </legend>
+                            <div class="col-md-8">
+                                <input name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$address2" type="text" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_address2" class="form-control" />
+                            </div>
+                        </div>
+                        </fieldset>
+                        <!--END ADRESSE SUITE-->
+
+                        <!--BEGIN TELEPHONE-->
+                        <fieldset>
+                        <div class="form-group form-group-sm">
+                            <legend class="control-label col-md-4" for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_tel">
+                                Téléphone
+                                :
+                            </legend>
+                            <div class="col-md-8">
+                                <input name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$tel" type="text" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_tel" class="form-control" placeholder="( 8 chiffres au minimum sans espace. Ex : +33140506070 ou 0140506070 )" />
+                                <small class="example">
+                                    <span id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_labelInfoTel" class="info-aide-right">( 8 chiffres au minimum sans espace. Ex : +33140506070 ou 0140506070 )</span>
+                                </small>
+                            </div>
+                            <span id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_nombreCaracteresNumTel" style="display:none;color:red;"><span title='Champ obligatoire' class='check-invalide'><img src='https://marches.megalis.bretagne.bzh/themes/images/picto-check-not-ok.gif' alt='Champ obligatoire' /></span></span>
+                        </div>
+                        </fieldset>
+                        <!--END TELEPHONE-->
+                    </div>
+                    <div class="col-md-6">
+                        <!--BEGIN CODE POSTALE-->
+                        <fieldset>
+                        <div class="form-group form-group-sm">
+                            <legend class="control-label col-md-3" for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_cp">
+                                Code postal
+                                :
+                            </legend>
+                            <div class="col-md-9">
+                                <input name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$cp" type="text" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_cp" class="form-control" />
+                            </div>
+                        </div>
+                        </fieldset>
+                        <!--END CODE POSTALE-->
+
+                        <!--BEGIN VILLE-->
+                        <fieldset>
+                        <div class="form-group form-group-sm">
+                            <legend class="control-label col-md-3" for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_ville">
+                                Ville
+                                :
+                            </legend>
+                            <div class="col-md-9">
+                                <input name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$ville" type="text" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_ville" class="form-control" />
+                            </div>
+                        </div>
+                        </fieldset>
+                        <!--END VILLE-->
+
+                        <!--BEGIN FAX-->
+                        <fieldset>
+                        <div class="form-group form-group-sm">
+                            <legend class="control-label col-md-3" for="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_fax">
+                                Fax
+                                :
+                            </legend>
+                            <div class="col-md-9">
+                                <input name="ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$fax" type="text" id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_fax" class="form-control" />
+                                <small class="example">
+                                    <span id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_labelInfoFax" class="info-aide-right">( 8 chiffres au minimum sans espace. Ex : +33140506070 ou 0140506070 )</span>
+                                </small>
+                            </div>
+                            <span id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_nombreCaracteresNumFax" style="display:none;color:red;"><span title='Champ obligatoire' class='check-invalide'><img src='https://marches.megalis.bretagne.bzh/themes/images/picto-check-not-ok.gif' alt='Champ obligatoire' /></span></span>
+                        </div>
+                        </fieldset>
+                        <!--END FAX-->
+
+                    </div>
+                </fieldset>
+                <!--END INFO ADRESSE-->
+            </div>
+        </div>
+    </div>
+    <!--BEGIN MES COORDONNEES-->
+</div>
+<span id="ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_script"><script>gererBlocCoordonnees();</script></span>
+<input type="hidden" id="moduleAvecAuth" value="0"/>
+<input type="hidden" id="moduleSansIden" value="1"/>
+<!--Fin partie centrale-->
+
+		<!--Debut line boutons-->
+				<div class="clearfix">
+					<input type="submit" name="ctl0$CONTENU_PAGE$ctl8" value="Annuler" id="ctl0_CONTENU_PAGE_ctl8" title="Annuler" class="btn btn-default btn-sm pull-left" />
+					<input type="submit" name="ctl0$CONTENU_PAGE$validateButton" value="Valider" id="ctl0_CONTENU_PAGE_validateButton" title="Valider" class="btn btn-primary btn-sm pull-right bouton-moyen float-right" onclick="javascript:document.getElementById('ctl0_CONTENU_PAGE_validateButton').style.display='none';" />
+				</div>
+		</div>
+
+		<!--Fin line boutons-->
+
+		<div class="breaker"></div>
+	</div>
+	<!--Fin colonne droite-->
+
+	<link rel="stylesheet" href="./app/css/dossierVolumineux.css?k=2026-00.05.01">
+	<script src="./themes/js/assistance-marche-public-prado.js?k=2026-00.05.01"></script>
+
+
+			</div>
+		</div>
+	</div>
+	<!--Fin partie centrale-->
+
+
+
+	<!--Debut Side menu-->
+<div>
+    <div id="acces-tel" class="help-bar" visible="0">
+		<ul>
+			<li style="display:none;">
+				<a href="/?page=Entreprise.EntrepriseFaq" target="_blank" class="faq">
+					TEXT_FAQ
+				</a>
+			</li>
+			<li>
+				<a class="hotline" target="_blank" title="Assistance (nouvelle fenêtre)" href="/index.php/entreprise/aide/assistance-telephonique">
+					<span class="text">
+						Assistance <span>: 02 23 48 04 54 / Assistance dédiée aux marchés de la formation professionnelle : 01 53 43 05 44</span>
+					</span>
+				</a>
+			</li>
+		</ul>
+	</div>
+</div>
+<!--Fin Side menu-->
+	</div>
+<div style="visibility:hidden;">
+<input type="text" style="display:none" autocomplete="off" name="PRADO_PAGESTATE" id="PRADO_PAGESTATE" value="TRONQUE" />
+</div>
+<script src="/assets/df1e7875/validator/validation3.min.js"></script>
+<script>
+/*<![CDATA[*/
+new Prado.ValidationManager({'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TValidationSummary({'ID':"ctl0_CONTENU_PAGE_ctl6_validationSummary",'FormID':"ctl0_ctl1",'ScrollToSummary':true,'DisplayMode':"BulletList",'Refresh':true,'ValidationGroup':"ValidateInfoUser",'Display':"None",'OnHideSummary':function(summary, validators){
+                    document.getElementById('ctl0_CONTENU_PAGE_ctl6_validationSummary').innerHTML='';
+                    document.getElementById('divValidationSummary').style.display='none';
+                 }});
+new Prado.WebUI.TCustomValidator({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_conditionsValidator",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ErrorMessage':"Vous devez accepter les conditions g\u00e9n\u00e9rales d\u0027utilisation de la plate-forme.",'ValidationGroup':"ValidateInfoUser",'ControlToValidate':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_clientId",'ControlType':"THiddenField",'Enabled':true,'OnValidationError':function(sender, parameter){
+                        document.getElementById('divValidationSummary').style.display='';
+                        document.getElementById('ctl0_CONTENU_PAGE_validateButton').style.display='';
+                     },'ClientValidationFunction':"accepterConditionsValidator"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_nom",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$nom",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TCustomValidator({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_nomValidator",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ErrorMessage':"NOM",'ValidationGroup':"ValidateInfoUser",'ControlToValidate':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_clientId",'ControlType':"THiddenField",'Enabled':true,'OnValidationError':function(sender, parameter){
+                                    document.getElementById('divValidationSummary').style.display='';
+                                    document.getElementById('ctl0_CONTENU_PAGE_validateButton').style.display='';
+                                 },'ClientValidationFunction':"nomValidatorDownloadDce"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_prenom",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$prenom",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TCustomValidator({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_prenomValidator",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ErrorMessage':"Pr\u00e9nom",'ValidationGroup':"ValidateInfoUser",'ControlToValidate':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_clientId",'ControlType':"THiddenField",'Enabled':true,'OnValidationError':function(sender, parameter){
+                                    document.getElementById('divValidationSummary').style.display='';
+                                    document.getElementById('ctl0_CONTENU_PAGE_validateButton').style.display='';
+                                 },'ClientValidationFunction':"prenomValidatorDownloadDce"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_email",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$email",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TCustomValidator({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_emailValidator",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ErrorMessage':"Adresse \u00e9lectronique",'ValidationGroup':"ValidateInfoUser",'ControlToValidate':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_clientId",'ControlType':"THiddenField",'Enabled':true,'OnValidationError':function(sender, parameter){
+                                    document.getElementById('divValidationSummary').style.display='';
+                                    document.getElementById('ctl0_CONTENU_PAGE_validateButton').style.display='';
+                                 },'ClientValidationFunction':"emailValidatorDownloadDce"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_raisonSocial",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$raisonSocial",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_siren",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$siren",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_siret",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$siret",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TCustomValidator({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_validatorSiren",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ErrorMessage':"Le SIRET est invalide",'ValidationGroup':"ValidateInfoUser",'ControlToValidate':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_siren",'ControlType':"TTextBox",'Enabled':true,'OnValidationError':function(sender, parameter){
+                                                document.getElementById('divValidationSummary').style.display='';
+                                                document.getElementById('ctl0_CONTENU_PAGE_validateButton').style.display='';
+                                             },'ClientValidationFunction':"validateSirenForLocalCompany"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_idNational",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$idNational",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_address",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$address",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_address2",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$address2",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_tel",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$tel",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TCustomValidator({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_nombreCaracteresNumTel",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ErrorMessage':"T\u00e9l\u00e9phone (maximum 14 caract\u00e8res)",'ValidationGroup':"ValidateInfoUser",'ControlToValidate':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_tel",'ControlType':"TTextBox",'Enabled':true,'OnValidationError':function(sender, parameter){
+                                    document.getElementById('divValidationSummary').style.display='';
+                                    document.getElementById('ctl0_CONTENU_PAGE_validateButton').style.display='';
+                                 },'ClientValidationFunction':"validerNombreCaracteresNumTelFax"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_cp",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$cp",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_ville",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$ville",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_fax",'EventTarget':"ctl0$CONTENU_PAGE$EntrepriseFormulaireDemande$fax",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TCustomValidator({'ID':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_nombreCaracteresNumFax",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ErrorMessage':"Fax (maximum 14 caract\u00e8res)",'ValidationGroup':"ValidateInfoUser",'ControlToValidate':"ctl0_CONTENU_PAGE_EntrepriseFormulaireDemande_fax",'ControlType':"TTextBox",'Enabled':true,'OnValidationError':function(sender, parameter){
+                                    document.getElementById('divValidationSummary').style.display='';
+                                    document.getElementById('ctl0_CONTENU_PAGE_validateButton').style.display='';
+                                 },'ClientValidationFunction':"validerNombreCaracteresNumTelFax"});
+new Prado.WebUI.TButton({'ID':"ctl0_CONTENU_PAGE_ctl8",'CausesValidation':true,'EventTarget':"ctl0$CONTENU_PAGE$ctl8",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TButton({'ID':"ctl0_CONTENU_PAGE_validateButton",'CausesValidation':true,'EventTarget':"ctl0$CONTENU_PAGE$validateButton",'ValidationGroup':"ValidateInfoUser",'FormID':"ctl0_ctl1"});
+/*]]>*/
+</script>
+</form>
+</main>
+
+<script src="/build/runtime.4c1b5377.js"></script>
+<script src="/build/5360.327a2067.js"></script>
+<script src="/build/1083.f7f04fc5.js"></script>
+<script src="/build/2348.edf47088.js"></script>
+<script src="/build/3806.0a2d5716.js"></script>
+<script src="/build/8601.20c277a9.js"></script>
+<script src="/build/1685.9caf32f3.js"></script>
+<script src="/build/agent-header-statistics.be8d7a1a.js"></script>
+<script src="/build/hinclude.0c37bfd6.js"></script>
+<script src="/build/6964.f3df8713.js"></script>
+<script src="/build/3144.fd886a2a.js"></script>
+<script src="/build/assistance-status-checker.feb392f2.js"></script>
+<script src="/build/force.b462143f.js"></script>
+<script src="/build/4692.ea0baeb8.js"></script>
+<script src="/build/8851.7170f0d0.js"></script>
+<script src="/build/2754.c2d5003c.js"></script>
+<script src="/build/vendor.a62c0775.js"></script>
+
+
+
+<div class="clearfix">&nbsp;</div>
+<footer class="footer" role="contentinfo">
+    <div class="content footer_content text-center">
+        <div class="list-unstyled clearfix container">
+            <div class="footer-menu">
+                <ul class="list-unstyled">
+                                            <li>
+                            <a class="link-footer" href="/index.php/entreprise/footer/info-site">
+                                InfoSite et RGPD
+                            </a>
+                        </li>
+
+                                            <li>
+                            <a class="link-footer"
+                               href="/index.php/entreprise/footer/conditions-utilisation">
+                                Conditions d'utilisation
+                            </a>
+                        </li>
+
+                    <li>
+                        <a class="link-footer"
+                           href="/index.php/entreprise/footer/prerequis-techniques">
+                            Pré-requis techniques
+                        </a>
+                    </li>
+
+
+                    <li>
+                        <a class="link-footer"
+                           href="/index.php/entreprise/footer/accessibilite">
+                            Accessibilité
+                        </a>
+                    </li>
+
+                                            <li>
+                            <a class="link-footer"
+                               href="/index.php/entreprise/footer/info-acrgs">
+                                Autorités de certification européennes
+                            </a>
+                        </li>
+
+
+                </ul>
+            </div>
+
+            <div>
+
+
+            </div>
+                            <div id="ctl0_ctl4_panelNaviguationMulilingue" class="footer-multilingual">
+                                            <div class="item-lang on lang-switcher"
+                             data-lang="fr">
+                            <a href="/index.php/language">
+                                <input type="button" name="ctl0$ctl4$langages$ctl2$flagImg"
+                                       value="fr"
+                                       id="ctl0_ctl4_langages_ctl2_flagImg"
+                                       class="language-choice flage-FR"
+                                />
+                            </a>
+                        </div>
+                                            <div class="item-lang on lang-switcher"
+                             data-lang="en">
+                            <a href="/index.php/language/en">
+                                <input type="button" name="ctl0$ctl4$langages$ctl3$flagImg"
+                                       value="en"
+                                       id="ctl0_ctl4_langages_ctl3_flagImg"
+                                       class="language-choice flage-EN"
+                                />
+                            </a>
+                        </div>
+                                            <div class="item-lang on lang-switcher"
+                             data-lang="es">
+                            <a href="/index.php/language/es">
+                                <input type="button" name="ctl0$ctl4$langages$ctl4$flagImg"
+                                       value="es"
+                                       id="ctl0_ctl4_langages_ctl4_flagImg"
+                                       class="language-choice flage-ES"
+                                />
+                            </a>
+                        </div>
+                                    </div>
+
+        </div>
+    </div>
+</footer>
+<div class="footer_go_top out" id="js-footer_go_top">
+    <a href="#" class="btn btn-primary btn-go-to-top animated" id="js-btn-go_to_top"
+       title="Retour en haut">
+        <i class="fa fa-angle-up"></i>
+    </a>
+</div>
+
+
+
+</div>
+<script  src="https://marches.megalis.bretagne.bzh/themes/js/prototype-noconflict.footer.js?k=2026-00.05.01" charset="UTF-8"></script>
+
+<!-- MainLayout -->
+
+		<script  src="https://marches.megalis.bretagne.bzh/themes/js/ng-script.js?k=2026-00.05.01" charset="UTF-8"></script>
+
+
+
+
+
+</body>
+</html>

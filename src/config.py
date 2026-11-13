@@ -474,6 +474,20 @@ DEAO_PARQUET_RESOURCE_ID = os.getenv("DEAO_PARQUET_RESOURCE_ID", "")
 DEAO_CSV_RESOURCE_ID = os.getenv("DEAO_CSV_RESOURCE_ID", "")
 DEAO_SCHEMA_RESOURCE_ID = os.getenv("DEAO_SCHEMA_RESOURCE_ID", "")
 
+# Scrapers des plateformes Atexo (dataset b) : intervalle minimal entre deux requêtes
+# vers une même plateforme (chaque plateforme a son propre limiteur) et User-Agent.
+CLOSED_INTERVALLE_REQUETES_S = float(os.getenv("CLOSED_INTERVALLE_REQUETES_S", "0.2"))
+CLOSED_USER_AGENT = os.getenv(
+    "CLOSED_USER_AGENT",
+    "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0",
+)
+# Préfixe S3 des DCE archivés : <préfixe>/<code plateforme>/<id DCE ou refCons><ext>
+DEAO_DCE_S3_PREFIX = os.getenv("DEAO_DCE_S3_PREFIX", "dce")
+# Ignorer l'état précédent des scrapers de plateformes et repartir de zéro.
+DEAO_SCRAP_PARTIR_DE_ZERO = (
+    os.getenv("DEAO_SCRAP_PARTIR_DE_ZERO", "false").lower() == "true"
+)
+
 with open(
     make_path_from_env(
         "DATASETS_REFERENCE_FILEPATH", REFERENCE_DIR / "source_datasets.json"

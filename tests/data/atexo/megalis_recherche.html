@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+<title>Recherche avancée - Portail des marchés publics</title>
+<link rel="stylesheet" type="text/css" href="/assets/b61c3793/themes/base/jquery-ui.css" />
+
+
+
+
+			<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+			<title>
+				Recherche avancée - Portail des marchés publics
+			</title>
+
+
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/vue-multiselect.min.css?k=2026-00.05.01" type="text/css" />
+			<link rel="stylesheet" type="text/css" href="https://marches.megalis.bretagne.bzh/themes/css/ng-style-mpe.css?k=2026-00.05.01" media="all"/>
+			<link rel="stylesheet" type="text/css" href="https://marches.megalis.bretagne.bzh/themes/css/ng-style.css?k=2026-00.05.01" media="all"/>
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/chosen.css?k=2026-00.05.01" type="text/css" />
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/leaflet.css?k=2026-00.05.01" />
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/MarkerCluster.css?k=2026-00.05.01" type="text/css" />
+			<link rel="stylesheet" href="https://marches.megalis.bretagne.bzh/themes/css/leaflet.awesome-markers.css?k=2026-00.05.01" type="text/css" />
+
+
+                    <link rel="stylesheet" href="app/assets/css/entreprise.css?k=2026-00.05.01" type="text/css" >
+
+
+			<!-- end bloc -->
+			<link rel="stylesheet" type="text/css"
+				  href="https://marches.megalis.bretagne.bzh/themes/css/upload/jquery.fileupload-ui-noscript.css?k=2026-00.05.01"
+				  media="all"/>
+			<link rel="stylesheet" type="text/css"
+				  href="https://marches.megalis.bretagne.bzh/themes/css/upload/jquery.fileupload-ui.css?k=2026-00.05.01"
+				  media="all"/>
+
+
+</head>
+
+<body class=' ' >
+
+<script>
+	var pfUrl = "/";
+	var isAgent = false;
+</script>
+
+
+
+
+<!--Debut Bandeau-->
+<!--Begin BandeauEntreprise-->
+
+
+
+
+    <header class="header" role="banner">
+        <div class="navbar-default navbar-section">
+            <div class="container  header-top">
+                <div class="pull-left relative header-left">
+    <div class="pull-left">
+        <a href="/entreprise"
+           alt="Accueil"
+           title="Accueil"
+           class="btn btn-link">
+            <img class="img-responsive header-img "
+                 src="/themes//images/img/logo-replace.png"
+                 alt="Accueil">
+        </a>
+    </div>
+</div>                            </div>
+        </div>
+    </header>
+
+    <div class="" id="skippy">
+        <a href="#horizonatal-menu"
+           class="sr-only sr-only-focusable clearfix btn-lg btn-block btn-xs">
+            Aller au menu
+        </a>
+        <a href="#middle"
+           class="sr-only sr-only-focusable clearfix btn-lg btn-block btn-xs">
+            Aller au contenu
+        </a>
+    </div>
+
+    <div class="nav-wrapper d-block">
+        <nav class="navbar horizonatal-menu" role="navigation" data-spy="affix" data-offset-top="20" id="horizonatal-menu">
+            <div class="container d-block">
+                <div class="top top-user-profile pull-right " id="ctl0_bandeauEntrepriseWithoutMenuSf_ctl0">
+                    <div id="user-infos" class="user-toogle-infos">
+                                                    <div id="ctl0_bandeauEntrepriseWithoutMenuSf_panelDisconnected" class="bloc-user-login">
+    <div class="bootstrap">
+        <div class="kt-profile" data-widget="profile" data-status="online"
+             data-json='{"profile":{"name":"", "lastname":"" } }'>
+            <div class="atx-popover-markup-login-usr">
+                <div class="trigger-btn selector btn-toggle-info_user kt-profile-dropdown-toggle"
+                                          aria-expanded="false" id="kt-profile-dropdown-Disconnected">
+                    <a href="/entreprise/login" data-placement="bottom" class="btn-block btn-login">
+                        <span class="text">
+                            <span class="hidden-xs">Se connecter</span>
+                            <span class="visible-xs pull-left">
+                                <i class="fa fa-user-o"></i>
+                            </span>
+                                                    </span>
+                    </a>
+                </div>
+
+                            </div>
+        </div>
+    </div>
+    <div id="ctl0_bandeauEntrepriseWithoutMenuSf_nonAuthentifie">
+        <div class="panel-user-infos">
+            <div class="panel-user-infos-arrow"></div>
+            <div class="content"></div>
+        </div>
+    </div>
+</div>                                            </div>
+                </div>
+                <div class="navbar-header">
+                    <div class="wrapper pull-right">
+                        <a class="mobile-help m-r-4" onclick="goToUtah()" aria-label="Contact"><i class="fa fa-phone"></i></a>
+                        <a class="mobile-search atx-popover-markup-login-usr m-r-2" href="/entreprise/login" aria-label="entreprise-auth"><i class="fa fa-user"></i></a>
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                                data-target="#navbar-collapse" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar top-bar"></span>
+                            <span class="icon-bar middle-bar"></span>
+                            <span class="icon-bar bottom-bar"></span>
+                        </button>
+                    </div>
+                    <a class="navbar-brand"
+                       href="/entreprise">
+                        <img src="/themes//images/img/logo_mobile.png"/>
+                    </a>
+                </div>
+                                    <div class="collapse navbar-collapse p-0" id="navbar-collapse">
+                        <ul class="nav navbar-nav">
+                                                            <li class="hide">
+    <a href="#" class="dropdown-toggle pull-left"
+       data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Mon panier
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                <li class="dropdown-header">
+                    <div class="h4">
+                        Consultations en cours
+                    </div>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise">
+                        <span class="fa fa-chevron-right"></span>
+                        Toutes les consultations
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;retraits">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansRetraits">
+                        sans retrait
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;questions">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansQuestions">
+                        sans question posée
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;depots">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansDepots">
+                        sans dépôt
+                    </a>
+                </li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;echanges">
+                        <span class="fa fa-chevron-right"></span>
+                        Avec
+                    </a>
+
+                    /
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;sansEchanges">
+                        sans message échangé
+                    </a>
+                </li>
+                <li role="separator" class="divider"></li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;panierEntreprise&amp;panierEntreprise&amp;dateFinEnd">
+                        <span class="fa fa-chevron-right"></span>
+                        Consultations clôturées
+                    </a>
+                </li>
+                <li role="separator" class="divider"></li>
+                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;searchAnnCons&amp;panierEntreprise">
+                        <span class="fa fa-chevron-right"></span>
+                        Recherche avancée
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+    </ul>
+</li>
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left"
+       data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Annonces
+        <span class="fa fa-chevron-down pull-right arrow-position"></span></a>
+
+    <ul class="dropdown-menu mega-dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled clearfix">
+                <li class="col-md-4">
+                    <ul class="list-unstyled">
+                        <li class="dropdown-header">
+                            <div class="h4">
+                                Consultations en cours
+                            </div>
+                        </li>
+                        <li>
+                            <div class="input-group form-group form-group-sm">
+                                <form class="input-group form-group form-group-sm"
+                                      action="/espace-entreprise/search"
+                                      method="get">
+                                    <label class="sr-only"
+                                           for="ctl0_bandeauEntrepriseWithoutMenuSf_quickSearch">
+                                        Recherche rapide
+                                    </label>
+                                    <input name="keyWord"
+                                           type="text"
+                                           aria-placeholder="Recherche rapide"
+                                           id="ctl0_bandeauEntrepriseWithoutMenuSf_quickSearch"
+                                           class="form-control input-quickSearch"
+                                           placeholder="Recherche rapide ..."
+                                           onfocus=""
+                                           onblur=""
+                                           title="Recherche rapide"
+                                    />
+                                    <span class="input-group-btn align-right">
+                                                                <button class="btn btn-sm btn-primary button-quickSearch"
+                                                                        type="submit"
+                                                                        id="btnGoToQuickResultSearch">
+                                                                    <i class="fa fa-search"></i>
+                                                                </button>
+                                                            </span>
+                                </form>
+                            </div>
+                        </li>
+                        <li>
+                                                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AllCons">
+                                    <span class="fa fa-chevron-right"></span>
+                                    Toutes les consultations
+                                </a>
+                                                    </li>
+                        <li>
+                                                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;searchAnnCons&type=multicriteres">
+                                    <span class="fa fa-chevron-right"></span>
+                                    Recherche avancée
+                                </a>
+                                                    </li>
+                        <li>
+                                                            <a id="btnReview"
+                                   href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;searchAnnCons&type=restreinte">
+                                    <span class="fa fa-chevron-right"></span>
+                                    Recherche d&#039;une procédure restreinte
+                                </a>
+                                                    </li>
+                    </ul>
+                </li>
+                <li class="col-md-4">
+                    <ul class="list-unstyled">
+                        <li class="dropdown-header">
+                            <div class="h4">
+                                Autres annonces
+                            </div>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AvisInformation">
+                                <span class="fa fa-chevron-right"></span>
+                                Toutes les annonces d&#039;information
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AvisAttribution">
+                                <span class="fa fa-chevron-right"></span>
+                                Toutes les annonces d&#039;attribution
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseAdvancedSearch&AllAnn">
+                                <span class="fa fa-chevron-right"></span>
+                                Recherche avancée
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="col-md-4">
+                    <ul class="list-unstyled">
+                        <li class="dropdown-header"
+                            style="display:block">
+                            <div class="h4">
+                                Données essentielles des marchés conclus
+                            </div>
+                        </li>
+                        <li style="display:block">
+                            <div id="ctl0_bandeauEntrepriseWithoutMenuSf_panelArticle133">
+                                                                    <div>
+                                        <a href="/?page=Entreprise.EntrepriseRechercherListeMarches&search">
+                                            <span class="fa fa-chevron-right"></span>
+                                            Recherche avancée
+                                        </a>
+                                    </div>
+
+
+                                                            </div>
+                        </li>
+                        <li class="dropdown-header">
+                            <div class="h4">
+                                Enchères
+                            </div>
+                        </li>
+                        <li>
+                            <a href="/?page=Entreprise.EntrepriseParticipationEnchere">
+                                <span class="fa fa-chevron-right"></span>
+                                Participation
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="col-md-12">
+                    <ul class="list-unstyled clearfix">
+
+                        <li class="dropdown-header clearfix">
+                            <div class="h4 pull-left">
+                                Mes alertes et recherches sauvegardées
+                            </div>
+                            <a href="/?page=Entreprise.EntrepriseGestionRecherches"
+                               class="pull-right btn btn-link btn-sm">
+                                <i class="fa fa-cog"></i>
+                                Gérer mes alertes et recherches sauvegardées
+                            </a>
+                        </li>
+                                            </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>
+                                                            <li class="hide">
+    <a href="/entreprise/dossier-volumineux/gestion/">
+        Dossiers volumineux
+    </a>
+</li>
+                                                            <li class="hide">
+    <a class="btn"  href="/?page=Entreprise.RechercheCollaborateur">
+        Recherche de collaboration
+    </a>
+</li>
+                                                            <li style="display:none;">
+    <a class="btn" href="/?page=Entreprise.EntrepriseVisualiserEntitesAchatsRecherche">
+        Entités d&#039;Achat
+    </a>
+</li>
+
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" role="button"
+       aria-haspopup="true" aria-expanded="false">
+        Signature
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                <li>
+                                            <a href="/entreprise/signer-document">
+                            <span class="fa fa-chevron-right"></span>
+                            Signer un document
+                        </a>
+                                    </li>
+                <li>
+                    <a href=" /entreprise/verification-signature ">
+                        <span class="fa fa-chevron-right"></span>
+                        Vérifier la signature
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" role="button"
+       aria-haspopup="true" aria-expanded="false">
+        Aide
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                <li>
+                    <a href="/?page=Entreprise.EntreprisePremiereVisite">
+                        <span class="fa fa-chevron-right"></span>
+                        Première visite
+                    </a>
+                </li>
+                <li>
+                    <a href="/entreprise/aide/guide">
+                        <span class="fa fa-chevron-right"></span>
+                        Guides d&#039;utilisation
+                    </a>
+                </li>
+                <li>
+                    <a href="/entreprise/aide/assistance-telephonique">
+                        <span class="fa fa-chevron-right"></span>
+                        Assistance
+                    </a>
+                </li>
+                <li style="display:none;">
+                    <a href="/?page=Entreprise.DocumentsDeReference&callFrom=entreprise"
+                       title="Documents de référence (nouvelle fenêtre)">
+                        <span class="fa fa-chevron-right"></span>
+                        Documents de référence
+                    </a>
+                </li>
+                                <li style="display:block;"></li>
+                <li style="display:block;">
+                    <a href="/entreprise/aide/outils-informatiques">
+                        <span class="fa fa-chevron-right"></span>
+                        Outils informatiques
+                    </a>
+                </li>
+
+                            </ul>
+        </li>
+    </ul>
+</li>
+                                                            <li>
+    <a href="#" class="dropdown-toggle pull-left"
+       data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        Se préparer à répondre
+        <span class="fa fa-chevron-down pull-right arrow-position"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <li class="container-fluid">
+            <ul class="list-unstyled">
+                                <li>
+                    <a href="/entreprise/footer/diagnostic-poste">
+                        <span class="fa fa-chevron-right"></span>
+                        Tester la configuration de mon poste
+                    </a>
+                </li>
+                                <li>
+                    <a href="/?page=Entreprise.EntrepriseAdvancedSearch&amp;AllCons&amp;orgTest">
+                        <span class="fa fa-chevron-right"></span>
+                        Consultations de test
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</li>
+                                                                                </ul>
+                    </div>
+                            </div>
+        </nav>
+    </div>
+    <div id="infoErrone" class="m-t-7">
+
+    </div>
+
+<div class="m-t-7">
+
+    </div>
+<!--End BandeauEntreprise-->
+<!--Begin BandeauAgent-->
+
+<!--End BandeauAgent-->
+<!--Begin BandeauAgentSocleInterne-->
+
+<!--End BandeauAgent-->
+<!--Fin Bandeau-->
+
+<main role = "main">
+<form id="ctl0_ctl1" method="post" action="/?page=Entreprise.EntrepriseAdvancedSearch&amp;searchAnnCons" name="main_form" autocomplete="on"><script src="/assets/db823f34/jquery.min.js"></script>
+<script src="/assets/df1e7875/prado.min.js"></script>
+<script src="/assets/df1e7875/controls/controls.min.js"></script>
+<script src="/assets/b61c3793/jquery-ui.min.js"></script>
+<script src="/assets/df1e7875/activecontrols/ajax3.min.js"></script>
+<script src="/assets/df1e7875/activecontrols/activecontrols3.min.js"></script>
+
+
+
+
+<script src="/assets/7b30d930/bootstrap.min.js"></script>
+
+
+<script type="text/javascript">
+    var J = jQuery.noConflict();
+</script>
+
+
+<script src="/assets/7b30d930/sdk.js"></script>
+
+<script src="/assets/7b30d930/bootboxjs.js"></script>
+
+<script src="/assets/286d531d/jquery.iframe-transport.js"></script>
+
+<script src="/assets/286d531d/jquery.fileupload.js"></script>
+
+<script src="/assets/7b30d930/jquery.placeholder.js"></script>
+
+<script src="/assets/7b30d930/chosen.jquery.js"></script>
+
+<script src="/assets/7b30d930/modernizr.js"></script>
+
+<script src="/assets/c9ed3ec4/printThis.js"></script>
+
+<script src="/assets/7b30d930/placeholder.js"></script>
+
+
+<script src="/assets/7b30d930/scripts.js"></script>
+
+<script src="/assets/7b30d930/popup.inc.js"></script>
+
+<script src="/assets/7b30d930/scripts-eval.js"></script>
+
+<script src="/assets/7b30d930/atexoFileUpload.js"></script>
+
+<script src="/assets/7b30d930/scripts-lieux-execution.js"></script>
+
+<script src="/assets/7b30d930/tab.js"></script>
+
+<script src="/assets/7b30d930/loader.js"></script>
+
+<script src="/assets/7b30d930/data.js"></script>
+
+<script src="/assets/7b30d930/standard.js"></script>
+
+<script src="/assets/c9ed3ec4/printThis.js"></script>
+
+<script src="/assets/7b30d930/attachmentMessec.js"></script>
+
+
+<script src="/assets/7b30d930/jquery.numberformatter-1.2.js"></script>
+
+<script src="/assets/7b30d930/OptionTransfer.js"></script>
+
+<script src="/assets/7b30d930/scripts-lieux-execution.js"></script>
+
+<script src="/assets/7b30d930/popUpInvites.js"></script>
+
+<script src="https://marches.megalis.bretagne.bzh/themes/js/atexoScript.fr.js?k=2026-00.05.01"></script>
+
+<script src="https://marches.megalis.bretagne.bzh/themes/js/codeCpv.fr.js?k=2026-00.05.01"></script>
+
+<script src="https://marches.megalis.bretagne.bzh/themes/js/atexoRef.fr.js?k=2026-00.05.01"></script>
+
+
+        <script src="https://marches.megalis.bretagne.bzh/themes/js/calendrier.fr.js?k=2026-00.05.01"></script>
+
+
+<script src="https://marches.megalis.bretagne.bzh/themes/js/atexoApplet.fr.js?k=2026-00.05.01"></script>
+
+
+<script src="/assets/7b30d930/vue.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/assets/7b30d930/prototype-noconflict.header.js"></script>
+
+
+
+
+
+
+
+	<!--Debut partie centrale-->
+	<div id="middle" class="clear-top atx-middle" style="">
+	    <div id="infoErrone" class="mt-2">
+
+    </div>
+
+<div class="mt-2">
+
+    </div>
+
+		<div class="container container--690-sm m-b-10">
+			<div class="clearfix">
+
+
+		<!--Debut Bloc Recherche avancee-->
+		<div id="ctl0_CONTENU_PAGE_rechercheAvancee" class="float-left">
+			<input type="submit" name="ctl0$CONTENU_PAGE$buttonRefresh" value="" id="ctl0_CONTENU_PAGE_buttonRefresh" style="display:none;" />
+			<script type="text/JavaScript">
+    function returnLieuxExecution(idSelectedGeo, numSelectedGeoN2) {
+        document.getElementById('ctl0_CONTENU_PAGE_AdvancedSearch_idsSelectedGeoN2').value = idSelectedGeo;
+        document.getElementById('ctl0_CONTENU_PAGE_AdvancedSearch_numSelectedGeoN2').value = numSelectedGeoN2;
+        document.getElementById('ctl0_CONTENU_PAGE_AdvancedSearch_selectedGeoN2').click();
+    }
+</script>
+<!--Debut colonne droite-->
+<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelContent" class="main-part">
+	<div class="advancedSearch">
+		<div class="clearfix hide-agent">
+			<nav role="navigation">
+			<ul class="breadcrumb">
+				<li>
+					<a href="/entreprise">
+						Accueil
+                    </a>
+				</li>
+				<li>
+					<a href="?page=Entreprise.EntrepriseAdvancedSearch&AllCons">
+						Consultations
+					</a>
+				</li>
+				<li>
+					Recherche avancée
+				</li>
+			</ul>
+			</nav>
+		</div>
+		<div class="breadcrumbs hide">
+
+			<a id="ctl0_CONTENU_PAGE_AdvancedSearch_linkConsultation" href="#">Consultations</a>
+			&gt;
+			Recherche avancée
+		</div>
+		<!--BEGIN MESSAGE ALERT-->
+		<div class="alert alert-danger" style="display:none">
+			<div class="h4">
+				<i class="fa fa-exclamation-triangle"></i>
+				Erreur de saisie.
+			</div>
+			<div class="m-l-3">
+				Veuillez vérifier la saisie des champs suivants :
+				<!-- Debut du sommateur de messages d'erreurs-->
+				<div id="validationSummary" class="m-t-1">
+					<ul>
+						<li id="erreurMinistereLi" style="display:none">
+							Entité publique
+						</li>
+						<li id="erreurReferenceLi" style="display:none">
+							Référence
+						</li>
+						<li id="erreurCodeLi" style="display:none">
+							Code d'accès
+						</li>
+					</ul>
+				</div>
+				<!-- Fin du sommateur de messages d'erreurs -->
+			</div>
+			<!-- Fin de l'entete du sommateur de messages d'erreurs -->
+			<!-- Debut du footer du sommateur de messages d'erreurs -->
+		</div>
+		<!--END MESSAGE ALERT-->
+		<!--Debut Bloc Message Recherche -->
+		<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelConfSave">
+
+		</div>
+		<!--fin Bloc Message Recherche -->
+		<!--BEGIN BLOC ADVANCED SEARCH-->
+		<!-- Début de l'entête du sommateur de messages d'erreurs -->
+<div id="divValidationSummary" style="display:none" class="bloc-message form-bloc-conf msg-erreur erreur-danger">
+
+    <div role="alert">
+        <div class="h4-alerte">
+            <i class="fa fa-exclamation-triangle m-r-1 hidden"></i>
+            Erreur de saisie.
+        </div>
+        <div class="spacer-small"></div>
+        <div>
+            Veuillez vérifier la saisie des champs suivants :
+            <span id="ctl0_CONTENU_PAGE_AdvancedSearch_ctl13_validationSummary" style="display:none;color:#d9534f;"></span>
+            <span id="ctl0_CONTENU_PAGE_AdvancedSearch_ctl13_serverError"></span>
+        </div>
+    </div>
+</div>
+<!-- Fin du footer du sommateur de messages d'erreurs -->
+		<div class="content-advancedSearch form-field form-horizontal">
+			<h1 class="hide-agent h2 m-t-0 m-b-2">
+				Recherche avancée
+			</h1>
+			<div class="top hide"><span class="left">&nbsp;</span><span class="right">&nbsp;</span>
+				<div class="title">
+					Recherche multicritères
+				</div>
+			</div>
+			<!--SELECT FOR MOBILE VIEW-->
+			<select id="selectRechercheAvance--m" class="form-control m-b-2 hide-agent"><option value='0'>Recherche multicritères</option></select>
+			<ul class="nav nav-tabs hide-agent" id="targetRechercheAvance--m" role="tablist">
+				<li class="active limulticriteres" role="presentation">
+					<a href="#multicriteres" aria-controls="multicriteres" role="tab" data-toggle="tab">
+						<h2 class="h3 panel-title">
+							Recherche multicritères
+						</h2>
+					</a>
+				</li>
+				<li role="presentation" class="lirestreinte" >
+					<a href="#restreinte" aria-controls="restreinte" role="tab" data-toggle="tab">
+						<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelSearch" class="form-field">
+							<h2 class="h3 panel-title">
+								Recherche d'une procédure restreinte
+							</h2>
+						</div>
+					</a>
+				</li>
+			</ul>
+			<div class="tab-content form-content">
+				<div class="panel panel-default tab-pane fade in active" id="multicriteres">
+					<div class="panel-body ">
+						<!--Debut Bloc Vision RMA-->
+						<!--Debut Ligne Vision-->
+
+						<!--Fin Bloc Vision RMA-->
+						<!-- BEGIN ROW SEARCH BY KEYWORDS-->
+						<section class="section">
+							<div class="section-body">
+								<div class="form-group form-group-sm hide-agent">
+									<div class="h3 hide">
+										Recherche par mots clés
+										<a href="#keywordSearch" onmouseover="afficheBulle('infosRechercheMotsCles', this)" onmouseout="cacheBulle('infosRechercheMotsCles')"
+										   onfocus="afficheBulle('infosRechercheMotsCles', this)" onblur="cacheBulle('infosRechercheMotsCles')" class="picto-info-intitule">
+											<img src="https://marches.megalis.bretagne.bzh/themes/images/picto-info.gif" alt="Info-bulle"/>
+										</a>
+										<div id="infosRechercheMotsCles" class="info-bulle" onmouseover="mouseOverBulle();" onmouseout="mouseOutBulle();">
+											<div>
+												Ex 1: Fourniture d'écrans pour micro-ordinateurs : Recherche de type OU sur chaque mot, hors mots de liaison (le, la, les, avec,pour, etc.)
+                    Ex 2 : "Fourniture d'écrans pour micro-ordinateurs" : Recherche sur l'expression exacte (car présence de guillemets)
+											</div>
+										</div>
+									</div>
+									<div class="line formulaire-inline">
+										<label class="control-label col-md-2 hide-agent" for="ctl0_CONTENU_PAGE_AdvancedSearch_keywordSearch">
+											Recherche par mots clés
+										</label>
+										<div class="intitule-bloc bloc-155 hide">
+											<label>
+												Dans la référence, l'intitulé ou l'objet de la consultation
+											</label>
+										</div>
+									</div>
+									<div class="col-md-9 formulaire-inline">
+										<input name="ctl0$CONTENU_PAGE$AdvancedSearch$keywordSearch" type="text" id="ctl0_CONTENU_PAGE_AdvancedSearch_keywordSearch" class="form-control long" placeholder="Dans la référence, l'intitulé ou l'objet de la consultation" />
+										<div class="hide">
+											<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelMotsCles" class="content-bloc bloc-600">
+												<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelRechercheFloue" class="line">
+													<input class="radio" title="Recherche approchée" id="ctl0_CONTENU_PAGE_AdvancedSearch_floue" type="radio" name="ctl0$CONTENU_PAGE$AdvancedSearch$rechercheFloue" value="ctl0$CONTENU_PAGE$AdvancedSearch$floue" checked="checked" />
+													<label>
+														Recherche approchée
+													</label>
+													&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+													<input class="radio" title="Recherche exacte" id="ctl0_CONTENU_PAGE_AdvancedSearch_exact" type="radio" name="ctl0$CONTENU_PAGE$AdvancedSearch$rechercheFloue" value="ctl0$CONTENU_PAGE$AdvancedSearch$exact" />
+													<label>
+														Recherche exacte
+													</label>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- BEGIN BLOCK ENTITE PUBLIQUE -->
+								<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelModeRechercheEntite" style="display:;">
+									<div class="form-group form-group-sm">
+										<label for="ctl0_CONTENU_PAGE_AdvancedSearch_orgNameAM" class="control-label col-md-2">
+											<span id="ctl0_CONTENU_PAGE_AdvancedSearch_messageModeRecherechEntite">Entité publique</span>
+										</label>
+										<div class="col-md-9">
+											<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelSearchAnnoncesMarches" style="display:;">
+												<span id="ctl0_CONTENU_PAGE_AdvancedSearch_labelEntitePubliqueAutoComplition" class="hide">&nbsp;</span>
+												<div style="position:relative;">
+													<input name="ctl0$CONTENU_PAGE$AdvancedSearch$orgNameAM" type="text" id="ctl0_CONTENU_PAGE_AdvancedSearch_orgNameAM" class="form-control" style="padding-right:28px;" /><div id="ctl0_CONTENU_PAGE_AdvancedSearch_orgNameAM_result" class="acomplete acomplete-entite-am"></div>
+														<button type="button"
+																style="position:absolute;right:0;top:0;height:100%;width:28px;background:none;border:none;cursor:pointer;z-index:2;color:#999;"
+																onclick="var f=document.getElementById('ctl0_CONTENU_PAGE_AdvancedSearch_orgNameAM');f.value='';f.focus();"
+																title="Effacer">&times;</button>
+												</div>
+												<style>
+												.autocomplete-entite-am-menu { font-family:'Lato',sans-serif !important; font-size:12px !important; border:1px solid #ccc !important; border-radius:4px !important; box-shadow:0 6px 12px rgba(0,0,0,.175) !important; padding:0 !important; background:#fff !important; background-image:none !important; }
+												.autocomplete-entite-am-menu .ui-menu-item { padding:2px 8px !important; margin:0 !important; cursor:pointer !important; color:#555 !important; }
+												.autocomplete-entite-am-menu .ui-state-focus, .autocomplete-entite-am-menu .ui-state-hover { background:#337ab7 !important; color:#fff !important; border:none !important; margin:0 !important; }
+												</style>
+												<script>
+												(function() {
+													var id = 'ctl0_CONTENU_PAGE_AdvancedSearch_orgNameAM';
+													function bindOrgSearch() {
+														var el = J('#' + id);
+														var inst = el.length ? el.data('ui-autocomplete') : null;
+														if (inst) {
+															// Le jQuery global bascule sur la version webpack (sans jQuery UI) apres le chargement ;
+															// on capture le jQuery qui possede reellement le widget pour rendre les items sur le bon cache.
+															var $j = el.constructor;
+															inst._renderItem = function (ul, item) {
+																return $j('<li>')
+																	.append($j('<div>').html(item.label))
+																	.data('ui-autocomplete-item', item)
+																	.appendTo(ul);
+															};
+															el.on('focus click', function() {
+																inst.search(el.val());
+															});
+															inst.menu.element.addClass('autocomplete-entite-am-menu');
+															el.on('autocompleteopen', function() {
+																var m = inst.menu.element;
+																var items = m.find('.ui-menu-item');
+																if (items.length > 20) {
+																	var itemH = items.first().outerHeight();
+																	m.css({'max-height': (itemH * 20) + 'px', 'overflow-y': 'auto'});
+																} else {
+																	m.css({'max-height': 'none', 'overflow-y': 'visible'});
+																}
+															});
+														} else {
+															setTimeout(bindOrgSearch, 50);
+														}
+													}
+													bindOrgSearch();
+												})();
+												</script>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- END BLOCK ENTITE PUBLIQUE -->
+								<div class="form-group form-group-sm">
+									<!-- BEGIN ROW REFERENCE-->
+									<div class="col-md-12 m-b-1">
+										<div class="row line">
+											<label class="control-label col-md-2 intitule-150 text-left" for="ctl0_CONTENU_PAGE_AdvancedSearch_reference">
+												Référence
+											</label>
+											<div class="col-md-9">
+												<input name="ctl0$CONTENU_PAGE$AdvancedSearch$reference" type="text" id="ctl0_CONTENU_PAGE_AdvancedSearch_reference" class="form-control long" />
+											</div>
+										</div>
+									</div>
+									<!-- END ROW REFERENCE-->
+									<!-- BEGIN ROW TYPE D'ANNONCE-->
+									<div class="col-md-12 m-b-1" style="display:;">
+										<div class="row line">
+											<label class="control-label col-md-2 intitule-150 text-left" for="ctl0_CONTENU_PAGE_AdvancedSearch_annonceType">
+												Type d'annonce
+											</label>
+											<div class="col-md-9">
+												<select name="ctl0$CONTENU_PAGE$AdvancedSearch$annonceType" id="ctl0_CONTENU_PAGE_AdvancedSearch_annonceType" disabled="disabled" class="form-control long"><option selected="selected" value="3">Annonce de consultation</option></select>
+											</div>
+										</div>
+									</div>
+									<!-- END ROW TYPE D'ANNONCE-->
+									<!-- BEGIN ROW TYPE PROCEDURE-->
+									<div class="col-md-12 m-b-1" style="display:;">
+										<div class="row line">
+											<label class="control-label col-md-2 intitule-150 text-left" for="ctl0_CONTENU_PAGE_AdvancedSearch_procedureType">
+												Type de procédure
+											</label>
+											<div class="col-md-9">
+												<select name="ctl0$CONTENU_PAGE$AdvancedSearch$procedureType" id="ctl0_CONTENU_PAGE_AdvancedSearch_procedureType" class="form-control long"><option value="0">--- Tous les types de procédure ---</option></select>
+											</div>
+										</div>
+									</div>
+									<!-- END ROW TYPE PROCEDURE-->
+									<!-- BEGIN ROW CATEGORIE PRINCIPALE-->
+									<div class="col-md-12 m-b-1">
+										<div class="row line">
+											<label class="control-label col-md-2 intitule-150 text-left" for="ctl0_CONTENU_PAGE_AdvancedSearch_categorie">
+												Catégorie principale
+											</label>
+											<div class="col-md-9">
+												<select name="ctl0$CONTENU_PAGE$AdvancedSearch$categorie" id="ctl0_CONTENU_PAGE_AdvancedSearch_categorie" class="form-control long cpvCategoryCheck"><option value="0">--- Toutes les catégories ---</option></select>
+											</div>
+										</div>
+									</div>
+									<!-- END ROW CATEGORIE PRINCIPALE-->
+								</div>
+								<div class="">
+									<!--Debut Ligne Date remise plis-->
+
+									<!--Fin Ligne Date remise plis-->
+									<!--Debut Ligne Statut-->
+
+									<!--Fin Ligne Statut-->
+									<!--debut Ligne Service-->
+
+									<!--Fin Ligne Service-->
+									<div id="ctl0_CONTENU_PAGE_AdvancedSearch_refrentielZoneText">
+
+
+
+
+									</div>
+									<hr class="hide-agent">
+									<div class="spacer"></div>
+									<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelClauseConsultation">
+										<!-- BEGIN ROW CLAUSES SOCIALES -->
+										<div class="form-group form-group-sm">
+											<div class="col-md-12">
+												<div class="row line">
+													<div class="hide intitule-160"><img class="float-left margin-right-5" src="https://marches.megalis.bretagne.bzh/themes/images/picto-clause-sociale.gif" alt="clause sociale"/>
+														<label>
+															Considération(s) sociale(s)
+														</label> :
+													</div>
+													<label class="control-label col-md-2 hide-agent" for="ctl0_CONTENU_PAGE_AdvancedSearch_clauseSociales">
+														<i class="s s-social s-18 m-r-1"></i>
+														Considération(s) sociale(s)
+													</label>
+													<div class="col-md-9">
+														<select name="ctl0$CONTENU_PAGE$AdvancedSearch$clauseSociales" id="ctl0_CONTENU_PAGE_AdvancedSearch_clauseSociales" class="form-control small-150"><option value="0">Indifférent</option></select>
+														<a href="#clauseSociales" onmouseover="afficheBulle('infosclauseSociales', this)" onmouseout="cacheBulle('infosclauseSociales')"
+														   onfocus="afficheBulle('infosclauseSociales', this)" onblur="cacheBulle('infosclauseSociales')" class="hide picto-info-intitule">
+															<img src="https://marches.megalis.bretagne.bzh/themes/images/picto-info.gif" alt="Info-bulle"/>
+														</a>
+														<div onmouseout="mouseOutBulle();" onmouseover="mouseOverBulle();" class="hide info-bulle" id="infosclauseSociales">
+															<div>
+																Pour vous aider, cf. guide de l'achat public « réussir son achat responsable » publié mi-2018.<br/>Veuillez sélectionner une valeur dans la liste ci-dessous.<br/>Exemples d'autres clauses sociales : plan de progrès social, démarche de responsabilité sociale, etc.
+															</div>
+														</div>
+													</div>
+													<div class="col-md-1 p-l-0 hide-agent">
+                                                        <span data-target="#" data-html="true" data-toggle="tooltip" data-original-title="Pour vous aider, cf. guide de l'achat public « réussir son achat responsable » publié mi-2018.<br/>Veuillez sélectionner une valeur dans la liste ci-dessous.<br/>Exemples d'autres clauses sociales : plan de progrès social, démarche de responsabilité sociale, etc.">
+                                                            <i class="fa fa-question-circle text-info p-t-1"></i>
+                                                        </span>
+													</div>
+												</div>
+											</div>
+										</div>
+										<!-- END ROW CLAUSES SOCIALES -->
+										<!-- BEGIN ROW MARCHE RESERVE -->
+										<div class="col-md-offset-2 col-md-8" style="display:block">
+											<div class="form-group form-group-sm">
+												<div class="control-label col-md-4 p-b-2 indent-30 normal spacer">
+													<strong>
+														Le marché public est réservé à des :
+													</strong>
+													<a href="#infoBulleMarcheReserve" onmouseover="afficheBulle('infoBulleMarcheReserve', this)"
+													   onmouseout="cacheBulle('infoBulleMarcheReserve')" onfocus="afficheBulle('infoBulleMarcheReserve', this)"
+													   onblur="cacheBulle('infoBulleMarcheReserve')" class="hide picto-info-intitule">
+														<img src="https://marches.megalis.bretagne.bzh/themes/images/picto-info.gif" alt="Info-bulle"/>
+													</a>
+													<div onmouseout="mouseOutBulle();" onmouseover="mouseOverBulle();" class="hide info-bulle" id="infoBulleMarcheReserve">
+														<div>
+															Filtre permettant de rechercher ou d'exclure les marchés réservés à des ESAT/EA
+														</div>
+													</div>
+												</div>
+												<div class="col-md-1 p-l-0 hide-agent">
+                                                                    <span data-target="#" data-html="true" data-toggle="tooltip" data-original-title="Veuillez sélectionner une valeur dans la liste ci-dessous.<br/>Les structures équivalentes emploient au minimum 50% de travailleurs handicapés ou de travailleurs défavorisés.<br/>La liste des marchés publics de services de santé sociaux ou culturels qui peuvent être réservés aux entreprises de l'EESS ou à des structures équivalentes est publiée au Journal officiel de la République française.">
+                                                                        <i class="fa fa-question-circle text-info p-t-1"></i>
+                                                                    </span>
+												</div>
+												<!--Debut Ligne ESAT/EA -->
+												<div class="col-md-12 m-b-2 line indent-30">
+													<div class="row">
+														<label class="control-label col-md-3 multiline intitule-130 line-height-normal"
+															   for="ctl0_CONTENU_PAGE_AdvancedSearch_ateliersProteges"
+															   data-toggle="tooltip"
+															   title="Etablissements et services d'aide par le travail / Entreprises Adaptées">
+															ESAT/EA ou structures équivalentes
+														</label>
+														<div class="col-md-9">
+															<div class="row">
+																<div class="col-md-11">
+																	<select name="ctl0$CONTENU_PAGE$AdvancedSearch$ateliersProteges" id="ctl0_CONTENU_PAGE_AdvancedSearch_ateliersProteges" class="form-control small-150"><option value="0">Indifférent</option></select>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!--Fin Ligne ESAT/EA -->
+												<!--Debut Ligne SIAE -->
+												<div class="col-md-12 m-b-2 line indent-30">
+													<div class="row">
+														<label class="control-label col-md-3 multiline intitule-130 line-height-normal"
+															   for="ctl0_CONTENU_PAGE_AdvancedSearch_siae"
+															   data-toggle="tooltip"
+															   title="Structures d'Insertion par l'Activité Economique">
+															 SIAE ou structures équivalentes
+														</label>
+														<div class="col-md-9">
+															<div class="row">
+																<div class="col-md-11">
+																	<select name="ctl0$CONTENU_PAGE$AdvancedSearch$siae" id="ctl0_CONTENU_PAGE_AdvancedSearch_siae" class="form-control small-150"><option value="0">Indifférent</option></select>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!--Fin Ligne SIAE -->
+												<!--Debut Ligne EESSs -->
+												<div class="col-md-12 m-b-2 line indent-30">
+													<div class="row">
+														<label class="control-label col-md-3 multiline intitule-130 line-height-normal"
+															   for="ctl0_CONTENU_PAGE_AdvancedSearch_ess"
+															   data-toggle="tooltip" title="Entreprise de l'Economie Sociale et Solidaire">
+															EESS ou structures équivalentes
+														</label>
+														<div class="col-md-9">
+															<div class="row">
+																<div class="col-md-11">
+																	<select name="ctl0$CONTENU_PAGE$AdvancedSearch$ess" id="ctl0_CONTENU_PAGE_AdvancedSearch_ess" class="form-control small-150"><option value="0">Indifférent</option></select>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<!--Fin Ligne EESS -->
+												<!-- BEGIN ROW CLAUSES SOCIALES SOUS CATEGORIE-->
+												<div id="ctl0_CONTENU_PAGE_AdvancedSearch_SSC">
+												<div class="col-md-12 m-b-2 line indent-30">
+													<div class="row">
+														<label class="control-label col-md-3 multiline intitule-120 line-height-normal"
+															   for="ctl0_CONTENU_PAGE_AdvancedSearch_clauseSocialesCommerceEquitable">
+															Dont le commerce équitable
+														</label>
+														<div class="col-md-9">
+															<div class="row">
+																<div class="col-md-11">
+																	<select name="ctl0$CONTENU_PAGE$AdvancedSearch$clauseSocialesCommerceEquitable" id="ctl0_CONTENU_PAGE_AdvancedSearch_clauseSocialesCommerceEquitable" class="form-control small-150"><option value="0">Indifférent</option></select>
+																	<a href="#clauseSocialesCommerceEquitable"
+																	   onmouseover="afficheBulle('infosclauseSocialesCommerceEquitable', this)"
+																	   onmouseout="cacheBulle('infosclauseSocialesCommerceEquitable')"
+																	   onfocus="afficheBulle('infosclauseSocialesCommerceEquitable', this)"
+																	   onblur="cacheBulle('infosclauseSocialesCommerceEquitable')"
+																	   class="hide picto-info-intitule">
+																		<img src="https://marches.megalis.bretagne.bzh/themes/images/picto-info.gif" alt="Info-bulle"/>
+																	</a>
+																	<div onmouseout="mouseOutBulle();"
+																	 onmouseover="mouseOverBulle();"
+																	 class="hide info-bulle"
+																	 id="infosclauseSocialesCommerceEquitable">
+																		<div>
+																			Filtre permettant de rechercher ou d'exclure les marchés comprenant la fourniture de produits issus du commerce équitable
+																		</div>
+																	</div>
+																</div>
+																<div class="col-md-1 p-l-0 hide-agent">
+																	<span data-target="#" data-toggle="tooltip"
+																		  data-original-title="Filtre permettant de rechercher ou d'exclure les marchés comprenant la fourniture de produits issus du commerce équitable">
+																		<i class="fa fa-question-circle text-info p-t-1"></i>
+																	</span>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-md-12 m-b-2 line indent-30">
+													<div class="row">
+														<label class="control-label col-md-3 p-b-2 indent-30 normal spacer"
+															   for="ctl0_CONTENU_PAGE_AdvancedSearch_clauseSocialesInsertionActiviteEconomique">
+															Dont considération d'insertion par l'activité économique
+														</label>
+														<div class="col-md-9">
+															<div class="row">
+																<div class="col-md-11">
+																	<select name="ctl0$CONTENU_PAGE$AdvancedSearch$clauseSocialesInsertionActiviteEconomique" id="ctl0_CONTENU_PAGE_AdvancedSearch_clauseSocialesInsertionActiviteEconomique" class="form-control small-150"><option value="0">Indifférent</option></select>
+																	<a href="#clauseSocialesInsertionActiviteEconomique"
+																	   onmouseover="afficheBulle('infosclauseSocialesInsertionActiviteEconomique', this)"
+																	   onmouseout="cacheBulle('infosclauseSocialesInsertionActiviteEconomique')"
+																	   onfocus="afficheBulle('infosclauseSocialesInsertionActiviteEconomique', this)"
+																	   onblur="cacheBulle('infosclauseSocialesInsertionActiviteEconomique')"
+																	   class="hide picto-info-intitule">
+																		<img src="https://marches.megalis.bretagne.bzh/themes/images/picto-info.gif"
+																			 alt="Info-bulle"/>
+																	</a>
+																	<div onmouseout="mouseOutBulle();"
+																		 onmouseover="mouseOverBulle();"
+																		 class="hide info-bulle"
+																		 id="infosclauseSocialesInsertionActiviteEconomique">
+																		<div>
+																			Filtre permettant de rechercher ou d'exclure les marchés comprenant une disposition d'insertion
+																		</div>
+																	</div>
+																</div>
+																<div class="col-md-1 p-l-0 hide-agent">
+																<span data-target="#" data-toggle="tooltip"
+																	  data-original-title="Filtre permettant de rechercher ou d'exclure les marchés comprenant une disposition d'insertion">
+																	<i class="fa fa-question-circle text-info p-t-1"></i>
+																</span>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												</div>
+												<!-- END ROW CLAUSES SOCIALES SOUS CATEGORIE-->
+											</div>
+										</div>
+										<!-- END ROW MARCHE RESERVE -->
+										<div class="spacer"></div>
+										<!--BEGIN CLAUSES ENVIRONNEMENTALES-->
+										<div class="form-group form-group-sm">
+											<div class="col-md-12">
+												<div class="row line">
+													<div class="hide intitule-150 line-height-normal"><img class="float-left margin-right-5" src="https://marches.megalis.bretagne.bzh/themes/images/picto-clause-environnementale.gif"
+																										   alt="clauses environnementale"/><label>
+															Considération(s) environnementale(s)
+														</label> :
+													</div>
+													<label class="control-label col-md-2 multiline hide-agent" for="ctl0_CONTENU_PAGE_AdvancedSearch_clauseEnvironnementale">
+														<i class="s s-environnement s-18 m-r-1"></i>
+														Considération(s) environnementale(s)
+													</label>
+													<div class="col-md-9">
+														<select name="ctl0$CONTENU_PAGE$AdvancedSearch$clauseEnvironnementale" id="ctl0_CONTENU_PAGE_AdvancedSearch_clauseEnvironnementale" class="form-control small-150"><option value="0">Indifférent</option></select>
+														<a href="#clauseEnvironnementale" onmouseover="afficheBulle('infosclauseEnvironnementales', this)"
+														   onmouseout="cacheBulle('infosclauseEnvironnementales')" onfocus="afficheBulle('infosclauseEnvironnementales', this)"
+														   onblur="cacheBulle('infosclauseEnvironnementales')" class="hide picto-info-intitule">
+															<img src="https://marches.megalis.bretagne.bzh/themes/images/picto-info.gif" alt="Info-bulle"/>
+														</a>
+														<div onmouseout="mouseOutBulle();" onmouseover="mouseOverBulle();" class="hide info-bulle" id="infosclauseEnvironnementales">
+															<div>
+																Filtre permettant de rechercher ou d'exclure les marchés comprenant des spécifications techniques, des conditions d'exécution ou des critères d'attribution environnementaux
+															</div>
+														</div>
+													</div>
+													<div class="col-md-1 p-l-0 hide-agent">
+                                                        <span data-target="#" data-toggle="tooltip" data-original-title="Filtre permettant de rechercher ou d'exclure les marchés comprenant des spécifications techniques, des conditions d'exécution ou des critères d'attribution environnementaux"><i
+																	class="fa fa-question-circle text-info p-t-1"></i>
+                                                        </span>
+													</div>
+												</div>
+											</div>
+										</div>
+										<!--END CLAUSES ENVIRONNEMENTALES-->
+										<div class="spacer-small"></div>
+										<!-- BEGIN CONSULTATION MPS-->
+										<div class="form-group form-group-sm" style="display:none;">
+											<div class="col-md-12">
+
+											</div>
+										</div>
+										<!--END CONSULTATION MPS-->
+										<div class="spacer-small"></div>
+									</div>
+								</div>
+								<!--BEGIN INSCRIT A LA BOURSE A LA CO-TRAITANCE-->
+
+								<!--END INSCRIT A LA BOURSE A LA CO-TRAITANCE -->
+								<!-- BEGIN ROW LIEU D'EXECUTION -->
+								<div id="ctl0_CONTENU_PAGE_AdvancedSearch_lieuExecution" class="form-group form-group-sm line">
+									<label class="control-label col-md-2 hide-agent">
+										Lieu d'exécution
+									</label>
+									<div class="intitule-150 hide">
+										Lieu d'exécution
+										<a href="#lieuExecution" onmouseover="afficheBulle('infosLieuExecution', this)" onmouseout="cacheBulle('infosLieuExecution')"
+										   onfocus="afficheBulle('infosLieuExecution', this)" onblur="cacheBulle('infosLieuExecution')" class="hide picto-info-intitule">
+											<img src="https://marches.megalis.bretagne.bzh/themes/images/picto-info.gif" alt="Info-bulle"/>
+										</a>
+									</div>
+									<div id="infosLieuExecution" class="hide info-bulle" onmouseover="mouseOverBulle();" onmouseout="mouseOutBulle();">
+										<div>
+											Lieu principal d'exécution et/ou de livraison
+										</div>
+									</div>
+									<div class="col-md-8 p-t-1 content-bloc bloc-500 text-justify">
+										<div id="lieuExecution" class="pull-left">
+											<input type="hidden" name="ctl0$CONTENU_PAGE$AdvancedSearch$idsSelectedGeoN2" id="ctl0_CONTENU_PAGE_AdvancedSearch_idsSelectedGeoN2" />
+											<input type="hidden" name="ctl0$CONTENU_PAGE$AdvancedSearch$numSelectedGeoN2" id="ctl0_CONTENU_PAGE_AdvancedSearch_numSelectedGeoN2" />
+											<span id="ctl0_CONTENU_PAGE_AdvancedSearch_denominationGeoN2"></span>
+											<a href="javascript:popUpSetSize('index.php?page=Commun.LieuxExecutionCarte&lieux=&selected=','850px','850px','yes');" class="bouton-small" data-toggle="tooltip"
+											   data-original-title="Détails Lieu d'exécution (nouvelle fenêtre)">
+												Détails
+											</a>
+											<a id="ctl0_CONTENU_PAGE_AdvancedSearch_linkLieuExe1" class="hide" style="display:none;" href="javascript:popUpSetSize('index.php?page=Commun.LieuxExecutionCarte&lieux=&selected=','850px','850px','yes');">javascript:popUpSetSize('index.php?page=Commun.LieuxExecutionCarte&lieux=&selected=','850px','850px','yes');</a>
+											<input type="submit" name="ctl0$CONTENU_PAGE$AdvancedSearch$selectedGeoN2" value="" id="ctl0_CONTENU_PAGE_AdvancedSearch_selectedGeoN2" style="display:none;" />
+										</div>
+										<span class="pull-left m-l-1" data-target="#" data-toggle="tooltip" data-original-title="Lieu principal d'exécution et/ou de livraison">
+                                            <i class="fa fa-question-circle text-info hide-agent"></i>
+                                        </span>
+									</div>
+								</div>
+								<!-- END ROW LIEU D'EXECUTION -->
+								<!-- debut codes nuts -->
+<div class="form-group form-group-sm">
+									<span id="ctl0_CONTENU_PAGE_AdvancedSearch_codesNuts" style="display:none"></span>
+								</div>
+								<style>
+									/* Aligne le sélecteur NUTS comme le champ Code CPV (layout legacy basé sur les floats) :
+									   largeur fixe identique au CPV (.referentiel-cpv = 576px) et neutralisation du chrome
+									   Bootstrap interne de CodeReferentiel (marges négatives .row, colonne col-11, multiselect). */
+									.referentiel-nuts { width: 576px; max-width: 100%; }
+									.referentiel-nuts .form-group { margin: 0; }
+									.referentiel-nuts .row { margin-left: 0; margin-right: 0; }
+									.referentiel-nuts .row > [class*="col-"] { flex: 0 0 100%; max-width: 100%; width: 100%; padding-left: 0; padding-right: 0; }
+									.referentiel-nuts .multiselect { box-sizing: border-box; width: 100%; }
+									/* La liste déroulante doit se superposer aux champs en dessous (ex: CPV à z-index 3). */
+									.referentiel-nuts .multiselect, .referentiel-nuts .multiselect--active { z-index: 50; }
+									/* styles-mpe.css force position:static sur le dropdown → il pousse le formulaire.
+									   On rétablit absolute pour qu'il se superpose sans décaler les champs. */
+									.referentiel-nuts .multiselect__content-wrapper { position: absolute; z-index: 50; }
+								</style>
+								<!-- fin codes nuts -->
+								<span id="ctl0_CONTENU_PAGE_AdvancedSearch_panelDomainesActivites" style="display:none"></span>
+								<!-- Debut domaine d'activites Lt-Ref -->
+
+								<!-- Fin domaine d'activites Lt-Ref -->
+								<span id="ctl0_CONTENU_PAGE_AdvancedSearch_panelQualifications" style="display:none"></span>
+								<span id="ctl0_CONTENU_PAGE_AdvancedSearch_panelAgrements" style="display:none"></span>
+								<!--BEGIN CPV-->
+								<div class="form-group form-group-sm">
+									<script src="https://marches.megalis.bretagne.bzh/themes/js/vue-multiselect.min.js?k=2026-00.05.01"></script>
+
+
+<div id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_panelModeMaj" class="clearfix col-md-12 m-b-1">
+    <div id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_panelCpv" class="clearfix row line">
+        <div class="intitule-150 col-150">
+            <label class="control-label col-md-2 intitule-150">
+                <span>Code CPV</span>
+                <span id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_ctl2" style="display:none"></span>
+            </label>
+        </div>
+        <div class="col-md-6 content-bloc">
+            <div class="row">
+                <div id="multiTreeContainer"
+                     class="recherche-referentiel referentiel-cpv col-md-12">
+                    <input id="typeSelectTreeView" type="hidden" value="arborescence">
+                    <div id="cpv">
+                        <multiselect
+                                v-model="selectedCpv"
+                                label="name"
+                                track-by="code"
+                                placeholder="Mot(s) clé(s) ou code CPV ..."
+                                open-direction="bottom"
+                                :max="4"
+                                :options="listeCpv"
+                                :preserveSearch="true"
+                                :multiple="true"
+                                :searchable="true"
+                                :loading="isLoading"
+                                :internal-search="false"
+                                :clear-on-select="true"
+                                :close-on-select="true"
+                                :options-limit="300"
+                                :max-height="600"
+                                :show-no-results="true"
+                                :custom-label="customLabel"
+                                :hide-selected="false"
+                                :show-labels="false"
+                                @search-change="asyncFind"
+                                @select="onSelectOption"
+                                @remove="onRemoveOption"
+                                data-tnr="multiselectCPV">
+                            <template slot="tag" slot-scope="slotProps"><span class="multiselect__tag"><span>{{ slotProps.option.code }} - {{ slotProps.option.label }}</span><i @click="slotProps.remove(slotProps.option)" aria-hidden="true" tabindex="1" class="multiselect__tag-icon"></i></span></template>
+                            <template slot="option" slot-scope="props"><span :style="props.option.style">{{ props.option.code }} - {{ props.option.label }}</span></template>
+                            <template slot="clear" slot-scope="props">
+                                <div class="multiselect__clear" v-if="selectedCpv.length" @mousedown.prevent.stop="clearAll(props.search)"></div>
+                            </template>
+                            <span slot="noResult" ><span v-if="!isCategorySelected">Merci de renseigner la catégorie (Fournitures, Services ou Travaux).</span><span v-else>Requête invalide ou incomplète : {{ searchquery }}</span></span>
+                        </multiselect>
+                    </div>
+                    <img src="https://marches.megalis.bretagne.bzh/themes/images/picto-check-not-ok.gif" alt="Champ obligatoire" id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_ImgErrorCpv" style="display:none;" />
+                    <div class="spacer-mini"></div>
+
+
+                    <span id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_ctl9" style="display:none;color:red;"><span title='Code CPV' class='check-invalide'><img src='https://marches.megalis.bretagne.bzh/themes/images/picto-check-not-ok.gif' alt='Champ obligatoire' /></span></span>
+
+                    <span id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_ctl10" style="display:none;color:red;"><span title='Code CPV' class='check-invalide'><img src='https://marches.megalis.bretagne.bzh/themes/images/picto-check-not-ok.gif' alt='Champ obligatoire' /></span></span>
+
+                </div>
+
+                <span id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_ctl11" style="display:none;color:red;">&nbsp;&nbsp;&nbsp;<span title='Code CPV' class='check-invalide'><img src='https://marches.megalis.bretagne.bzh/themes/images/picto-check-not-ok.gif' alt='Champ obligatoire' /></span></span>
+
+                <input type="hidden" name="ctl0$CONTENU_PAGE$AdvancedSearch$referentielCPV$cpvPrincipale" id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_cpvPrincipale" class="hidenGwtChosenPrincipal" />
+                <input type="hidden" name="ctl0$CONTENU_PAGE$AdvancedSearch$referentielCPV$cpvSecondaires" id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_cpvSecondaires" class="hidenGwtChosenSecondaires" />
+            </div>
+        </div>
+        <div class="col-md-3 switch-toggle switch-candy hide-agent">
+            <!-- BEGIN BUTOON SWITCH -->
+            <div class="btn-group btn-group-tooltip colors btn-group-justified" data-toggle="buttons">
+                <div class="btn btn-primary active" Onclick="toggleTree('multiTreeContainer', 'arborescence')"
+                     title="Vue simple">
+                    <div class="clearfix btn-groupe-item-text text-center" data-toggle="tooltip" data-html="true"
+                         title="<div class='text-center'>Vue simple</div>">
+                        <input title="Vue simple" id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_cpvArborescence" type="radio" name="ctl0$CONTENU_PAGE$AdvancedSearch$referentielCPV$rechercheFloue" value="ctl0$CONTENU_PAGE$AdvancedSearch$referentielCPV$cpvArborescence" checked="checked" />
+                        <span class="sr-only">Vue simple</span>
+                        <i class="fa fa-list-ul"></i>
+                    </div>
+                </div>
+                <div class="btn btn-primary" onclick="toggleTree('multiTreeContainer', 'simple')"
+                     title="Vue arborescence">
+                    <div class="clearfix btn-groupe-item-text text-center" data-toggle="tooltip" data-html="true"
+                         title="<div class='text-center'>Vue arborescence</div>">
+                        <input title="Vue arborescence" id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_cpvSimple" type="radio" name="ctl0$CONTENU_PAGE$AdvancedSearch$referentielCPV$rechercheFloue" value="ctl0$CONTENU_PAGE$AdvancedSearch$referentielCPV$cpvSimple" />
+                        <span class="sr-only">Vue arborescence</span>
+                        <i class="fa fa-align-right"></i>
+                    </div>
+                </div>
+            </div>
+            <a href="#"><span class="sr-only">agent</span></a>
+            <!-- END BUTOON SWITCH -->
+        </div>
+        <div class="col-md-3 switch-toggle switch-candy hide-entreprise">
+            <input id="simple" name="view" checked="checked" type="radio">
+            <label for="simple" onclick="toggleTree('multiTreeContainer', 'arborescence')" title="Vue simple"><i
+                        class="icon icon-search"></i><span class="sr-only">Vue simple</span></label>
+            <input id="arborescence" name="view" type="radio">
+            <label for="arborescence" onclick="toggleTree('multiTreeContainer', 'simple')" title="Vue arborescence"><i
+                        class="icon icon-tree"></i><span class="sr-only">Vue arborescence</span></label>
+            <a class="btn btn-default"></a>
+        </div>
+        <img alt="Info-bulle" class="picto-info-intitule img-question-hide hide-entreprise"
+             onmouseout="cacheBulle('infosclauseCPV')"
+             onmouseover="afficheBulle('infosclauseCPV', this)" src="https://marches.megalis.bretagne.bzh/themes/images/picto-info.gif">
+        <div style="display: none; left: 714px; top: 350px;" onmouseout="mouseOutBulle();"
+             onmouseover="mouseOverBulle();" class="info-bulle" id="infosclauseCPV">
+            <div>
+                <p>
+                    Avec un (ou plusieurs) mot(s) clé(s) et/ou code, vous pouvez effectuer une recherche simple, ou une recherche dans l'arborescence complète des codes CPV
+                    .
+                </p>
+                <p>
+                    Pour améliorer la liste des résultats, vous pouvez rechercher les libellés comprenant
+                    :
+                </p>
+                <ul>
+                    <li>-
+                        une expression exacte (ex : "riz usiné")
+                        ,
+                    </li>
+                    <li>-
+                        l'un ou l'autre des mots saisis (ex : riz blé)
+                        ,
+                    </li>
+                    <li>-
+                        tous les mots saisis (ex : farine ET riz)
+                        .
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-1 p-l-0 hide-agent">
+            <span data-target="#" data-toggle="tooltip" data-placement="top" data-html="true"
+                  data-original-title="<p>Avec un (ou plusieurs) mot(s) clé(s) et/ou code, vous pouvez effectuer une recherche simple, ou une recherche dans l'arborescence complète des codes CPV.</p><p>Pour améliorer la liste des résultats, vous pouvez rechercher les libellés comprenant :</p><ul style='padding-left: 20px;'><li>une expression exacte (ex : &quot;riz usiné&quot;) ,</li><li>l'un ou l'autre des mots saisis (ex : riz blé) ,</li><li>tous les mots saisis (ex : farine ET riz) .</li></ul>">
+                <i class="fa fa-question-circle text-info p-t-1"></i>
+            </span>
+        </div>
+    </div>
+    <span id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_labelScriptCPV" style="display:none;"></span>
+    <span id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_labelScriptCPVLang" style="display:none;"><script>var currentLocal = "fr";</script></span>
+    <span id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_labelSourceScriptCPV" style="display:none;"></span>
+    <span id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_labelScriptCategorieParent" style="display:none;"></span>
+    <span id="ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_labelScriptCpvsParent" style="display:none;"></span>
+    <div class="spacer-small"></div>
+</div>
+
+<script src="https://marches.megalis.bretagne.bzh/themes/js/polyfill.min.js?k=2026-00.05.01"></script>
+<script src="https://marches.megalis.bretagne.bzh/themes/js/axios.min.js?k=2026-00.05.01"></script>
+<script src="https://marches.megalis.bretagne.bzh/themes/js/vue-cpv.js?k=2026-00.05.01"></script>
+<script>
+    function toggleTree(container, id) {
+        typeSelectTreeView=document.getElementById('typeSelectTreeView');
+        if(typeSelectTreeView.value!=id) {
+            typeSelectTreeView.value= id;
+        }
+    }
+</script>
+
+
+
+								</div>
+								<!--END CPV-->
+								<!-- BEGIN ROW SEARCH BY DATE-->
+								<section class="section">
+									<div class="section-heading page-header m-t-3 m-l-1">
+										<span id="ctl0_CONTENU_PAGE_AdvancedSearch_titreDate">
+											<h2 class="h4 m-b-0">
+												Recherche par date
+											</h2>
+										</span>
+									</div>
+									<div class="section-body">
+										<fieldset>
+										<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelDate" class="form-group form-group-sm line">
+											<div class="col-md-2 multiline intitule-150 line-height-normal">
+												<label class="control-label ">Date limite de remise des plis</label>
+											</div>
+
+											<div class="form-inline col-md-10">
+												<div class="form-group form-group-sm col-md-6 formulaire-inline">
+													<div class="col-md-3 control-label p-t-1 intitule-auto">
+														Entre le
+													</div>
+													<div class="input-group datetimepicker col-md-8 calendar" id="dateMiseEnLigneStart">
+														<input name="ctl0$CONTENU_PAGE$AdvancedSearch$dateMiseEnLigneStart" type="text" value="13/11/2026" id="ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneStart" class="form-control text-center" onchange="supprimerEspace(this);" placeholder="( jj/mm/aaaa )" title="Entre le (jj/mm/aaaa)" />
+														<img src="https://marches.megalis.bretagne.bzh/themes/images/picto-calendar.gif" alt="Calendrier" class="hide" onclick="popUpCalendar(this,document.getElementById('ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneStart'),'dd/mm/yyyy','');" title="Calendrier" />
+														<span id="ctl0_CONTENU_PAGE_AdvancedSearch_controlDateMiseEnLigneStart" style="display:none;color:red;">Le format de la date est invalide</span>
+														<span class="input-group-addon hide-agent">
+															<i class="fa fa-calendar"></i>
+														</span>
+													</div>
+												</div>
+												<div class="form-group form-group-sm col-md-6 formulaire-inline">
+													<div class="col-md-3 control-label p-t-1 intitule-auto indent-10">
+														<div class="text-center">
+															et le
+														</div>
+													</div>
+													<div class="input-group datetimepicker col-md-8 calendar">
+														<input name="ctl0$CONTENU_PAGE$AdvancedSearch$dateMiseEnLigneEnd" type="text" value="13/05/2027" id="ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneEnd" class="form-control text-center" onchange="supprimerEspace(this);" placeholder="( jj/mm/aaaa )" title="et le (jj/mm/aaaa)" />
+														<img src="https://marches.megalis.bretagne.bzh/themes/images/picto-calendar.gif" alt="Calendrier" class="hide" onclick="popUpCalendar(this,document.getElementById('ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneEnd'),'dd/mm/yyyy','');" title="Calendrier" />
+														<!-- inofrmation sur format de la date JJ/MM/AAAA -->
+														<span id="ctl0_CONTENU_PAGE_AdvancedSearch_controlDateMiseEnLigneEnd" style="display:none;color:red;">Le format de la date est invalide</span>
+														<span class="input-group-addon hide-agent">
+                                                                <i class="fa fa-calendar"></i>
+                                                            </span>
+													</div>
+												</div>
+											</div>
+										</div>
+										</fieldset>
+										<fieldset>
+										<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelDateMiseEnLigneCalcule" class="form-group form-group-sm line">
+											<div class="control-label col-md-2 multiline intitule-150">
+												<label class="control-label ">Date de mise en ligne</label>
+											</div>
+											<div class="form-inline col-md-10">
+												<div class="form-group form-group-sm col-md-6 formulaire-inline">
+													<div class="col-md-3 control-label p-t-1 intitule-auto">
+														Entre le
+													</div>
+													<div class="input-group datetimepicker col-md-8 calendar">
+														<input name="ctl0$CONTENU_PAGE$AdvancedSearch$dateMiseEnLigneCalculeStart" type="text" value="13/05/2026" id="ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneCalculeStart" class="form-control text-center" onchange="supprimerEspace(this);" placeholder="( jj/mm/aaaa )" title="Entre le (jj/mm/aaaa)" />
+														<img src="https://marches.megalis.bretagne.bzh/themes/images/picto-calendar.gif" alt="Calendrier" class="hide" onclick="popUpCalendar(this,document.getElementById('ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneCalculeStart'),'dd/mm/yyyy','');" title="Calendrier" />
+														<span id="ctl0_CONTENU_PAGE_AdvancedSearch_controlDateMiseEnLigneCalculeStart" style="display:none;color:red;">Le format de la date est invalide</span>
+														<span class="input-group-addon hide-agent">
+                                                                <i class="fa fa-calendar"></i>
+                                                            </span>
+													</div>
+												</div>
+												<div class="form-group form-group-sm col-md-6 formulaire-inline">
+													<div class="col-md-3 control-label p-t-1 intitule-auto indent-10">
+														<div class="text-center">
+															et le
+														</div>
+													</div>
+													<div class="input-group datetimepicker col-md-8 calendar">
+														<input name="ctl0$CONTENU_PAGE$AdvancedSearch$dateMiseEnLigneCalculeEnd" type="text" value="13/11/2026" id="ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneCalculeEnd" class="form-control text-center" onchange="supprimerEspace(this);" placeholder="( jj/mm/aaaa )" title="et le (jj/mm/aaaa)" />
+														<img src="https://marches.megalis.bretagne.bzh/themes/images/picto-calendar.gif" alt="Calendrier" class="hide" onclick="popUpCalendar(this,document.getElementById('ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneCalculeEnd'),'dd/mm/yyyy','');" title="Calendrier" />
+														<div class="info-aide-right hide">
+															( jj/mm/aaaa )
+														</div>
+														<span id="ctl0_CONTENU_PAGE_AdvancedSearch_controlDateMiseEnLigneCalculeEnd" style="display:none;color:red;">Le format de la date est invalide</span>
+														<span class="input-group-addon hide-agent">
+                                                                <i class="fa fa-calendar"></i>
+                                                            </span>
+													</div>
+												</div>
+											</div>
+										</div>
+										</fieldset>
+									</div>
+									<div class="hide">
+										<h2>Recherche par mots clés
+										<a href="#keywordSearchHide" onmouseover="afficheBulle('infosRechercheMotsCles', this)" onmouseout="cacheBulle('infosRechercheMotsCles')" onfocus="afficheBulle('infosRechercheMotsCles', this)" onblur="cacheBulle('infosRechercheMotsCles')" class="picto-info-intitule">
+											<img src="https://marches.megalis.bretagne.bzh/themes/images/picto-info.gif" alt="Info-bulle" />
+										</a>
+										</h2>
+										<div class="line">
+											<div class="intitule-bloc bloc-155"><label for="ctl0_CONTENU_PAGE_keywordSearchBottom">Dans la référence, l'intitulé ou l'objet de la consultation :</label></div>
+											<input name="ctl0$CONTENU_PAGE$AdvancedSearch$keywordSearchBottom" type="text" id="ctl0_CONTENU_PAGE_AdvancedSearch_keywordSearchBottom" class="long" title="Dans la référence, l'intitulé ou l'objet de la consultation" />
+											<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelMotsClesBottom" class="content-bloc bloc-600">
+												<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelRechercheFloueBottom" class="line">
+													<input class="radio" title="Recherche approchée" id="ctl0_CONTENU_PAGE_AdvancedSearch_floueBottom" type="radio" name="ctl0$CONTENU_PAGE$AdvancedSearch$rechercheFloue" value="ctl0$CONTENU_PAGE$AdvancedSearch$floueBottom" checked="checked" />
+													<label for="floueBottom">Recherche approchée</label>
+													&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+													<input class="radio" title="Recherche exacte" id="ctl0_CONTENU_PAGE_AdvancedSearch_exactBottom" type="radio" name="ctl0$CONTENU_PAGE$AdvancedSearch$rechercheFloue" value="ctl0$CONTENU_PAGE$AdvancedSearch$exactBottom" /><label for="exacteBottom">
+													Recherche exacte</label>
+												</div>
+											</div>
+										</div>
+									</div>
+								</section>
+								<!-- END ROW SEARCH BY DATE-->
+								<div class="spacer"></div>
+							</div>
+						</section>
+						<!-- END ROW SEARCH BY KEYWORDS-->
+					</div>
+					<div class="panel-footer">
+						<div class="clearfix fix-footer">
+							<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelButton" class="">
+								<div class="pull-left">
+									<input type="reset" style="display:none" id="bouttonReset"
+										   class="btn btn-sm btn-default m-r-1 pull-left"
+										   value="Effacer les critères de recherche"
+										   title="Effacer les critères de recherche"/>
+									<input type="submit" name="ctl0$CONTENU_PAGE$AdvancedSearch$boutonClear" value="Effacer les critères de recherche" id="ctl0_CONTENU_PAGE_AdvancedSearch_boutonClear" class="btn btn-footer btn-sm btn-default pull-left bouton-long-190" onclick="javascript:document.getElementById('bouttonReset').click();" />
+								</div>
+								<div class="pull-right">
+
+									<span data-tnr="rechercheAvanceeLancerRecherche">
+										<input type="submit" name="ctl0$CONTENU_PAGE$AdvancedSearch$lancerRecherche" value="Lancer la recherche" id="ctl0_CONTENU_PAGE_AdvancedSearch_lancerRecherche" class="btn btn-footer btn-sm btn-primary pull-left bouton-moyen-120 float-right" />
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="panel panel-default tab-pane fade" id="restreinte">
+					<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelSearchPrRest" class="form-field">
+						<div class="panel-body">
+							<div class="content">
+								<section class="section">
+									<div class="text-right m-b-2 small">
+										Le symbole
+										<span class="text-danger">*</span>
+										indique les champs obligatoires
+									</div>
+									<div class="section-body">
+
+										<!--BEGIN ENTITE PUBLIQUE-->
+										<div class="form-group form-group-sm">
+											<label class="col-md-2 control-label" for="ctl0_CONTENU_PAGE_AdvancedSearch_orgNamesRestreinteSearch">
+												Entité publique
+												<span class="text-danger">*</span>
+											</label>
+											<div class="col-md-9">
+												<select name="ctl0$CONTENU_PAGE$AdvancedSearch$orgNamesRestreinteSearch" id="ctl0_CONTENU_PAGE_AdvancedSearch_orgNamesRestreinteSearch" class="form-control"><option value="0">--- Sélectionnez une Entité publique ---</option></select>
+											</div>
+											<span id="erreurMinistere" style="display:none" title='Champ obligatoire' class='check-invalide text-danger'><i
+														class="fa fa-times-circle-o p-r-1"></i></span>
+										</div>
+										<!--END ENTITE PUBLIQUE-->
+										<div id="ctl0_CONTENU_PAGE_AdvancedSearch_panelPurchaseNamesConsRestreinte">
+											<!--BEGIN SERVICE-->
+											<div id="divEntityPurchaseConsRestreinte" style="display:none" class="form-group form-group-sm">
+												<label class="col-md-2 control-label" for="ctl0_CONTENU_PAGE_AdvancedSearch_entityPurchaseNamesConsRestreinte">
+													Service
+												</label>
+												<div class="col-md-9">
+													<select name="ctl0$CONTENU_PAGE$AdvancedSearch$entityPurchaseNamesConsRestreinte" id="ctl0_CONTENU_PAGE_AdvancedSearch_entityPurchaseNamesConsRestreinte" class="form-control"></select>
+												</div>
+											</div>
+											<!--END SERVICE-->
+											<span id="ctl0_CONTENU_PAGE_AdvancedSearch_scriptPurchaseNamesConsRestreinte"></span>
+											<p id="erreurListe" style="display: none;" title="Champ obligatoire" class="check-invalide text-danger"><i class="fa fa-times-circle-o p-r-1" aria-hidden="true"></i><span class="sr-only">Champ obligatoire</span></p>
+										</div>
+										<!--BEGIN REFERENCE-->
+										<div class="form-group form-group-sm">
+											<label class="col-md-2 control-label" for="ctl0_CONTENU_PAGE_AdvancedSearch_refRestreinteSearch">
+												Référence
+												<span class="text-danger">*</span>
+											</label>
+											<div class="col-md-9">
+												<input name="ctl0$CONTENU_PAGE$AdvancedSearch$refRestreinteSearch" type="text" id="ctl0_CONTENU_PAGE_AdvancedSearch_refRestreinteSearch" class="form-control" />
+											</div>
+											<p id="erreurReference" style="display: none;" title="Champ obligatoire" class="check-invalide text-danger"><i class="fa fa-times-circle-o p-r-1" aria-hidden="true"></i><span class="sr-only">Champ obligatoire</span></p>
+										</div>
+										<!--BEGIN REFERENCE-->
+										<!--BEGIN CODE D"ACCES-->
+										<div class="form-group form-group-sm">
+											<label class="col-md-2 control-label" for="ctl0_CONTENU_PAGE_AdvancedSearch_accesRestreinteSearch">
+												Code d'accès
+												<span class="text-danger">*</span>
+											</label>
+											<div class="col-md-9">
+												<input name="ctl0$CONTENU_PAGE$AdvancedSearch$accesRestreinteSearch" type="text" maxlength="15" id="ctl0_CONTENU_PAGE_AdvancedSearch_accesRestreinteSearch" class="form-control" />
+											</div>
+											<p id="erreurCode" style="display: none;" title="Champ obligatoire" class="check-invalide text-danger"><i class="fa fa-times-circle-o p-r-1" aria-hidden="true"></i><span class="sr-only">Champ obligatoire</span></p>
+										</div>
+										<!--BEGIN CODE D"ACCES-->
+									</div>
+								</section>
+							</div>
+						</div>
+						<div class="panel-footer">
+							<div class="clearfix">
+								<div class="pull-left">
+									<button type="reset" class="btn btn-sm btn-default"
+											value="Effacer les critères de recherche"
+											title="Effacer les critères de recherche">
+										<!--i class="fa fa-ban m-r-1"></i-->
+										Effacer les critères de recherche
+									</button>
+								</div>
+								<div class="pull-right">
+									<input type="submit" name="ctl0$CONTENU_PAGE$AdvancedSearch$ctl115" value="Lancer la recherche" id="ctl0_CONTENU_PAGE_AdvancedSearch_ctl115" class="btn btn-sm btn-primary" onclick="return verifierDonneeRechercheRestreinte();" title="Lancer la recherche" />
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--Debut Bloc Recherche Procedure restreinte-->
+		<div id="rechercheRes"></div>
+		<!--Debut Bloc Gestion des envois postaux compl?mentaires-->
+
+		<!--Fin Bloc Gestion des envois postaux complémentaires-->
+		<!--Fin Bloc Recherche Procedure restreinte-->
+
+	</div>
+	<!--Fin Bloc Recherche avancee-->
+</div>
+<!--Debut Modal Recherche-->
+<div class="modal fade" id="modalSaveSearch" tabindex="-1" role="dialog" aria-labelledby="modalSaveSearch">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<div class="h4 modal-title" id="modalSaveSearchLabel">Sauvegarder la recherche</div>
+			</div>
+			<div class="modal-body">
+				<!-- Début de l'entête du sommateur de messages d'erreurs -->
+<div id="divValidation" style="display:none" class="bloc-message form-bloc-conf msg-erreur erreur-danger">
+
+    <div role="alert">
+        <div class="h4-alerte">
+            <i class="fa fa-exclamation-triangle m-r-1 hidden"></i>
+            Erreur de saisie.
+        </div>
+        <div class="spacer-small"></div>
+        <div>
+            Veuillez vérifier la saisie des champs suivants :
+            <span id="ctl0_CONTENU_PAGE_AdvancedSearch_ctl0_validationSummary" style="display:none;color:#d9534f;"></span>
+            <span id="ctl0_CONTENU_PAGE_AdvancedSearch_ctl0_serverError"></span>
+        </div>
+    </div>
+</div>
+<!-- Fin du footer du sommateur de messages d'erreurs -->
+				<!--Debut Formulaire-->
+				<div class="clearfix">
+					<div class="form-horizontal">
+						<div class="form-group form-group-sm clearfix line">
+							<label for="ctl0_CONTENU_PAGE_AdvancedSearch_rechercheName" class="control-label col-md-2">
+								Nom
+								<span class="text-danger" style="color:red">*</span>
+							</label>
+							<div class="col-md-10">
+								<input name="ctl0$CONTENU_PAGE$AdvancedSearch$rechercheName" type="text" id="ctl0_CONTENU_PAGE_AdvancedSearch_rechercheName" class="form-control moyen" />
+							</div>
+						</div>
+						<div class="form-group form-group-sm clearfix">
+							<div class="col-md-offset-2 col-md-10 line">
+								<div>
+									<label for="ctl0_CONTENU_PAGE_AdvancedSearch_sauvegardeRecherche" style="font-weight: normal">
+										<input title="Recherche sauvegardée" id="ctl0_CONTENU_PAGE_AdvancedSearch_sauvegardeRecherche" type="checkbox" name="ctl0$CONTENU_PAGE$AdvancedSearch$sauvegardeRecherche" />
+										Recherche sauvegardée
+									</label>
+								</div>
+							</div>
+							<div class="col-md-offset-2 col-md-10 line">
+								<div class="checkbox">
+									<label for="ctl0_CONTENU_PAGE_AdvancedSearch_sauvegardeAlerte">
+										<input title="Alerte" id="ctl0_CONTENU_PAGE_AdvancedSearch_sauvegardeAlerte" type="checkbox" onclick="isCheckedShowDiv(this,'ctl0_CONTENU_PAGE_AdvancedSearch_infoCompAlerte');" name="ctl0$CONTENU_PAGE$AdvancedSearch$sauvegardeAlerte" />
+										Alerte
+									</label>
+								</div>
+							</div>
+						</div>
+						<div class="form-group form-group-sm m-b-0">
+							<div class="col-md-offset-2 col-md-10">
+								<div id="ctl0_CONTENU_PAGE_AdvancedSearch_infoCompAlerte" style="Display:none;">
+									<div class="m-b-2">
+										<label>
+											Je souhaite recevoir l'alerte
+											:
+										</label>
+										<div>
+											<label class="radio-inline control-label" for="ctl0_CONTENU_PAGE_AdvancedSearch_tousLesJours">
+												<input title="Tous les jours" id="ctl0_CONTENU_PAGE_AdvancedSearch_tousLesJours" type="radio" name="ctl0$CONTENU_PAGE$AdvancedSearch$RadioGroup" value="ctl0$CONTENU_PAGE$AdvancedSearch$tousLesJours" checked="checked" />
+												Tous les jours
+											</label>
+											<label class="radio-inline control-label" for="ctl0_CONTENU_PAGE_AdvancedSearch_toutesLesSemaines">
+												<input title="Toutes les semaines" id="ctl0_CONTENU_PAGE_AdvancedSearch_toutesLesSemaines" type="radio" name="ctl0$CONTENU_PAGE$AdvancedSearch$RadioGroup" value="ctl0$CONTENU_PAGE$AdvancedSearch$toutesLesSemaines" />
+												Toutes les semaines
+											</label>
+											<label class="radio-inline control-label" for="ctl0_CONTENU_PAGE_AdvancedSearch_desactiver">
+												<input title="Désactiver temporairement" id="ctl0_CONTENU_PAGE_AdvancedSearch_desactiver" type="radio" name="ctl0$CONTENU_PAGE$AdvancedSearch$RadioGroup" value="ctl0$CONTENU_PAGE$AdvancedSearch$desactiver" />
+												Désactiver temporairement
+											</label>
+										</div>
+									</div>
+									<div class="m-b-2">
+										<label>
+											Je souhaite recevoir l'alerte au format
+											:
+										</label>
+										<div>
+											<label class="radio-inline control-label" for="ctl0_CONTENU_PAGE_AdvancedSearch_formatHtml">
+												<input title="Format Html" id="ctl0_CONTENU_PAGE_AdvancedSearch_formatHtml" type="radio" name="ctl0$CONTENU_PAGE$AdvancedSearch$formatAlerte" value="ctl0$CONTENU_PAGE$AdvancedSearch$formatHtml" checked="checked" />
+												HTML
+											</label>
+											<label class="radio-inline control-label" for="ctl0_CONTENU_PAGE_AdvancedSearch_formatTexte">
+												<input title="Format Texte" id="ctl0_CONTENU_PAGE_AdvancedSearch_formatTexte" type="radio" name="ctl0$CONTENU_PAGE$AdvancedSearch$formatAlerte" value="ctl0$CONTENU_PAGE$AdvancedSearch$formatTexte" />
+												Texte
+											</label>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<span id="ctl0_CONTENU_PAGE_AdvancedSearch_sauvegardeValidator" style="display:none;color:red;"><span  title='<com:TTranslate>CHAMP_OBLIGATOIRE</com:TTranslate>' class='check-invalide'><img src='https://marches.megalis.bretagne.bzh/themes/images/picto-check-not-ok.gif' alt='<com:TTranslate>CHAMP_OBLIGATOIRE</com:TTranslate>' /></span></span>
+					</div>
+				</div>
+				<!--Fin Formulaire-->
+			</div>
+			<div class="modal-footer">
+				<!--Debut line boutons-->
+				<button type="button"
+						class="btn btn-sm btn-default pull-left" data-dismiss="modal">Annuler</button>
+				<input type="submit" name="ctl0$CONTENU_PAGE$AdvancedSearch$saveRecherche" value="Enregistrer" id="ctl0_CONTENU_PAGE_AdvancedSearch_saveRecherche" class="btn btn-sm btn-primary bouton-validation float-right" />
+				<!--Fin line boutons-->
+			</div>
+		</div>
+	</div>
+</div>
+<span id="ctl0_CONTENU_PAGE_AdvancedSearch_scriptJs" style="display:none;"></span>
+<script>
+    function displayInputAutocomplete() {
+        var idDisplay = document.getElementById("ctl0_CONTENU_PAGE_AdvancedSearch_panelSearchAnnoncesMarches");
+        if (idDisplay) {
+			if (idDisplay.style.display === "none") {
+				idDisplay.style.display = "block";
+			}
+        }
+    }
+</script>
+<span id="ctl0_CONTENU_PAGE_AdvancedSearch_panelDefaultRestreinte" style="display:none"></span>
+<!--Fin colonne droite-->
+
+		</div>
+		<!--Fin Bloc Recherche avancee-->
+		<!--Debut Bloc de Resultat-->
+
+		<!--Fin Bloc de Resultat-->
+		<input type="submit" name="ctl0$CONTENU_PAGE$afficherMonPanier" value="" id="ctl0_CONTENU_PAGE_afficherMonPanier" style="display:none;" />
+
+
+
+			</div>
+		</div>
+	</div>
+	<!--Fin partie centrale-->
+
+
+
+	<!--Debut Side menu-->
+<div>
+    <div id="acces-tel" class="help-bar" visible="0">
+		<ul>
+			<li style="display:none;">
+				<a href="/?page=Entreprise.EntrepriseFaq" target="_blank" class="faq">
+					TEXT_FAQ
+				</a>
+			</li>
+			<li>
+				<a class="hotline" target="_blank" title="Assistance (nouvelle fenêtre)" href="/index.php/entreprise/aide/assistance-telephonique">
+					<span class="text">
+						Assistance <span>: 02 23 48 04 54 / Assistance dédiée aux marchés de la formation professionnelle : 01 53 43 05 44</span>
+					</span>
+				</a>
+			</li>
+		</ul>
+	</div>
+</div>
+<!--Fin Side menu-->
+	</div>
+<div style="visibility:hidden;">
+<input type="text" style="display:none" autocomplete="off" name="PRADO_PAGESTATE" id="PRADO_PAGESTATE" value="TRONQUE" />
+</div>
+<script src="/assets/df1e7875/validator/validation3.min.js"></script>
+<script>
+/*<![CDATA[*/
+new Prado.WebUI.TActiveButton({'EventTarget':"ctl0$CONTENU_PAGE$buttonRefresh",'ID':"ctl0_CONTENU_PAGE_buttonRefresh"});
+new Prado.ValidationManager({'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TValidationSummary({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_ctl13_validationSummary",'FormID':"ctl0_ctl1",'ScrollToSummary':true,'DisplayMode':"BulletList",'Refresh':true,'ValidationGroup':"validationRestreinte",'Display':"None",'OnHideSummary':function(summary, validators){
+                    document.getElementById('ctl0_CONTENU_PAGE_AdvancedSearch_ctl13_validationSummary').innerHTML='';
+                    document.getElementById('divValidationSummary').style.display='none';
+                 }});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_keywordSearch",'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$keywordSearch",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TJuiAutoComplete({'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$orgNameAM",'minLength':0,'delay':400,'appendTo':"#ctl0_CONTENU_PAGE_AdvancedSearch_orgNameAM_result",'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_orgNameAM"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_reference",'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$reference",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TActiveButton({'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$selectedGeoN2",'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_selectedGeoN2"});
+new Prado.WebUI.TRequiredFieldValidator({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_ctl9",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ErrorMessage':"Code CPV",'ValidationGroup':"validerNotification",'ControlToValidate':"ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_cpvPrincipale",'ControlType':"THiddenField",'Enabled':true,'OnValidationError':function(sender, parameter){
+                            document.getElementById('divValidationSummaryEnregistrement').style.display='';
+                         }});
+new Prado.WebUI.TRequiredFieldValidator({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_ctl10",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ErrorMessage':"Code CPV",'ValidationGroup':"validateInfosContrat",'ControlToValidate':"ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_cpvPrincipale",'ControlType':"THiddenField",'Enabled':true,'OnValidationError':function(sender, parameter){
+                            document.getElementById('divValidationSummary').style.display='';
+                         }});
+new Prado.WebUI.TRequiredFieldValidator({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_ctl11",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ErrorMessage':"Code CPV",'ValidationGroup':"validateInfosAnnonce",'ControlToValidate':"ctl0_CONTENU_PAGE_AdvancedSearch_referentielCPV_cpvPrincipale",'ControlType':"THiddenField",'Enabled':true,'OnValidationError':function(sender, parameter){
+                        document.getElementById('divValidationSummary').style.display='';
+                     }});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneStart",'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$dateMiseEnLigneStart",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TDataTypeValidator({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_controlDateMiseEnLigneStart",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ValidationGroup':"datesValidation",'ControlToValidate':"ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneStart",'ControlType':"TTextBox",'Enabled':true,'DataType':"Date",'DateFormat':"dd\/M\/yyyy"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneEnd",'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$dateMiseEnLigneEnd",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TDataTypeValidator({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_controlDateMiseEnLigneEnd",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ValidationGroup':"datesValidation",'ControlToValidate':"ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneEnd",'ControlType':"TTextBox",'Enabled':true,'DataType':"Date",'DateFormat':"dd\/M\/yyyy"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneCalculeStart",'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$dateMiseEnLigneCalculeStart",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TDataTypeValidator({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_controlDateMiseEnLigneCalculeStart",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ValidationGroup':"datesValidation",'ControlToValidate':"ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneCalculeStart",'ControlType':"TTextBox",'Enabled':true,'DataType':"Date",'DateFormat':"dd\/M\/yyyy"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneCalculeEnd",'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$dateMiseEnLigneCalculeEnd",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TDataTypeValidator({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_controlDateMiseEnLigneCalculeEnd",'FormID':"ctl0_ctl1",'Display':"Dynamic",'ValidationGroup':"datesValidation",'ControlToValidate':"ctl0_CONTENU_PAGE_AdvancedSearch_dateMiseEnLigneCalculeEnd",'ControlType':"TTextBox",'Enabled':true,'DataType':"Date",'DateFormat':"dd\/M\/yyyy"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_keywordSearchBottom",'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$keywordSearchBottom",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TButton({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_boutonClear",'CausesValidation':true,'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$boutonClear",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TButton({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_lancerRecherche",'CausesValidation':true,'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$lancerRecherche",'ValidationGroup':"datesValidation",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TActiveDropDownList({'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$orgNamesRestreinteSearch",'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_orgNamesRestreinteSearch"});
+new Prado.WebUI.TActiveDropDownList({'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$entityPurchaseNamesConsRestreinte",'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_entityPurchaseNamesConsRestreinte"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_refRestreinteSearch",'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$refRestreinteSearch",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TTextBox({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_accesRestreinteSearch",'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$accesRestreinteSearch",'AutoPostBack':false,'CausesValidation':true,'TextMode':"SingleLine",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.TButton({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_ctl115",'CausesValidation':true,'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$ctl115",'FormID':"ctl0_ctl1"});
+new Prado.WebUI.DefaultButton({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_panelContent",'Panel':"ctl0_CONTENU_PAGE_AdvancedSearch_panelContent",'Target':"ctl0_CONTENU_PAGE_AdvancedSearch_lancerRecherche",'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$lancerRecherche",'Event':"click"});
+new Prado.WebUI.TValidationSummary({'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_ctl0_validationSummary",'FormID':"ctl0_ctl1",'ScrollToSummary':true,'DisplayMode':"BulletList",'Refresh':true,'ValidationGroup':"validateName",'Display':"None",'OnHideSummary':function(summary, validators){
+                    document.getElementById('ctl0_CONTENU_PAGE_AdvancedSearch_ctl0_validationSummary').innerHTML='';
+                    document.getElementById('divValidation').style.display='none';
+                 }});
+new Prado.WebUI.TActiveTextBox({'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$rechercheName",'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_rechercheName",'AutoPostBack':false,'TextMode':"SingleLine"});
+new Prado.WebUI.TActiveButton({'ValidationGroup':"validateName",'EventTarget':"ctl0$CONTENU_PAGE$AdvancedSearch$saveRecherche",'ID':"ctl0_CONTENU_PAGE_AdvancedSearch_saveRecherche"});
+new Prado.WebUI.TButton({'ID':"ctl0_CONTENU_PAGE_afficherMonPanier",'CausesValidation':true,'EventTarget':"ctl0$CONTENU_PAGE$afficherMonPanier",'FormID':"ctl0_ctl1"});
+/*]]>*/
+</script>
+</form>
+</main>
+
+<script src="/build/runtime.4c1b5377.js"></script>
+<script src="/build/5360.327a2067.js"></script>
+<script src="/build/1083.f7f04fc5.js"></script>
+<script src="/build/2348.edf47088.js"></script>
+<script src="/build/3806.0a2d5716.js"></script>
+<script src="/build/8601.20c277a9.js"></script>
+<script src="/build/1685.9caf32f3.js"></script>
+<script src="/build/agent-header-statistics.be8d7a1a.js"></script>
+<script src="/build/4692.ea0baeb8.js"></script>
+<script src="/build/8851.7170f0d0.js"></script>
+<script src="/build/2754.c2d5003c.js"></script>
+<script src="/build/6964.f3df8713.js"></script>
+<script src="/build/vendor.a62c0775.js"></script>
+
+
+
+<div class="clearfix">&nbsp;</div>
+<footer class="footer" role="contentinfo">
+    <div class="content footer_content text-center">
+        <div class="list-unstyled clearfix container">
+            <div class="footer-menu">
+                <ul class="list-unstyled">
+                                            <li>
+                            <a class="link-footer" href="/entreprise/footer/info-site">
+                                InfoSite et RGPD
+                            </a>
+                        </li>
+
+                                            <li>
+                            <a class="link-footer"
+                               href="/entreprise/footer/conditions-utilisation">
+                                Conditions d'utilisation
+                            </a>
+                        </li>
+
+                    <li>
+                        <a class="link-footer"
+                           href="/entreprise/footer/prerequis-techniques">
+                            Pré-requis techniques
+                        </a>
+                    </li>
+
+
+                    <li>
+                        <a class="link-footer"
+                           href="/entreprise/footer/accessibilite">
+                            Accessibilité
+                        </a>
+                    </li>
+
+                                            <li>
+                            <a class="link-footer"
+                               href="/entreprise/footer/info-acrgs">
+                                Autorités de certification européennes
+                            </a>
+                        </li>
+
+
+                </ul>
+            </div>
+
+            <div>
+
+
+            </div>
+                            <div id="ctl0_ctl4_panelNaviguationMulilingue" class="footer-multilingual">
+                                            <div class="item-lang on lang-switcher"
+                             data-lang="fr">
+                            <a href="/language">
+                                <input type="button" name="ctl0$ctl4$langages$ctl2$flagImg"
+                                       value="fr"
+                                       id="ctl0_ctl4_langages_ctl2_flagImg"
+                                       class="language-choice flage-FR"
+                                />
+                            </a>
+                        </div>
+                                            <div class="item-lang on lang-switcher"
+                             data-lang="en">
+                            <a href="/language/en">
+                                <input type="button" name="ctl0$ctl4$langages$ctl3$flagImg"
+                                       value="en"
+                                       id="ctl0_ctl4_langages_ctl3_flagImg"
+                                       class="language-choice flage-EN"
+                                />
+                            </a>
+                        </div>
+                                            <div class="item-lang on lang-switcher"
+                             data-lang="es">
+                            <a href="/language/es">
+                                <input type="button" name="ctl0$ctl4$langages$ctl4$flagImg"
+                                       value="es"
+                                       id="ctl0_ctl4_langages_ctl4_flagImg"
+                                       class="language-choice flage-ES"
+                                />
+                            </a>
+                        </div>
+                                    </div>
+
+        </div>
+    </div>
+</footer>
+<div class="footer_go_top out" id="js-footer_go_top">
+    <a href="#" class="btn btn-primary btn-go-to-top animated" id="js-btn-go_to_top"
+       title="Retour en haut">
+        <i class="fa fa-angle-up"></i>
+    </a>
+</div>
+
+
+
+</div>
+<script  src="https://marches.megalis.bretagne.bzh/themes/js/prototype-noconflict.footer.js?k=2026-00.05.01" charset="UTF-8"></script>
+
+<!-- MainLayout -->
+
+		<script  src="https://marches.megalis.bretagne.bzh/themes/js/ng-script.js?k=2026-00.05.01" charset="UTF-8"></script>
+
+
+
+
+
+</body>
+</html>
