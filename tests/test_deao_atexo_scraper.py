@@ -26,6 +26,8 @@ REGISTRE = (
     SourceDeao("boamp", "BOAMP", True, "res-boamp", 1),
 )
 
+PROVISOIRE = pl.DataFrame({"uid": ["x"], "sourceDataset": ["provisoire"]})
+
 
 def _cons(ref="242752", nombre_lots=0, **kw) -> ConsultationListe:
     defaut = dict(
@@ -105,6 +107,8 @@ def env(monkeypatch, tmp_path, fake_datagouv):
         "geocoder_adresses",
         lambda adresses, today: pl.DataFrame(schema=ADRESSE_GEOCODE_SCHEMA),
     )
+    # Fichier provisoire déposé à la création de la ressource : non conforme.
+    _publier(fake_datagouv, "res-megalis", PROVISOIRE)
     return fake_datagouv, s3, tmp_path
 
 
@@ -139,6 +143,35 @@ def test_precedent_indisponible_echoue(env, monkeypatch):
     monkeypatch.setattr(config, "DEAO_SCRAP_PARTIR_DE_ZERO", False)
     client = FauxClient([_cons("1")])
     with pytest.raises(FichierSourceIndisponible):
+        _lancer(client)
+    assert client.appels == []
+
+
+def test_precedent_en_panne_echoue_malgre_le_drapeau(env):
+    # Une panne de data.gouv.fr ne doit jamais effacer l'historique.
+    datagouv, _, _ = env
+    datagouv.en_erreur.add("res-megalis")
+    client = FauxClient([_cons("1")])
+    with pytest.raises(FichierSourceIndisponible, match="HTTP 500"):
+        _lancer(client)
+    assert client.appels == []
+
+
+def test_precedent_absent_echoue_malgre_le_drapeau(env):
+    datagouv, _, _ = env
+    del datagouv.fichiers["res-megalis"]
+    client = FauxClient([_cons("1")])
+    with pytest.raises(FichierSourceIndisponible, match="HTTP 404"):
+        _lancer(client)
+    assert client.appels == []
+
+
+def test_precedent_illisible_echoue_malgre_le_drapeau(env):
+    # Un téléchargement tronqué n'est pas un fichier provisoire.
+    datagouv, _, _ = env
+    datagouv.fichiers["res-megalis"] = b"PAR1 tronque"
+    client = FauxClient([_cons("1")])
+    with pytest.raises(FichierSourceIndisponible, match="illisible"):
         _lancer(client)
     assert client.appels == []
 

@@ -23,7 +23,7 @@ from src.tasks.deao.enrich import dictionnaire_depuis_publie, enrich_acheteurs
 from src.tasks.deao.geocode_cache import geocoder_adresses
 from src.tasks.deao.schema import published_schema, selection_publiee
 from src.tasks.deao.sources_publiees import (
-    FichierSourceIndisponible,
+    FichierSourceNonConforme,
     publication_autorisee,
     telecharger_fichier_source,
 )
@@ -92,31 +92,32 @@ def _referentiels() -> tuple[pl.LazyFrame, pl.LazyFrame, pl.DataFrame]:
 
 
 def _lire_precedent(entree: SourceDeao, dossier: Path) -> pl.DataFrame:
-    """Fichier publié de la source ; absent ou non conforme (ex. fichier provisoire
-    déposé à la création de la ressource) : départ de zéro seulement sur demande
-    explicite (une panne de data.gouv.fr ne doit pas écraser l'historique)."""
+    """Fichier publié de la source. Non conforme (ex. fichier provisoire déposé à la
+    création de la ressource) : départ de zéro seulement sur demande explicite. Absent,
+    en erreur ou illisible : toujours une erreur, même avec le drapeau (une panne de
+    data.gouv.fr ne doit pas écraser l'historique)."""
+    chemin = telecharger_fichier_source(entree, dossier)
     try:
-        chemin = telecharger_fichier_source(entree, dossier)
         try:
             precedent = selection_publiee(pl.read_parquet(chemin))
         except pl.exceptions.PolarsError as e:
-            raise FichierSourceIndisponible(
+            raise FichierSourceNonConforme(
                 f"Source {entree.code} : fichier publié non conforme au schéma ({e})"
             ) from e
         etrangeres = precedent.filter(
             pl.col("sourceDataset").is_null() | (pl.col("sourceDataset") != entree.code)
         ).height
         if etrangeres:
-            raise FichierSourceIndisponible(
+            raise FichierSourceNonConforme(
                 f"Source {entree.code} : fichier publié non conforme "
                 f"({etrangeres} ligne(s) dont sourceDataset != {entree.code})"
             )
         return precedent
-    except FichierSourceIndisponible as e:
+    except FichierSourceNonConforme as e:
         if not config.DEAO_SCRAP_PARTIR_DE_ZERO:
             raise
         get_logger(level=config.LOG_LEVEL).warning(
-            f"{entree.code} : fichier publié indisponible ({e}), départ de zéro "
+            f"{entree.code} : fichier publié non conforme ({e}), départ de zéro "
             "(DEAO_SCRAP_PARTIR_DE_ZERO)."
         )
         return pl.DataFrame(schema=published_schema())

@@ -18,6 +18,11 @@ class FichierSourceIndisponible(RuntimeError):
     """Le fichier d'une source est absent, en erreur ou illisible sur data.gouv.fr."""
 
 
+class FichierSourceNonConforme(FichierSourceIndisponible):
+    """Le fichier d'une source est bien téléchargé et lisible, mais son contenu n'est
+    pas celui attendu (ex. fichier provisoire déposé à la création de la ressource)."""
+
+
 DELAIS = httpx.Timeout(30, read=300)
 
 
