@@ -8,3 +8,15 @@
   open_data: true
   resource_id: 8fd238e4-d5ab-40d1-9b61-a07c2fdb020c
   min_rows: 10000
+- code: megalis_bretagne
+  name: Mégalis Bretagne (profil d'acheteur Atexo)
+  open_data: false
+  resource_id: c5a67fe9-fe02-4c9e-b11a-ec6162ec2c76
+  min_rows: 300
+  url_base: https://marches.megalis.bretagne.bzh
+- code: maximilien
+  name: Maximilien (profil d'acheteur Atexo, Île-de-France)
+  open_data: false
+  resource_id: e9a13bd3-b3d1-43e8-a79b-8e74e75e50d5
+  min_rows: 150
+  url_base: https://marches.maximilien.fr

@@ -1,13 +1,12 @@
 """Flow deao_processing : agrégation des fichiers par source (dataset b privé) et
 publication des datasets a (Open Data) et b (complet), issue #178."""
 
-from collections import Counter
-
 import polars as pl
 from prefect import flow
 from prefect.concurrency.sync import concurrency
 
 from src import config
+from src.tasks.deao.dedoublonnage import dedoublonner_sources
 from src.tasks.deao.report import lignes_rapport_sources, publier_rapport
 from src.tasks.deao.schema import open_schema, published_schema, write_table_schema
 from src.tasks.deao.sources_publiees import (
@@ -24,12 +23,6 @@ from src.tasks.utils import get_logger
 # Colonnes absentes des fichiers publiés avant leur ajout au schéma : complétées
 # par des nuls à la lecture (transition de schéma).
 COLONNES_TRANSITOIRES = ("acheteur_codePostal", "urlDce", "urlReglementConsultation")
-
-
-def dedoublonner_sources(df: pl.DataFrame) -> tuple[pl.DataFrame, Counter]:
-    """Dédoublonnage entre sources : identité en v1 (la règle viendra avec les
-    sources qui se recoupent)."""
-    return df, Counter(dedoublonnage_retire=0)
 
 
 def _verifier_identifiants() -> None:
@@ -116,7 +109,9 @@ def deao_processing(run_date: str | None = None) -> None:
         if not frames:
             raise RuntimeError("Aucune source DEAO exploitable.")
 
-        df, stats = dedoublonner_sources(pl.concat(list(frames.values())))
+        df, stats = dedoublonner_sources(
+            pl.concat(list(frames.values())), config.DEAO_REGISTRE
+        )
         logger.info(f"Dédoublonnage : {dict(stats)}")
         if df["uid"].is_duplicated().any():
             n = int(df["uid"].is_duplicated().sum())
@@ -125,6 +120,7 @@ def deao_processing(run_date: str | None = None) -> None:
         publier_rapport(
             lignes_rapport_sources(df)
             + [{"indicateur": f"source_ecartee:{c}", "valeur": 1} for c in ecartees]
+            + [{"indicateur": k, "valeur": v} for k, v in sorted(stats.items())]
         )
 
         # Écriture : agrégat Open Data (a) et agrégat complet (b)

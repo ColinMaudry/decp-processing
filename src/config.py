@@ -422,6 +422,8 @@ class SourceDeao:
     resource_id: str
     min_rows: int
     skip: bool = False
+    # Racine du site d'une plateforme (dédoublonnage BOAMP ↔ plateformes)
+    url_base: str | None = None
 
 
 def charger_registre_deao(path: Path) -> tuple[SourceDeao, ...]:
@@ -443,6 +445,12 @@ def charger_registre_deao(path: Path) -> tuple[SourceDeao, ...]:
         if entree["code"] in codes:
             raise ValueError(f"Registre DEAO {path} : code en double {entree['code']}")
         codes.add(entree["code"])
+        url_base = entree.get("url_base")
+        if url_base is not None and not str(url_base).startswith("https://"):
+            raise ValueError(
+                f"Registre DEAO {path} : url_base doit commencer par https:// "
+                f"({entree['code']} : {url_base})"
+            )
         sources.append(
             SourceDeao(
                 code=entree["code"],
@@ -451,6 +459,7 @@ def charger_registre_deao(path: Path) -> tuple[SourceDeao, ...]:
                 resource_id=str(entree["resource_id"]),
                 min_rows=int(entree["min_rows"]),
                 skip=bool(entree.get("skip", False)),
+                url_base=str(url_base) if url_base is not None else None,
             )
         )
     return tuple(sources)

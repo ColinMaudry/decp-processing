@@ -252,3 +252,14 @@ def test_source_fermee_ecartee_signalee(fake_datagouv, env, monkeypatch):
     )
     deao_processing()
     assert {"indicateur": "source_ecartee:joue", "valeur": 1} in lignes
+
+
+def test_compteurs_dedoublonnage_dans_rapport(fake_datagouv, env, monkeypatch):
+    from src.flows import deao_processing as module
+
+    lignes = []
+    monkeypatch.setattr(
+        module, "publier_rapport", lambda rapport: lignes.extend(rapport)
+    )
+    deao_processing()
+    assert {"indicateur": "dedoublonnage_retire", "valeur": 0} in lignes
