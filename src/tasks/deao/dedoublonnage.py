@@ -87,9 +87,10 @@ def dedoublonner_sources(
     nul, même jour limite, et un seul candidat de chaque côté."""
     stats = Counter(dedoublonnage_retire=0)
     presentes = set(df["sourceDataset"].unique().drop_nulls())
-    plateformes = [
-        s for s in registre if not s.open_data and s.url_base and s.code in presentes
-    ]
+    # Toutes les plateformes du registre servent à lire les URL BOAMP (même une
+    # source écartée du run) ; seules les présentes peuvent être fusionnées.
+    plateformes_registre = [s for s in registre if not s.open_data and s.url_base]
+    plateformes = [s for s in plateformes_registre if s.code in presentes]
     if not plateformes:
         return df, stats
 
@@ -107,7 +108,7 @@ def dedoublonner_sources(
                     id_consultation_expr(p.url_base).alias("id_p"),
                 )
             )
-            for p in plateformes
+            for p in plateformes_registre
         ).alias("_cible")
     ).unnest("_cible")
     paires_exactes = boamp.select(
@@ -120,25 +121,27 @@ def dedoublonner_sources(
         how="inner",
     )
 
-    # 2. Strict, parmi les consultations non appariées. Une consultation BOAMP dont
-    # l'URL désigne une consultation d'une plateforme n'est pas candidate : son
-    # URL dit déjà de quelle consultation il s'agit.
-    boamp_restant = boamp.filter(pl.col("source_p").is_null())
-    plateformes_restant = cons_plateformes.join(
-        paires_exactes.select(
-            pl.col("source_p").alias("sourceDataset"), pl.col("id_p").alias("id")
-        ),
-        on=CLE,
-        how="anti",
-    )
+    # 2. Strict. L'unicité de la clé se compte sur toutes les consultations (BOAMP
+    # et plateformes, appariées ou non) : un appariement exact ne doit pas masquer
+    # une ambiguïté. Puis on ne garde que les consultations sans appariement exact ;
+    # une consultation BOAMP dont l'URL désigne une consultation d'une plateforme
+    # (présente ou non) n'est pas candidate : son URL dit déjà de laquelle il s'agit.
     cle = ["_ref", "acheteur_id", "_jour"]
     paires_strictes = (
-        _cle_stricte(boamp_restant)
-        .filter(pl.col("_n") == 1)
+        _cle_stricte(boamp)
+        .filter((pl.col("_n") == 1) & pl.col("source_p").is_null())
         .select("id", *cle)
         .join(
-            _cle_stricte(plateformes_restant)
+            _cle_stricte(cons_plateformes)
             .filter(pl.col("_n") == 1)
+            .join(
+                paires_exactes.select(
+                    pl.col("source_p").alias("sourceDataset"),
+                    pl.col("id_p").alias("id"),
+                ),
+                on=CLE,
+                how="anti",
+            )
             .select(
                 pl.col("sourceDataset").alias("source_p"),
                 pl.col("id").alias("id_p"),

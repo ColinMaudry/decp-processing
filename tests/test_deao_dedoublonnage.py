@@ -237,3 +237,39 @@ def test_sans_plateforme_identite():
     resultat, stats = dedoublonner_sources(df, REGISTRE)
     assert resultat.equals(df)
     assert stats["dedoublonnage_retire"] == 0
+
+
+def test_stricte_ambiguite_non_masquee_par_appariement_exact():
+    """BOAMP A apparié exactement à 242752 ; BOAMP B (URL racine) partage la clé
+    stricte avec 242752 et 999 : la clé est ambiguë, B n'est pas fusionné."""
+    df = _df(
+        _strict("boamp", "26-1", urlConsultation=URL_BOAMP),
+        _strict("boamp", "26-2", urlConsultation=f"{MEGALIS}/"),
+        _strict("megalis_bretagne", "242752", urlConsultation=URL_MEGALIS),
+        _strict(
+            "megalis_bretagne",
+            "999",
+            urlConsultation=f"{MEGALIS}/entreprise/consultation/999",
+        ),
+    )
+    df, stats = dedoublonner_sources(df, REGISTRE)
+    assert stats["fusion_exacte:megalis_bretagne"] == 1
+    assert stats["fusion_stricte:megalis_bretagne"] == 0
+    assert stats["seule:megalis_bretagne"] == 1
+    assert df.filter(pl.col("sourceDataset") == "megalis_bretagne")["id"].to_list() == [
+        "999"
+    ]
+    assert df.height == 3
+
+
+def test_stricte_url_vers_plateforme_absente_pas_de_fusion():
+    """Maximilien écarté du run : une URL BOAMP désignant une consultation
+    Maximilien n'est pas candidate au rapprochement strict avec Mégalis."""
+    df = _df(
+        _strict("boamp", "26-1", urlConsultation=f"{MAXIMILIEN}/?page=x&id=555"),
+        _strict("megalis_bretagne", "242752", urlConsultation=URL_MEGALIS),
+    )
+    df, stats = dedoublonner_sources(df, REGISTRE)
+    assert df.height == 2
+    assert stats["fusion_stricte:megalis_bretagne"] == 0
+    assert stats["seule:megalis_bretagne"] == 1
