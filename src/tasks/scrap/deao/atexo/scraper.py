@@ -221,7 +221,7 @@ def _collecter(
 
     if archiver:
         try:
-            verifier_depot_s3()
+            verifier_depot_s3(code)
         except ErreurDepotS3 as e:
             couper_archivage(e)
     lignes: list[dict] = []

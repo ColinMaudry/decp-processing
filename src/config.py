@@ -483,6 +483,8 @@ CLOSED_USER_AGENT = os.getenv(
 )
 # Préfixe S3 des DCE archivés : <préfixe>/<code plateforme>/<id DCE ou refCons><ext>
 DEAO_DCE_S3_PREFIX = os.getenv("DEAO_DCE_S3_PREFIX", "dce")
+# Base des URL publiques des DCE ; vide = <S3_ENDPOINT_URL>/<S3_BUCKET> (voir template.env)
+DEAO_DCE_URL_PUBLIQUE = os.getenv("DEAO_DCE_URL_PUBLIQUE", "")
 # Repartir de zéro quand le fichier publié d'une plateforme est non conforme (fichier
 # provisoire) ; une indisponibilité de data.gouv.fr reste toujours une erreur.
 DEAO_SCRAP_PARTIR_DE_ZERO = (

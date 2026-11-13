@@ -49,7 +49,13 @@ def _content_disposition(nom_fichier: str) -> str:
 
 
 def _base_publique() -> str:
-    return f"{config.S3_ENDPOINT_URL.rstrip('/')}/{config.S3_BUCKET}/"
+    """Base des URL publiques des DCE : `DEAO_DCE_URL_PUBLIQUE` si renseignée (stockage
+    multi-locataire : `<endpoint>/<compte>:<bucket>`), sinon `<endpoint>/<bucket>`."""
+    base = (
+        config.DEAO_DCE_URL_PUBLIQUE
+        or f"{config.S3_ENDPOINT_URL.rstrip('/')}/{config.S3_BUCKET}"
+    )
+    return f"{base.rstrip('/')}/"
 
 
 def url_publique(cle: str) -> str:
@@ -77,10 +83,11 @@ def taille_archivee(cle: str) -> str | None:
     return reponse.get("Metadata", {}).get("taille-affichee")
 
 
-def verifier_depot_s3() -> None:
+def verifier_depot_s3(code: str) -> None:
     """Dépose (en lecture publique), relit puis supprime un petit objet sous le préfixe
-    des DCE ; lève ErreurDepotS3 si S3 refuse l'une de ces opérations."""
-    cle = f"{config.DEAO_DCE_S3_PREFIX}/{_CLE_CONTROLE}"
+    des DCE (clé propre à la plateforme `code`, les plateformes tournant en parallèle) ;
+    lève ErreurDepotS3 si S3 refuse l'une de ces opérations."""
+    cle = f"{config.DEAO_DCE_S3_PREFIX}/{_CLE_CONTROLE}-{code}"
     try:
         client = s3_client()
         client.put_object(

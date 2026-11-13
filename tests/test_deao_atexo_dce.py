@@ -13,6 +13,7 @@ def fake_s3(monkeypatch):
     monkeypatch.setattr(dce.config, "S3_BUCKET", "b")
     monkeypatch.setattr(dce.config, "S3_ENDPOINT_URL", "https://s3.example.com/")
     monkeypatch.setattr(dce.config, "DEAO_DCE_S3_PREFIX", "dce")
+    monkeypatch.setattr(dce.config, "DEAO_DCE_URL_PUBLIQUE", "")
     return fake
 
 
@@ -123,7 +124,7 @@ def test_verifier_depot_s3(fake_s3, monkeypatch):
         reel(**kwargs)
 
     monkeypatch.setattr(fake_s3, "put_object", put_object)
-    dce.verifier_depot_s3()
+    dce.verifier_depot_s3("maximilien")
     # Objet de contrôle sous le préfixe des DCE, en lecture publique, puis supprimé.
     assert deposes[0]["Key"].startswith("dce/")
     assert deposes[0]["ACL"] == "public-read"
@@ -133,4 +134,32 @@ def test_verifier_depot_s3(fake_s3, monkeypatch):
 def test_verifier_depot_s3_acl_refusee(fake_s3, monkeypatch):
     monkeypatch.setattr(fake_s3, "put_object", _refus("PutObject"))
     with pytest.raises(dce.ErreurDepotS3, match="AccessDenied"):
-        dce.verifier_depot_s3()
+        dce.verifier_depot_s3("maximilien")
+
+
+def test_url_publique_base_personnalisee(fake_s3, monkeypatch):
+    monkeypatch.setattr(
+        dce.config, "DEAO_DCE_URL_PUBLIQUE", "https://s3.example.com/compte:b/"
+    )
+    url = dce.url_publique("dce/x/1.zip")
+    assert url == "https://s3.example.com/compte:b/dce/x/1.zip"
+    assert dce.cle_depuis_url(url) == "dce/x/1.zip"
+    # Une URL au format par défaut n'est plus reconnue.
+    assert dce.cle_depuis_url("https://s3.example.com/b/dce/x/1.zip") is None
+
+
+def test_verifier_depot_s3_cle_propre_a_la_plateforme(fake_s3, monkeypatch):
+    cles = []
+    reel = fake_s3.put_object
+
+    def put_object(**kwargs):
+        cles.append(kwargs["Key"])
+        reel(**kwargs)
+
+    monkeypatch.setattr(fake_s3, "put_object", put_object)
+    dce.verifier_depot_s3("maximilien")
+    dce.verifier_depot_s3("megalis_bretagne")
+    assert cles == [
+        "dce/.controle-depot-maximilien",
+        "dce/.controle-depot-megalis_bretagne",
+    ]
