@@ -73,7 +73,7 @@ S3_REGION = os.getenv("S3_REGION", "")
 HTTP_CLIENT = httpx.Client()
 HTTP_HEADERS = {
     "Connection": "keep-alive",
-    "User-agent": "decp.info",
+    "User-agent": "colibre.fr",
 }
 
 # Timeout pour la publication de chaque ressource sur data.gouv.fr

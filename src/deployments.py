@@ -36,7 +36,7 @@ def deao_deployment_specs() -> list[dict]:
     flows = [
         # (nom, entrypoint, cron prod, concurrency_limit, tags, description)
         (
-            "scrap-open",
+            "deao-scrap-open",
             "src/flows/scrap_open.py:scrap_open",
             "0 8,12,16 * * *",
             1,
@@ -44,7 +44,7 @@ def deao_deployment_specs() -> list[dict]:
             "DEAO : collecte BOAMP/JOUE (appels d'offres ouverts), puis traitement.",
         ),
         (
-            "scrap-closed",
+            "deao-scrap-closed",
             "src/flows/scrap_closed.py:scrap_closed",
             "0 6 * * *",
             1,
@@ -211,38 +211,6 @@ def decp_deployment_specs() -> list[dict]:
             "description": "Prétraitement SIRENE sur l'instance Scaleway éphémère de dev.",
             "work_pool_name": "scaleway-dev",
             "tags": tags_sirene,
-        },
-        {
-            "entrypoint": scrap,
-            "branch": "main",
-            "name": "scrap-marches-securises",
-            "description": "Scraping des données de marches-securises.fr.",
-            "work_pool_name": "local",
-            "cron": "0 0 * * 1-5",
-            "job_variables": scrap_env(
-                "prod", "False", "month", "marches-securises.fr"
-            ),
-            "tags": [*tags_scrap, "marches-securises"],
-        },
-        {
-            "entrypoint": scrap,
-            "branch": "main",
-            "name": "scrap-aws",
-            "description": "Scraping des données de marches-publics.info.",
-            "work_pool_name": "local",
-            "cron": "0 0 * * 1-5",
-            "job_variables": scrap_env("prod", "False", "month", "aws"),
-            "tags": [*tags_scrap, "aws"],
-        },
-        {
-            "entrypoint": scrap,
-            "branch": "main",
-            "name": "scrap-dume",
-            "description": "Scraping des données de l'API DUME.",
-            "work_pool_name": "local",
-            "cron": "0 0 * * 2",
-            "job_variables": scrap_env("prod", "False", "month", "dume"),
-            "tags": [*tags_scrap, "dume"],
         },
         {
             "entrypoint": scrap,
