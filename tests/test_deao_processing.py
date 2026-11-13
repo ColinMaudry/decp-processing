@@ -10,7 +10,7 @@ from src import config
 from src.flows.deao_processing import deao_processing
 from src.flows.scrap_open import selection_publiee
 from src.tasks.deao.report import lignes_rapport_sources
-from src.tasks.deao.schema import published_schema
+from src.tasks.deao.schema import open_schema, published_schema
 from tests.deao_fakes import fake_datagouv  # noqa: F401
 
 OPEN = "ds-a"
@@ -199,3 +199,56 @@ def test_rapport_par_source():
     assert indicateurs["statut:joue:ouvert"] == 3
     assert indicateurs["acheteur_id_source:boamp:siret"] == 3
     assert indicateurs["remplissage:objet:boamp"] == 1.0
+
+
+def test_ancien_fichier_accepte_et_renomme(fake_datagouv, env):
+    # fichier joue publié avant le déploiement : idAvisInitial au lieu de id,
+    # sans les 3 nouvelles colonnes
+    rid = _rid(env, "joue")
+    df = pl.read_parquet(io.BytesIO(fake_datagouv.fichiers[rid]))
+    df = df.rename({"id": "idAvisInitial"}).drop(
+        "acheteur_codePostal", "urlDce", "urlReglementConsultation"
+    )
+    buf = io.BytesIO()
+    df.write_parquet(buf)
+    fake_datagouv.fichiers[rid] = buf.getvalue()
+    deao_processing()
+    closed = pl.read_parquet(env.dist / "closed" / "deao.parquet")
+    assert dict(closed.schema) == published_schema()
+
+
+def test_dataset_a_sans_champs_fermes(fake_datagouv, env):
+    deao_processing()
+    ouvert = pl.read_parquet(env.dist / "deao.parquet")
+    assert "urlDce" not in ouvert.columns and "id" in ouvert.columns
+    assert dict(ouvert.schema) == open_schema()
+
+
+def test_source_fermee_absente_non_bloquante(fake_datagouv, env):
+    _registre(env, joue={"open_data": False})
+    del fake_datagouv.fichiers[_rid(env, "joue")]
+    deao_processing()
+    assert (OPEN, PARQUET_A) in {(d, r) for d, r, _ in fake_datagouv.publies}
+    closed = pl.read_parquet(env.dist / "closed" / "deao.parquet")
+    assert set(closed["sourceDataset"]) == {"boamp"}
+
+
+def test_source_fermee_sous_minimum_non_bloquante(fake_datagouv, env):
+    _registre(env, joue={"open_data": False, "min_rows": 99})
+    deao_processing()
+    assert ("ds-b", PARQUET_B) in {(d, r) for d, r, _ in fake_datagouv.publies}
+    closed = pl.read_parquet(env.dist / "closed" / "deao.parquet")
+    assert set(closed["sourceDataset"]) == {"boamp"}
+
+
+def test_source_fermee_ecartee_signalee(fake_datagouv, env, monkeypatch):
+    _registre(env, joue={"open_data": False})
+    del fake_datagouv.fichiers[_rid(env, "joue")]
+    from src.flows import deao_processing as module
+
+    lignes = []
+    monkeypatch.setattr(
+        module, "publier_rapport", lambda rapport: lignes.extend(rapport)
+    )
+    deao_processing()
+    assert {"indicateur": "source_ecartee:joue", "valeur": 1} in lignes

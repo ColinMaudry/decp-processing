@@ -9,7 +9,7 @@ from prefect.concurrency.sync import concurrency
 
 from src import config
 from src.tasks.deao.report import lignes_rapport_sources, publier_rapport
-from src.tasks.deao.schema import published_schema, write_table_schema
+from src.tasks.deao.schema import open_schema, published_schema, write_table_schema
 from src.tasks.deao.sources_publiees import (
     publication_autorisee,
     publier_fichier,
@@ -20,6 +20,10 @@ from src.tasks.publish import publish_deao_to_datagouv, should_publish_deao
 from src.tasks.utils import get_logger
 
 # La configuration (config.*) est lue à l'appel : les tests la substituent.
+
+# Colonnes absentes des fichiers publiés avant leur ajout au schéma : complétées
+# par des nuls à la lecture (transition de schéma).
+COLONNES_TRANSITOIRES = ("acheteur_codePostal", "urlDce", "urlReglementConsultation")
 
 
 def dedoublonner_sources(df: pl.DataFrame) -> tuple[pl.DataFrame, Counter]:
@@ -43,7 +47,16 @@ def _verifier_identifiants() -> None:
 
 def _verifier_fichier(code: str, chemin, min_rows: int) -> pl.DataFrame:
     attendu = published_schema()
-    schema = dict(pl.read_parquet_schema(chemin))
+    df = pl.read_parquet(chemin)
+    # Transition : ancien nom de l'identifiant et colonnes ajoutées depuis
+    if "idAvisInitial" in df.columns and "id" not in df.columns:
+        df = df.rename({"idAvisInitial": "id"})
+    df = df.with_columns(
+        pl.lit(None, dtype=attendu[c]).alias(c)
+        for c in COLONNES_TRANSITOIRES
+        if c not in df.columns
+    )
+    schema = dict(df.schema)
     if schema != attendu:
         manquantes = sorted(set(attendu) - set(schema))
         en_trop = sorted(set(schema) - set(attendu))
@@ -52,7 +65,7 @@ def _verifier_fichier(code: str, chemin, min_rows: int) -> pl.DataFrame:
             f"Source {code} : schéma non conforme (colonnes manquantes {manquantes}, "
             f"en trop {en_trop}, types différents {types})"
         )
-    df = pl.read_parquet(chemin).select(list(attendu))
+    df = df.select(list(attendu))
     if df.height < min_rows:
         raise RuntimeError(
             f"Source {code} : {df.height} lignes < minimum attendu {min_rows}"
@@ -86,12 +99,22 @@ def deao_processing(run_date: str | None = None) -> None:
         dossier = config.DEAO_DATA_DIR / "sources"
         dossier.mkdir(parents=True, exist_ok=True)
         frames = {}
+        ecartees = []
         for source in sources:
             logger.info(f"Téléchargement de la source {source.code}...")
-            chemin = telecharger_fichier_source(source, dossier)
-            frames[source.code] = _verifier_fichier(
-                source.code, chemin, source.min_rows
-            )
+            try:
+                chemin = telecharger_fichier_source(source, dossier)
+                frames[source.code] = _verifier_fichier(
+                    source.code, chemin, source.min_rows
+                )
+            except Exception as e:
+                if source.open_data:
+                    raise
+                # Source fermée en échec : écartée, ne bloque pas les autres
+                logger.error(f"Source fermée {source.code} écartée : {e}")
+                ecartees.append(source.code)
+        if not frames:
+            raise RuntimeError("Aucune source DEAO exploitable.")
 
         df, stats = dedoublonner_sources(pl.concat(list(frames.values())))
         logger.info(f"Dédoublonnage : {dict(stats)}")
@@ -99,17 +122,22 @@ def deao_processing(run_date: str | None = None) -> None:
             n = int(df["uid"].is_duplicated().sum())
             raise RuntimeError(f"uid non unique dans l'agrégat ({n} lignes concernées)")
 
-        publier_rapport(lignes_rapport_sources(df))
+        publier_rapport(
+            lignes_rapport_sources(df)
+            + [{"indicateur": f"source_ecartee:{c}", "valeur": 1} for c in ecartees]
+        )
 
         # Écriture : agrégat Open Data (a) et agrégat complet (b)
         dist = config.DEAO_DIST_DIR
         dist.mkdir(parents=True, exist_ok=True)
         # Concaténation des seules sources open_data (jamais un filtre a posteriori)
-        frames_open = [frames[s.code] for s in sources if s.open_data]
+        frames_open = [
+            frames[s.code] for s in sources if s.open_data and s.code in frames
+        ]
         df_open = (
-            pl.concat(frames_open)
+            pl.concat(frames_open).select(list(open_schema()))
             if frames_open
-            else pl.DataFrame(schema=published_schema())
+            else pl.DataFrame(schema=open_schema())
         )
         logger.info(f"Écriture de {df_open.height} lignes Open Data dans {dist}...")
         sink_to_files(df_open.lazy(), dist / "deao")
