@@ -50,7 +50,9 @@ def test_depot_public_et_metadonnees(fake_s3, tmp_path):
     assert fake_s3.extra_args["dce/x/1.zip"] == {
         "ACL": "public-read",
         "ContentType": "application/zip",
-        "ContentDisposition": 'attachment; filename="1-DCE.zip"',
+        "ContentDisposition": (
+            "attachment; filename=\"1-DCE.zip\"; filename*=UTF-8''1-DCE.zip"
+        ),
         "Metadata": {"taille-affichee": "72,09 Mo"},
     }
     assert not d.chemin.exists()
@@ -70,3 +72,27 @@ def test_depot_supprime_fichier_si_echec(fake_s3, tmp_path, monkeypatch):
     with pytest.raises(RuntimeError):
         dce.deposer_dce(d, "dce/x/1.zip", None)
     assert not d.chemin.exists()
+
+
+def test_content_disposition_nom_hostile():
+    entete = dce._content_disposition('a"b\\\r\né.zip')
+    assert entete == (
+        "attachment; filename=\"ab_.zip\"; filename*=UTF-8''a%22b%5C%0D%0A%C3%A9.zip"
+    )
+    assert entete.isascii() and "\r" not in entete and "\n" not in entete
+
+
+def test_normaliser_taille():
+    assert dce.normaliser_taille("72,09 Mo") == "72,09 Mo"
+    assert dce.normaliser_taille(" 72,09  Mo ") == "72,09 Mo"
+    assert dce.normaliser_taille("é").isascii()
+    assert dce.normaliser_taille(None) is None
+
+
+def test_depot_taille_nbsp_coherente(fake_s3, tmp_path):
+    dce.deposer_dce(_dce(tmp_path), "dce/x/1.zip", "72,09 Mo")
+    assert dce.taille_archivee("dce/x/1.zip") == dce.normaliser_taille("72,09 Mo")
+
+
+def test_cle_dce_suffixe_non_sur(fake_s3):
+    assert dce.cle_dce("x", "1", "a.z ip/../é").endswith("/1.zip")

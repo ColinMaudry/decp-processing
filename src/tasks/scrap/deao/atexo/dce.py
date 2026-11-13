@@ -1,6 +1,8 @@
 """Archivage public des DCE Atexo dans S3 (même bucket que le reste, objets en lecture publique)."""
 
+import re
 from pathlib import PurePosixPath
+from urllib.parse import quote
 
 from botocore.exceptions import ClientError
 
@@ -10,8 +12,32 @@ from src.tasks.utils import s3_client
 
 
 def cle_dce(code: str, identifiant: str, nom_fichier: str) -> str:
-    suffixe = PurePosixPath(nom_fichier).suffix.lower() or ".zip"
+    suffixe = PurePosixPath(nom_fichier).suffix.lower()
+    if not re.fullmatch(r"\.[a-z0-9]{1,8}", suffixe):
+        suffixe = ".zip"
     return f"{config.DEAO_DCE_S3_PREFIX}/{code}/{identifiant}{suffixe}"
+
+
+def normaliser_taille(texte: str | None) -> str | None:
+    """Taille affichée sûre pour une métadonnée S3 (ASCII) : espaces unifiés,
+    caractères non ASCII encodés en pourcentage. À appliquer aussi à la taille
+    affichée par la plateforme avant de la comparer à `taille_archivee`."""
+    if texte is None:
+        return None
+    texte = re.sub(r"\s+", " ", texte).strip()
+    return quote(texte, safe=" ,.()/%-+")
+
+
+def _content_disposition(nom_fichier: str) -> str:
+    ascii_sur = "".join(
+        c if c.isascii() and c.isprintable() and c not in '"\\' else "_"
+        for c in nom_fichier
+        if c not in '"\\' and c.isprintable()
+    )
+    return (
+        f'attachment; filename="{ascii_sur}"; '
+        f"filename*=UTF-8''{quote(nom_fichier, safe='')}"
+    )
 
 
 def _base_publique() -> str:
@@ -51,8 +77,10 @@ def deposer_dce(dce: DceTelecharge, cle: str, taille_affichee: str | None) -> st
             ExtraArgs={
                 "ACL": "public-read",
                 "ContentType": dce.content_type,
-                "ContentDisposition": f'attachment; filename="{dce.nom_fichier}"',
-                "Metadata": {"taille-affichee": taille_affichee or ""},
+                "ContentDisposition": _content_disposition(dce.nom_fichier),
+                "Metadata": {
+                    "taille-affichee": normaliser_taille(taille_affichee) or ""
+                },
             },
         )
     finally:
