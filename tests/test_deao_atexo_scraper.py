@@ -291,10 +291,13 @@ def test_recherche_incomplete_n_annule_rien(env):
     datagouv, _, _ = env
     premier = _lancer(FauxClient([_cons("1"), _cons("2")]))
     _publier(datagouv, "res-megalis", premier)
-    client = FauxClient([_cons("1")])
+    client = FauxClient([_cons("1", intitule="Modifié")])
     client.recherche_incomplete = True
     df = _lancer(client)
     assert dict(zip(df["id"], df["statut"])) == {"1": "ouvert", "2": "ouvert"}
+    # Les consultations lues sont bien rafraîchies.
+    assert client.nb("detail") == 1
+    assert df.filter(pl.col("id") == "1")["objet"].to_list() == ["Modifié"]
 
 
 def test_disparue_avant_date_limite_annulee(env):
@@ -337,3 +340,32 @@ def test_precedent_non_conforme_echoue_sans_drapeau(env, monkeypatch):
     with pytest.raises(FichierSourceIndisponible, match="non conforme"):
         _lancer(client)
     assert client.appels == []
+
+
+def _lignes_en_panne_pour(monkeypatch, ref):
+    reelle = scraper.lignes_consultation
+
+    def lignes(code, url_base, c, *args, **kwargs):
+        if c.ref_cons == ref:
+            raise ValueError("valeur inattendue")
+        return reelle(code, url_base, c, *args, **kwargs)
+
+    monkeypatch.setattr(scraper, "lignes_consultation", lignes)
+
+
+def test_lignes_en_echec_nouvelle_ignoree(env, monkeypatch):
+    _lignes_en_panne_pour(monkeypatch, "2")
+    df = _lancer(FauxClient([_cons("1"), _cons("2"), _cons("3")]))
+    assert sorted(df["id"]) == ["1", "3"]
+
+
+def test_lignes_en_echec_connue_conservee(env, monkeypatch):
+    datagouv, _, _ = env
+    premier = _lancer(FauxClient([_cons("1"), _cons("2")]))
+    _publier(datagouv, "res-megalis", premier)
+    _lignes_en_panne_pour(monkeypatch, "2")
+    df = _lancer(
+        FauxClient([_cons("1", intitule="Modifié"), _cons("2", intitule="Modifié")])
+    )
+    assert dict(zip(df["id"], df["objet"])) == {"1": "Modifié", "2": "Intitulé 2"}
+    assert set(df["statut"]) == {"ouvert"}

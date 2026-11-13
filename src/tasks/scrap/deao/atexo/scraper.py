@@ -167,6 +167,13 @@ def _archiver_dce(
     return url
 
 
+def _suite(c: ConsultationListe, connus: set[str]) -> str:
+    """Sort d'une consultation en erreur : une connue garde ses lignes précédentes."""
+    if c.ref_cons in connus:
+        return "lignes précédentes conservées"
+    return "consultation ignorée ce passage"
+
+
 def _collecter(
     client: ClientAtexo,
     entree: SourceDeao,
@@ -206,14 +213,10 @@ def _collecter(
                 lots = []
         except Exception as e:
             stats["detail_en_erreur"] += 1
-            suite = (
-                "lignes précédentes conservées"
-                if c.ref_cons in connus
-                else "consultation ignorée ce passage"
+            logger.warning(
+                f"{code} {c.ref_cons} : détail en erreur ({e!r}), {_suite(c, connus)}."
             )
-            logger.warning(f"{code} {c.ref_cons} : détail en erreur ({e!r}), {suite}.")
             continue
-        stats["rafraichies"] += 1
 
         url_dce = urls_dce.get(c.ref_cons)
         if archiver:
@@ -225,9 +228,19 @@ def _collecter(
                 # On garde l'éventuelle archive précédente ; nouvel essai au passage suivant.
                 stats["dce_en_erreur"] += 1
                 logger.warning(f"{code} {c.ref_cons} : DCE en erreur ({e!r}).")
-        lignes.extend(
-            lignes_consultation(code, entree.url_base, c, detail, lots, url_dce, stats)
-        )
+        try:
+            lignes.extend(
+                lignes_consultation(
+                    code, entree.url_base, c, detail, lots, url_dce, stats
+                )
+            )
+        except Exception as e:
+            stats["lignes_en_erreur"] += 1
+            logger.warning(
+                f"{code} {c.ref_cons} : lignes en erreur ({e!r}), {_suite(c, connus)}."
+            )
+            continue
+        stats["rafraichies"] += 1
     return consultations, annoncees, lignes
 
 
@@ -297,7 +310,7 @@ def _passage(
         f"{'' if complete else ' (recherche incomplète ou trop courte : aucune annulation)'}"
         f", {stats['rafraichies']} rafraîchies ; {stats['dce_deposes']} DCE déposés "
         f"({stats['dce_octets'] / 1e6:.1f} Mo) ; erreurs : {stats['detail_en_erreur']} "
-        f"détail, {stats['dce_en_erreur']} DCE, {stats['geocodage_en_erreur']} géocodage ; "
+        f"détail, {stats['lignes_en_erreur']} lignes, {stats['dce_en_erreur']} DCE, {stats['geocodage_en_erreur']} géocodage ; "
         f"procédures inconnues : {inconnues or 'aucune'} ; {df.height} lignes, "
         f"{df['id'].n_unique()} consultations, {avec_siret} lignes avec acheteur_id."
     )
