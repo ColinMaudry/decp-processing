@@ -144,3 +144,18 @@ def test_scrapers_atexo_enregistres():
     from src.tasks.scrap.deao.contrat import SCRAPERS
 
     assert {"megalis_bretagne", "maximilien"} <= set(SCRAPERS)
+
+
+def test_scraper_execute_dans_le_contexte_du_flow(env, monkeypatch):
+    """Les scrapers tournent dans des fils : ils doivent garder le logger du run."""
+    from prefect import get_run_logger
+
+    publication, _, _, scrapers = env
+
+    def avec_logger(jour):
+        get_run_logger().info("journal du scraper")
+        return _lignes("plateforme_a")
+
+    scrapers["plateforme_a"] = avec_logger
+    flow_module.scrap_closed(run_date="2026-10-15")
+    assert [p[1] for p in publication.publies] == ["res-a"]

@@ -1,5 +1,6 @@
 """Flow scrap_closed : scrapers de plateformes fermées, puis traitement (issue #178)."""
 
+import contextvars
 from datetime import date
 
 import polars as pl
@@ -41,8 +42,12 @@ def scrap_closed(run_date: str | None = None) -> None:
             erreurs[code] = "source absente du registre"
     a_lancer = [c for c in codes if c not in erreurs]
 
+    # Un contexte par scraper, copié dans le fil du flow : les fils du pool gardent
+    # le contexte Prefect (logger du run, sous-flow sirene_preprocess).
+    contextes = {code: contextvars.copy_context() for code in a_lancer}
+
     def executer(code: str) -> pl.DataFrame:
-        return SCRAPERS[code](today)
+        return contextes[code].run(SCRAPERS[code], today)
 
     resultats = run_in_pool(
         executer,

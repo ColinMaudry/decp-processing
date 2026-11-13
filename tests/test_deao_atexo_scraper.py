@@ -311,3 +311,29 @@ def test_sirene_absent_lance_preprocess(env, monkeypatch, tmp_path):
     monkeypatch.setattr(scraper, "sirene_preprocess", lambda: appels.append(1))
     scraper._referentiels()
     assert appels == [1]
+
+
+def test_precedent_non_conforme_partir_de_zero(env):
+    datagouv, _, _ = env
+    # Fichier provisoire déposé à la création de la ressource (autre schéma).
+    _publier(
+        datagouv,
+        "res-megalis",
+        pl.DataFrame({"uid": ["x"], "techniques": ["a"], "sourceDataset": ["edf"]}),
+    )
+    df = _lancer(FauxClient([_cons("1")]))
+    assert df["uid"].to_list() == [f"{CODE}_1_0"]
+
+
+def test_precedent_non_conforme_echoue_sans_drapeau(env, monkeypatch):
+    datagouv, _, _ = env
+    monkeypatch.setattr(config, "DEAO_SCRAP_PARTIR_DE_ZERO", False)
+    _publier(
+        datagouv,
+        "res-megalis",
+        pl.DataFrame({"uid": ["x"], "sourceDataset": ["edf"]}),
+    )
+    client = FauxClient([_cons("1")])
+    with pytest.raises(FichierSourceIndisponible, match="non conforme"):
+        _lancer(client)
+    assert client.appels == []

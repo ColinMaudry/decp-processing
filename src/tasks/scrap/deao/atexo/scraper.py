@@ -87,10 +87,26 @@ def _referentiels() -> tuple[pl.LazyFrame, pl.LazyFrame, pl.DataFrame]:
 
 
 def _lire_precedent(entree: SourceDeao, dossier: Path) -> pl.DataFrame:
-    """Fichier publié de la source ; absent : départ de zéro seulement sur demande
+    """Fichier publié de la source ; absent ou non conforme (ex. fichier provisoire
+    déposé à la création de la ressource) : départ de zéro seulement sur demande
     explicite (une panne de data.gouv.fr ne doit pas écraser l'historique)."""
     try:
         chemin = telecharger_fichier_source(entree, dossier)
+        try:
+            precedent = selection_publiee(pl.read_parquet(chemin))
+        except pl.exceptions.PolarsError as e:
+            raise FichierSourceIndisponible(
+                f"Source {entree.code} : fichier publié non conforme au schéma ({e})"
+            ) from e
+        etrangeres = precedent.filter(
+            pl.col("sourceDataset").is_null() | (pl.col("sourceDataset") != entree.code)
+        ).height
+        if etrangeres:
+            raise FichierSourceIndisponible(
+                f"Source {entree.code} : fichier publié non conforme "
+                f"({etrangeres} ligne(s) dont sourceDataset != {entree.code})"
+            )
+        return precedent
     except FichierSourceIndisponible as e:
         if not config.DEAO_SCRAP_PARTIR_DE_ZERO:
             raise
@@ -99,7 +115,6 @@ def _lire_precedent(entree: SourceDeao, dossier: Path) -> pl.DataFrame:
             "(DEAO_SCRAP_PARTIR_DE_ZERO)."
         )
         return pl.DataFrame(schema=published_schema())
-    return selection_publiee(pl.read_parquet(chemin))
 
 
 def _dictionnaire(code: str, dossier: Path) -> pl.DataFrame | None:
@@ -112,13 +127,18 @@ def _dictionnaire(code: str, dossier: Path) -> pl.DataFrame | None:
         chemin = telecharger_fichier_source(boamp, dossier)
         presentes = pl.read_parquet_schema(chemin)
         colonnes = [c for c in _COLONNES_DICTIONNAIRE if c in presentes]
-        return dictionnaire_depuis_publie(pl.read_parquet(chemin, columns=colonnes))
+        dictionnaire = dictionnaire_depuis_publie(
+            pl.read_parquet(chemin, columns=colonnes)
+        )
     except Exception as e:
         logger.warning(
             f"{code} : pas de dictionnaire SIRET pour ce passage "
             f"(boamp.parquet indisponible : {e!r})."
         )
         return None
+    # Vide si boamp.parquet n'a pas encore acheteur_codePostal.
+    logger.info(f"{code} : dictionnaire SIRET de {dictionnaire.height} entrées.")
+    return dictionnaire
 
 
 def _archiver_dce(
