@@ -7,6 +7,7 @@ import pytest
 from src import config
 from src.config import SourceDeao
 from src.tasks.deao.schema import published_schema
+from src.tasks.scrap.deao.erreurs import ScrapPartiel
 from tests.deao_fakes import fake_datagouv  # noqa: F401
 
 flow_module = importlib.import_module("src.flows.scrap_closed")
@@ -159,3 +160,16 @@ def test_scraper_execute_dans_le_contexte_du_flow(env, monkeypatch):
     scrapers["plateforme_a"] = avec_logger
     flow_module.scrap_closed(run_date="2026-10-15")
     assert [p[1] for p in publication.publies] == ["res-a"]
+
+
+def test_scraper_partiel_publie_puis_echoue(env):
+    publication, appels, _, scrapers = env
+
+    def partiel(jour):
+        raise ScrapPartiel("dépôt S3 des DCE en échec", _lignes("plateforme_a"))
+
+    scrapers["plateforme_a"] = partiel
+    with pytest.raises(RuntimeError, match="plateforme_a : dépôt S3 des DCE en échec"):
+        flow_module.scrap_closed(run_date="2026-10-15")
+    assert [p[1] for p in publication.publies] == ["res-a"]
+    assert appels == ["2026-10-15"]

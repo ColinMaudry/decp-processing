@@ -37,16 +37,19 @@ from src.tasks.scrap.deao.atexo.accumulation import (
 )
 from src.tasks.scrap.deao.atexo.client import ClientAtexo, RechercheIncomplete
 from src.tasks.scrap.deao.atexo.dce import (
+    ErreurDepotS3,
     cle_dce,
     cle_depuis_url,
     deposer_dce,
     taille_archivee,
+    verifier_depot_s3,
 )
 from src.tasks.scrap.deao.atexo.lignes import (
     lignes_consultation,
     lots_depuis_precedent,
 )
 from src.tasks.scrap.deao.atexo.parse import ConsultationListe, DetailConsultation
+from src.tasks.scrap.deao.erreurs import ScrapPartiel
 from src.tasks.utils import get_logger
 
 # Les références de module (charger_referentiels, geocoder_adresses,
@@ -207,6 +210,20 @@ def _collecter(
     )
     a_relire = lots_a_relire(consultations, precedent)
     archiver = publication_autorisee() and bool(config.S3_BUCKET)
+
+    def couper_archivage(e: ErreurDepotS3) -> None:
+        # Coupe-circuit : sans dépôt possible, chaque DCE serait retéléchargé à
+        # chaque passage. Les URL précédentes sont gardées ; le passage échouera.
+        nonlocal archiver
+        archiver = False
+        stats[f"s3_en_erreur:{e}"] += 1
+        logger.error(f"{code} : {e} ; archivage des DCE arrêté pour ce passage.")
+
+    if archiver:
+        try:
+            verifier_depot_s3()
+        except ErreurDepotS3 as e:
+            couper_archivage(e)
     lignes: list[dict] = []
     for c in consultations:
         try:
@@ -230,6 +247,8 @@ def _collecter(
                 url_dce = _archiver_dce(
                     client, code, c, detail, url_dce, dossier_tmp, stats
                 )
+            except ErreurDepotS3 as e:
+                couper_archivage(e)
             except Exception as e:
                 # On garde l'éventuelle archive précédente ; nouvel essai au passage suivant.
                 stats["dce_en_erreur"] += 1
@@ -330,6 +349,14 @@ def _passage(
         f"procédures inconnues : {inconnues or 'aucune'} ; {df.height} lignes, "
         f"{df['id'].n_unique()} consultations, {avec_siret} lignes avec acheteur_id."
     )
+    erreurs_s3 = [
+        k.removeprefix("s3_en_erreur:") for k in stats if k.startswith("s3_en_erreur:")
+    ]
+    if erreurs_s3:
+        # Les lignes sont publiées, mais le flow doit signaler l'échec.
+        raise ScrapPartiel(
+            f"dépôt S3 des DCE en échec, archivage interrompu ({erreurs_s3[0]})", df
+        )
     return df
 
 

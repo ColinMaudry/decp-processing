@@ -18,6 +18,11 @@ class FakeS3:
 
     def put_object(self, Bucket, Key, Body, **kwargs):
         self.objects[Key] = Body if isinstance(Body, bytes) else Body.read()
+        self.extra_args[Key] = kwargs
+
+    def delete_object(self, Bucket, Key, **kwargs):
+        self.objects.pop(Key, None)
+        self.extra_args.pop(Key, None)
 
     def get_object(self, Bucket, Key, **kwargs):
         if Key not in self.objects:

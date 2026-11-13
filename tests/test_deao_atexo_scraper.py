@@ -14,6 +14,7 @@ from src.tasks.deao.sources_publiees import FichierSourceIndisponible
 from src.tasks.scrap.deao.atexo import dce, scraper
 from src.tasks.scrap.deao.atexo.client import DceTelecharge, RechercheIncomplete
 from src.tasks.scrap.deao.atexo.parse import ConsultationListe, DetailConsultation, Lot
+from src.tasks.scrap.deao.erreurs import ScrapPartiel
 from tests.deao_fakes import FakeS3, fake_datagouv  # noqa: F401
 from tests.test_deao_enrich import COG, _lf_etab, _lf_ul
 
@@ -434,3 +435,43 @@ def test_annulations_sous_le_seuil_non_journalisees(env, monkeypatch):
     monkeypatch.setattr(scraper, "get_logger", lambda level: journal)
     _lancer(FauxClient([_cons(str(i)) for i in range(9)]))
     assert not any("annulées" in m for m in journal.avertissements)
+
+
+def _panne_s3(**kwargs):
+    raise RuntimeError("AccessDenied")
+
+
+def test_controle_s3_en_echec_aucun_telechargement(env, monkeypatch):
+    _, s3, _ = env
+    monkeypatch.setattr(config, "DECP_PROCESSING_PUBLISH", True)
+    monkeypatch.setattr(s3, "put_object", _panne_s3)
+    client = FauxClient([_cons("1"), _cons("2")])
+    with pytest.raises(ScrapPartiel, match="S3") as exc:
+        _lancer(client)
+    assert client.nb("dce") == 0
+    # Les lignes restent publiables.
+    assert sorted(exc.value.lignes["id"]) == ["1", "2"]
+    assert exc.value.lignes["urlDce"].to_list() == [None, None]
+
+
+def test_depot_s3_en_echec_coupe_circuit(env, monkeypatch):
+    _, s3, tmp_path = env
+    monkeypatch.setattr(config, "DECP_PROCESSING_PUBLISH", True)
+    monkeypatch.setattr(s3, "upload_file", _panne_s3)
+    client = FauxClient([_cons("1"), _cons("2"), _cons("3")])
+    with pytest.raises(ScrapPartiel) as exc:
+        _lancer(client)
+    # Un seul DCE téléchargé : l'archivage s'arrête à la première erreur de dépôt.
+    assert client.nb("dce") == 1
+    assert client.nb("detail") == 3
+    assert sorted(exc.value.lignes["id"]) == ["1", "2", "3"]
+    assert _dce_tmp(tmp_path) == []
+
+
+def test_telechargement_en_echec_ne_coupe_pas_le_circuit(env, monkeypatch):
+    monkeypatch.setattr(config, "DECP_PROCESSING_PUBLISH", True)
+    client = FauxClient([_cons("1"), _cons("2")])
+    client.dce_en_erreur = True
+    df = _lancer(client)
+    assert client.nb("dce") == 2
+    assert df["urlDce"].to_list() == [None, None]

@@ -10,6 +10,14 @@ from src import config
 from src.tasks.scrap.deao.atexo.client import DceTelecharge
 from src.tasks.utils import s3_client
 
+# Objet de contrôle déposé puis supprimé avant le premier téléchargement d'un passage.
+_CLE_CONTROLE = ".controle-depot"
+
+
+class ErreurDepotS3(RuntimeError):
+    """Échec d'un accès S3 des DCE (identifiants, ACL, quota…) : contrairement à un
+    téléchargement en échec, il touche toutes les consultations du passage."""
+
 
 def cle_dce(code: str, identifiant: str, nom_fichier: str) -> str:
     suffixe = PurePosixPath(nom_fichier).suffix.lower()
@@ -63,8 +71,25 @@ def taille_archivee(cle: str) -> str | None:
     except ClientError as exc:
         if exc.response.get("Error", {}).get("Code") in ("404", "NoSuchKey"):
             return None
-        raise
+        raise ErreurDepotS3(f"Lecture de {cle} impossible : {exc!r}") from exc
+    except Exception as exc:
+        raise ErreurDepotS3(f"Lecture de {cle} impossible : {exc!r}") from exc
     return reponse.get("Metadata", {}).get("taille-affichee")
+
+
+def verifier_depot_s3() -> None:
+    """Dépose (en lecture publique), relit puis supprime un petit objet sous le préfixe
+    des DCE ; lève ErreurDepotS3 si S3 refuse l'une de ces opérations."""
+    cle = f"{config.DEAO_DCE_S3_PREFIX}/{_CLE_CONTROLE}"
+    try:
+        client = s3_client()
+        client.put_object(
+            Bucket=config.S3_BUCKET, Key=cle, Body=b"ok", ACL="public-read"
+        )
+        client.head_object(Bucket=config.S3_BUCKET, Key=cle)
+        client.delete_object(Bucket=config.S3_BUCKET, Key=cle)
+    except Exception as exc:
+        raise ErreurDepotS3(f"Contrôle du dépôt S3 en échec : {exc!r}") from exc
 
 
 def deposer_dce(dce: DceTelecharge, cle: str, taille_affichee: str | None) -> str:
@@ -83,6 +108,8 @@ def deposer_dce(dce: DceTelecharge, cle: str, taille_affichee: str | None) -> st
                 },
             },
         )
+    except Exception as exc:
+        raise ErreurDepotS3(f"Dépôt de {cle} impossible : {exc!r}") from exc
     finally:
         dce.chemin.unlink(missing_ok=True)
     return url_publique(cle)

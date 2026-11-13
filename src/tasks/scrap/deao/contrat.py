@@ -9,6 +9,8 @@ from src.tasks.scrap.deao.atexo.scraper import scraper_atexo
 
 # Un scraper reçoit la date du run et renvoie les lignes au schéma
 # `published_schema()`, avec `sourceDataset` = code de la source du registre.
+# Il peut lever `src.tasks.scrap.deao.erreurs.ScrapPartiel` (lignes publiées, mais
+# source comptée en erreur par scrap_closed).
 Scraper = Callable[[date], pl.DataFrame]
 
 # Un scraper s'y ajoute par son `code` de registre. Construction paresseuse : aucun

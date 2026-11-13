@@ -1,4 +1,5 @@
 import pytest
+from botocore.exceptions import ClientError
 
 from src.tasks.scrap.deao.atexo import dce
 from src.tasks.scrap.deao.atexo.client import DceTelecharge
@@ -69,7 +70,7 @@ def test_depot_supprime_fichier_si_echec(fake_s3, tmp_path, monkeypatch):
 
     monkeypatch.setattr(fake_s3, "upload_file", boom)
     d = _dce(tmp_path)
-    with pytest.raises(RuntimeError):
+    with pytest.raises(dce.ErreurDepotS3, match="panne S3"):
         dce.deposer_dce(d, "dce/x/1.zip", None)
     assert not d.chemin.exists()
 
@@ -96,3 +97,40 @@ def test_depot_taille_nbsp_coherente(fake_s3, tmp_path):
 
 def test_cle_dce_suffixe_non_sur(fake_s3):
     assert dce.cle_dce("x", "1", "a.z ip/../é").endswith("/1.zip")
+
+
+def _refus(operation):
+    def refus(**kwargs):
+        raise ClientError(
+            {"Error": {"Code": "AccessDenied", "Message": "refusé"}}, operation
+        )
+
+    return refus
+
+
+def test_taille_archivee_erreur_s3_leve_erreur_depot(fake_s3, monkeypatch):
+    monkeypatch.setattr(fake_s3, "head_object", _refus("HeadObject"))
+    with pytest.raises(dce.ErreurDepotS3):
+        dce.taille_archivee("dce/x/1.zip")
+
+
+def test_verifier_depot_s3(fake_s3, monkeypatch):
+    deposes = []
+    reel = fake_s3.put_object
+
+    def put_object(**kwargs):
+        deposes.append(kwargs)
+        reel(**kwargs)
+
+    monkeypatch.setattr(fake_s3, "put_object", put_object)
+    dce.verifier_depot_s3()
+    # Objet de contrôle sous le préfixe des DCE, en lecture publique, puis supprimé.
+    assert deposes[0]["Key"].startswith("dce/")
+    assert deposes[0]["ACL"] == "public-read"
+    assert fake_s3.objects == {}
+
+
+def test_verifier_depot_s3_acl_refusee(fake_s3, monkeypatch):
+    monkeypatch.setattr(fake_s3, "put_object", _refus("PutObject"))
+    with pytest.raises(dce.ErreurDepotS3, match="AccessDenied"):
+        dce.verifier_depot_s3()

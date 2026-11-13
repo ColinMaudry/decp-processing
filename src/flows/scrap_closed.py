@@ -12,6 +12,7 @@ from src.flows.deao_processing import deao_processing
 from src.tasks.deao.schema import published_schema
 from src.tasks.deao.sources_publiees import ecrire_et_publier, publication_autorisee
 from src.tasks.scrap.deao.contrat import SCRAPERS
+from src.tasks.scrap.deao.erreurs import ScrapPartiel
 from src.tasks.utils import get_logger, run_in_pool
 
 # Les références de module (SCRAPERS, deao_processing) et config.* sont lues à
@@ -45,9 +46,16 @@ def scrap_closed(run_date: str | None = None) -> None:
     # Un contexte par scraper, copié dans le fil du flow : les fils du pool gardent
     # le contexte Prefect (logger du run, sous-flow sirene_preprocess).
     contextes = {code: contextvars.copy_context() for code in a_lancer}
+    # Scrapers en échec partiel : lignes publiées, puis erreur du flow.
+    partiels: dict[str, str] = {}
 
     def executer(code: str) -> pl.DataFrame:
-        return contextes[code].run(SCRAPERS[code], today)
+        try:
+            return contextes[code].run(SCRAPERS[code], today)
+        except ScrapPartiel as e:
+            logger.error(f"❌ Échec partiel du scraper {code} : {e}")
+            partiels[code] = str(e)
+            return e.lignes
 
     resultats = run_in_pool(
         executer,
@@ -86,6 +94,8 @@ def scrap_closed(run_date: str | None = None) -> None:
         )
         if cause:
             erreurs[code] = cause
+    for code, cause in partiels.items():
+        erreurs[code] = f"{erreurs[code]} ; {cause}" if code in erreurs else cause
 
     # Le traitement agrège ce qui est publié sur data.gouv.fr, même en cas d'échec partiel.
     with tags("appels-offres", "traitement"):
