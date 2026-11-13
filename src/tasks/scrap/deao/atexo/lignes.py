@@ -46,6 +46,7 @@ def lignes_consultation(
     """Une ligne par lot, ou une ligne `lotId` = '0' pour une consultation non allotie."""
     ref_b64 = b64encode(c.ref_cons.encode()).decode()
     cpv_detail = detail.code_cpv if detail else None
+    lieu = c.lieux_execution[0] if c.lieux_execution else None
     commun = {
         "id": c.ref_cons,
         "idDernierAvis": None,
@@ -59,8 +60,8 @@ def lignes_consultation(
         "procedure": libelle_procedure(c.procedure_code, stats),
         "datePublicationInitiale": c.date_mise_en_ligne,
         "dateLimiteReponse": c.date_limite,
-        "lieuExecution_code": c.lieux_execution[0] if c.lieux_execution else None,
-        "lieuExecution_typeCode": "Code département",
+        "lieuExecution_code": lieu,
+        "lieuExecution_typeCode": "Code département" if lieu else None,
         "urlConsultation": f"{url_base}/entreprise/consultation/{c.ref_cons}?orgAcronyme={c.org_cons}",
         "urlReglementConsultation": (
             f"{url_base}/index.php?page=Entreprise.EntrepriseDownloadReglement"

@@ -128,3 +128,11 @@ def test_lots_depuis_precedent():
     assert [lot.numero for lot in relus] == ["2", "10"]
     assert relus[1].code_cpv == "45" and relus[1].intitule == "Dix"
     assert lots_depuis_precedent(precedent, "9") == []
+
+
+def test_sans_lieu_execution_pas_de_type_de_code():
+    ligne = lignes_consultation(
+        "megalis_bretagne", BASE, _consultation(lieux_execution=[]), DETAIL, [], None
+    )[0]
+    assert ligne["lieuExecution_code"] is None
+    assert ligne["lieuExecution_typeCode"] is None
