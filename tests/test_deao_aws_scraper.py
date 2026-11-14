@@ -15,7 +15,7 @@ from src.tasks.deao.schema import published_schema
 from src.tasks.scrap.deao import plateformes
 from src.tasks.scrap.deao.atexo import dce
 from src.tasks.scrap.deao.aws import archive, scraper
-from src.tasks.scrap.deao.aws.client import ResultatRecherche
+from src.tasks.scrap.deao.aws.client import ResultatRecherche, SiteIndisponible
 from src.tasks.scrap.deao.aws.parse import AvisListe, parse_avis
 from src.tasks.scrap.deao.erreurs import ScrapPartiel
 from tests.deao_fakes import FakeS3, fake_datagouv  # noqa: F401
@@ -396,3 +396,16 @@ def test_log_de_synthese(env, monkeypatch):
         "annulations : 0 confirmées, 0 évitées",
     ):
         assert attendu in synthese
+
+
+def test_site_indisponible_fait_echouer_le_passage(env):
+    client = FauxClient([_liste(A1), _liste(A2)])
+
+    def panne(chemin):
+        client.appels.append(("page_avis", chemin))
+        raise SiteIndisponible("6 défaillances réseau consécutives")
+
+    client.page_avis = panne
+    with pytest.raises(SiteIndisponible):
+        _lancer(client)
+    assert client.nb("page_avis") == 1 and client.ferme

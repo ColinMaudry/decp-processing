@@ -9,6 +9,7 @@ from src.tasks.scrap.deao.aws.client import (
     PROCEDURES,
     ClientAws,
     ResultatRecherche,
+    SiteIndisponible,
     url_rc_plateforme,
 )
 from src.tasks.scrap.deao.aws.parse import numeros_avis
@@ -462,3 +463,87 @@ def test_departement_en_echec_puis_enfants_sans_reference():
     resultat = site.client().rechercher()
     assert resultat.segments_en_erreur == []
     assert resultat.complete
+
+
+@pytest.fixture
+def sans_attente(monkeypatch):
+    for fn in (ClientAws._requete_essais, ClientAws._telecharger):
+        monkeypatch.setattr(fn.retry, "sleep", lambda _: None)
+
+
+class SiteEnPanne(FauxSite):
+    """Formulaire servi, puis 503 sur toute requête."""
+
+    def __call__(self, requete: httpx.Request) -> httpx.Response:
+        if requete.method == "GET" and requete.url.path == "/Annonces/rechercher":
+            return super().__call__(requete)
+        self.requetes.append((requete.method, str(requete.url)))
+        return httpx.Response(503, text="indisponible")
+
+
+def test_site_en_panne_interrompt_la_recherche(sans_attente):
+    site = SiteEnPanne()
+    with pytest.raises(SiteIndisponible):
+        site.client().rechercher()
+    assert len(site.requetes) <= 60
+
+
+def test_site_indisponible_plus_aucune_requete(sans_attente):
+    site = SiteEnPanne()
+    client = site.client()
+    with pytest.raises(SiteIndisponible):
+        client.rechercher()
+    nb = len(site.requetes)
+    with pytest.raises(SiteIndisponible):
+        client.page_avis("/Annonces/MPI-pub-1.htm")
+    assert len(site.requetes) == nb
+
+
+def test_page_503_pas_relue_8_fois(sans_attente):
+    site = FauxSite()
+    site.poster("X", "X", "X", liste({"s": 12}))
+    dix = liste({"s": 12}, s=[bloc(n) for n in range(10)])
+    site.poster("13", "X", "X", dix)
+    site.poster("13", "S", "X", liste({"s": 12}, s=[bloc(n) for n in range(12)]))
+    original = site.__call__
+
+    def appel(requete):
+        if requete.method == "GET" and "pager_s=2" in str(requete.url):
+            site.requetes.append((requete.method, str(requete.url)))
+            return httpx.Response(503, text="indisponible")
+        return original(requete)
+
+    client = ClientAws(
+        BASE,
+        http=httpx.Client(transport=httpx.MockTransport(appel)),
+        limiteur=Limiteur(0),
+    )
+    resultat = client.rechercher()
+    urls = [u for _, u in site.requetes]
+    url = f"{BASE}/Annonces/lister?pager_s=2"
+    debut = urls.index(url)
+    suivant_post = next(
+        i for i, (m, _) in enumerate(site.requetes) if i > debut and m == "POST"
+    )
+    # une seule lecture de la page (5 essais tenacity), pas ESSAIS_PAGE × 5
+    assert urls[debut:suivant_post].count(url) == 5 < ESSAIS_PAGE
+    assert resultat.complete and len(resultat.avis) == 12
+
+
+def test_reponse_404_remet_le_compteur_a_zero(sans_attente):
+    reponses = iter([503] * 5 * 5 + [404] + [503] * 5 * 5 + [200])
+
+    def handler(requete: httpx.Request) -> httpx.Response:
+        return httpx.Response(next(reponses), text="<html>avis</html>")
+
+    client = ClientAws(
+        BASE,
+        http=httpx.Client(transport=httpx.MockTransport(handler)),
+        limiteur=Limiteur(0),
+    )
+    for attendu in [503] * 5 + [404] + [503] * 5:
+        with pytest.raises(httpx.HTTPStatusError) as exc:
+            client.page_avis("/Annonces/MPI-pub-1.htm")
+        assert exc.value.response.status_code == attendu
+    assert client.page_avis("/Annonces/MPI-pub-1.htm") == "<html>avis</html>"
+    assert client.echecs_reseau == 0

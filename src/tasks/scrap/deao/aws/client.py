@@ -20,6 +20,10 @@ recherche à la place de la page N). Stratégie :
 5. un segment découpé dont les enfants lisent moins d'avis distincts que son badge
    ou que son « Votre recherche trouve N résultats » est noté en erreur lui aussi.
 
+Panne du site : une page en échec réseau (transport, 5xx) n'est pas relue au-delà
+des essais de tenacity ; au-delà de `MAX_ECHECS_RESEAU_CONSECUTIFS` défaillances
+réseau consécutives, `SiteIndisponible` interrompt le passage.
+
 Jamais de requête vers les URL du DCE (`dematEnt`, captcha).
 """
 
@@ -60,6 +64,9 @@ ESSAIS_PAGE = 8
 PART_MINIMALE_TOTAL = 0.9
 # Département absent du formulaire qui renvoie pourtant des avis
 DEPARTEMENT_SUPPLEMENTAIRE = "00"
+# Défaillances réseau consécutives (après les essais de tenacity) tolérées : au-delà,
+# le site est tenu pour indisponible et le passage échoue au lieu de durer des heures.
+MAX_ECHECS_RESEAU_CONSECUTIFS = 5
 NATURES = ("T", "S", "F")
 PROCEDURES = ("PA", "AOO", "AOE", "MN", "CO", "CR", "DC", "AU", "DSP")
 
@@ -112,6 +119,17 @@ def url_rc_plateforme(url_base: str, idm: str) -> str:
     return f"{url_base.rstrip('/')}/mpiaws/index.cfm?fuseaction=dce.dRC&IDM={idm}"
 
 
+class SiteIndisponible(RuntimeError):
+    """Trop de défaillances réseau consécutives : le passage est interrompu."""
+
+
+def _panne_reseau(exc: BaseException) -> bool:
+    """Défaillance réseau (transport ou 5xx), par opposition à une réponse du site."""
+    if isinstance(exc, httpx.TransportError):
+        return True
+    return isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code >= 500
+
+
 def _a_reessayer(exc: BaseException) -> bool:
     if isinstance(exc, httpx.TransportError):
         return True
@@ -152,10 +170,47 @@ class ClientAws:
             timeout=60,
         )
         self.limiteur = limiteur or Limiteur(config.CLOSED_INTERVALLE_REQUETES_S)
+        self.echecs_reseau = 0
 
-    @_retry
+    def _surveiller(self, appel):
+        """Exécute `appel` (requête avec essais tenacity) en comptant les défaillances
+        réseau consécutives ; toute réponse du site (même 404) remet le compteur à zéro.
+        Au-delà de `MAX_ECHECS_RESEAU_CONSECUTIFS`, lève SiteIndisponible (sans
+        nouvelle requête)."""
+        if self.echecs_reseau > MAX_ECHECS_RESEAU_CONSECUTIFS:
+            raise SiteIndisponible(
+                f"{self.url_base} : {self.echecs_reseau} défaillances réseau consécutives"
+            )
+        try:
+            resultat = appel()
+        except httpx.HTTPError as exc:
+            if not _panne_reseau(exc):
+                self.echecs_reseau = 0
+                raise
+            self.echecs_reseau += 1
+            if self.echecs_reseau > MAX_ECHECS_RESEAU_CONSECUTIFS:
+                logger.error(
+                    "%s : %s défaillances réseau consécutives, site indisponible",
+                    self.url_base,
+                    self.echecs_reseau,
+                )
+                raise SiteIndisponible(
+                    f"{self.url_base} : {self.echecs_reseau} défaillances réseau "
+                    f"consécutives ({exc!r})"
+                ) from exc
+            raise
+        except Exception:
+            self.echecs_reseau = 0  # le site a répondu (ex. HTML au lieu d'un PDF)
+            raise
+        self.echecs_reseau = 0
+        return resultat
+
     def _requete(self, methode: str, url: str, **kwargs) -> httpx.Response:
         """Seul accès réseau hors téléchargement de fichier ; lève sur un code ≥ 400."""
+        return self._surveiller(lambda: self._requete_essais(methode, url, **kwargs))
+
+    @_retry
+    def _requete_essais(self, methode: str, url: str, **kwargs) -> httpx.Response:
         self.limiteur.attendre()
         reponse = self.http.request(methode, url, **kwargs)
         reponse.raise_for_status()
@@ -184,12 +239,21 @@ class ClientAws:
         """Page N d'un onglet, relue jusqu'à `ESSAIS_PAGE` fois si elle manque.
 
         Manquante : 404, formulaire ou aucun bloc dans l'onglet. Aucune autre requête
-        entre deux essais.
+        entre deux essais. Défaillance réseau (transport, 5xx, déjà retentée par
+        tenacity) : pas d'autre essai.
         """
         for essai in range(1, ESSAIS_PAGE + 1):
             try:
                 page = self._page(onglet, numero)
             except httpx.HTTPError as exc:
+                if _panne_reseau(exc):
+                    logger.warning(
+                        "Page %s de l'onglet %s en échec réseau : %s",
+                        numero,
+                        onglet,
+                        exc,
+                    )
+                    return None
                 motif = str(exc)
             else:
                 if numeros_avis(page, onglet):
@@ -420,8 +484,10 @@ class ClientAws:
 
     def telecharger_rc(self, idm: str, dest_dir: Path) -> Path:
         """Télécharge le RC (PDF) en `{dest_dir}/{idm}.pdf` ; ValueError si HTML."""
-        return self._telecharger(
-            url_rc_plateforme(self.url_base, idm), Path(dest_dir) / f"{idm}.pdf"
+        return self._surveiller(
+            lambda: self._telecharger(
+                url_rc_plateforme(self.url_base, idm), Path(dest_dir) / f"{idm}.pdf"
+            )
         )
 
     def close(self) -> None:

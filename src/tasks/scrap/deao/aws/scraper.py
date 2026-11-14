@@ -35,6 +35,7 @@ from src.tasks.scrap.deao.aws.archive import (
 from src.tasks.scrap.deao.aws.client import (
     ClientAws,
     ResultatRecherche,
+    SiteIndisponible,
     url_rc_plateforme,
 )
 from src.tasks.scrap.deao.aws.lignes import lignes_avis
@@ -214,6 +215,8 @@ class _Passage:
             return url
         except ErreurDepotS3 as e:
             self.couper_archivage(e)
+        except SiteIndisponible:
+            raise
         except Exception as e:
             self.stats["rc_en_erreur"] += 1
             self.logger.warning(f"{self.code} {a.idm} : RC en erreur ({e!r}).")
@@ -256,6 +259,8 @@ def _collecter(
             continue
         try:
             avis = passage.avis(a, relue)
+        except SiteIndisponible:
+            raise  # le passage échoue plutôt que d'enchaîner les échecs
         except Exception as e:
             stats["avis_en_erreur"] += 1
             logger.warning(
