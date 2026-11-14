@@ -147,11 +147,17 @@ sans identification ni captcha.
 - **Contrôle de complétude** : une recherche nationale (`IDR=X`, `IDN=X`, `IDP=X`)
   est refusée car trop large, mais affiche le total (« trouve 4093 résultats »,
   observé le 14/11/2026). Le total peut bouger pendant la collecte (nouveaux avis,
-  avis échus) : il est lu **avant et après** la collecte, et la recherche est
-  complète si aucun segment n'est en erreur et si le nombre d'`IDM` distincts lus
-  est compris entre le plus petit et le plus grand des deux totaux (_choix de
-  Claude_). Un avis peut-il apparaître dans plusieurs départements ? **À vérifier** ;
-  dédoublonner sur `IDM` dans tous les cas.
+  avis échus) : il est lu **avant et après** la collecte. La recherche est
+  complète si aucun segment n'est en erreur (chaque segment interrogé est vérifié
+  contre son badge) et si les avis distincts lus atteignent au moins 90 % du plus
+  petit des deux totaux, garde-fou contre une liste de départements cassée
+  (_choix de Claude, révisé après les essais réels du 14/11/2026_). Constat : le
+  code `00`, absent du formulaire, renvoie quelques avis sans département (il est
+  interrogé en plus) ; environ 3 % des avis du total national restent introuvables
+  par département. Ils ne sont jamais vus, donc jamais annulés à tort. Les avis
+  hébergés sur une autre plateforme AWS (`DL-pub-`, `CG42-pub-`…) ou déposés
+  ailleurs comptent pour la complétude sans produire de ligne. Un avis peut
+  apparaître dans plusieurs départements : dédoublonnage sur `IDM`.
 
 ### Identifiants
 
