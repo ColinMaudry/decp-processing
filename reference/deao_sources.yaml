@@ -254,3 +254,10 @@
   resource_id: d99f6b9b-198a-4295-8f87-04ecba6fd40e
   min_rows: 12
   url_base: https://marchespublics.nantesmetropole.fr
+- code: www.marches-publics.info
+  name: "marches-publics.info (profil d'acheteur AWS)"
+  open_data: false
+  plateforme: aws
+  resource_id: eb5801ee-a8d0-4419-bab2-1e5c25ca2381
+  min_rows: 2000
+  url_base: https://www.marches-publics.info

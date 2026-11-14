@@ -13,9 +13,12 @@ def test_registre_reference():
         "www.marches-publics.gouv.fr",
         "puma.cnrs.fr",
     } <= set(r)
-    assert len(r) == 37
+    assert len(r) == 38
     atexo = [s for s in r.values() if s.plateforme == "atexo"]
     assert len(atexo) == 35 and not any(s.open_data for s in atexo)
+    aws = r["www.marches-publics.info"]
+    assert aws.plateforme == "aws" and aws.min_rows == 2000 and not aws.open_data
+    assert aws.resource_id == "eb5801ee-a8d0-4419-bab2-1e5c25ca2381"
     assert len({s.resource_id for s in r.values()}) == len(r)
     assert r["boamp"].resource_id == "9861dd3a-e4af-49c7-b8f9-8d20b0cfdd62"
     assert r["boamp"].min_rows == 50000
@@ -52,7 +55,7 @@ def test_registre_reference():
     )
     assert not r["www.marches-publics.gouv.fr"].open_data
     assert not any(s.skip for s in r.values())
-    assert all(s.plateforme == "atexo" for s in r.values() if s.url_base)
+    assert all(s.plateforme in ("atexo", "aws") for s in r.values() if s.url_base)
 
 
 def _ecrire(tmp_path, contenu):
