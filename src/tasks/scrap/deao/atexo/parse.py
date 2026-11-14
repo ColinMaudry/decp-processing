@@ -69,6 +69,8 @@ class DetailConsultation:
     entite_publique: str | None
     service: str | None
     taille_dce: str | None
+    # PLACE : « sigle / chemin - libellé » de l'acheteur réel (absent sur Mégalis)
+    entite_achat: str | None = None
 
 
 @dataclass(frozen=True)
@@ -297,7 +299,19 @@ def parse_detail(html: str) -> DetailConsultation:
         m = re.search(r"Dossier de consultation\s*-\s*(.+)", _texte(lien))
         taille = m[1].strip() if m else None
 
-    return DetailConsultation(code_cpv, entite, service, taille)
+    entite_achat = _texte(_valeur_libelle(arbre, "Entité d'Achat")) or None
+    return DetailConsultation(code_cpv, entite, service, taille, entite_achat)
+
+
+def libelle_entite_achat(entite_achat: str) -> str:
+    """Libellé de l'acheteur d'une « Entité d'Achat » PLACE.
+
+    « MASAF / ONF / DT MIM - Direction territoriale Midi-Méditerranée » ->
+    « Direction territoriale Midi-Méditerranée » : dernier segment après « / »,
+    puis ce qui suit son code (premier « - »). Sans code, le segment entier."""
+    segment = entite_achat.rsplit(" / ", 1)[-1].strip()
+    _code, sep, libelle = segment.partition(" - ")
+    return (libelle if sep else segment).strip() or entite_achat.strip()
 
 
 def parse_lots(html: str) -> list[Lot]:

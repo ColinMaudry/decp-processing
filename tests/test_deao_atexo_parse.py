@@ -10,6 +10,7 @@ from src.tasks.scrap.deao.atexo.parse import (
     champs_formulaire,
     date_fr,
     date_heure_fr,
+    libelle_entite_achat,
     nombre_resultats,
     parse_detail,
     parse_lots,
@@ -146,3 +147,44 @@ def test_bloc_ampute_leve_value_error():
     html = _sans_objet_line(lire("megalis_resultats.html"), 3)
     with pytest.raises(ValueError, match="Bloc de consultation n° 4 illisible"):
         parse_resultats(html)
+
+
+def test_detail_place_entite_achat():
+    d = parse_detail(lire("place_detail_3065079.html"))
+    assert d.entite_achat == "ESMS / 76 CHU - CHU ROUEN"
+    assert d.entite_publique == "Etablissements de Santé et Médico-sociaux"
+
+
+def test_detail_megalis_sans_entite_achat():
+    assert parse_detail(lire("megalis_detail_242752.html")).entite_achat is None
+
+
+# Échantillon réel PLACE du 14/11/2026 (10 organismes tirés au hasard)
+@pytest.mark.parametrize(
+    "entite,attendu",
+    [
+        (
+            "MJL / SG / DPFAC Sud / CA Toulouse - CA Toulouse - Service administratif régional",
+            "CA Toulouse - Service administratif régional",
+        ),
+        (
+            "MEAE / _EP - AFD - Agence française de développement",
+            "AFD - Agence française de développement",
+        ),
+        ("EOESRI / NANTES UNIVERSITE - NANTES UNIVERSITE", "NANTES UNIVERSITE"),
+        (
+            "MASAF / ONF / DT MIM - Direction territoriale Midi-Méditerranée",
+            "Direction territoriale Midi-Méditerranée",
+        ),
+        ("MENJESRI / RECT- 976 - Rectorat de Mayotte", "Rectorat de Mayotte"),
+        ("CCI / _GI / CCI Finance - CCI FINANCE", "CCI FINANCE"),
+        (
+            "MINARM / CND - CND - Commissariat au Numérique de Défense",
+            "CND - Commissariat au Numérique de Défense",
+        ),
+        ("ESMS / 76 CHU - CHU ROUEN", "CHU ROUEN"),
+        ("MAIRIE DE X", "MAIRIE DE X"),
+    ],
+)
+def test_libelle_entite_achat(entite, attendu):
+    assert libelle_entite_achat(entite) == attendu

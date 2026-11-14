@@ -136,3 +136,22 @@ def test_sans_lieu_execution_pas_de_type_de_code():
     )[0]
     assert ligne["lieuExecution_code"] is None
     assert ligne["lieuExecution_typeCode"] is None
+
+
+def test_acheteur_nom_depuis_entite_achat():
+    detail = DetailConsultation(
+        "45000000",
+        "Ministère X",
+        None,
+        None,
+        "MASAF / ONF / DT MIM - Direction territoriale",
+    )
+    lignes = lignes_consultation("place", BASE, _consultation(), detail, [], None)
+    assert lignes[0]["acheteur_nom"] == "Direction territoriale"
+
+
+def test_acheteur_nom_sans_entite_achat():
+    lignes = lignes_consultation(
+        "megalis_bretagne", BASE, _consultation(), DETAIL, [], None
+    )
+    assert lignes[0]["acheteur_nom"] == _consultation().organisme

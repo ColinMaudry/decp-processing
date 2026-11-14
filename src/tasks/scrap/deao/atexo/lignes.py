@@ -5,7 +5,12 @@ from collections import Counter
 
 import polars as pl
 
-from src.tasks.scrap.deao.atexo.parse import ConsultationListe, DetailConsultation, Lot
+from src.tasks.scrap.deao.atexo.parse import (
+    ConsultationListe,
+    DetailConsultation,
+    Lot,
+    libelle_entite_achat,
+)
 
 AUTRE_PROCEDURE = "Autre procédure"
 
@@ -51,7 +56,11 @@ def lignes_consultation(
         "id": c.ref_cons,
         "idDernierAvis": None,
         "referenceAcheteur": c.reference,
-        "acheteur_nom": c.organisme,
+        "acheteur_nom": (
+            libelle_entite_achat(detail.entite_achat)
+            if detail and detail.entite_achat
+            else c.organisme
+        ),
         "acheteur_adresse_cp": c.code_postal,
         "acheteur_adresse_ville": c.ville,
         "acheteur_pays": "FRA",
@@ -113,7 +122,7 @@ def lots_depuis_precedent(precedent: pl.DataFrame, ref_cons: str) -> list[Lot]:
     ]
     return sorted(
         lots,
-        key=lambda lot: (0, int(lot.numero), "")
-        if lot.numero.isdigit()
-        else (1, 0, lot.numero),
+        key=lambda lot: (
+            (0, int(lot.numero), "") if lot.numero.isdigit() else (1, 0, lot.numero)
+        ),
     )
