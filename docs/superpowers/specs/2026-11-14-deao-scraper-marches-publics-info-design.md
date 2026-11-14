@@ -38,6 +38,10 @@ qu'un recours.
 - Historique des versions : seule la dernière version de chaque fichier est gardée.
 - Avis expirés, attributions et données essentielles du site (onglets `IDE` = A, AAA,
   DE).
+- Remplissage des nouvelles colonnes depuis le BOAMP et le JOUE (eForms : BT-06,
+  BT-71, BT-63, acheteur coordinateur) et colonne `criteresAttribution` (BT-539 à
+  541, avec pondérations) : tâche eForms séparée, juste après celle-ci (décision de
+  l'utilisateur). Les plateformes Atexo laissent ces colonnes nulles.
 
 ## Constat sur le site (14/11/2026, en lecture seule)
 
@@ -185,6 +189,35 @@ Correspondance indicative, à finaliser par le builder sur le modèle d'Atexo
 | `urlReglementConsultation`         | URL publique S3 du RC, sinon lien `dce.dRC`                                                                                           |
 | `urlDce`                           | nul                                                                                                                                   |
 | `sourceDataset`                    | `www.marches-publics.info`                                                                                                            |
+| `considerationsSociales`           | pictogramme du bloc de la liste, ou mention de la page d'avis (nouvelle colonne)                                                      |
+| `considerationsEnvironnementales`  | pictogramme `ico-critere-environnement` de la liste, ou mention de la page d'avis (nouvelle colonne)                                  |
+| `marcheReserve`                    | « Marché réservé : Oui/Non » (nouvelle colonne)                                                                                       |
+| `variantes`                        | « Les variantes sont exigées / autorisées : … » (nouvelle colonne)                                                                    |
+| `groupementCommandes`              | « Groupement de commandes : Oui/Non » (nouvelle colonne)                                                                              |
+
+### Nouvelles colonnes du schéma (décision de l'utilisateur)
+
+Ajoutées à `reference/schema_deao.json`, publiées dans les deux datasets (pas
+`closed_only` : le BOAMP et le JOUE les rempliront avec la tâche eForms) :
+
+| Nom                               | Type    | Titre                            | Valeurs                                                                                     |
+| --------------------------------- | ------- | -------------------------------- | ------------------------------------------------------------------------------------------- |
+| `considerationsSociales`          | booléen | Considérations sociales          | vrai si l'avis affiche une considération ou clause sociale ; nul si la source ne le dit pas |
+| `considerationsEnvironnementales` | booléen | Considérations environnementales | idem, environnementale                                                                      |
+| `marcheReserve`                   | booléen | Marché réservé                   | « Marché réservé : Oui » → vrai, « Non » → faux                                             |
+| `variantes`                       | texte   | Variantes                        | `exigées`, `autorisées`, `interdites`, nul si non dit                                       |
+| `groupementCommandes`             | booléen | Groupement de commandes          | « Oui » → vrai, « Non » → faux                                                              |
+
+Les libellés exacts des pages d'avis (formulations des variantes, mention des
+considérations sur la page d'avis, et pas seulement en pictogramme dans la liste) sont
+**à vérifier** sur plusieurs avis. Pour les considérations, une absence de
+pictogramme vaut faux seulement si la page d'avis le confirme ; sinon nul.
+
+Compatibilité : les fichiers déjà publiés (BOAMP, JOUE, Atexo) n'ont pas ces colonnes.
+`deao_processing` et la lecture du fichier précédent par les scrapers doivent les
+accepter absentes et les remplir à nul, comme pour les colonnes ajoutées le
+13/11/2026 (`acheteur_codePostal`, `urlDce`, `urlReglementConsultation`).
+Description de `sourceDataset` dans le schéma : inchangée (déjà générique).
 
 Les années à deux chiffres (« 10/11/26 ») sont lues comme 20xx. L'enrichissement
 (SIRENE, géographie, catégorie d'acheteur) passe par le même chemin qu'Atexo, avec le
@@ -208,8 +241,10 @@ SIRET déjà présent.
    - sinon GET de la page d'avis, dépôt S3 **privé** `{DEAO_AWS_S3_PREFIX}/{IDM}.html`
      (défaut `www.marches-publics.info/raw`, ACL par défaut du bucket, métadonnée
      `date-limite`), en écrasant la version précédente ;
-   - GET du RC, dépôt S3 **public** `{DEAO_DCE_S3_PREFIX}/www.marches-publics.info/ {IDM}-rc.pdf` (`public-read`, mêmes métadonnées et même coupe-circuit que les
-     DCE Atexo) ;
+   - GET du RC, dépôt S3 **public** `{DEAO_RC_S3_PREFIX}/www.marches-publics.info/{IDM}.pdf`
+     (nouvelle variable, défaut `rc` ; `public-read`, mêmes métadonnées et même
+     coupe-circuit que les DCE Atexo). Préfixe distinct de `dce/` : le rapport des
+     DCE de `deao_processing` ne compte pas les RC ;
    - construction des lignes depuis la page d'avis.
 4. Les consultations non relues gardent leurs lignes précédentes ; `fusionner()`
    recalcule les statuts sans adaptation propre à AWS : `clos` dès que la date
@@ -232,8 +267,9 @@ site.
 
 Une page d'avis ou un RC en erreur n'arrête pas le passage : la consultation est
 gardée telle qu'au passage précédent (ou, nouvelle, ignorée), avec un compteur dans
-le rapport, comme chez Atexo. Le rapport de `deao_processing` compte déjà les objets
-sous `dce/` : les RC y apparaîtront sous `dce:nombre:www.marches-publics.info`.
+le rapport, comme chez Atexo. Le rapport des DCE de `deao_processing` (objets sous
+`dce/`) ne change pas : aucun DCE pour ce site, les RC (sous `rc/`) ne sont pas
+comptés (décision de l'utilisateur).
 
 ### Dédoublonnage avec le BOAMP
 
