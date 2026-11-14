@@ -409,3 +409,53 @@ def test_site_indisponible_fait_echouer_le_passage(env):
     with pytest.raises(SiteIndisponible):
         _lancer(client)
     assert client.nb("page_avis") == 1 and client.ferme
+
+
+def _url_rc(df, idm):
+    return set(df.filter(pl.col("id") == idm)["urlReglementConsultation"])
+
+
+def test_rc_relue_en_erreur_garde_l_url_archivee(env):
+    _premier(env)
+    autre = _liste(A2).date_limite.replace(hour=14)
+    client = FauxClient([_liste(A1), _liste(A2, date_limite=autre)])
+    client.rc_en_erreur.add(A2)
+    df = _lancer(client)
+    assert client.appels.count(("rc", A2)) == 1
+    assert _url_rc(df, A2) == {URL_RC_S3.format(A2)}
+
+
+def test_rc_non_relue_lien_plateforme_rattrape(env):
+    datagouv, s3, _ = env
+    client = FauxClient([_liste(A1), _liste(A2)])
+    client.rc_en_erreur.add(A1)
+    premier = _lancer(client)
+    _publier(datagouv, "res-aws", premier)
+    assert _url_rc(premier, A1) == {url_rc_lien(A1)}
+
+    client = FauxClient([_liste(A1), _liste(A2)])
+    df = _lancer(client)
+    assert client.appels == [("rechercher", ""), ("rc", A1)]
+    assert archive.cle_rc(CODE, A1) in s3.objects
+    assert _url_rc(df, A1) == {URL_RC_S3.format(A1)}
+    assert _url_rc(df, A2) == {URL_RC_S3.format(A2)}
+    assert sorted(df["uid"]) == sorted(premier["uid"])
+
+
+def test_rattrapage_rc_plafonne(env, monkeypatch):
+    datagouv, _, _ = env
+    client = FauxClient([_liste(A1), _liste(A2)])
+    client.rc_en_erreur.update({A1, A2})
+    _publier(datagouv, "res-aws", _lancer(client))
+
+    monkeypatch.setattr(scraper, "RATTRAPAGE_RC_PAR_PASSAGE", 1)
+    client = FauxClient([_liste(A1), _liste(A2)])
+    df = _lancer(client)
+    assert client.nb("rc") == 1
+    urls = _url_rc(df, A1) | _url_rc(df, A2)
+    assert len(urls) == 2
+    assert len([u for u in urls if u.startswith("https://s3.example.com/")]) == 1
+
+
+def url_rc_lien(idm):
+    return f"{BASE}/mpiaws/index.cfm?fuseaction=dce.dRC&IDM={idm}"

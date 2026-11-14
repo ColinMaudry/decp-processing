@@ -24,7 +24,11 @@ from src.tasks.deao.enrich import enrich_acheteurs
 from src.tasks.deao.schema import published_schema, selection_publiee
 from src.tasks.deao.sources_publiees import publication_autorisee
 from src.tasks.scrap.deao import plateformes
-from src.tasks.scrap.deao.atexo.dce import ErreurDepotS3, verifier_depot_s3
+from src.tasks.scrap.deao.atexo.dce import (
+    ErreurDepotS3,
+    cle_depuis_url,
+    verifier_depot_s3,
+)
 from src.tasks.scrap.deao.aws.archive import (
     cle_rc,
     deposer_avis,
@@ -59,6 +63,10 @@ from src.tasks.utils import get_logger
 # Au-delà, les consultations absentes de la liste ne sont pas vérifiées une à une :
 # aucune annulation ce passage (une telle disparition signale plutôt une liste tronquée).
 MAX_VERIFICATIONS_ANNULATION = 200
+# RC de consultations non relues encore servis par le lien plateforme (archivage
+# inactif ou en échec lors d'un passage précédent) : téléchargés et déposés, au plus
+# autant par passage.
+RATTRAPAGE_RC_PAR_PASSAGE = 200
 
 # Colonnes des lignes avant enrichissement : schéma publié + adresse de l'acheteur.
 # Schéma explicite : une colonne nulle sur toutes les lignes ne doit pas être inférée.
@@ -203,11 +211,34 @@ class _Passage:
         return self._site(a, marque)
 
     def rc(self, a: AvisListe, url_precedente: str | None, relue: bool) -> str:
-        """URL du RC : déposé dans S3 pour une consultation relue (lien plateforme en
-        cas d'échec) ; sinon celle du passage précédent, à défaut le lien plateforme."""
+        """URL du RC : déposé dans S3 pour une consultation relue ; en cas d'échec,
+        l'URL précédente si elle est dans notre archive, sinon le lien plateforme.
+        Non relue : URL précédente archivée, sinon RC rattrapé (borné), à défaut
+        l'URL précédente ou le lien plateforme."""
         lien = url_rc_plateforme(self.url_base, a.idm)
-        if not relue or not self.archiver:
+        archivee = url_precedente if cle_depuis_url(url_precedente) else None
+        if not self.archiver:
             return url_precedente or lien
+        if not relue:
+            return archivee or self.rattraper_rc(a) or url_precedente or lien
+        return self._deposer_rc(a) or archivee or lien
+
+    def rattraper_rc(self, a: AvisListe) -> str | None:
+        """RC d'une consultation non relue absent de l'archive : téléchargé et déposé,
+        au plus `RATTRAPAGE_RC_PAR_PASSAGE` essais par passage ; None sinon."""
+        if (
+            not self.archiver
+            or self.stats["rc_rattrapages_tentes"] >= RATTRAPAGE_RC_PAR_PASSAGE
+        ):
+            return None
+        self.stats["rc_rattrapages_tentes"] += 1
+        url = self._deposer_rc(a)
+        if url is not None:
+            self.stats["rc_rattrapes"] += 1
+        return url
+
+    def _deposer_rc(self, a: AvisListe) -> str | None:
+        """Télécharge le RC et le dépose dans S3 ; None en cas d'échec."""
         try:
             chemin = self.client.telecharger_rc(a.idm, self.dossier_tmp)
             url = deposer_rc(chemin, cle_rc(self.code, a.idm))
@@ -220,7 +251,7 @@ class _Passage:
         except Exception as e:
             self.stats["rc_en_erreur"] += 1
             self.logger.warning(f"{self.code} {a.idm} : RC en erreur ({e!r}).")
-        return lien
+        return None
 
 
 def _suite(idm: str, connus: dict) -> str:
@@ -236,8 +267,9 @@ def _collecter(
     precedent: pl.DataFrame,
     dossier_tmp: Path,
     stats: Counter,
-) -> tuple[ResultatRecherche, list[dict]]:
-    """Résultat de la recherche et lignes des consultations relues ou reconstruites."""
+) -> tuple[ResultatRecherche, list[dict], dict[str, str]]:
+    """Résultat de la recherche, lignes des consultations relues ou reconstruites et
+    URL des RC rattrapés (consultations non relues, lignes précédentes gardées)."""
     code = entree.code
     logger = get_logger(level=config.LOG_LEVEL)
     resultat = client.rechercher()
@@ -252,10 +284,16 @@ def _collecter(
         )
 
     lignes: list[dict] = []
+    rc_rattrapes: dict[str, str] = {}
     for a in resultat.avis:
         relue = a.idm in relire
         # Reconstruction : seulement tant que l'archive est accessible.
         if not relue and not (reconstruire and passage.archiver):
+            url_precedente = etat[a.idm][2] if a.idm in etat else None
+            if not cle_depuis_url(url_precedente):
+                url = passage.rattraper_rc(a)
+                if url is not None:
+                    rc_rattrapes[a.idm] = url
             continue
         try:
             avis = passage.avis(a, relue)
@@ -282,7 +320,7 @@ def _collecter(
             )
             continue
         stats["rafraichies"] += 1
-    return resultat, lignes
+    return resultat, lignes, rc_rattrapes
 
 
 def _annulations_a_verifier(
@@ -391,7 +429,9 @@ def _passage(
     # Instant de lecture de la liste : une date limite passée à cet instant clôt.
     instant = instant_du_passage(today)
     try:
-        resultat, lignes = _collecter(client, entree, precedent, dossier_tmp, stats)
+        resultat, lignes, rc_rattrapes = _collecter(
+            client, entree, precedent, dossier_tmp, stats
+        )
         ids_vus, complete = _verifier_annulations(
             client,
             code,
@@ -406,6 +446,13 @@ def _passage(
         # Un téléchargement interrompu peut laisser un fichier partiel.
         shutil.rmtree(dossier_tmp, ignore_errors=True)
 
+    if rc_rattrapes:
+        # Lignes précédentes gardées : seule l'URL du RC change.
+        precedent = precedent.with_columns(
+            pl.col("id")
+            .replace_strict(rc_rattrapes, default=pl.col("urlReglementConsultation"))
+            .alias("urlReglementConsultation")
+        )
     nouvelles = pl.DataFrame(lignes, schema=_SCHEMA_LIGNES, strict=False)
     if nouvelles.height:
         nouvelles = enrich_acheteurs(
@@ -451,7 +498,8 @@ def _passage(
         f"l'archive ; pages : {stats['pages_cache']} cache S3, "
         f"{stats['pages_archive']} archive, {stats['pages_site']} site, "
         f"{stats['avis_deposes']} déposées ; RC : {stats['rc_deposes']} déposés, "
-        f"{stats['rc_en_erreur']} en erreur ; erreurs : {stats['avis_en_erreur']} "
+        f"{stats['rc_en_erreur']} en erreur, {stats['rc_rattrapes']} rattrapés sur "
+        f"{stats['rc_rattrapages_tentes']} essais ; erreurs : {stats['avis_en_erreur']} "
         f"avis, {stats['archive_illisible']} archive illisible, "
         f"{stats['lignes_en_erreur']} lignes, {stats['geocodage_en_erreur']} "
         f"géocodage ; annulations : {stats['annulation_confirmee']} confirmées, "
