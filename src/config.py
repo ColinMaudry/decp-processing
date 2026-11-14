@@ -513,7 +513,8 @@ DEAO_DCE_S3_PREFIX = os.getenv("DEAO_DCE_S3_PREFIX", "dce")
 # (publics) : <préfixe>/<idm>.html et <préfixe RC>/<code plateforme>/<idm>.pdf
 DEAO_AWS_S3_PREFIX = os.getenv("DEAO_AWS_S3_PREFIX", "www.marches-publics.info/raw")
 DEAO_RC_S3_PREFIX = os.getenv("DEAO_RC_S3_PREFIX", "rc")
-# Relire les pages d'avis AWS en ligne plutôt que l'archive S3
+# Vrai : reconstruire les lignes AWS depuis les pages d'avis archivées dans S3 (toutes
+# les consultations listées, sans requête au site pour les pages archivées)
 DEAO_AWS_RELIRE_ARCHIVE = (
     os.getenv("DEAO_AWS_RELIRE_ARCHIVE", "false").lower() == "true"
 )

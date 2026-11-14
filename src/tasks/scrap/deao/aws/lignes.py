@@ -18,6 +18,9 @@ MODES: dict[str, str] = {
     "procédure avec négociation": PROCEDURES["PN"],
     "dialogue compétitif": PROCEDURES["DC"],
     "concession": PROCEDURES["CONC"],
+    # Libellés BOAMP des concours (TYPE_PROCEDURE CONCOURS_OUVERT / CONCOURS_RESTREINT)
+    "concours ouvert": "Concours ouvert",
+    "concours restreint": "Concours restreint",
 }
 
 TECHNIQUES: dict[str, str] = {
@@ -28,6 +31,8 @@ TECHNIQUES: dict[str, str] = {
     "catalogue électronique": "Catalogue électronique",
     "enchère électronique": "Enchère électronique",
 }
+# Technique explicitement absente : aucune technique, sans compteur d'inconnue.
+_SANS_TECHNIQUE = {"sans objet"}
 
 
 def libelle_procedure_aws(mode: str | None, stats: Counter | None = None) -> str:
@@ -62,7 +67,10 @@ def _combine(liste: bool, avis: bool | None) -> bool | None:
 def _techniques(technique: str | None, stats: Counter | None) -> list[str]:
     if not technique:
         return []
-    libelle = TECHNIQUES.get(" ".join(technique.lower().split()))
+    cle = " ".join(technique.lower().split())
+    if cle in _SANS_TECHNIQUE:
+        return []
+    libelle = TECHNIQUES.get(cle)
     if libelle is None:
         if stats is not None:
             stats[f"technique_inconnue:{technique}"] += 1
@@ -98,6 +106,7 @@ def lignes_avis(
         "datePublicationInitiale": avis.date_envoi or liste.date_publication,
         "dateLimiteReponse": avis.date_limite or liste.date_limite,
         "urlConsultation": url_base + liste.chemin_avis,
+        "urlAvis": url_base + liste.chemin_avis,
         "urlReglementConsultation": url_rc,
         "urlDce": None,
         "considerationsSociales": _combine(

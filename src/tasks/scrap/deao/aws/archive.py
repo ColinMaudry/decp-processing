@@ -55,6 +55,8 @@ def deposer_avis(idm: str, html: str, date_limite: str) -> None:
             Body=html.encode("utf-8"),
             ContentType="text/html; charset=utf-8",
             Metadata={"date-limite": date_limite},
+            # Explicite : ne pas dépendre de l'ACL par défaut du bucket
+            ACL="private",
         )
     except Exception as exc:
         raise ErreurDepotS3(f"Dépôt de {cle} impossible : {exc!r}") from exc

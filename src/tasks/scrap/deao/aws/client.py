@@ -28,6 +28,7 @@ Jamais de requête vers les URL du DCE (`dematEnt`, captcha).
 """
 
 import logging
+import re
 from dataclasses import dataclass, field
 from math import ceil
 from pathlib import Path
@@ -68,6 +69,8 @@ DEPARTEMENT_SUPPLEMENTAIRE = "00"
 # le site est tenu pour indisponible et le passage échoue au lieu de durer des heures.
 MAX_ECHECS_RESEAU_CONSECUTIFS = 5
 NATURES = ("T", "S", "F")
+# URL du DCE (captcha, avertissement) : jamais demandées
+_URL_INTERDITE = re.compile(r"dematEnt|avertissement|type=DCE", re.IGNORECASE)
 PROCEDURES = ("PA", "AOO", "AOE", "MN", "CO", "CR", "DC", "AU", "DSP")
 
 _CHAMPS_VIDES = (
@@ -206,7 +209,11 @@ class ClientAws:
         return resultat
 
     def _requete(self, methode: str, url: str, **kwargs) -> httpx.Response:
-        """Seul accès réseau hors téléchargement de fichier ; lève sur un code ≥ 400."""
+        """Seul accès réseau hors téléchargement de fichier ; lève sur un code ≥ 400.
+
+        ValueError (sans requête) pour une URL du DCE."""
+        if _URL_INTERDITE.search(url):
+            raise ValueError(f"Requête vers une URL du DCE interdite : {url}")
         return self._surveiller(lambda: self._requete_essais(methode, url, **kwargs))
 
     @_retry
@@ -472,6 +479,8 @@ class ClientAws:
 
     @_retry
     def _telecharger(self, url: str, dest: Path) -> Path:
+        if _URL_INTERDITE.search(url):
+            raise ValueError(f"Requête vers une URL du DCE interdite : {url}")
         self.limiteur.attendre()
         with self.http.stream("GET", url) as reponse:
             reponse.raise_for_status()

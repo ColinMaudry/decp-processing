@@ -70,7 +70,7 @@ def test_deposer_avis_prive_avec_metadonnee(s3):
     archive.deposer_avis("1", "<p>é</p>", "2026-03-04T12:30")
     o = s3.objets[archive.cle_avis("1")]
     assert o["Body"] == "<p>é</p>".encode("utf-8")
-    assert "ACL" not in o
+    assert o["ACL"] == "private"
     assert o["ContentType"] == "text/html; charset=utf-8"
     assert o["Metadata"] == {"date-limite": "2026-03-04T12:30"}
 

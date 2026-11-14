@@ -188,6 +188,10 @@ class _Passage:
         html = self.client.page_avis(a.chemin_avis)
         self.stats["pages_site"] += 1
         avis = parse_avis(html)
+        if len(avis.lots) != a.nombre_lots:
+            # Liste et page d'avis divergent : la consultation sera relue au passage
+            # suivant (le nombre de lots du fichier ne correspondra pas à la liste).
+            self.stats["lots_incoherents"] += 1
         if self.archiver:
             try:
                 deposer_avis(a.idm, html, marque)
@@ -272,10 +276,12 @@ def _collecter(
     URL des RC rattrapés (consultations non relues, lignes précédentes gardées)."""
     code = entree.code
     logger = get_logger(level=config.LOG_LEVEL)
+    # Contrôle du dépôt S3 avant la recherche (une heure de lecture du site sinon
+    # perdue pour apprendre que S3 refuse les dépôts).
+    passage = _Passage(client, entree, dossier_tmp, stats)
     resultat = client.rechercher()
     etat = _etat_precedent(precedent)
     relire = a_relire(resultat.avis, etat)
-    passage = _Passage(client, entree, dossier_tmp, stats)
     reconstruire = config.DEAO_AWS_RELIRE_ARCHIVE
     if reconstruire and not passage.archiver:
         logger.warning(
@@ -504,7 +510,9 @@ def _passage(
         f"{stats['lignes_en_erreur']} lignes, {stats['geocodage_en_erreur']} "
         f"géocodage ; annulations : {stats['annulation_confirmee']} confirmées, "
         f"{stats['annulation_evitee']} évitées (page en ligne), "
-        f"{stats['annulation_non_verifiee']} non vérifiées ; procédures inconnues : {inconnues or 'aucune'} ; "
+        f"{stats['annulation_non_verifiee']} non vérifiées ; "
+        f"{stats['lots_incoherents']} pages au nombre de lots différent de la liste ; "
+        f"procédures inconnues : {inconnues or 'aucune'} ; "
         f"{df.height} lignes, {df['id'].n_unique()} consultations, {avec_siret} "
         "lignes avec acheteur_id."
     )

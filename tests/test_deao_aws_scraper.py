@@ -174,7 +174,7 @@ def test_premier_passage(env):
     for idm in (A1, A2):
         cle = archive.cle_avis(idm)
         assert cle in s3.objects
-        assert "ACL" not in s3.extra_args[cle]
+        assert s3.extra_args[cle]["ACL"] == "private"
         assert s3.extra_args[cle]["Metadata"] == {
             "date-limite": archive.marque_date_limite(_liste(idm).date_limite)
         }
@@ -394,6 +394,7 @@ def test_log_de_synthese(env, monkeypatch):
         "2 site",
         "RC : 1 déposés, 1 en erreur",
         "annulations : 0 confirmées, 0 évitées",
+        "0 pages au nombre de lots différent de la liste",
     ):
         assert attendu in synthese
 
@@ -459,3 +460,26 @@ def test_rattrapage_rc_plafonne(env, monkeypatch):
 
 def url_rc_lien(idm):
     return f"{BASE}/mpiaws/index.cfm?fuseaction=dce.dRC&IDM={idm}"
+
+
+def test_depot_s3_verifie_avant_la_recherche(env, monkeypatch):
+    ordre = []
+    monkeypatch.setattr(scraper, "verifier_depot_s3", lambda code: ordre.append("s3"))
+    client = FauxClient([_liste(A1)])
+    original = client.rechercher
+
+    def rechercher():
+        ordre.append("rechercher")
+        return original()
+
+    client.rechercher = rechercher
+    _lancer(client)
+    assert ordre == ["s3", "rechercher"]
+
+
+def test_lots_incoherents_comptes(env, monkeypatch):
+    journal = _Journal()
+    monkeypatch.setattr(scraper, "get_logger", lambda level: journal)
+    _lancer(FauxClient([_liste(A1, nombre_lots=5)]))
+    (synthese,) = [m for m in journal.infos if m.startswith(CODE)]
+    assert "1 pages au nombre de lots différent de la liste" in synthese

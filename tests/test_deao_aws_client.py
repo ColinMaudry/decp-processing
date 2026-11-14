@@ -547,3 +547,29 @@ def test_reponse_404_remet_le_compteur_a_zero(sans_attente):
         assert exc.value.response.status_code == attendu
     assert client.page_avis("/Annonces/MPI-pub-1.htm") == "<html>avis</html>"
     assert client.echecs_reseau == 0
+
+
+@pytest.mark.parametrize(
+    "chemin",
+    [
+        "/mpiaws/index.cfm?fuseaction=dematEnt.login&type=DCE&IDM=1",
+        "/mpiaws/index.cfm?fuseaction=DEMATENT.login",
+        "/avertissement.cfm",
+        "/x?Type=dce",
+    ],
+)
+def test_url_dce_refusee_sans_requete(chemin):
+    envoyes = []
+
+    def handler(requete: httpx.Request) -> httpx.Response:
+        envoyes.append(requete)
+        return httpx.Response(200, text="ok")
+
+    client = ClientAws(
+        BASE,
+        http=httpx.Client(transport=httpx.MockTransport(handler)),
+        limiteur=Limiteur(0),
+    )
+    with pytest.raises(ValueError, match="DCE"):
+        client.page_avis(chemin)
+    assert envoyes == []

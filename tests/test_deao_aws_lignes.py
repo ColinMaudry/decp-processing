@@ -60,6 +60,7 @@ def test_avis_alloti():
     assert lignes[0]["id"] == "2026314252"
     assert lignes[0]["idDernierAvis"] == "123456"
     assert lignes[0]["urlConsultation"] == BASE + "/Annonces/MPI-pub-123456.htm"
+    assert lignes[0]["urlAvis"] == lignes[0]["urlConsultation"]
     assert lignes[0]["urlDce"] is None
     assert lignes[0]["urlReglementConsultation"] == "https://rc"
     assert lignes[0]["rectifie"] is False
@@ -85,6 +86,23 @@ def test_procedure_inconnue():
     assert libelle_procedure_aws("Procédure adaptée ouverte") == "Procédure adaptée"
     assert libelle_procedure_aws(None, stats) == "Autre procédure"
     assert len(stats) == 1
+
+
+def test_concours_restreint():
+    stats = Counter()
+    assert libelle_procedure_aws("Concours restreint", stats) == "Concours restreint"
+    assert libelle_procedure_aws("Concours ouvert", stats) == "Concours ouvert"
+    assert not stats
+
+
+def test_technique_sans_objet():
+    stats = Counter()
+    avis = replace(avis_fixture("2026275758"), technique="Sans objet")
+    (ligne,) = lignes_avis(
+        CODE, BASE, liste_fixture(avis, idm="2026275758"), avis, "https://rc", stats
+    )
+    assert ligne["techniques"] == []
+    assert not [k for k in stats if k.startswith("technique_inconnue")]
 
 
 @pytest.mark.parametrize(
