@@ -9,6 +9,7 @@ from src.tasks.scrap.deao.aws.parse import (
     date_courte,
     date_heure_courte,
     departements,
+    numeros_avis,
     parse_avis,
     parse_liste,
     trop_de_resultats,
@@ -205,3 +206,14 @@ def test_date_envoi_impossible_donne_none():
         parse_avis(html.replace("Envoi le 10/11/26", "Envoi le 31/02/26")).date_envoi
         is None
     )
+
+
+def test_numeros_avis_compte_tous_les_blocs():
+    html = lire("liste_25.html")
+    numeros = numeros_avis(html)
+    # 27 blocs, dont les 5 sans IDM
+    assert len(numeros) == 27 and len(parse_liste(html)) == 22
+    assert all(n.isdigit() for n in numeros)
+    assert {a.numero_avis for a in parse_liste(html)} <= set(numeros)
+    assert len(numeros_avis(html, "f")) < 27
+    assert len(numeros_avis(lire("liste_13_S_p1.html"), "s")) == 10

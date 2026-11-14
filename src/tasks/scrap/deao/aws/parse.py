@@ -222,27 +222,47 @@ def _bloc_vers_avis(bloc, nature: str) -> AvisListe | None:
     )
 
 
-def parse_liste(html: str, onglet: str | None = None) -> list[AvisListe]:
-    """Avis d'une page de résultats ; `onglet` « t », « s » ou « f » (None = tous).
-
-    Un bloc sans IDM (aucun lien DCE, RC, question ou dépôt) ou sans date de
-    publication lisible est ignoré : c'est à l'appelant de compter l'écart avec
-    le badge.
-    """
-    arbre = _arbre(html)
-    resultat: list[AvisListe] = []
+def _blocs(arbre, onglet: str | None):
+    """Blocs de résultats `(bloc, nature)` de l'onglet demandé (None = tous)."""
     for bloc in arbre.xpath('//div[@id="entity"]'):
         panneaux = bloc.xpath('ancestor::div[contains(@class, "tab-pane")][1]/@id')
         panneau = panneaux[0] if panneaux else None
         if onglet is not None and panneau != _ONGLET_PANNEAU[onglet]:
             continue
         nature = _PANNEAU_NATURE.get(panneau or "")
-        if nature is None:
-            continue
+        if nature is not None:
+            yield bloc, nature
+
+
+def parse_liste(html: str, onglet: str | None = None) -> list[AvisListe]:
+    """Avis d'une page de résultats ; `onglet` « t », « s » ou « f » (None = tous).
+
+    Un bloc sans IDM (aucun lien DCE, RC, question ou dépôt) ou sans date de
+    publication lisible est ignoré : c'est à l'appelant de compter l'écart avec
+    le badge (voir `numeros_avis`).
+    """
+    resultat: list[AvisListe] = []
+    for bloc, nature in _blocs(_arbre(html), onglet):
         avis = _bloc_vers_avis(bloc, nature)
         if avis is not None:
             resultat.append(avis)
     return resultat
+
+
+def numeros_avis(html: str, onglet: str | None = None) -> list[str]:
+    """Numéro d'avis (`MPI-pub-{n°}`, chiffres seuls) de chaque bloc de résultat.
+
+    Compte tous les blocs, avec ou sans IDM : c'est la base de la comparaison avec
+    le badge de l'onglet et avec le total national.
+    """
+    numeros: list[str] = []
+    for bloc, _ in _blocs(_arbre(html), onglet):
+        for lien in bloc.xpath('.//a[contains(@href, "/Annonces/MPI-pub-")]/@href'):
+            m = re.search(r"MPI-pub-(\d+)\.htm", lien)
+            if m:
+                numeros.append(m[1])
+                break
+    return numeros
 
 
 def _oui_non(texte: str, motif: str) -> bool | None:
