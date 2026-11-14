@@ -429,7 +429,7 @@ class SourceDeao:
     plateforme: str | None = None
 
 
-PLATEFORMES_DEAO = {"atexo"}
+PLATEFORMES_DEAO = {"atexo", "aws"}
 
 
 def charger_registre_deao(path: Path) -> tuple[SourceDeao, ...]:
@@ -509,6 +509,14 @@ CLOSED_USER_AGENT = os.getenv(
 )
 # Préfixe S3 des DCE archivés : <préfixe>/<code plateforme>/<id DCE ou refCons><ext>
 DEAO_DCE_S3_PREFIX = os.getenv("DEAO_DCE_S3_PREFIX", "dce")
+# Préfixe S3 des pages d'avis AWS archivées (privées) et des règlements de consultation
+# (publics) : <préfixe>/<idm>.html et <préfixe RC>/<code plateforme>/<idm>.pdf
+DEAO_AWS_S3_PREFIX = os.getenv("DEAO_AWS_S3_PREFIX", "www.marches-publics.info/raw")
+DEAO_RC_S3_PREFIX = os.getenv("DEAO_RC_S3_PREFIX", "rc")
+# Relire les pages d'avis AWS en ligne plutôt que l'archive S3
+DEAO_AWS_RELIRE_ARCHIVE = (
+    os.getenv("DEAO_AWS_RELIRE_ARCHIVE", "false").lower() == "true"
+)
 # Base des URL publiques des DCE ; vide = <S3_ENDPOINT_URL>/<S3_BUCKET> (voir template.env)
 DEAO_DCE_URL_PUBLIQUE = os.getenv("DEAO_DCE_URL_PUBLIQUE", "")
 # Repartir de zéro quand le fichier publié d'une plateforme est non conforme (fichier

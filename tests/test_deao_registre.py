@@ -142,3 +142,13 @@ def test_plateforme_sans_url_base_refusee(tmp_path):
     p = _ecrire(tmp_path, _PLATEFORME.format(code="a") + "  plateforme: atexo\n")
     with pytest.raises(ValueError, match="url_base requise"):
         charger_registre_deao(p)
+
+
+def test_plateforme_aws_acceptee(tmp_path):
+    p = _ecrire(
+        tmp_path,
+        _PLATEFORME.format(code="www.marches-publics.info")
+        + "  url_base: https://www.marches-publics.info\n  plateforme: aws\n",
+    )
+    (s,) = charger_registre_deao(p)
+    assert s.plateforme == "aws"
