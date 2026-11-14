@@ -125,6 +125,8 @@ def test_nombre_resultats_page_inattendue_leve():
         ("5 Sep. 2026", date(2026, 9, 5)),
         ("5 Jan. 2026", date(2026, 1, 5)),
         ("5 Fev. 2026", date(2026, 2, 5)),
+        ("5 Fév. 2026", date(2026, 2, 5)),  # PLACE
+        ("5 Dec. 2026", date(2026, 12, 5)),
     ],
 )
 def test_date_fr_abreviations_supplementaires(texte, attendu):

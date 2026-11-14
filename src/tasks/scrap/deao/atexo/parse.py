@@ -4,6 +4,7 @@ Fonctions pures, sans accès réseau.
 """
 
 import re
+import unicodedata
 from dataclasses import dataclass
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
@@ -90,11 +91,21 @@ def _arbre(html: str):
     return lxml_html.fromstring(html)
 
 
+def _sans_accent(texte: str) -> str:
+    return "".join(
+        c for c in unicodedata.normalize("NFD", texte) if not unicodedata.combining(c)
+    )
+
+
+# Comparaison sans accents : PLACE écrit « Fév. », Mégalis « Févr. ».
+_MOIS_SANS_ACCENT = {_sans_accent(k): v for k, v in MOIS.items()}
+
+
 def _mois(texte: str) -> int:
-    cle = texte.strip().rstrip(".").lower()
-    if cle not in MOIS:
+    cle = _sans_accent(texte.strip().rstrip(".").lower())
+    if cle not in _MOIS_SANS_ACCENT:
         raise ValueError(f"Mois inconnu dans la date : {texte!r}")
-    return MOIS[cle]
+    return _MOIS_SANS_ACCENT[cle]
 
 
 def date_fr(texte: str) -> date:
