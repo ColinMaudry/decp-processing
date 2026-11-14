@@ -147,7 +147,9 @@ def test_scrapers_atexo_enregistres():
 
     registre = charger_registre_deao(REFERENCE_DIR / "deao_sources.yaml")
     scrapers = scrapers_du_registre(registre)
-    assert set(scrapers) == {e.code for e in registre if e.plateforme == "atexo"}
+    assert set(scrapers) == {
+        e.code for e in registre if e.plateforme in ("atexo", "aws")
+    }
     assert {
         "marches.megalis.bretagne.bzh",
         "marches.maximilien.fr",
@@ -182,3 +184,23 @@ def test_scraper_partiel_publie_puis_echoue(env):
         flow_module.scrap_closed(run_date="2026-10-15")
     assert [p[1] for p in publication.publies] == ["res-a"]
     assert appels == ["2026-10-15"]
+
+
+def test_scrapers_du_registre_aws():
+    from src.config import SourceDeao
+    from src.tasks.scrap.deao.contrat import scrapers_du_registre
+
+    registre = (
+        SourceDeao(
+            "www.marches-publics.info",
+            "AWS",
+            False,
+            "res-aws",
+            1,
+            url_base="https://www.marches-publics.info",
+            plateforme="aws",
+        ),
+    )
+    scrapers = scrapers_du_registre(registre)
+    assert set(scrapers) == {"www.marches-publics.info"}
+    assert callable(scrapers["www.marches-publics.info"])

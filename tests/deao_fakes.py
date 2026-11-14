@@ -29,7 +29,10 @@ class FakeS3:
             raise ClientError(
                 {"Error": {"Code": "NoSuchKey", "Message": Key}}, "GetObject"
             )
-        return {"Body": io.BytesIO(self.objects[Key])}
+        return {
+            "Body": io.BytesIO(self.objects[Key]),
+            "Metadata": self.extra_args.get(Key, {}).get("Metadata", {}),
+        }
 
     def upload_file(self, Filename, Bucket, Key, ExtraArgs=None):
         self.objects[Key] = Path(Filename).read_bytes()

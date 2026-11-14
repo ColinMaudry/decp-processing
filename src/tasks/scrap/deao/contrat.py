@@ -7,6 +7,7 @@ import polars as pl
 
 from src import config
 from src.tasks.scrap.deao.atexo.scraper import scraper_atexo
+from src.tasks.scrap.deao.aws.scraper import scraper_aws
 
 # Un scraper reçoit la date du run et renvoie les lignes au schéma
 # `published_schema()`, avec `sourceDataset` = code de la source du registre.
@@ -19,7 +20,12 @@ def scrapers_du_registre(registre: tuple[config.SourceDeao, ...]) -> dict[str, S
     """Un scraper par source du registre dont la `plateforme` est connue.
 
     Construction paresseuse : aucun accès au réseau ni à S3 avant l'appel."""
-    return {e.code: scraper_atexo(e.code) for e in registre if e.plateforme == "atexo"}
+    fabriques = {"atexo": scraper_atexo, "aws": scraper_aws}
+    return {
+        e.code: fabriques[e.plateforme](e.code)
+        for e in registre
+        if e.plateforme in fabriques
+    }
 
 
 SCRAPERS: dict[str, Scraper] = scrapers_du_registre(config.DEAO_REGISTRE)

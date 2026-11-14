@@ -18,7 +18,8 @@ SOURCE_BOAMP = "boamp"
 CLE = ["sourceDataset", "id"]
 # Hôte d'une URL (sans identifiants ni port), en minuscules
 _HOTE = r"^[A-Za-z][A-Za-z0-9+.\-]*://(?:[^/?#@]*@)?([^/?#:]+)"
-_ID_CONSULTATION = r"(?:[?&]id=|/consultation/)(\d+)"
+# `id=` (Atexo), `IDM=` (AWS, www.marches-publics.info), `/consultation/{n}`
+_ID_CONSULTATION = r"(?:[?&](?:id|IDM)=|/consultation/)(\d+)"
 # Valeurs de la plateforme reportées sur les lignes BOAMP appariées : la première
 # remplace celle du BOAMP, les autres ne complètent que les nuls.
 _REMPLACEES = ("urlConsultation",)

@@ -280,3 +280,33 @@ def test_stricte_url_vers_plateforme_absente_pas_de_fusion():
     assert df.height == 2
     assert stats["fusion_stricte:marches.megalis.bretagne.bzh"] == 0
     assert stats["seule:marches.megalis.bretagne.bzh"] == 1
+
+
+def test_fusion_exacte_aws_idm():
+    aws = "https://www.marches-publics.info"
+    registre = REGISTRE + (
+        SourceDeao("www.marches-publics.info", "AWS", False, "r-aws", 1, url_base=aws),
+    )
+    df = _df(
+        _lignes(
+            "boamp",
+            "26-1",
+            urlConsultation=f"{aws}/mpiaws/index.cfm?fuseaction=dce.dRC&IDM=1902107",
+        ),
+        _lignes(
+            "www.marches-publics.info",
+            "1902107",
+            urlConsultation=f"{aws}/Annonces/MPI-pub-2026314252.htm",
+            urlReglementConsultation="https://s3/rc/1902107.pdf",
+        ),
+        _lignes(
+            "www.marches-publics.info",
+            "19021070",
+            urlConsultation=f"{aws}/Annonces/MPI-pub-2026314253.htm",
+        ),
+    )
+    df, stats = dedoublonner_sources(df, registre)
+    assert stats["fusion_exacte:www.marches-publics.info"] == 1
+    boamp = df.filter(pl.col("sourceDataset") == "boamp")
+    assert boamp["urlReglementConsultation"].to_list() == ["https://s3/rc/1902107.pdf"]
+    assert sorted(df["id"]) == ["19021070", "26-1"]
