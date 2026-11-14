@@ -182,3 +182,26 @@ def test_avis_formulations_oui(avant, apres, champ, attendu):
 def test_avis_sans_objet_ni_acheteur():
     with pytest.raises(ValueError):
         parse_avis("<html><body><p>Rien</p></body></html>")
+
+
+def test_date_publication_impossible_ignore_le_bloc():
+    html = lire("liste_25.html")
+    assert "Publié le\n                            10/11/26" in html
+    modifie = html.replace(
+        "Publié le\n                            10/11/26",
+        "Publié le\n                            31/02/26",
+        1,
+    )
+    avis = parse_liste(modifie)
+    chemins = {a.chemin_avis for a in avis}
+    assert len(avis) == 21
+    assert "/Annonces/MPI-pub-2026314252.htm" not in chemins
+
+
+def test_date_envoi_impossible_donne_none():
+    html = lire("avis_2026314252.html")
+    assert "Envoi le 10/11/26" in html
+    assert (
+        parse_avis(html.replace("Envoi le 10/11/26", "Envoi le 31/02/26")).date_envoi
+        is None
+    )

@@ -199,6 +199,10 @@ def _bloc_vers_avis(bloc, nature: str) -> AvisListe | None:
     m_pub = re.search(r"Publié le\s*(\d{1,2}/\d{1,2}/\d{2,4})", texte)
     if not m_pub:
         return None
+    try:
+        date_publication = date_courte(m_pub[1])
+    except ValueError:
+        return None
     m_lim = re.search(r"Date limite\s*:\s*le\s*(" + _DATE_HEURE + ")", texte)
     images = " ".join(bloc.xpath(".//img/@src"))
     return AvisListe(
@@ -210,7 +214,7 @@ def _bloc_vers_avis(bloc, nature: str) -> AvisListe | None:
         reference=reference,
         objet=objet,
         nombre_lots=nombre_lots,
-        date_publication=date_courte(m_pub[1]),
+        date_publication=date_publication,
         date_limite=date_heure_courte(m_lim[1]) if m_lim else None,
         nature=nature,
         considerations_sociales="ico-critere-social" in images,
@@ -221,8 +225,9 @@ def _bloc_vers_avis(bloc, nature: str) -> AvisListe | None:
 def parse_liste(html: str, onglet: str | None = None) -> list[AvisListe]:
     """Avis d'une page de résultats ; `onglet` « t », « s » ou « f » (None = tous).
 
-    Un bloc sans IDM (aucun lien DCE, RC, question ou dépôt) est ignoré : c'est
-    à l'appelant de compter l'écart avec le badge.
+    Un bloc sans IDM (aucun lien DCE, RC, question ou dépôt) ou sans date de
+    publication lisible est ignoré : c'est à l'appelant de compter l'écart avec
+    le badge.
     """
     arbre = _arbre(html)
     resultat: list[AvisListe] = []
@@ -408,6 +413,12 @@ def parse_avis(html: str) -> Avis:
 
     m_limite = re.search(r"Remise des offres le\s*(" + _DATE_HEURE + ")", texte)
     m_envoi = re.search(r"Envoi le\s*(\d{1,2}/\d{1,2}/\d{2,4})", texte)
+    date_envoi = None
+    if m_envoi:
+        try:
+            date_envoi = date_courte(m_envoi[1])
+        except ValueError:
+            date_envoi = None
 
     return Avis(
         siret=siret,
@@ -426,7 +437,7 @@ def parse_avis(html: str) -> Avis:
         cpv_principal=cpv,
         lots=_lots(arbre),
         date_limite=date_heure_courte(m_limite[1]) if m_limite else None,
-        date_envoi=date_courte(m_envoi[1]) if m_envoi else None,
+        date_envoi=date_envoi,
         marche_reserve=_oui_non(texte, r"Marché réservé"),
         variantes=_variantes(texte),
         groupement=_oui_non(texte, r"Groupement de commandes"),
