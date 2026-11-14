@@ -17,3 +17,7 @@ renvoie la page du formulaire de recherche (deux essais, avec ou sans `Referer`)
 - `aucun_resultat.html` : POST `IDR=84`, `IDN=S`, `IDP=AOE`, recherche à 0 résultat : le site
   renvoie le formulaire avec « Aucun résultat trouvé. Veuillez modifier votre recherche »,
   sans badge.
+
+- `liste_07_T_PA_dl.html` : POST `IDR=7`, `IDN=T`, `IDP=PA` (badge travaux 4) : 2 avis
+  `MPI-pub-` et 2 avis `DL-pub-` dont les liens DCE/RC pointent vers
+  `dl.aws-achat.info` (autre numérotation IDM).

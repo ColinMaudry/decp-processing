@@ -214,8 +214,8 @@ def test_numeros_avis_compte_tous_les_blocs():
     numeros = numeros_avis(html)
     # 27 blocs, dont les 5 sans IDM
     assert len(numeros) == 27 and len(parse_liste(html)) == 22
-    assert all(n.isdigit() for n in numeros)
-    assert {a.numero_avis for a in parse_liste(html)} <= set(numeros)
+    assert all(n.startswith("MPI-") and n[4:].isdigit() for n in numeros)
+    assert {f"MPI-{a.numero_avis}" for a in parse_liste(html)} <= set(numeros)
     assert len(numeros_avis(html, "f")) < 27
     assert len(numeros_avis(lire("liste_13_S_p1.html"), "s")) == 10
 
@@ -225,3 +225,16 @@ def test_aucun_resultat():
     assert not aucun_resultat(lire("liste_25.html"))
     assert not aucun_resultat(lire("rechercher.html"))
     assert aucun_resultat("<p>Aucun&nbsp;r&eacute;sultat\n trouv&eacute;.</p>")
+
+
+def test_blocs_dl_pub_comptes_mais_sans_ligne():
+    html = lire("liste_07_T_PA_dl.html")
+    assert sorted(set(numeros_avis(html, "t"))) == [
+        "DL-2026303005",
+        "DL-2026316006",
+        "MPI-2026295098",
+        "MPI-2026300232",
+    ]
+    avis = parse_liste(html, "t")
+    assert [a.idm for a in avis] == ["1890637", "1895722"]
+    assert all(a.chemin_avis.startswith("/Annonces/MPI-pub-") for a in avis)

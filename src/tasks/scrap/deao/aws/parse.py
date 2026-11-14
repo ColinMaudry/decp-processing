@@ -166,6 +166,9 @@ def departements(html: str) -> list[str]:
 
 def _idm(bloc) -> str | None:
     for href in bloc.xpath(".//a/@href"):
+        # IDM de www.marches-publics.info seulement : dl.aws-achat.info a sa numérotation
+        if href.startswith("http") and "://www.marches-publics.info/" not in href:
+            continue
         m = re.search(r"[?&]IDM=(\d+)", href)
         if m:
             return m[1]
@@ -257,17 +260,19 @@ def parse_liste(html: str, onglet: str | None = None) -> list[AvisListe]:
 
 
 def numeros_avis(html: str, onglet: str | None = None) -> list[str]:
-    """Numéro d'avis (`MPI-pub-{n°}`, chiffres seuls) de chaque bloc de résultat.
+    """Clé d'avis `{PREFIXE}-{n°}` (ex. `MPI-2026295098`, `DL-2026303005`) par bloc.
 
-    Compte tous les blocs, avec ou sans IDM : c'est la base de la comparaison avec
-    le badge de l'onglet et avec le total national.
+    Compte tous les blocs ayant un lien `/Annonces/{PREFIXE}-pub-{n°}.htm`, avec ou
+    sans IDM, y compris ceux d'une autre plateforme AWS (`DL`) : c'est la base de la
+    comparaison avec le badge de l'onglet et avec le total national. Le préfixe évite
+    toute collision entre numérotations.
     """
     numeros: list[str] = []
     for bloc, _ in _blocs(_arbre(html), onglet):
-        for lien in bloc.xpath('.//a[contains(@href, "/Annonces/MPI-pub-")]/@href'):
-            m = re.search(r"MPI-pub-(\d+)\.htm", lien)
+        for lien in bloc.xpath('.//a[contains(@href, "/Annonces/")]/@href'):
+            m = re.search(r"/Annonces/([A-Z]+)-pub-(\d+)\.htm", lien)
             if m:
-                numeros.append(m[1])
+                numeros.append(f"{m[1]}-{m[2]}")
                 break
     return numeros
 

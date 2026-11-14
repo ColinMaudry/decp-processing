@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Matomo analytics -->
+        <script src="/js/matomo.js"></script>
+
+
+        <meta charset="UTF-8">
+        <title>AW Solutions - Liste des annonces</title>
+                    <link rel="stylesheet" href="/css/font-awesome.min.css">            <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+            <link rel="stylesheet" href="/css/bootstrap-iso.css">
+                        <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+            <link href="/css/main.css?t=1741076644" rel="stylesheet"/>
+            </head>
+    <body>
+        <div class="header blanc full">
+            <div id="blocEntete">
+                <p class='styleButton'><a class='lienHeader' href="/acheteurs.htm ">&nbsp;
+                        &nbsp; ACCÈS ACHETEUR &nbsp; &nbsp;</a></p>
+                <p class='styleButton'><a class='lienHeader' href="/fournisseurs.htm ">&nbsp;
+                        &nbsp; ACCÈS FOURNISSEUR &nbsp; &nbsp;</a></p>
+            </div>
+            <a href="/">
+                <img src="/image/logo-orange.png" alt="logo AW Solutions" class="logo"/>
+            </a>
+            <div id="barMenu" style="display:flex" class="full">
+                <ul class="menuHeader">
+
+
+                      <!--<li class="choixMenuHeader">
+                        <a href="#" class='lienMenuHeader2'>Nos solutions<i class="fa fa-sort-desc" aria-hidden="true"></i></a>
+                        <ul class="sousMenu">
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>L'Intelligence Artificielle MIA"</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>eOffre</a></li>
+                            <li><a href="/pratique-tester.htm" class='lienMenuHeader'>Profil d'acheteur</a></li>
+                            <li><a href="/pratique-depotdetest.htm" class='lienMenuHeader'>Sourcing</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>Tiers de Télétransmission</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>Signature électronique</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>eContrat</a></li>
+
+                        </ul>
+                    </li>-->
+                    <li class="choixMenuHeader">
+                        <a href="#" class='lienMenuHeader2'>Outils <i class="fa fa-sort-desc" aria-hidden="true"></i></a>
+                        <ul class="sousMenu">
+                            <!--<li><a href="/pratique-tester.htm" class='lienMenuHeader'>Testez votre poste</a></li>-->
+                            <li><a href="/pratique-depotdetest.htm" class='lienMenuHeader'>Dépôt de test</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>Signature électronique</a></li>
+                            <li><a href="https://www.marches-publics.info/avis/index.cfm?fuseaction=lre.accueil"  class='lienMenuHeader'>Authentification LAR</a></li>
+                            <li><a href="https://awsolutions.fr/blog/cgu/" target="_blank" class='lienMenuHeader'>Conditions Générales</a></li>
+                            <!--<li><a href="/correspondance.htm" class='lienMenuHeader'>Correspondance</a></li>
+                            <li><a href="/mots-de-passe.htm" class='lienMenuHeader'>Gestion des mots de passe</a></li>-->
+
+                        </ul>
+                    </li>
+                    <li class="choixMenuHeader">
+                        <a href="/pratique-assistance.htm"" class='lienMenuHeader2'">F.A.Q </a>
+                    </li>
+                     <li class="choixMenuHeader">
+                        <a href="https://www.aws-france.com/" target="_blank" class='lienMenuHeader2'> Qui sommes nous ?</a>
+                    </li>
+
+                    </ul>
+            </div>
+        </div>
+
+
+        <div id="content" class="blanc">
+
+
+
+	<form>
+		<input id="currentTab" name="currentTab" type="hidden" value="1">
+	</form>
+	<div class="bootstrap-iso">
+		<div class="full" style="background: #D3D7E0 ; margin-top: 0px;height: 180px;">
+			<a href="/Annonces/rechercher" style="font-size:14px;font-family: Poppins-SemiBold;">
+				<i class="fa fa-arrow-left" style="font-size:15px" id="_sessionStorage"></i>
+				RETOUR</a>
+
+			<h2 id="nbResultAvis">
+				<strong>
+					4
+				</strong>
+				Avis correspondent à votre recherche</h2>
+
+			<!--div style="padding:20px;float: right ; margin-top: -62px;">
+                <form class="form-search form-inline" action="/mpi/clearSession" id="nouvelleRecherche1">
+                    <input type="text" id="nouvelleRecherche" class="form-control search-query" placeholder="   Nouvelle Recherche" style="width: 200px;text-align: center"/>
+                </form>
+            </div-->
+
+		</div>
+		<div id="exTab2" class="container-fluid" style="margin-top: -48px;">
+			<ul class="nav nav-tabs" id="myTab">
+				<li id="tab1">
+					<a href="#1" data-toggle="tab" id="travaux">
+						<span class="badge" id="badge_travaux">4</span>
+						<strong>TRAVAUX</strong>
+					</a>
+				</li>
+				<li id="tab2">
+					<a href="#2" data-toggle="tab" id="services">
+						<span class="badge" id="badge_services">0</span>
+						<strong>SERVICES</strong>
+					</a>
+				</li>
+				<li id="tab3">
+					<a href="#3" data-toggle="tab" id="fournitures">
+						<span class="badge" id="badge_fournitures">0</span>
+						<strong>FOURNITURES</strong>
+					</a>
+				</li>
+			</ul>
+			<div style="margin-top: 15px;">Résultat de recherche pour les avis
+				<strong>
+											en cours
+									</strong>
+				dans le(s) département(s) :
+
+				<strong>
+											7
+									</strong>
+
+
+
+								<br>
+				<br>
+			</div>
+			<div class="tab-content">
+				    <div class="tab-pane active" id="1" style="margin-top: -5px;">
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="center-block" style="width: 70% ;
+                                                margin-left: auto ;
+                                                margin-right: auto ;">
+                                    </div>
+            </div>
+        </div>
+                                    <div class="container-fluid" id="entity">
+                    <div class="row affiche_date_avis" style="margin-top: 5px;color: #61C000 ; ">
+                        <div class="col-6 col-md-3 col-sm-12">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                            Publié le
+                            22/10/26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+                        </div>
+
+                                                    <div class="col-6 col-md-6 col-sm-12">
+                                <i class="fa fa-clock-o"></i>
+                                Date limite : le
+                                27/11/26 à 12h00
+                                                            </div>
+                                                <div id="info-icons-container" class="col-6 col-md-3" style="float: right">
+
+                                                                                                <img src="/image/imgSearch/ico-critere-social.png"
+                                         style="float: right; margin-right:2px;"/>
+
+
+                                                                                                            <img src="/image/imgSearch/ico-critere-environnement.png"
+                                             style="float: right; margin-right:2px;"/>
+
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="h2-avis">Département de l&#039;Ardèche
+                                (07007)
+                            </h2>
+                            <div id='titre_box'>
+                                                                    <div class="col-12 col-md-12 ref-acheteur">
+                                        [réf.
+                                        27SRP01]
+                                    </div>
+                                    <br>
+                                                                27SRP01 - Travaux de garde-corps sur routes départementales<br>
+
+                                                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row vdivide bandeau">
+                        <div class="col-md-2 text-center first-child-bandeau">
+                            <a href="/Annonces/MPI-pub-2026295098.htm" title="Consulter l'avis">Consulter l'avis</a>
+                        </div>
+                                                                                    <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dematEnt.login&amp;type=DCE&amp;IDM=1890637" target="_blank" title="Dossier de Consultation des Entreprises">DCE</a>
+                                </div>
+                                                                                        <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dce.dRC&amp;IDM=1890637" title="Règlement de Consultation">RC</a>
+                                </div>
+                                                                                        <div class="col-md-3 text-center fourth-child-bandeau">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=entCom.poserQuestion&amp;type=Quest&amp;typeAff=client&amp;IDM=1890637" title="Règlement de Consultation">Contacter l'acheteur</a>
+                                </div>
+                                                        <div class="col-md-4 last-child-bandeau text-center">
+                                <td colspan="4" class="liLong">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=demat.termes&amp;IDM=1890637" target="_blank" title="Candidature et/ou Offre">Déposer un pli</a>
+                                </td>
+                            </div>
+                                            </div>
+                </div>
+                <br/>
+                            <div class="container-fluid" id="entity">
+                    <div class="row affiche_date_avis" style="margin-top: 5px;color: #61C000 ; ">
+                        <div class="col-6 col-md-3 col-sm-12">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                            Publié le
+                            27/10/26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+                        </div>
+
+                                                    <div class="col-6 col-md-6 col-sm-12">
+                                <i class="fa fa-clock-o"></i>
+                                Date limite : le
+                                27/11/26 à 12h00
+                                                            </div>
+                                                <div id="info-icons-container" class="col-6 col-md-3" style="float: right">
+
+
+
+
+                                                                                                            <span class="label label-danger" style="float: right ; margin-right:2px;">Avis rectifié</span>
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="h2-avis">ARCHE AGGLO
+                                (07300)
+                            </h2>
+                            <div id='titre_box'>
+                                                                    <div class="col-12 col-md-12 ref-acheteur">
+                                        [réf.
+                                        26A26A]
+                                    </div>
+                                    <br>
+                                                                26A26A Travaux de renouvellement des ballons anti bélier station eau potable  OBSERVANCE, CHABOT, BOYON sur la Commune de Tournon sur Rhône (07)<br>
+
+                                                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row vdivide bandeau">
+                        <div class="col-md-2 text-center first-child-bandeau">
+                            <a href="/Annonces/MPI-pub-2026300232.htm" title="Consulter l'avis">Consulter l'avis</a>
+                        </div>
+                                                                                    <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dematEnt.login&amp;type=DCE&amp;IDM=1895722" target="_blank" title="Dossier de Consultation des Entreprises">DCE</a>
+                                </div>
+                                                                                        <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dce.dRC&amp;IDM=1895722" title="Règlement de Consultation">RC</a>
+                                </div>
+                                                                                        <div class="col-md-3 text-center fourth-child-bandeau">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=entCom.poserQuestion&amp;type=Quest&amp;typeAff=client&amp;IDM=1895722" title="Règlement de Consultation">Contacter l'acheteur</a>
+                                </div>
+                                                        <div class="col-md-4 last-child-bandeau text-center">
+                                <td colspan="4" class="liLong">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=demat.termes&amp;IDM=1895722" target="_blank" title="Candidature et/ou Offre">Déposer un pli</a>
+                                </td>
+                            </div>
+                                            </div>
+                </div>
+                <br/>
+                            <div class="container-fluid" id="entity">
+                    <div class="row affiche_date_avis" style="margin-top: 5px;color: #61C000 ; ">
+                        <div class="col-6 col-md-3 col-sm-12">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                            Publié le
+                            30/10/26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+                        </div>
+
+                                                    <div class="col-6 col-md-6 col-sm-12">
+                                <i class="fa fa-clock-o"></i>
+                                Date limite : le
+                                30/11/26 à 12h00
+                                                            </div>
+                                                <div id="info-icons-container" class="col-6 col-md-3" style="float: right">
+
+
+
+
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="h2-avis">MAIRIE DE GUILHERAND GRANGES
+                                (07500)
+                            </h2>
+                            <div id='titre_box'>
+                                                                    <div class="col-12 col-md-12 ref-acheteur">
+                                        [réf.
+                                        GGRE_CS2026-17]
+                                    </div>
+                                    <br>
+                                                                Travaux d’installation de climatisation réversibles dans les groupes scolaires de la ville de Guilherand-Granges<br>
+
+                                                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row vdivide bandeau">
+                        <div class="col-md-2 text-center first-child-bandeau">
+                            <a href="/Annonces/DL-pub-2026303005.htm" title="Consulter l'avis">Consulter l'avis</a>
+                        </div>
+                                                                                    <div class="col-md-1 text-center">
+                                    <a href="https://dl.aws-achat.info//avis/index.cfm?fuseaction=dematEnt.login&amp;type=DCE&amp;IDM=77784" target="_blank" title="Dossier de Consultation des Entreprises">DCE</a>
+                                </div>
+                                                                                        <div class="col-md-1 text-center">
+                                    <a href="https://dl.aws-achat.info//avis/index.cfm?fuseaction=dce.dRC&amp;IDM=77784" title="Règlement de Consultation">RC</a>
+                                </div>
+                                                                                        <div class="col-md-3 text-center fourth-child-bandeau">
+                                    <a href="https://dl.aws-achat.info//avis/index.cfm?fuseaction=entCom.poserQuestion&amp;type=Quest&amp;typeAff=client&amp;IDM=77784" title="Règlement de Consultation">Contacter l'acheteur</a>
+                                </div>
+                                                        <div class="col-md-4 last-child-bandeau text-center">
+                                <td colspan="4" class="liLong">
+                                    <a href="https://dl.aws-achat.info//avis/index.cfm?fuseaction=demat.termes&amp;IDM=77784" target="_blank" title="Candidature et/ou Offre">Déposer un pli</a>
+                                </td>
+                            </div>
+                                            </div>
+                </div>
+                <br/>
+                            <div class="container-fluid" id="entity">
+                    <div class="row affiche_date_avis" style="margin-top: 5px;color: #61C000 ; ">
+                        <div class="col-6 col-md-3 col-sm-12">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                            Publié le
+                            12/11/26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+                        </div>
+
+                                                    <div class="col-6 col-md-6 col-sm-12">
+                                <i class="fa fa-clock-o"></i>
+                                Date limite : le
+                                11/12/26 à 12h00
+                                                            </div>
+                                                <div id="info-icons-container" class="col-6 col-md-3" style="float: right">
+
+                                                                                                <img src="/image/imgSearch/ico-critere-social.png"
+                                         style="float: right; margin-right:2px;"/>
+
+
+                                                                                                            <img src="/image/imgSearch/ico-critere-environnement.png"
+                                             style="float: right; margin-right:2px;"/>
+
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="h2-avis">COMMUNAUTE DE COMMUNES RHONE CRUSSOL
+                                (07502)
+                            </h2>
+                            <div id='titre_box'>
+                                                                    <div class="col-12 col-md-12 ref-acheteur">
+                                        [réf.
+                                        CCRC_MP2026-18]
+                                    </div>
+                                    <br>
+                                                                Le marché concerne les travaux de peinture routière réalisée sur les voiries du territoire Rhône Crussol ; à<br />savoir : Alboussière, Boffres, Charmes sur Rhône, Châteaubourg, Champis, Cornas, Guilherand-Granges,<br />Saint Georges Les Bains, Saint-Péray, Saint Romain de Lerps, Saint Sylvestre, Toulaud et Soyons<br>
+
+                                                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row vdivide bandeau">
+                        <div class="col-md-2 text-center first-child-bandeau">
+                            <a href="/Annonces/DL-pub-2026316006.htm" title="Consulter l'avis">Consulter l'avis</a>
+                        </div>
+                                                                                    <div class="col-md-1 text-center">
+                                    <a href="https://dl.aws-achat.info//avis/index.cfm?fuseaction=dematEnt.login&amp;type=DCE&amp;IDM=77971" target="_blank" title="Dossier de Consultation des Entreprises">DCE</a>
+                                </div>
+                                                                                        <div class="col-md-1 text-center">
+                                    <a href="https://dl.aws-achat.info//avis/index.cfm?fuseaction=dce.dRC&amp;IDM=77971" title="Règlement de Consultation">RC</a>
+                                </div>
+                                                                                        <div class="col-md-3 text-center fourth-child-bandeau">
+                                    <a href="https://dl.aws-achat.info//avis/index.cfm?fuseaction=entCom.poserQuestion&amp;type=Quest&amp;typeAff=client&amp;IDM=77971" title="Règlement de Consultation">Contacter l'acheteur</a>
+                                </div>
+                                                        <div class="col-md-4 last-child-bandeau text-center">
+                                <td colspan="4" class="liLong">
+                                    <a href="https://dl.aws-achat.info//avis/index.cfm?fuseaction=demat.termes&amp;IDM=77971" target="_blank" title="Candidature et/ou Offre">Déposer un pli</a>
+                                </td>
+                            </div>
+                                            </div>
+                </div>
+                <br/>
+
+            <div class="row">
+                <div class="col-sm-12 heureLocale">
+                    <em>* Heure Locale de l'acheteur</em>
+                </div>
+            </div>
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="center-block" style=" width: 70% ; margin-left: auto ; margin-right: auto ;">
+                                    </div>
+            </div>
+        </div>
+    </div>				    <div class="tab-pane" id="2" style="margin-top: -5px;">
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="center-block" style="width: 70% ;
+                                                margin-left: auto ;
+                                                margin-right: auto ;">
+                                    </div>
+            </div>
+        </div>
+
+            <div class="row">
+                <div class="col-sm-12 heureLocale">
+                    <em>* Heure Locale de l'acheteur</em>
+                </div>
+            </div>
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="center-block" style=" width: 70% ; margin-left: auto ; margin-right: auto ;">
+                                    </div>
+            </div>
+        </div>
+    </div>				    <div class="tab-pane" id="3" style="margin-top: -5px;">
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="center-block" style="width: 70% ;
+                                                margin-left: auto ;
+                                                margin-right: auto ;">
+                                    </div>
+            </div>
+        </div>
+
+            <div class="row">
+                <div class="col-sm-12 heureLocale">
+                    <em>* Heure Locale de l'acheteur</em>
+                </div>
+            </div>
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="center-block" style=" width: 70% ; margin-left: auto ; margin-right: auto ;">
+                                    </div>
+            </div>
+        </div>
+    </div>			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+	    if(sessionStorage.getItem("SessionSelectedTabsId") == 0) {
+            sessionStorage.setItem("SessionSelectedTabsId", 1);
+		}
+        var activeTab = sessionStorage.getItem("SessionSelectedTabsId");
+        var tab1 = document.getElementById("tab1");
+        var tab2 = document.getElementById("tab2");
+        var tab3 = document.getElementById("tab3");
+
+
+                tab2.classList.add("disable");
+
+                tab3.classList.add("disable");
+
+
+        // GARDE LE NUMERO DE PAGINATION D'UNE TAB A UNE AUTRE LORS DE LA NAVIGATION
+        $("ul.nav-tabs > li > a").on("shown.bs.tab", function (e) {
+            var id = $(e.target).attr("href").substr(1);
+            sessionStorage.setItem("SessionSelectedTabsId", id);
+        });
+
+        $('#myTab a[href="#' + activeTab + '"]').tab('show');
+
+        $('#myTab a').click(function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
+
+        $('#myTab > li > a ').click(function (e) {
+			let green = "#90DA25";
+			let gray = "#666A73";
+            if ($(this).text().indexOf("TRAVAUX") >= 0) {
+                $('#badge_travaux').css("background-color", green);
+				$('#badge_services').css("background-color", gray);
+				$('#badge_fournitures').css("background-color", gray);
+				$('#badge_donneesEssentielles').css("background-color", gray)
+            }
+
+            if ($(this).text().indexOf("SERVICE") >= 0) {
+				$('#badge_travaux').css("background-color", gray);
+				$('#badge_services').css("background-color", green);
+				$('#badge_fournitures').css("background-color", gray);
+				$('#badge_donneesEssentielles').css("background-color", gray)
+			}
+
+            if ($(this).text().indexOf("FOURN") >= 0) {
+                $('#badge_travaux').css("background-color", gray);
+                $('#badge_services').css("background-color", gray);
+                $('#badge_fournitures').css("background-color", green);
+                $('#badge_donneesEssentielles').css("background-color", gray)
+            }
+
+            if ($(this).text().indexOf("DONN") >= 0) {
+                $('#badge_travaux').css("background-color", gray);
+                $('#badge_services').css("background-color", gray);
+                $('#badge_fournitures').css("background-color", gray);
+                $('#badge_donneesEssentielles').css("background-color", green)
+            }
+        });
+
+        $('#nouvelleRecherche1').click(function (e) {
+            var href = "/fr/mpi/clearSession";
+            console.log(href);
+            window.location.href = href;
+        });
+	</script>
+        </div>
+        <div id='footer' class="blanc full ">
+            <hr class="full">
+            <div class="bootstrap-iso">
+                <div class="pull-left logoFooter"><a target="_blank" href="https://aws-france.com"><img src="/image/logo-avenue-web-systemes.png" alt="Logo" id="logoBordure"/></a></div>
+                <div class="pull-right liensFooter" >
+                <ul class="list-inline align-middle">
+                    <li><a href="/pratique-infoslegales.htm">Mentions légales</a></li>
+                    <li><a href="https://awsolutions.fr/blog/cgu/" target="_blank">C.G.U.</a></li>
+                    <li><a href="https://awsolutions.fr/blog/cgu/#RGPD" target="_blank">Données personnelles</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+                    <script src="/js/resize.js"></script>
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    var docHeight = $(window).height();
+                    var footerHeight = $('#footer').height();
+                    var footerTop = $('#footer').position().top + footerHeight;
+                    if (footerTop < docHeight)
+                        $('#footer').css('margin-top', (docHeight - footerTop) + 'px');
+
+                    $(".languagepicker > li").find("a").click(function () {
+                        // $("#menutitle").text($(this).text());
+                        // alert($(this).text()) ;
+                        $('#lang_choice').html($(this).html())
+                    });
+                });
+            </script>
+            </body>
+</html>

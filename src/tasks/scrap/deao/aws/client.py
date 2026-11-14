@@ -81,9 +81,9 @@ class ResultatRecherche:
     total_avant: int | None
     total_apres: int | None
     segments_en_erreur: list[str] = field(default_factory=list)
-    # Numéros d'avis distincts lus sans IDM (dépôt sur une autre plateforme) :
-    # ils comptent pour la complétude mais n'ont pas de RC AWS.
-    sans_idm: int = 0
+    # Avis distincts lus sans ligne produite (sans IDM, dépôt ailleurs, autre
+    # plateforme AWS comme `DL`) : ils comptent pour la complétude mais n'ont pas de RC AWS.
+    hors_plateforme: int = 0
 
     @property
     def complete(self) -> bool:
@@ -91,7 +91,7 @@ class ResultatRecherche:
             return False
         if self.total_avant is None or self.total_apres is None:
             return False
-        lus = len(self.avis) + self.sans_idm
+        lus = len(self.avis) + self.hors_plateforme
         return (
             min(self.total_avant, self.total_apres)
             <= lus
@@ -228,13 +228,13 @@ class ClientAws:
         for dep in deps:
             self._segment(collecte, dep, None, None)
         total_apres = self._total_national()
-        avec_idm = {a.numero_avis for a in collecte.avis.values()}
+        avec_idm = {f"MPI-{a.numero_avis}" for a in collecte.avis.values()}
         return ResultatRecherche(
             avis=list(collecte.avis.values()),
             total_avant=total_avant,
             total_apres=total_apres,
             segments_en_erreur=collecte.erreurs,
-            sans_idm=len(collecte.numeros - avec_idm),
+            hors_plateforme=len(collecte.numeros - avec_idm),
         )
 
     @staticmethod

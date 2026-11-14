@@ -341,7 +341,7 @@ def _passage(
     avec_siret = df["acheteur_id"].is_not_null().sum()
     logger.info(
         f"{code} : {len(resultat.avis)} consultations lues (IDM), "
-        f"{resultat.sans_idm} sans IDM, total {resultat.total_avant} avant / "
+        f"{resultat.hors_plateforme} hors plateforme, total {resultat.total_avant} avant / "
         f"{resultat.total_apres} après, {len(resultat.segments_en_erreur)} segments "
         f"en erreur, recherche "
         f"{'complète' if complete else 'incomplète (aucune annulation)'} ; "

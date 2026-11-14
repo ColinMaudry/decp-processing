@@ -176,14 +176,14 @@ def test_decoupage_par_procedure_rattrape_les_pages_manquantes():
     assert resultat.complete
 
 
-def test_avis_sans_idm_comptes_pour_la_completude():
+def test_avis_hors_plateforme_comptes_pour_la_completude():
     site = FauxSite()
     page = liste(s=[bloc(1), bloc(2, avec_idm=False), bloc(3), bloc(4, avec_idm=False)])
     site.poster("X", "X", "X", page)
     site.poster("13", "X", "X", page)
     resultat = site.client().rechercher()
     assert [a.numero_avis for a in resultat.avis] == ["1", "3"]
-    assert resultat.sans_idm == 2
+    assert resultat.hors_plateforme == 2
     assert resultat.complete
 
 
@@ -198,22 +198,22 @@ def test_avis_dans_deux_departements():
     for cle in ("X", "25", "90"):
         site.poster(cle, "X", "X", page)
     resultat = site.client().rechercher()
-    assert len(resultat.avis) == 3 and resultat.sans_idm == 0
+    assert len(resultat.avis) == 3 and resultat.hors_plateforme == 0
     assert resultat.complete
 
 
 def test_completude_tolerance():
-    def resultat(lus: int, sans_idm: int = 0) -> ResultatRecherche:
+    def resultat(lus: int, hors_plateforme: int = 0) -> ResultatRecherche:
         return ResultatRecherche(
-            avis=[object()] * (lus - sans_idm),  # type: ignore[list-item]
+            avis=[object()] * (lus - hors_plateforme),  # type: ignore[list-item]
             total_avant=100,
             total_apres=103,
-            sans_idm=sans_idm,
+            hors_plateforme=hors_plateforme,
         )
 
     assert resultat(101).complete
     assert resultat(100).complete and resultat(103).complete
-    assert resultat(101, sans_idm=5).complete
+    assert resultat(101, hors_plateforme=5).complete
     assert not resultat(98).complete
     assert not resultat(104).complete
     assert not ResultatRecherche([], None, 3).complete
@@ -394,3 +394,15 @@ def test_page_toujours_absente_essayee_8_fois():
     assert urls[: urls.index(url) + 1].count(url) == 1
     assert urls.count(url) % ESSAIS_PAGE == 0 and urls.count(url) >= 2 * ESSAIS_PAGE
     assert not resultat.complete and resultat.segments_en_erreur
+
+
+def test_segment_avec_blocs_dl_pub_complet():
+    site = FauxSite()
+    page = lire("liste_07_T_PA_dl.html")
+    site.poster("X", "X", "X", page)
+    site.poster("13", "X", "X", page)
+    resultat = site.client().rechercher()
+    assert resultat.segments_en_erreur == []
+    assert [a.idm for a in resultat.avis] == ["1890637", "1895722"]
+    assert resultat.hors_plateforme == 2
+    assert resultat.complete

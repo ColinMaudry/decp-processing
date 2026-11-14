@@ -342,7 +342,7 @@ def test_log_de_synthese(env, monkeypatch):
     (synthese,) = [m for m in journal.infos if m.startswith(CODE)]
     for attendu in (
         "2 consultations lues (IDM)",
-        "0 sans IDM",
+        "0 hors plateforme",
         "total 2 avant / 2 après",
         "0 segments en erreur",
         "recherche complète",
