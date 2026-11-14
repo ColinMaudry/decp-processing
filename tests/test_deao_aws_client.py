@@ -5,6 +5,7 @@ import httpx
 import pytest
 
 from src.tasks.scrap.deao.aws.client import (
+    ESSAIS_PAGE,
     PROCEDURES,
     ClientAws,
     ResultatRecherche,
@@ -351,3 +352,45 @@ def test_nature_sans_resultat_non_reposte():
     assert resultat.segments_en_erreur == []
     assert [c["IDN"] for c in site.corps if c["IDR"] == "13"] == ["X", "T", "S", "F"]
     assert resultat.complete
+
+
+def test_page_relue_jusqu_a_reussir():
+    site = FauxSite()
+    site.poster("X", "X", "X", liste({"s": 12}))
+    site.poster("13", "X", "X", liste({"s": 12}, s=[bloc(n) for n in range(10)]))
+    reel = liste(s=[bloc(10), bloc(11)])
+    reponses = iter([lire("rechercher.html"), lire("rechercher.html"), reel])
+    original = site.__call__
+
+    def appel(requete):
+        if requete.url.path == "/Annonces/lister" and requete.method == "GET":
+            site.pages[("s", 2)] = next(reponses)
+        return original(requete)
+
+    client = ClientAws(
+        BASE,
+        http=httpx.Client(transport=httpx.MockTransport(appel)),
+        limiteur=Limiteur(0),
+    )
+    resultat = client.rechercher()
+    url = f"{BASE}/Annonces/lister?pager_s=2"
+    assert [u for _, u in site.requetes].count(url) == 3
+    assert len(resultat.avis) == 12 and resultat.segments_en_erreur == []
+    assert resultat.complete
+
+
+def test_page_toujours_absente_essayee_8_fois():
+    site = FauxSite()
+    site.poster("X", "X", "X", liste({"s": 12}))
+    dix = liste({"s": 12}, s=[bloc(n) for n in range(10)])
+    site.poster("13", "X", "X", dix)
+    site.poster("13", "S", "X", dix)
+    for code in PROCEDURES:
+        site.poster("13", "S", code, dix)
+    resultat = site.client().rechercher()
+    url = f"{BASE}/Annonces/lister?pager_s=2"
+    urls = [u for _, u in site.requetes]
+    # premier segment : 8 essais puis nouveau POST, 8 essais de nouveau
+    assert urls[: urls.index(url) + 1].count(url) == 1
+    assert urls.count(url) % ESSAIS_PAGE == 0 and urls.count(url) >= 2 * ESSAIS_PAGE
+    assert not resultat.complete and resultat.segments_en_erreur

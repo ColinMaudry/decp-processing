@@ -49,6 +49,9 @@ from src.tasks.scrap.deao.limiteur import Limiteur
 logger = logging.getLogger(__name__)
 
 RESULTATS_PAR_PAGE = 10
+# Le site renvoie parfois le formulaire à la place de la page N (plusieurs serveurs
+# sans session partagée) : la même URL réussit en général après quelques essais.
+ESSAIS_PAGE = 8
 NATURES = ("T", "S", "F")
 PROCEDURES = ("PA", "AOO", "AOE", "MN", "CO", "CR", "DC", "AU", "DSP")
 
@@ -168,6 +171,39 @@ class ClientAws:
         return self._requete(
             "GET", f"{self.url_base}/Annonces/lister?pager_{onglet}={numero}"
         ).text
+
+    def _page_avec_essais(self, onglet: str, numero: int) -> str | None:
+        """Page N d'un onglet, relue jusqu'à `ESSAIS_PAGE` fois si elle manque.
+
+        Manquante : 404, formulaire ou aucun bloc dans l'onglet. Aucune autre requête
+        entre deux essais.
+        """
+        for essai in range(1, ESSAIS_PAGE + 1):
+            try:
+                page = self._page(onglet, numero)
+            except httpx.HTTPError as exc:
+                motif = str(exc)
+            else:
+                if numeros_avis(page, onglet):
+                    return page
+                motif = "aucun avis dans l'onglet"
+            if essai < ESSAIS_PAGE:
+                logger.debug(
+                    "Page %s de l'onglet %s manquante (essai %s/%s) : %s",
+                    numero,
+                    onglet,
+                    essai,
+                    ESSAIS_PAGE,
+                    motif,
+                )
+        logger.warning(
+            "Page %s de l'onglet %s manquante après %s essais : %s",
+            numero,
+            onglet,
+            ESSAIS_PAGE,
+            motif,
+        )
+        return None
 
     def _total_national(self) -> int | None:
         """Nombre de résultats toutes natures et départements confondus, ou None."""
@@ -321,12 +357,8 @@ class ClientAws:
             for numero in range(2, ceil(attendu / RESULTATS_PAR_PAGE) + 1):
                 if len(lus[onglet]) >= attendu:
                     break
-                try:
-                    page = self._page(onglet, numero)
-                except httpx.HTTPError as exc:
-                    logger.warning(
-                        "Page %s de l'onglet %s manquante : %s", numero, onglet, exc
-                    )
+                page = self._page_avec_essais(onglet, numero)
+                if page is None:
                     continue
                 self._ajouter(collecte, page, onglet, lus[onglet])
             if len(lus[onglet]) < attendu:
