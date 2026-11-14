@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Matomo analytics -->
+        <script src="/js/matomo.js"></script>
+
+
+        <meta charset="UTF-8">
+        <title>AW Solutions - Liste des annonces</title>
+                    <link rel="stylesheet" href="/css/font-awesome.min.css">            <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+            <link rel="stylesheet" href="/css/bootstrap-iso.css">
+                        <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+            <link href="/css/main.css?t=1741076644" rel="stylesheet"/>
+            </head>
+    <body>
+        <div class="header blanc full">
+            <div id="blocEntete">
+                <p class='styleButton'><a class='lienHeader' href="/acheteurs.htm ">&nbsp;
+                        &nbsp; ACCÈS ACHETEUR &nbsp; &nbsp;</a></p>
+                <p class='styleButton'><a class='lienHeader' href="/fournisseurs.htm ">&nbsp;
+                        &nbsp; ACCÈS FOURNISSEUR &nbsp; &nbsp;</a></p>
+            </div>
+            <a href="/">
+                <img src="/image/logo-orange.png" alt="logo AW Solutions" class="logo"/>
+            </a>
+            <div id="barMenu" style="display:flex" class="full">
+                <ul class="menuHeader">
+
+
+                      <!--<li class="choixMenuHeader">
+                        <a href="#" class='lienMenuHeader2'>Nos solutions<i class="fa fa-sort-desc" aria-hidden="true"></i></a>
+                        <ul class="sousMenu">
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>L'Intelligence Artificielle MIA"</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>eOffre</a></li>
+                            <li><a href="/pratique-tester.htm" class='lienMenuHeader'>Profil d'acheteur</a></li>
+                            <li><a href="/pratique-depotdetest.htm" class='lienMenuHeader'>Sourcing</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>Tiers de Télétransmission</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>Signature électronique</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>eContrat</a></li>
+
+                        </ul>
+                    </li>-->
+                    <li class="choixMenuHeader">
+                        <a href="#" class='lienMenuHeader2'>Outils <i class="fa fa-sort-desc" aria-hidden="true"></i></a>
+                        <ul class="sousMenu">
+                            <!--<li><a href="/pratique-tester.htm" class='lienMenuHeader'>Testez votre poste</a></li>-->
+                            <li><a href="/pratique-depotdetest.htm" class='lienMenuHeader'>Dépôt de test</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>Signature électronique</a></li>
+                            <li><a href="https://www.marches-publics.info/avis/index.cfm?fuseaction=lre.accueil"  class='lienMenuHeader'>Authentification LAR</a></li>
+                            <li><a href="https://awsolutions.fr/blog/cgu/" target="_blank" class='lienMenuHeader'>Conditions Générales</a></li>
+                            <!--<li><a href="/correspondance.htm" class='lienMenuHeader'>Correspondance</a></li>
+                            <li><a href="/mots-de-passe.htm" class='lienMenuHeader'>Gestion des mots de passe</a></li>-->
+
+                        </ul>
+                    </li>
+                    <li class="choixMenuHeader">
+                        <a href="/pratique-assistance.htm"" class='lienMenuHeader2'">F.A.Q </a>
+                    </li>
+                     <li class="choixMenuHeader">
+                        <a href="https://www.aws-france.com/" target="_blank" class='lienMenuHeader2'> Qui sommes nous ?</a>
+                    </li>
+
+                    </ul>
+            </div>
+        </div>
+
+
+        <div id="content" class="blanc">
+
+
+
+	<form>
+		<input id="currentTab" name="currentTab" type="hidden" value="1">
+	</form>
+	<div class="bootstrap-iso">
+		<div class="full" style="background: #D3D7E0 ; margin-top: 0px;height: 180px;">
+			<a href="/Annonces/rechercher" style="font-size:14px;font-family: Poppins-SemiBold;">
+				<i class="fa fa-arrow-left" style="font-size:15px" id="_sessionStorage"></i>
+				RETOUR</a>
+
+			<h2 id="nbResultAvis">
+				<strong>
+					67
+				</strong>
+				Avis correspondent à votre recherche</h2>
+
+			<!--div style="padding:20px;float: right ; margin-top: -62px;">
+                <form class="form-search form-inline" action="/mpi/clearSession" id="nouvelleRecherche1">
+                    <input type="text" id="nouvelleRecherche" class="form-control search-query" placeholder="   Nouvelle Recherche" style="width: 200px;text-align: center"/>
+                </form>
+            </div-->
+
+		</div>
+		<div id="exTab2" class="container-fluid" style="margin-top: -48px;">
+			<ul class="nav nav-tabs" id="myTab">
+				<li id="tab1">
+					<a href="#1" data-toggle="tab" id="travaux">
+						<span class="badge" id="badge_travaux">0</span>
+						<strong>TRAVAUX</strong>
+					</a>
+				</li>
+				<li id="tab2">
+					<a href="#2" data-toggle="tab" id="services">
+						<span class="badge" id="badge_services">67</span>
+						<strong>SERVICES</strong>
+					</a>
+				</li>
+				<li id="tab3">
+					<a href="#3" data-toggle="tab" id="fournitures">
+						<span class="badge" id="badge_fournitures">0</span>
+						<strong>FOURNITURES</strong>
+					</a>
+				</li>
+			</ul>
+			<div style="margin-top: 15px;">Résultat de recherche pour les avis
+				<strong>
+											en cours
+									</strong>
+				dans le(s) département(s) :
+
+				<strong>
+											13
+									</strong>
+
+
+
+								<br>
+				<br>
+			</div>
+			<div class="tab-content">
+				    <div class="tab-pane active" id="1" style="margin-top: -5px;">
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="center-block" style="width: 70% ;
+                                                margin-left: auto ;
+                                                margin-right: auto ;">
+                                    </div>
+            </div>
+        </div>
+
+            <div class="row">
+                <div class="col-sm-12 heureLocale">
+                    <em>* Heure Locale de l'acheteur</em>
+                </div>
+            </div>
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="center-block" style=" width: 70% ; margin-left: auto ; margin-right: auto ;">
+                                    </div>
+            </div>
+        </div>
+    </div>				    <div class="tab-pane" id="2" style="margin-top: -5px;">
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="center-block" style="width: 70% ;
+                                                margin-left: auto ;
+                                                margin-right: auto ;">
+                                            <div class="pagerfanta"><nav><span class="disabled">&#171; Previous</span><span class="current">1</span><a href="/Annonces/lister?pager_s=2">2</a><a href="/Annonces/lister?pager_s=3">3</a><a href="/Annonces/lister?pager_s=4">4</a><a href="/Annonces/lister?pager_s=5">5</a><a href="/Annonces/lister?pager_s=6">6</a><a href="/Annonces/lister?pager_s=7">7</a><a href="/Annonces/lister?pager_s=2" rel="next">Next &#187;</a></nav></div>
+                                    </div>
+            </div>
+        </div>
+                                    <div class="container-fluid" id="entity">
+                    <div class="row affiche_date_avis" style="margin-top: 5px;color: #61C000 ; ">
+                        <div class="col-6 col-md-3 col-sm-12">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                            Publié le
+                            14/10/26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+                        </div>
+
+                                                    <div class="col-6 col-md-6 col-sm-12">
+                                <i class="fa fa-clock-o"></i>
+                                Date limite : le
+                                16/11/26 à 10h00
+                                                            </div>
+                                                <div id="info-icons-container" class="col-6 col-md-3" style="float: right">
+
+
+                                                                                                            <img src="/image/imgSearch/service-dume.gif"
+                                             style="width: 30%; float: right; margin-right:2px;"/>
+
+                                                                                                            <img src="/image/imgSearch/ico-critere-environnement.png"
+                                             style="float: right; margin-right:2px;"/>
+
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="h2-avis">Région Provence-Alpes-Côte d&#039;Azur
+                                (13481)
+                            </h2>
+                            <div id='titre_box'>
+                                                                    <div class="col-12 col-md-12 ref-acheteur">
+                                        [réf.
+                                        2026-0873]
+                                    </div>
+                                    <br>
+                                                                Étude de Potentiel Commercial des Liaisons Ferroviaires Transfrontalières France-Italie dans le cadre du projet CROSUSMOB<br>
+
+                                                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row vdivide bandeau">
+                        <div class="col-md-2 text-center first-child-bandeau">
+                            <a href="/Annonces/MPI-pub-2026288847.htm" title="Consulter l'avis">Consulter l'avis</a>
+                        </div>
+                                                                                    <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dematEnt.login&amp;type=DCE&amp;IDM=1888860" target="_blank" title="Dossier de Consultation des Entreprises">DCE</a>
+                                </div>
+                                                                                        <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dce.dRC&amp;IDM=1888860" title="Règlement de Consultation">RC</a>
+                                </div>
+                                                                                        <div class="col-md-3 text-center fourth-child-bandeau">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=entCom.poserQuestion&amp;type=Quest&amp;typeAff=client&amp;IDM=1888860" title="Règlement de Consultation">Contacter l'acheteur</a>
+                                </div>
+                                                        <div class="col-md-4 last-child-bandeau text-center">
+                                <td colspan="4" class="liLong">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=demat.termes&amp;IDM=1888860" target="_blank" title="Candidature et/ou Offre">Déposer un pli</a>
+                                </td>
+                            </div>
+                                            </div>
+                </div>
+                <br/>
+                            <div class="container-fluid" id="entity">
+                    <div class="row affiche_date_avis" style="margin-top: 5px;color: #61C000 ; ">
+                        <div class="col-6 col-md-3 col-sm-12">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                            Publié le
+                            16/09/26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+                        </div>
+
+                                                    <div class="col-6 col-md-6 col-sm-12">
+                                <i class="fa fa-clock-o"></i>
+                                Date limite : le
+                                16/11/26 à 12h00
+                                                            </div>
+                                                <div id="info-icons-container" class="col-6 col-md-3" style="float: right">
+
+                                                                                                <img src="/image/imgSearch/ico-critere-social.png"
+                                         style="float: right; margin-right:2px;"/>
+
+
+                                                                                                            <img src="/image/imgSearch/ico-critere-environnement.png"
+                                             style="float: right; margin-right:2px;"/>
+
+                                                                                                            <span class="label label-danger" style="float: right ; margin-right:2px;">Avis rectifié</span>
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="h2-avis">SOLEAM
+                                (13006)
+                            </h2>
+                            <div id='titre_box'>
+                                                                    <div class="col-12 col-md-12 ref-acheteur">
+                                        [réf.
+                                        2026-SOLE-0001]
+                                    </div>
+                                    <br>
+                                                                Missions de géomètre expert pour les concessions d’aménagement gérées par la SOLEAM<br>
+                                                                    <p style="font-family: Poppins-ItalicBold, serif;">[Marché alloti :
+                                        4
+                                        lots]
+                                    </p>
+                                                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row vdivide bandeau">
+                        <div class="col-md-2 text-center first-child-bandeau">
+                            <a href="/Annonces/MPI-pub-2026260690.htm" title="Consulter l'avis">Consulter l'avis</a>
+                        </div>
+                                                                                    <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dematEnt.login&amp;type=DCE&amp;IDM=1869429" target="_blank" title="Dossier de Consultation des Entreprises">DCE</a>
+                                </div>
+                                                                                        <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dce.dRC&amp;IDM=1869429" title="Règlement de Consultation">RC</a>
+                                </div>
+                                                                                        <div class="col-md-3 text-center fourth-child-bandeau">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=entCom.poserQuestion&amp;type=Quest&amp;typeAff=client&amp;IDM=1869429" title="Règlement de Consultation">Contacter l'acheteur</a>
+                                </div>
+                                                        <div class="col-md-4 last-child-bandeau text-center">
+                                <td colspan="4" class="liLong">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=demat.termes&amp;IDM=1869429" target="_blank" title="Candidature et/ou Offre">Déposer un pli</a>
+                                </td>
+                            </div>
+                                            </div>
+                </div>
+                <br/>
+                            <div class="container-fluid" id="entity">
+                    <div class="row affiche_date_avis" style="margin-top: 5px;color: #61C000 ; ">
+                        <div class="col-6 col-md-3 col-sm-12">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                            Publié le
+                            14/10/26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+                        </div>
+
+                                                    <div class="col-6 col-md-6 col-sm-12">
+                                <i class="fa fa-clock-o"></i>
+                                Date limite : le
+                                16/11/26 à 12h00
+                                                            </div>
+                                                <div id="info-icons-container" class="col-6 col-md-3" style="float: right">
+
+
+
+
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="h2-avis">SAEM MARSEILLE HABITAT
+                                (13001)
+                            </h2>
+                            <div id='titre_box'>
+                                                                    <div class="col-12 col-md-12 ref-acheteur">
+                                        [réf.
+                                        26-DOUFCK2]
+                                    </div>
+                                    <br>
+                                                                Marché de prestations intellectuelles Prestation d’assistance à maîtrise d’ouvrage pour le montage opérationnel et la commercialisation d’un pôle de commerces et de services en secteur de renouvellement urbain – Parc Kalliste – Marseille 15e arrondissement<br>
+
+                                                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row vdivide bandeau">
+                        <div class="col-md-2 text-center first-child-bandeau">
+                            <a href="/Annonces/MPI-pub-20262871467.htm" title="Consulter l'avis">Consulter l'avis</a>
+                        </div>
+                                                                                    <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dematEnt.login&amp;type=DCE&amp;IDM=1889248" target="_blank" title="Dossier de Consultation des Entreprises">DCE</a>
+                                </div>
+                                                                                        <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dce.dRC&amp;IDM=1889248" title="Règlement de Consultation">RC</a>
+                                </div>
+                                                                                        <div class="col-md-3 text-center fourth-child-bandeau">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=entCom.poserQuestion&amp;type=Quest&amp;typeAff=client&amp;IDM=1889248" title="Règlement de Consultation">Contacter l'acheteur</a>
+                                </div>
+                                                        <div class="col-md-4 last-child-bandeau text-center">
+                                <td colspan="4" class="liLong">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=demat.termes&amp;IDM=1889248" target="_blank" title="Candidature et/ou Offre">Déposer un pli</a>
+                                </td>
+                            </div>
+                                            </div>
+                </div>
+                <br/>
+                            <div class="container-fluid" id="entity">
+                    <div class="row affiche_date_avis" style="margin-top: 5px;color: #61C000 ; ">
+                        <div class="col-6 col-md-3 col-sm-12">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                            Publié le
+                            14/10/26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+                        </div>
+
+                                                    <div class="col-6 col-md-6 col-sm-12">
+                                <i class="fa fa-clock-o"></i>
+                                Date limite : le
+                                16/11/26 à 12h00
+                                                            </div>
+                                                <div id="info-icons-container" class="col-6 col-md-3" style="float: right">
+
+
+
+
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="h2-avis">SAEM MARSEILLE HABITAT
+                                (13001)
+                            </h2>
+                            <div id='titre_box'>
+                                                                    <div class="col-12 col-md-12 ref-acheteur">
+                                        [réf.
+                                        26-DMO-VMC]
+                                    </div>
+                                    <br>
+                                                                Marché de maintenance et d'exploitation des installations de ventilation sanitaire individuelles et collectives<br>
+
+                                                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row vdivide bandeau">
+                        <div class="col-md-2 text-center first-child-bandeau">
+                            <a href="/Annonces/MPI-pub-20262871574.htm" title="Consulter l'avis">Consulter l'avis</a>
+                        </div>
+                                                                                    <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dematEnt.login&amp;type=DCE&amp;IDM=1889280" target="_blank" title="Dossier de Consultation des Entreprises">DCE</a>
+                                </div>
+                                                                                        <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dce.dRC&amp;IDM=1889280" title="Règlement de Consultation">RC</a>
+                                </div>
+                                                                                        <div class="col-md-3 text-center fourth-child-bandeau">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=entCom.poserQuestion&amp;type=Quest&amp;typeAff=client&amp;IDM=1889280" title="Règlement de Consultation">Contacter l'acheteur</a>
+                                </div>
+                                                        <div class="col-md-4 last-child-bandeau text-center">
+                                <td colspan="4" class="liLong">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=demat.termes&amp;IDM=1889280" target="_blank" title="Candidature et/ou Offre">Déposer un pli</a>
+                                </td>
+                            </div>
+                                            </div>
+                </div>
+                <br/>
+                            <div class="container-fluid" id="entity">
+                    <div class="row affiche_date_avis" style="margin-top: 5px;color: #61C000 ; ">
+                        <div class="col-6 col-md-3 col-sm-12">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                            Publié le
+                            13/10/26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+                        </div>
+
+                                                    <div class="col-6 col-md-6 col-sm-12">
+                                <i class="fa fa-clock-o"></i>
+                                Date limite : le
+                                16/11/26 à 12h00
+                                                            </div>
+                                                <div id="info-icons-container" class="col-6 col-md-3" style="float: right">
+
+                                                                                                <img src="/image/imgSearch/ico-critere-social.png"
+                                         style="float: right; margin-right:2px;"/>
+
+
+                                                                                                            <img src="/image/imgSearch/ico-critere-environnement.png"
+                                             style="float: right; margin-right:2px;"/>
+
+                                                                                                            <span class="label label-danger" style="float: right ; margin-right:2px;">Avis rectifié</span>
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="h2-avis">SA ERILIA, société à mission
+                                (13008)
+                            </h2>
+                            <div id='titre_box'>
+                                                                    <div class="col-12 col-md-12 ref-acheteur">
+                                        [réf.
+                                        S1056]
+                                    </div>
+                                    <br>
+                                                                Marché de Maitrise d'œuvre pour la Réhabilitation de la résidence les Mirandoles - 06110 LE CANNET<br>
+
+                                                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row vdivide bandeau">
+                        <div class="col-md-2 text-center first-child-bandeau">
+                            <a href="/Annonces/MPI-pub-2026287866.htm" title="Consulter l'avis">Consulter l'avis</a>
+                        </div>
+                                                                                    <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dematEnt.login&amp;type=DCE&amp;IDM=1888253" target="_blank" title="Dossier de Consultation des Entreprises">DCE</a>
+                                </div>
+                                                                                        <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dce.dRC&amp;IDM=1888253" title="Règlement de Consultation">RC</a>
+                                </div>
+                                                                                        <div class="col-md-3 text-center fourth-child-bandeau">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=entCom.poserQuestion&amp;type=Quest&amp;typeAff=client&amp;IDM=1888253" title="Règlement de Consultation">Contacter l'acheteur</a>
+                                </div>
+                                                        <div class="col-md-4 last-child-bandeau text-center">
+                                <td colspan="4" class="liLong">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=demat.termes&amp;IDM=1888253" target="_blank" title="Candidature et/ou Offre">Déposer un pli</a>
+                                </td>
+                            </div>
+                                            </div>
+                </div>
+                <br/>
+                            <div class="container-fluid" id="entity">
+                    <div class="row affiche_date_avis" style="margin-top: 5px;color: #61C000 ; ">
+                        <div class="col-6 col-md-3 col-sm-12">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                            Publié le
+                            19/10/26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+                        </div>
+
+                                                    <div class="col-6 col-md-6 col-sm-12">
+                                <i class="fa fa-clock-o"></i>
+                                Date limite : le
+                                16/11/26 à 12h00
+                                                            </div>
+                                                <div id="info-icons-container" class="col-6 col-md-3" style="float: right">
+
+
+                                                                                                            <img src="/image/imgSearch/service-dume.gif"
+                                             style="width: 30%; float: right; margin-right:2px;"/>
+
+
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="h2-avis">Mairie de Marignane
+                                (13729)
+                            </h2>
+                            <div id='titre_box'>
+                                                                    <div class="col-12 col-md-12 ref-acheteur">
+                                        [réf.
+                                        2026-026]
+                                    </div>
+                                    <br>
+                                                                Organisation et réalisation de sorties et excursions à destination des seniors de la ville de Marignane<br>
+
+                                                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row vdivide bandeau">
+                        <div class="col-md-2 text-center first-child-bandeau">
+                            <a href="/Annonces/MPI-pub-2026292816.htm" title="Consulter l'avis">Consulter l'avis</a>
+                        </div>
+                                                                                    <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dematEnt.login&amp;type=DCE&amp;IDM=1891323" target="_blank" title="Dossier de Consultation des Entreprises">DCE</a>
+                                </div>
+                                                                                        <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dce.dRC&amp;IDM=1891323" title="Règlement de Consultation">RC</a>
+                                </div>
+                                                                                        <div class="col-md-3 text-center fourth-child-bandeau">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=entCom.poserQuestion&amp;type=Quest&amp;typeAff=client&amp;IDM=1891323" title="Règlement de Consultation">Contacter l'acheteur</a>
+                                </div>
+                                                        <div class="col-md-4 last-child-bandeau text-center">
+                                <td colspan="4" class="liLong">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=demat.termes&amp;IDM=1891323" target="_blank" title="Candidature et/ou Offre">Déposer un pli</a>
+                                </td>
+                            </div>
+                                            </div>
+                </div>
+                <br/>
+                            <div class="container-fluid" id="entity">
+                    <div class="row affiche_date_avis" style="margin-top: 5px;color: #61C000 ; ">
+                        <div class="col-6 col-md-3 col-sm-12">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                            Publié le
+                            21/10/26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+                        </div>
+
+                                                    <div class="col-6 col-md-6 col-sm-12">
+                                <i class="fa fa-clock-o"></i>
+                                Date limite : le
+                                16/11/26 à 12h00
+                                                            </div>
+                                                <div id="info-icons-container" class="col-6 col-md-3" style="float: right">
+
+
+
+                                                                                                            <img src="/image/imgSearch/ico-critere-environnement.png"
+                                             style="float: right; margin-right:2px;"/>
+
+                                                                                                            <span class="label label-danger" style="float: right ; margin-right:2px;">Avis rectifié</span>
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="h2-avis">Commune de Miramas
+                                (13140)
+                            </h2>
+                            <div id='titre_box'>
+                                                                    <div class="col-12 col-md-12 ref-acheteur">
+                                        [réf.
+                                        26S012]
+                                    </div>
+                                    <br>
+                                                                Prestations rédactionnelles - Commune de Miramas<br>
+
+                                                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row vdivide bandeau">
+                        <div class="col-md-2 text-center first-child-bandeau">
+                            <a href="/Annonces/MPI-pub-20262941336.htm" title="Consulter l'avis">Consulter l'avis</a>
+                        </div>
+                                                                                    <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dematEnt.login&amp;type=DCE&amp;IDM=1891972" target="_blank" title="Dossier de Consultation des Entreprises">DCE</a>
+                                </div>
+                                                                                        <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dce.dRC&amp;IDM=1891972" title="Règlement de Consultation">RC</a>
+                                </div>
+                                                                                        <div class="col-md-3 text-center fourth-child-bandeau">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=entCom.poserQuestion&amp;type=Quest&amp;typeAff=client&amp;IDM=1891972" title="Règlement de Consultation">Contacter l'acheteur</a>
+                                </div>
+                                                        <div class="col-md-4 last-child-bandeau text-center">
+                                <td colspan="4" class="liLong">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=demat.termes&amp;IDM=1891972" target="_blank" title="Candidature et/ou Offre">Déposer un pli</a>
+                                </td>
+                            </div>
+                                            </div>
+                </div>
+                <br/>
+                            <div class="container-fluid" id="entity">
+                    <div class="row affiche_date_avis" style="margin-top: 5px;color: #61C000 ; ">
+                        <div class="col-6 col-md-3 col-sm-12">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                            Publié le
+                            21/10/26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+                        </div>
+
+                                                    <div class="col-6 col-md-6 col-sm-12">
+                                <i class="fa fa-clock-o"></i>
+                                Date limite : le
+                                16/11/26 à 12h00
+                                                            </div>
+                                                <div id="info-icons-container" class="col-6 col-md-3" style="float: right">
+
+
+
+
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="h2-avis">Région Provence-Alpes-Côte d&#039;Azur
+                                (13481)
+                            </h2>
+                            <div id='titre_box'>
+                                                                    <div class="col-12 col-md-12 ref-acheteur">
+                                        [réf.
+                                        2026-0825]
+                                    </div>
+                                    <br>
+                                                                La présente consultation a pour objet la préparation physique et mentale de l’équipe régionale des métiers, lors d’une journée d’intégration, de 2 stages de préparation ainsi qu’à l’occasion des finales nationales de la 49e Compétition Worldskills.<br>
+                                                                    <p style="font-family: Poppins-ItalicBold, serif;">[Marché alloti :
+                                        2
+                                        lots]
+                                    </p>
+                                                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row vdivide bandeau">
+                        <div class="col-md-2 text-center first-child-bandeau">
+                            <a href="/Annonces/MPI-pub-20262941439.htm" title="Consulter l'avis">Consulter l'avis</a>
+                        </div>
+                                                                                    <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dematEnt.login&amp;type=DCE&amp;IDM=1892819" target="_blank" title="Dossier de Consultation des Entreprises">DCE</a>
+                                </div>
+                                                                                        <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dce.dRC&amp;IDM=1892819" title="Règlement de Consultation">RC</a>
+                                </div>
+                                                                                        <div class="col-md-3 text-center fourth-child-bandeau">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=entCom.poserQuestion&amp;type=Quest&amp;typeAff=client&amp;IDM=1892819" title="Règlement de Consultation">Contacter l'acheteur</a>
+                                </div>
+                                                        <div class="col-md-4 last-child-bandeau text-center">
+                                <td colspan="4" class="liLong">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=demat.termes&amp;IDM=1892819" target="_blank" title="Candidature et/ou Offre">Déposer un pli</a>
+                                </td>
+                            </div>
+                                            </div>
+                </div>
+                <br/>
+                            <div class="container-fluid" id="entity">
+                    <div class="row affiche_date_avis" style="margin-top: 5px;color: #61C000 ; ">
+                        <div class="col-6 col-md-3 col-sm-12">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                            Publié le
+                            19/10/26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+                        </div>
+
+                                                    <div class="col-6 col-md-6 col-sm-12">
+                                <i class="fa fa-clock-o"></i>
+                                Date limite : le
+                                16/11/26 à 12h00
+                                                            </div>
+                                                <div id="info-icons-container" class="col-6 col-md-3" style="float: right">
+
+
+
+                                                                                                            <img src="/image/imgSearch/ico-critere-environnement.png"
+                                             style="float: right; margin-right:2px;"/>
+
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="h2-avis">Ville d&#039;Arles
+                                (13637)
+                            </h2>
+                            <div id='titre_box'>
+                                                                    <div class="col-12 col-md-12 ref-acheteur">
+                                        [réf.
+                                        26AS-COP-0860-X]
+                                    </div>
+                                    <br>
+                                                                PRESTATIONS D’INTERVENTIONS DE SPORTS, DE LOISIRS ET DE SENSIBILISATION – 6 LOTS (SECONDE PROCEDURE)<br>
+                                                                    <p style="font-family: Poppins-ItalicBold, serif;">[Marché alloti :
+                                        6
+                                        lots]
+                                    </p>
+                                                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row vdivide bandeau">
+                        <div class="col-md-2 text-center first-child-bandeau">
+                            <a href="/Annonces/MPI-pub-2026294783.htm" title="Consulter l'avis">Consulter l'avis</a>
+                        </div>
+                                                                                    <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dematEnt.login&amp;type=DCE&amp;IDM=1890880" target="_blank" title="Dossier de Consultation des Entreprises">DCE</a>
+                                </div>
+                                                                                        <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dce.dRC&amp;IDM=1890880" title="Règlement de Consultation">RC</a>
+                                </div>
+                                                                                        <div class="col-md-3 text-center fourth-child-bandeau">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=entCom.poserQuestion&amp;type=Quest&amp;typeAff=client&amp;IDM=1890880" title="Règlement de Consultation">Contacter l'acheteur</a>
+                                </div>
+                                                        <div class="col-md-4 last-child-bandeau text-center">
+                                <td colspan="4" class="liLong">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=demat.termes&amp;IDM=1890880" target="_blank" title="Candidature et/ou Offre">Déposer un pli</a>
+                                </td>
+                            </div>
+                                            </div>
+                </div>
+                <br/>
+                            <div class="container-fluid" id="entity">
+                    <div class="row affiche_date_avis" style="margin-top: 5px;color: #61C000 ; ">
+                        <div class="col-6 col-md-3 col-sm-12">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                            Publié le
+                            23/10/26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+                        </div>
+
+                                                    <div class="col-6 col-md-6 col-sm-12">
+                                <i class="fa fa-clock-o"></i>
+                                Date limite : le
+                                16/11/26 à 13h30
+                                                            </div>
+                                                <div id="info-icons-container" class="col-6 col-md-3" style="float: right">
+
+
+
+                                                                                                            <img src="/image/imgSearch/ico-critere-environnement.png"
+                                             style="float: right; margin-right:2px;"/>
+
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="h2-avis">Ville de Septèmes-les-Vallons
+                                (13240)
+                            </h2>
+                            <div id='titre_box'>
+                                                                    <div class="col-12 col-md-12 ref-acheteur">
+                                        [réf.
+                                        2026MA15]
+                                    </div>
+                                    <br>
+                                                                MAINTENANCE DES INSTALLATIONS DE CHAUFFAGE - EAU CHAUDE SANITAIRE ET FOURNITURE D'ENERGIE - 4 SITES<br>
+
+                                                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row vdivide bandeau">
+                        <div class="col-md-2 text-center first-child-bandeau">
+                            <a href="/Annonces/MPI-pub-2026296268.htm" title="Consulter l'avis">Consulter l'avis</a>
+                        </div>
+                                                                                    <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dematEnt.login&amp;type=DCE&amp;IDM=1894461" target="_blank" title="Dossier de Consultation des Entreprises">DCE</a>
+                                </div>
+                                                                                        <div class="col-md-1 text-center">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=dce.dRC&amp;IDM=1894461" title="Règlement de Consultation">RC</a>
+                                </div>
+                                                                                        <div class="col-md-3 text-center fourth-child-bandeau">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=entCom.poserQuestion&amp;type=Quest&amp;typeAff=client&amp;IDM=1894461" title="Règlement de Consultation">Contacter l'acheteur</a>
+                                </div>
+                                                        <div class="col-md-4 last-child-bandeau text-center">
+                                <td colspan="4" class="liLong">
+                                    <a href="https://www.marches-publics.info/mpiaws/index.cfm?fuseaction=demat.termes&amp;IDM=1894461" target="_blank" title="Candidature et/ou Offre">Déposer un pli</a>
+                                </td>
+                            </div>
+                                            </div>
+                </div>
+                <br/>
+
+            <div class="row">
+                <div class="col-sm-12 heureLocale">
+                    <em>* Heure Locale de l'acheteur</em>
+                </div>
+            </div>
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="center-block" style=" width: 70% ; margin-left: auto ; margin-right: auto ;">
+                                    </div>
+            </div>
+        </div>
+    </div>				    <div class="tab-pane" id="3" style="margin-top: -5px;">
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="center-block" style="width: 70% ;
+                                                margin-left: auto ;
+                                                margin-right: auto ;">
+                                    </div>
+            </div>
+        </div>
+
+            <div class="row">
+                <div class="col-sm-12 heureLocale">
+                    <em>* Heure Locale de l'acheteur</em>
+                </div>
+            </div>
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="center-block" style=" width: 70% ; margin-left: auto ; margin-right: auto ;">
+                                    </div>
+            </div>
+        </div>
+    </div>			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+	    if(sessionStorage.getItem("SessionSelectedTabsId") == 0) {
+            sessionStorage.setItem("SessionSelectedTabsId", 2);
+		}
+        var activeTab = sessionStorage.getItem("SessionSelectedTabsId");
+        var tab1 = document.getElementById("tab1");
+        var tab2 = document.getElementById("tab2");
+        var tab3 = document.getElementById("tab3");
+
+                tab1.classList.add("disable");
+
+
+                tab3.classList.add("disable");
+
+
+        // GARDE LE NUMERO DE PAGINATION D'UNE TAB A UNE AUTRE LORS DE LA NAVIGATION
+        $("ul.nav-tabs > li > a").on("shown.bs.tab", function (e) {
+            var id = $(e.target).attr("href").substr(1);
+            sessionStorage.setItem("SessionSelectedTabsId", id);
+        });
+
+        $('#myTab a[href="#' + activeTab + '"]').tab('show');
+
+        $('#myTab a').click(function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
+
+        $('#myTab > li > a ').click(function (e) {
+			let green = "#90DA25";
+			let gray = "#666A73";
+            if ($(this).text().indexOf("TRAVAUX") >= 0) {
+                $('#badge_travaux').css("background-color", green);
+				$('#badge_services').css("background-color", gray);
+				$('#badge_fournitures').css("background-color", gray);
+				$('#badge_donneesEssentielles').css("background-color", gray)
+            }
+
+            if ($(this).text().indexOf("SERVICE") >= 0) {
+				$('#badge_travaux').css("background-color", gray);
+				$('#badge_services').css("background-color", green);
+				$('#badge_fournitures').css("background-color", gray);
+				$('#badge_donneesEssentielles').css("background-color", gray)
+			}
+
+            if ($(this).text().indexOf("FOURN") >= 0) {
+                $('#badge_travaux').css("background-color", gray);
+                $('#badge_services').css("background-color", gray);
+                $('#badge_fournitures').css("background-color", green);
+                $('#badge_donneesEssentielles').css("background-color", gray)
+            }
+
+            if ($(this).text().indexOf("DONN") >= 0) {
+                $('#badge_travaux').css("background-color", gray);
+                $('#badge_services').css("background-color", gray);
+                $('#badge_fournitures').css("background-color", gray);
+                $('#badge_donneesEssentielles').css("background-color", green)
+            }
+        });
+
+        $('#nouvelleRecherche1').click(function (e) {
+            var href = "/fr/mpi/clearSession";
+            console.log(href);
+            window.location.href = href;
+        });
+	</script>
+        </div>
+        <div id='footer' class="blanc full ">
+            <hr class="full">
+            <div class="bootstrap-iso">
+                <div class="pull-left logoFooter"><a target="_blank" href="https://aws-france.com"><img src="/image/logo-avenue-web-systemes.png" alt="Logo" id="logoBordure"/></a></div>
+                <div class="pull-right liensFooter" >
+                <ul class="list-inline align-middle">
+                    <li><a href="/pratique-infoslegales.htm">Mentions légales</a></li>
+                    <li><a href="https://awsolutions.fr/blog/cgu/" target="_blank">C.G.U.</a></li>
+                    <li><a href="https://awsolutions.fr/blog/cgu/#RGPD" target="_blank">Données personnelles</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+                    <script src="/js/resize.js"></script>
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    var docHeight = $(window).height();
+                    var footerHeight = $('#footer').height();
+                    var footerTop = $('#footer').position().top + footerHeight;
+                    if (footerTop < docHeight)
+                        $('#footer').css('margin-top', (docHeight - footerTop) + 'px');
+
+                    $(".languagepicker > li").find("a").click(function () {
+                        // $("#menutitle").text($(this).text());
+                        // alert($(this).text()) ;
+                        $('#lang_choice').html($(this).html())
+                    });
+                });
+            </script>
+            </body>
+</html>
