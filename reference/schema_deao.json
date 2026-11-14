@@ -268,6 +268,42 @@
       "format": "uri"
     },
     {
+      "type": "boolean",
+      "name": "considerationsSociales",
+      "title": "Considérations sociales",
+      "description": "Vrai si l'appel d'offres comporte des considérations sociales ; nulle si la source ne la donne pas.",
+      "short_title": "Cons. sociales"
+    },
+    {
+      "type": "boolean",
+      "name": "considerationsEnvironnementales",
+      "title": "Considérations environnementales",
+      "description": "Vrai si l'appel d'offres comporte des considérations environnementales ; nulle si la source ne la donne pas.",
+      "short_title": "Cons. environnementales"
+    },
+    {
+      "type": "boolean",
+      "name": "marcheReserve",
+      "title": "Marché réservé",
+      "description": "Vrai si le marché est réservé (ateliers protégés, structures d'insertion, ESS) ; nulle si la source ne la donne pas.",
+      "short_title": null
+    },
+    {
+      "type": "string",
+      "name": "variantes",
+      "title": "Variantes",
+      "description": "Position de l'acheteur sur les variantes : exigées, autorisées ou interdites ; nulle si la source ne la donne pas.",
+      "short_title": null,
+      "enum": ["exigées", "autorisées", "interdites"]
+    },
+    {
+      "type": "boolean",
+      "name": "groupementCommandes",
+      "title": "Groupement de commandes",
+      "description": "Vrai si l'appel d'offres est passé dans le cadre d'un groupement de commandes ; nulle si la source ne la donne pas.",
+      "short_title": null
+    },
+    {
       "type": "string",
       "name": "id",
       "title": "Identifiant appel d'offres",

@@ -16,7 +16,7 @@ from src.tasks.deao.schema import (
 
 def test_ordre_des_colonnes_publiees():
     noms = [f.name for f in PUBLISHED_FIELDS]
-    assert len(noms) == 42
+    assert len(noms) == 47
     assert noms[:6] == [
         "uid",
         "referenceAcheteur",
@@ -48,7 +48,7 @@ def test_empty_avis_frame():
 
 def test_write_table_schema(tmp_path):
     data = json.loads(write_table_schema(tmp_path / "schema.json").read_text())
-    assert len(data["fields"]) == 40
+    assert len(data["fields"]) == 45
     statut = next(f for f in data["fields"] if f["name"] == "statut")
     assert statut["enum"] == ["ouvert", "clos", "annule", "pre-information"]
     assert (
@@ -150,3 +150,17 @@ def test_table_schema_sans_champs_fermes(tmp_path):
 def test_statut_decrit_annulation_plateforme():
     statut = next(f for f in PUBLISHED_FIELDS if f.name == "statut")
     assert "plateforme" in statut.description
+
+
+def test_nouvelles_colonnes_publiees():
+    from src.tasks.deao.schema import open_schema, published_schema
+
+    s, o = published_schema(), open_schema()
+    for c in (
+        "considerationsSociales",
+        "considerationsEnvironnementales",
+        "marcheReserve",
+        "groupementCommandes",
+    ):
+        assert s[c] == pl.Boolean and c in o
+    assert s["variantes"] == pl.String and "variantes" in o

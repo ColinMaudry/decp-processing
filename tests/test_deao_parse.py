@@ -138,6 +138,15 @@ def test_parse_day_inchange_hors_nouvelles_colonnes():
     files = {p.name: p.read_bytes() for p in FIXTURES.glob("*.xml")}
     df, _ = parse_day(files)
     attendu = pl.read_parquet(FIXTURES / "parse_day_expected.parquet")
-    nouvelles = ["idEforms", "idEformsPrecedent", "acheteur_pays"]
+    nouvelles = [
+        "idEforms",
+        "idEformsPrecedent",
+        "acheteur_pays",
+        "considerationsSociales",
+        "considerationsEnvironnementales",
+        "marcheReserve",
+        "variantes",
+        "groupementCommandes",
+    ]
     assert df.drop(nouvelles).columns == attendu.columns
     assert_frame_equal(df.drop(nouvelles), attendu)

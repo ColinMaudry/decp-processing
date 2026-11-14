@@ -98,6 +98,11 @@ AVIS_LOT_SCHEMA: dict[str, pl.DataType] = {
     "acheteur_pays": S,
     "idEforms": S,
     "idEformsPrecedent": S,
+    "considerationsSociales": pl.Boolean,
+    "considerationsEnvironnementales": pl.Boolean,
+    "marcheReserve": pl.Boolean,
+    "variantes": S,
+    "groupementCommandes": pl.Boolean,
 }
 
 

@@ -203,11 +203,18 @@ def test_rapport_par_source():
 
 def test_ancien_fichier_accepte_et_renomme(fake_datagouv, env):
     # fichier joue publié avant le déploiement : idAvisInitial au lieu de id,
-    # sans les 3 nouvelles colonnes
+    # sans les 8 nouvelles colonnes
     rid = _rid(env, "joue")
     df = pl.read_parquet(io.BytesIO(fake_datagouv.fichiers[rid]))
     df = df.rename({"id": "idAvisInitial"}).drop(
-        "acheteur_codePostal", "urlDce", "urlReglementConsultation"
+        "acheteur_codePostal",
+        "urlDce",
+        "urlReglementConsultation",
+        "considerationsSociales",
+        "considerationsEnvironnementales",
+        "marcheReserve",
+        "variantes",
+        "groupementCommandes",
     )
     buf = io.BytesIO()
     df.write_parquet(buf)

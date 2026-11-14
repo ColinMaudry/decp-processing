@@ -26,7 +26,16 @@ from src.tasks.utils import get_logger
 
 # Colonnes absentes des fichiers publiés avant leur ajout au schéma : complétées
 # par des nuls à la lecture (transition de schéma).
-COLONNES_TRANSITOIRES = ("acheteur_codePostal", "urlDce", "urlReglementConsultation")
+COLONNES_TRANSITOIRES = (
+    "acheteur_codePostal",
+    "urlDce",
+    "urlReglementConsultation",
+    "considerationsSociales",
+    "considerationsEnvironnementales",
+    "marcheReserve",
+    "variantes",
+    "groupementCommandes",
+)
 
 
 def _verifier_identifiants() -> None:
