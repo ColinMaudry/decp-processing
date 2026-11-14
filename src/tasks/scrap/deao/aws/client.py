@@ -52,6 +52,12 @@ RESULTATS_PAR_PAGE = 10
 # Le site renvoie parfois le formulaire à la place de la page N (plusieurs serveurs
 # sans session partagée) : la même URL réussit en général après quelques essais.
 ESSAIS_PAGE = 8
+# Part minimale du total national que la lecture doit atteindre : chaque segment est
+# déjà contrôlé sur son badge, mais quelques avis (département `00`, hors formulaire)
+# n'apparaissent dans aucune recherche par département.
+PART_MINIMALE_TOTAL = 0.9
+# Département absent du formulaire qui renvoie pourtant des avis
+DEPARTEMENT_SUPPLEMENTAIRE = "00"
 NATURES = ("T", "S", "F")
 PROCEDURES = ("PA", "AOO", "AOE", "MN", "CO", "CR", "DC", "AU", "DSP")
 
@@ -75,7 +81,11 @@ _CHAMPS_VIDES = (
 
 @dataclass
 class ResultatRecherche:
-    """Avis lus (avec IDM, dédoublonnés sur `idm`) et état de complétude."""
+    """Avis lus (avec IDM, dédoublonnés sur `idm`) et état de complétude.
+
+    `complete` : aucun segment en erreur, totaux nationaux connus et avis distincts lus
+    (avec IDM + `hors_plateforme`) au moins `PART_MINIMALE_TOTAL` du plus petit total.
+    """
 
     avis: list[AvisListe]
     total_avant: int | None
@@ -92,11 +102,7 @@ class ResultatRecherche:
         if self.total_avant is None or self.total_apres is None:
             return False
         lus = len(self.avis) + self.hors_plateforme
-        return (
-            min(self.total_avant, self.total_apres)
-            <= lus
-            <= max(self.total_avant, self.total_apres)
-        )
+        return lus >= PART_MINIMALE_TOTAL * min(self.total_avant, self.total_apres)
 
 
 def url_rc_plateforme(url_base: str, idm: str) -> str:
@@ -224,6 +230,9 @@ class ClientAws:
         deps = departements(formulaire)
         if not deps:
             raise ValueError("Aucun département lu sur le formulaire de recherche")
+        if DEPARTEMENT_SUPPLEMENTAIRE not in deps:
+            deps.append(DEPARTEMENT_SUPPLEMENTAIRE)
+        logger.info("%s départements à interroger (dont `00`)", len(deps))
         total_avant = self._total_national()
         for dep in deps:
             self._segment(collecte, dep, None, None)

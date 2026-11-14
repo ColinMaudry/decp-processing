@@ -202,22 +202,32 @@ def test_avis_dans_deux_departements():
     assert resultat.complete
 
 
-def test_completude_tolerance():
-    def resultat(lus: int, hors_plateforme: int = 0) -> ResultatRecherche:
+def test_completude_part_minimale():
+    def resultat(lus: int, erreurs: list[str] | None = None) -> ResultatRecherche:
         return ResultatRecherche(
-            avis=[object()] * (lus - hors_plateforme),  # type: ignore[list-item]
+            avis=[object()] * lus,  # type: ignore[list-item]
             total_avant=100,
             total_apres=103,
-            hors_plateforme=hors_plateforme,
+            segments_en_erreur=erreurs or [],
         )
 
-    assert resultat(101).complete
-    assert resultat(100).complete and resultat(103).complete
-    assert resultat(101, hors_plateforme=5).complete
-    assert not resultat(98).complete
-    assert not resultat(104).complete
+    assert resultat(95).complete
+    assert resultat(90).complete and resultat(103).complete
+    assert not resultat(85).complete
+    assert not resultat(100, ["13/S/PA"]).complete
+    assert ResultatRecherche([object()] * 95, 100, 103, hors_plateforme=0).complete
+    assert ResultatRecherche([object()] * 80, 100, 103, hors_plateforme=15).complete
     assert not ResultatRecherche([], None, 3).complete
     assert not ResultatRecherche([], 0, 0, ["13/S/PA"]).complete
+
+
+def test_departement_00_interroge():
+    site = FauxSite()
+    site.poster("00", "X", "X", liste(s=[bloc(1), bloc(2)]))
+    site.poster("X", "X", "X", liste({"s": 2}))
+    resultat = site.client().rechercher()
+    assert any(c["IDR"] == "00" for c in site.corps)
+    assert len(resultat.avis) == 2 and resultat.complete
 
 
 def test_aucune_requete_dce():
