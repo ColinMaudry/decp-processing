@@ -20,3 +20,9 @@
   resource_id: e9a13bd3-b3d1-43e8-a79b-8e74e75e50d5
   min_rows: 150
   url_base: https://marches.maximilien.fr
+- code: place
+  name: PLACE (plateforme des achats de l'État, profil d'acheteur Atexo)
+  open_data: false
+  resource_id: 111e3919-ec45-42c4-9c65-5d8bb6a41cb0
+  min_rows: 1000
+  url_base: https://www.marches-publics.gouv.fr

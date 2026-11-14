@@ -5,7 +5,7 @@ from src.config import REFERENCE_DIR, charger_registre_deao
 
 def test_registre_reference():
     r = {s.code: s for s in charger_registre_deao(REFERENCE_DIR / "deao_sources.yaml")}
-    assert set(r) == {"boamp", "joue", "megalis_bretagne", "maximilien"}
+    assert set(r) == {"boamp", "joue", "megalis_bretagne", "maximilien", "place"}
     assert r["boamp"].resource_id == "9861dd3a-e4af-49c7-b8f9-8d20b0cfdd62"
     assert r["boamp"].min_rows == 50000
     assert r["joue"].resource_id == "8fd238e4-d5ab-40d1-9b61-a07c2fdb020c"
@@ -19,6 +19,10 @@ def test_registre_reference():
     assert r["maximilien"].min_rows == 150
     assert r["maximilien"].url_base == "https://marches.maximilien.fr"
     assert not r["megalis_bretagne"].open_data and not r["maximilien"].open_data
+    assert r["place"].resource_id == "111e3919-ec45-42c4-9c65-5d8bb6a41cb0"
+    assert r["place"].min_rows == 1000
+    assert r["place"].url_base == "https://www.marches-publics.gouv.fr"
+    assert not r["place"].open_data
     assert not any(s.skip for s in r.values())
 
 

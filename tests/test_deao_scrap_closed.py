@@ -144,7 +144,7 @@ def test_scraper_avec_autre_source_dataset_non_publie(env):
 def test_scrapers_atexo_enregistres():
     from src.tasks.scrap.deao.contrat import SCRAPERS
 
-    assert {"megalis_bretagne", "maximilien"} <= set(SCRAPERS)
+    assert {"megalis_bretagne", "maximilien", "place"} <= set(SCRAPERS)
 
 
 def test_scraper_execute_dans_le_contexte_du_flow(env, monkeypatch):

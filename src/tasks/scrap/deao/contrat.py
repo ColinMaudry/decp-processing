@@ -16,5 +16,5 @@ Scraper = Callable[[date], pl.DataFrame]
 # Un scraper s'y ajoute par son `code` de registre. Construction paresseuse : aucun
 # accès au registre, au réseau ni à S3 à l'import.
 SCRAPERS: dict[str, Scraper] = {
-    code: scraper_atexo(code) for code in ("megalis_bretagne", "maximilien")
+    code: scraper_atexo(code) for code in ("megalis_bretagne", "maximilien", "place")
 }
