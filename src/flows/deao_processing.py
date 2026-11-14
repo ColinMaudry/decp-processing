@@ -7,7 +7,11 @@ from prefect.concurrency.sync import concurrency
 
 from src import config
 from src.tasks.deao.dedoublonnage import dedoublonner_sources
-from src.tasks.deao.report import lignes_rapport_sources, publier_rapport
+from src.tasks.deao.report import (
+    lignes_rapport_dce,
+    lignes_rapport_sources,
+    publier_rapport,
+)
 from src.tasks.deao.schema import open_schema, published_schema, write_table_schema
 from src.tasks.deao.sources_publiees import (
     publication_autorisee,
@@ -121,6 +125,12 @@ def deao_processing(run_date: str | None = None) -> None:
             lignes_rapport_sources(df)
             + [{"indicateur": f"source_ecartee:{c}", "valeur": 1} for c in ecartees]
             + [{"indicateur": k, "valeur": v} for k, v in sorted(stats.items())]
+            # DCE archivés seulement s'il y a des plateformes scrapées
+            + (
+                lignes_rapport_dce()
+                if any(s.plateforme for s in config.DEAO_REGISTRE)
+                else []
+            )
         )
 
         # Écriture : agrégat Open Data (a) et agrégat complet (b)

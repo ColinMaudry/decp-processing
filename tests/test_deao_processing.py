@@ -263,3 +263,22 @@ def test_compteurs_dedoublonnage_dans_rapport(fake_datagouv, env, monkeypatch):
     )
     deao_processing()
     assert {"indicateur": "dedoublonnage_retire", "valeur": 0} in lignes
+
+
+def test_rapport_dce_seulement_avec_plateformes(fake_datagouv, env, monkeypatch):
+    from src.flows import deao_processing as module
+
+    lignes, appels = [], []
+    monkeypatch.setattr(module, "publier_rapport", lambda r: lignes.extend(r))
+    monkeypatch.setattr(
+        module,
+        "lignes_rapport_dce",
+        lambda: appels.append(1) or [{"indicateur": "dce:nombre", "valeur": 7}],
+    )
+    deao_processing()
+    assert appels == [] and not any(r["indicateur"].startswith("dce:") for r in lignes)
+
+    _registre(env, joue={"open_data": False, "plateforme": "atexo"})
+    deao_processing()
+    assert appels == [1]
+    assert {"indicateur": "dce:nombre", "valeur": 7} in lignes

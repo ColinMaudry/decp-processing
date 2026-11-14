@@ -1,14 +1,16 @@
 """Rapport de run des flows scrap_open et deao_processing : compteurs, répartitions, taux de remplissage."""
 
-from collections import Counter
+import statistics
+from collections import Counter, defaultdict
 
 import polars as pl
 from prefect.artifacts import create_table_artifact
 from prefect.exceptions import MissingContextError
 
+from src import config
 from src.config import LOG_LEVEL
 from src.tasks.deao.schema import PUBLISHED_FIELDS
-from src.tasks.utils import get_logger
+from src.tasks.utils import get_logger, s3_client
 
 COMPTEURS = (
     "lu",
@@ -151,6 +153,60 @@ def lignes_rapport_sources(df: pl.DataFrame) -> list[dict]:
                 "valeur": round(float(valeur), 3),
             }
         )
+    return lignes
+
+
+def _mo(octets: float) -> float:
+    return round(octets / 1_000_000, 1)
+
+
+def lignes_rapport_dce(client=None) -> list[dict]:
+    """Taille des DCE archivés dans S3 (dernière version de chaque DCE), en Mo :
+    nombre, total, max, moyenne et médiane, puis nombre et total par plateforme.
+
+    S3 indisponible : une seule ligne `dce:rapport_indisponible`, sans lever."""
+    prefixe = f"{config.DEAO_DCE_S3_PREFIX}/"
+    try:
+        client = client or s3_client()
+        par_code: dict[str, list[int]] = defaultdict(list)
+        pages = client.get_paginator("list_objects_v2").paginate(
+            Bucket=config.S3_BUCKET, Prefix=prefixe
+        )
+        for page in pages:
+            for objet in page.get("Contents", []):
+                chemin = objet["Key"][len(prefixe) :]
+                code, _, nom = chemin.partition("/")
+                # Objets de contrôle du dépôt (« dce/.controle-depot-… »)
+                if not nom or nom.startswith("."):
+                    continue
+                par_code[code].append(int(objet["Size"]))
+    except Exception as e:
+        get_logger(level=LOG_LEVEL).warning(f"Rapport des DCE impossible : {e!r}")
+        return [{"indicateur": "dce:rapport_indisponible", "valeur": 1}]
+
+    tailles = [t for liste in par_code.values() for t in liste]
+    lignes = [{"indicateur": "dce:nombre", "valeur": len(tailles)}]
+    if tailles:
+        lignes += [
+            {"indicateur": "dce:taille_totale_mo", "valeur": _mo(sum(tailles))},
+            {"indicateur": "dce:taille_max_mo", "valeur": _mo(max(tailles))},
+            {
+                "indicateur": "dce:taille_moyenne_mo",
+                "valeur": _mo(statistics.mean(tailles)),
+            },
+            {
+                "indicateur": "dce:taille_mediane_mo",
+                "valeur": _mo(statistics.median(tailles)),
+            },
+        ]
+    for code in sorted(par_code):
+        lignes += [
+            {"indicateur": f"dce:nombre:{code}", "valeur": len(par_code[code])},
+            {
+                "indicateur": f"dce:taille_totale_mo:{code}",
+                "valeur": _mo(sum(par_code[code])),
+            },
+        ]
     return lignes
 
 

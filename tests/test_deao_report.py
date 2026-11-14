@@ -108,3 +108,70 @@ def test_lignes_rapport_compteurs_prefixes_par_source():
     indicateurs = {ligne["indicateur"] for ligne in lignes_rapport(Counter(), df)}
     assert "remplissage:objet:joue/eforms" in indicateurs
     assert "remplissage:objet:boamp/legacy" in indicateurs
+
+
+class _FauxS3:
+    def __init__(self, pages):
+        self.pages = pages
+        self.demandes = []
+
+    def get_paginator(self, nom):
+        assert nom == "list_objects_v2"
+        return self
+
+    def paginate(self, **kwargs):
+        self.demandes.append(kwargs)
+        return iter(self.pages)
+
+
+def test_rapport_dce(monkeypatch):
+    from src import config
+    from src.tasks.deao.report import lignes_rapport_dce
+
+    monkeypatch.setattr(config, "DEAO_DCE_S3_PREFIX", "dce")
+    monkeypatch.setattr(config, "S3_BUCKET", "b")
+    client = _FauxS3(
+        [
+            {
+                "Contents": [
+                    {"Key": "dce/a.fr/1.zip", "Size": 1_000_000},
+                    {"Key": "dce/a.fr/2.zip", "Size": 3_000_000},
+                    {"Key": "dce/.controle-depot-a.fr", "Size": 0},
+                ]
+            },
+            {"Contents": [{"Key": "dce/b.fr/9.zip", "Size": 8_000_000}]},
+        ]
+    )
+    lignes = {r["indicateur"]: r["valeur"] for r in lignes_rapport_dce(client)}
+    assert client.demandes == [{"Bucket": "b", "Prefix": "dce/"}]
+    assert lignes == {
+        "dce:nombre": 3,
+        "dce:taille_totale_mo": 12.0,
+        "dce:taille_max_mo": 8.0,
+        "dce:taille_moyenne_mo": 4.0,
+        "dce:taille_mediane_mo": 3.0,
+        "dce:nombre:a.fr": 2,
+        "dce:taille_totale_mo:a.fr": 4.0,
+        "dce:nombre:b.fr": 1,
+        "dce:taille_totale_mo:b.fr": 8.0,
+    }
+
+
+def test_rapport_dce_vide():
+    from src.tasks.deao.report import lignes_rapport_dce
+
+    assert lignes_rapport_dce(_FauxS3([{}])) == [
+        {"indicateur": "dce:nombre", "valeur": 0}
+    ]
+
+
+def test_rapport_dce_s3_indisponible():
+    from src.tasks.deao.report import lignes_rapport_dce
+
+    class Panne:
+        def get_paginator(self, nom):
+            raise RuntimeError("S3 en panne")
+
+    assert lignes_rapport_dce(Panne()) == [
+        {"indicateur": "dce:rapport_indisponible", "valeur": 1}
+    ]
