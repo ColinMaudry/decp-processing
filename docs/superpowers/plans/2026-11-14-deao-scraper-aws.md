@@ -32,6 +32,24 @@
 
 ---
 
+### Task 0: robots.txt et essai de cadence (contrôleur, avant toute implémentation)
+
+Étape avec effets externes, faite par le contrôleur, pas par un sous-agent. But :
+vérifier que le site tolère la cadence prévue, pas chercher sa limite.
+
+- [ ] **Step 1:** Lire `https://www.marches-publics.info/robots.txt`. Si `/Annonces/`, `/mpiaws/` ou les téléchargements de RC sont interdits, ou si un `Crawl-delay` est fixé, s'arrêter et en parler à l'utilisateur (un `Crawl-delay` remplace 0,2 s).
+- [ ] **Step 2:** Script jetable dans `$CLAUDE_JOB_DIR/tmp` (pas dans le dépôt), un seul client httpx avec `CLOSED_USER_AGENT` et `Limiteur(0.2)`, strictement séquentiel :
+  1. quelques recherches (3 départements, pagination comprise) pour réunir environ 300 chemins de pages d'avis ;
+  2. 300 GET de pages d'avis (le gros du trafic d'un premier passage), puis 20 GET de RC (`dce.dRC`, corps lu puis jeté).
+     Arrêt immédiat au premier 429, 403 ou 5xx, à une page de captcha ou de blocage, ou si la médiane des 20 dernières latences dépasse 5 s.
+- [ ] **Step 3:** Rapport : nombre de requêtes, codes HTTP, latences (médiane, p90, max) par tranche de 50 requêtes, pour voir si elles se dégradent au fil de l'essai, et `Retry-After` éventuel.
+- [ ] **Step 4:** Décision :
+
+  - aucun signe de gêne → 0,2 s gardé ;
+  - sinon → nouvel essai de 100 requêtes à 0,5 s, puis proposer à l'utilisateur un intervalle propre à la source : champ `intervalle_s` dans le registre, lu par `ClientAws`, défaut `CLOSED_INTERVALLE_REQUETES_S`, ajouté à la Task 4.
+
+  Consigner le résultat dans le ledger et dans `tests/data/aws/README.md` (Task 3).
+
 ### Task 1: Colonnes de schéma et transition
 
 **Files:**
@@ -241,7 +259,7 @@ Passage (`_passage(code, today, client_factory)`), dans l'ordre : `lire_preceden
 
 Étapes avec effets externes, faites par le contrôleur de la session, pas par un sous-agent.
 
-- [ ] **Step 1:** Lire `https://www.marches-publics.info/robots.txt` ; si `/Annonces/`, `/mpiaws/` ou les téléchargements sont interdits, s'arrêter et demander à l'utilisateur.
+- [ ] **Step 1:** (robots.txt déjà vérifié en Task 0.)
 - [ ] **Step 2:** Créer dans le dataset b la ressource `www.marches-publics.info.parquet` (parquet vide au `published_schema()`, description « Données d'appels d'offres du profil d'acheteur marches-publics.info (AWS) (https://www.marches-publics.info) au format DEAO. »).
 - [ ] **Step 3:** Ajouter l'entrée au registre (`plateforme: aws`, `min_rows: 2000`, `resource_id` créé) ; étendre `test_registre_reference` (38 sources, 36 plateformes).
 - [ ] **Step 4:** Essai réel sans publication ni S3 (`DECP_PROCESSING_PUBLISH` vide) : `ClientAws.rechercher()` complet + `parse_avis` et `lignes_avis` sur 20 avis tirés au hasard ; vérifier `complete`, le nombre d'IDM ≈ total national, et le taux de SIRET, CPV, date limite renseignés.
