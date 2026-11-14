@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from src.tasks.scrap.deao.aws.parse import (
+    aucun_resultat,
     badges,
     date_courte,
     date_heure_courte,
@@ -217,3 +218,10 @@ def test_numeros_avis_compte_tous_les_blocs():
     assert {a.numero_avis for a in parse_liste(html)} <= set(numeros)
     assert len(numeros_avis(html, "f")) < 27
     assert len(numeros_avis(lire("liste_13_S_p1.html"), "s")) == 10
+
+
+def test_aucun_resultat():
+    assert aucun_resultat(lire("aucun_resultat.html"))
+    assert not aucun_resultat(lire("liste_25.html"))
+    assert not aucun_resultat(lire("rechercher.html"))
+    assert aucun_resultat("<p>Aucun&nbsp;r&eacute;sultat\n trouv&eacute;.</p>")

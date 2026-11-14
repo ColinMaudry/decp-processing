@@ -6,6 +6,7 @@ Fonctions pures, sans accès réseau.
 import re
 from dataclasses import dataclass
 from datetime import date, datetime
+from html import unescape
 
 from lxml import html as lxml_html
 
@@ -131,6 +132,12 @@ def trop_de_resultats(html: str) -> int | None:
     """« Votre recherche trouve 4093 résultats » -> 4093 ; sinon None."""
     m = re.search(r"Votre recherche trouve\s+([\d\s\xa0]+?)\s*résultats?", html)
     return int(re.sub(r"\D", "", m[1])) if m else None
+
+
+def aucun_resultat(html: str) -> bool:
+    """« Aucun résultat trouvé. Veuillez modifier votre recherche » (recherche à 0)."""
+    texte = _norm(unescape(re.sub(r"<[^>]+>", " ", html)))
+    return re.search(r"Aucun\s+résultat\s+trouvé", texte, re.IGNORECASE) is not None
 
 
 def badges(html: str) -> dict[str, int]:

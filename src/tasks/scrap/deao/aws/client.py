@@ -37,6 +37,7 @@ from tenacity import (
 from src import config
 from src.tasks.scrap.deao.aws.parse import (
     AvisListe,
+    aucun_resultat,
     badges,
     departements,
     numeros_avis,
@@ -219,7 +220,11 @@ class ClientAws:
             except httpx.HTTPError as exc:
                 logger.warning("Segment %s : %s", nom, exc)
                 continue
-            if trop_de_resultats(html) is not None or badges(html):
+            if (
+                trop_de_resultats(html) is not None
+                or badges(html)
+                or aucun_resultat(html)
+            ):
                 return html
             logger.warning("Segment %s : réponse sans badge", nom)
         return None
@@ -234,6 +239,8 @@ class ClientAws:
         """Collecte un segment ; renvoie les numéros lus par onglet (enfants compris)."""
         nom = self._nom(dep, nature, procedure)
         html = self._poster_segment(dep, nature, procedure)
+        if html is not None and aucun_resultat(html):
+            return {}  # recherche à 0 résultat : segment valide, rien à lire
         if html is None or trop_de_resultats(html) is not None:
             # Pas de badge pour contrôler : seul le total national sert de filet
             return self._decouper(collecte, dep, nature, procedure, tous=True)

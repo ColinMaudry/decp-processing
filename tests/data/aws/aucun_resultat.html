@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Matomo analytics -->
+        <script src="/js/matomo.js"></script>
+
+
+        <meta charset="UTF-8">
+        <title>AWS</title>
+        	            <link rel="stylesheet" href="/css/font-awesome.min.css">            <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+            <link rel="stylesheet" href="/css/bootstrap-iso.css">
+                        <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+            <link href="/css/main.css?t=1741076644" rel="stylesheet"/>
+
+	<link href="/css/avanceSearch.css" rel="stylesheet"/>
+    </head>
+    <body>
+        <div class="header blanc full">
+            <div id="blocEntete">
+                <p class='styleButton'><a class='lienHeader' href="/acheteurs.htm ">&nbsp;
+                        &nbsp; ACCÈS ACHETEUR &nbsp; &nbsp;</a></p>
+                <p class='styleButton'><a class='lienHeader' href="/fournisseurs.htm ">&nbsp;
+                        &nbsp; ACCÈS FOURNISSEUR &nbsp; &nbsp;</a></p>
+            </div>
+            <a href="/">
+                <img src="/image/logo-orange.png" alt="logo AW Solutions" class="logo"/>
+            </a>
+            <div id="barMenu" style="display:flex" class="full">
+                <ul class="menuHeader">
+
+
+                      <!--<li class="choixMenuHeader">
+                        <a href="#" class='lienMenuHeader2'>Nos solutions<i class="fa fa-sort-desc" aria-hidden="true"></i></a>
+                        <ul class="sousMenu">
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>L'Intelligence Artificielle MIA"</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>eOffre</a></li>
+                            <li><a href="/pratique-tester.htm" class='lienMenuHeader'>Profil d'acheteur</a></li>
+                            <li><a href="/pratique-depotdetest.htm" class='lienMenuHeader'>Sourcing</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>Tiers de Télétransmission</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>Signature électronique</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>eContrat</a></li>
+
+                        </ul>
+                    </li>-->
+                    <li class="choixMenuHeader">
+                        <a href="#" class='lienMenuHeader2'>Outils <i class="fa fa-sort-desc" aria-hidden="true"></i></a>
+                        <ul class="sousMenu">
+                            <!--<li><a href="/pratique-tester.htm" class='lienMenuHeader'>Testez votre poste</a></li>-->
+                            <li><a href="/pratique-depotdetest.htm" class='lienMenuHeader'>Dépôt de test</a></li>
+                            <li><a href="/pratique-signature.htm" class='lienMenuHeader'>Signature électronique</a></li>
+                            <li><a href="https://www.marches-publics.info/avis/index.cfm?fuseaction=lre.accueil"  class='lienMenuHeader'>Authentification LAR</a></li>
+                            <li><a href="https://awsolutions.fr/blog/cgu/" target="_blank" class='lienMenuHeader'>Conditions Générales</a></li>
+                            <!--<li><a href="/correspondance.htm" class='lienMenuHeader'>Correspondance</a></li>
+                            <li><a href="/mots-de-passe.htm" class='lienMenuHeader'>Gestion des mots de passe</a></li>-->
+
+                        </ul>
+                    </li>
+                    <li class="choixMenuHeader">
+                        <a href="/pratique-assistance.htm"" class='lienMenuHeader2'">F.A.Q </a>
+                    </li>
+                     <li class="choixMenuHeader">
+                        <a href="https://www.aws-france.com/" target="_blank" class='lienMenuHeader2'> Qui sommes nous ?</a>
+                    </li>
+
+                    </ul>
+            </div>
+        </div>
+
+
+        <div id="content" class="blanc">
+            	<!-- bandeau -->
+<div id='imagePortail' class="full">
+    <div class="flexColumnCenter" style="margin-top:0px;">
+    <p class="titre blanc2" style="padding-top:0px;font-weight:bold;">Recherche avancée</p>
+    </div>
+</div>
+<!-- fin du bandeau -->
+
+	<div class="bootstrap-iso">
+		<div class="full" style="background: #D3D7E0 ; margin-top: 0px;height: 70px;padding:2% 52%;">
+			<a href="/" style="font-size:14px;font-family: Poppins-SemiBold;">
+				<i class="fa fa-arrow-left" style="font-size:15px;" id="_sessionStorage"></i>
+				RETOUR
+			</a>
+		</div>
+					<div class="alert alert-danger">
+									Aucun résultat trouvé. Veuillez modifier votre recherche
+							</div>
+
+
+		<form action="/Annonces/lister" method="post" id="formRech" class="form-group">
+			<div class="form-group">
+				<p id="prechTypeA">
+					<label class="flecheVert">Type d'annonces :</label>
+					<input type="radio" name="IDE" value="EC"  checked="checked"  id="typeEC" onchange="affichageChampsForm()" class="radio-inline">
+					<label for="typeEC" class="labelEtroit">En cours</label>
+					<input type="radio" name="IDE" value="A"  id="typeA" onchange="affichageChampsForm()" class="radio-inline">
+					<label for="typeA" class="labelEtroit">Expirés</label>
+					<input type="radio" name="IDE" value="AAA"  id="typeAAA" onchange="affichageChampsForm()" class="radio-inline">
+					<label for="typeAAA" class="labelEtroit">Attributions</label>
+					<input type="radio" name="IDE" value="DE"  id="typeDE" onchange="affichageChampsForm()" class="radio-inline">
+					<label for="typeDE" class="labelLarge">Données Esssentielles</label>
+				</p>
+				<p id="prechNat">
+					<label class="flecheVert">Nature :</label>
+					<input type="radio" name="IDN" value="X"  id="toutes" class="form-check-input" type="radio" onchange="affichageChampsForm()">
+					<label for="toutes" class="labelEtroit">Toutes</label>
+					<input type="radio" name="IDN" value="T"  id="travaux" class="radio" class="form-check-input" type="radio" onchange="affichageChampsForm()">
+					<label for="travaux" class="labelEtroit">Travaux</label>
+					<input type="radio" name="IDN" value="S"  checked="checked"  id="services" class="radio" class="form-check-input" type="radio" onchange="affichageChampsForm()">
+					<label for="services" class="labelEtroit">Services</label>
+					<input type="radio" name="IDN" value="F"  id="fournitures" class="radio" class="form-check-input" type="radio" onchange="affichageChampsForm()">
+					<label for="fournitures" class="labelLarge">Fournitures</label>
+				</p>
+
+				<p id="prechCPV">
+					<label class="flecheVert" for="btnCPV">Nomenclature CPV :</label>
+					<input
+					type="text" id="CPV_Rech" value="" name="listeCPV" autocomplete="off" class="form-control">
+					<!--input type="text" id="CPV_Rech" value="" autocomplete="off" class="form-control">
+					<input type="hidden" name="listeCPV" id="listeCPV" value=""-->
+				</p>
+				<p id="prechProc" style="">
+					<label class="flecheVert" for="reg">Procédure :</label>
+					<select name="IDP" size="1" id="select2" class="form-control form-control">
+						<option value="X">Toutes</option>
+						<option value="PA" >Procédure adaptée
+						</option>
+						<option value="AOO" >Appel d'Offres Ouvert
+						</option>
+						<option value="AOE"  selected="selected" >Appel d'Offres Restreint
+						</option>
+						<option value="MN" >Marché négocié
+						</option>
+						<option value="CO" >Concours Ouvert
+						</option>
+						<option value="CR" >Concours Restreint
+						</option>
+						<option value="DC" >Dialogue compétitif
+						</option>
+						<option value="AU" >Autres
+						</option>
+						<option value="DSP" >Concession
+						</option>
+					</select>
+				</p>
+				<p id="prechReg">
+					<label class="flecheVert" for="reg">Départements :</label>
+					<select name="IDR" size="1" class="form-control form-control">
+						<option value="X" selected="selected">par région</option>
+						<option value="X">Région ou département</option>
+						<option value="1,3,7,15,26,38,42,43,63,69,73,74">AUVERGNE-RHÔNE-ALPES</option>
+						<option value="1" >&nbsp;&nbsp;&nbsp;01 - AIN</option>
+						<option value="3" >&nbsp;&nbsp;&nbsp;03 - ALLIER</option>
+						<option value="7" >&nbsp;&nbsp;&nbsp;07 - ARDECHE</option>
+						<option value="15" >&nbsp;&nbsp;&nbsp;15 - CANTAL</option>
+						<option value="26" >&nbsp;&nbsp;&nbsp;26 - DROME</option>
+						<option value="38" >&nbsp;&nbsp;&nbsp;38 - ISERE</option>
+						<option value="42" >&nbsp;&nbsp;&nbsp;42 - LOIRE</option>
+						<option value="43" >&nbsp;&nbsp;&nbsp;43 - HAUTE-LOIRE</option>
+						<option value="63" >&nbsp;&nbsp;&nbsp;63 - PUY-DE-DOME</option>
+						<option value="69" >&nbsp;&nbsp;&nbsp;69 - RHONE</option>
+						<option value="73" >&nbsp;&nbsp;&nbsp;73 - SAVOIE</option>
+						<option value="74" >&nbsp;&nbsp;&nbsp;74 - HAUTE-SAVOIE</option>
+						<option value="21,25,39,58,70,71,89,90">BOURGOGNE-FRANCHE-COMTÉ</option>
+						<option value="21" >&nbsp;&nbsp;&nbsp;21 - COTE-D'OR</option>
+						<option value="25" >&nbsp;&nbsp;&nbsp;25 - DOUBS</option>
+						<option value="39" >&nbsp;&nbsp;&nbsp;39 - JURA</option>
+						<option value="58" >&nbsp;&nbsp;&nbsp;58 - NIEVRE</option>
+						<option value="70" >&nbsp;&nbsp;&nbsp;70 - HAUTE-SAONE</option>
+						<option value="71" >&nbsp;&nbsp;&nbsp;71 - SAONE-ET-LOIRE</option>
+						<option value="89" >&nbsp;&nbsp;&nbsp;89 - YONNE</option>
+						<option value="90" >&nbsp;&nbsp;&nbsp;90 - BELFORT/TERRITOIRE</option>
+						<option value="22,29,35,56">BRETAGNE</option>
+						<option value="22" >&nbsp;&nbsp;&nbsp;22 - COTES-D'ARMOR</option>
+						<option value="29" >&nbsp;&nbsp;&nbsp;29 - FINISTERE</option>
+						<option value="35" >&nbsp;&nbsp;&nbsp;35 - ILLE-ET-VILAINE</option>
+						<option value="56" >&nbsp;&nbsp;&nbsp;56 - MORBIHAN</option>
+						<option value="18,28,36,37,41,45">CENTRE-VAL DE LOIRE</option>
+						<option value="18" >&nbsp;&nbsp;&nbsp;18 - CHER</option>
+						<option value="28" >&nbsp;&nbsp;&nbsp;28 - EURE-ET-LOIR</option>
+						<option value="36" >&nbsp;&nbsp;&nbsp;36 - INDRE</option>
+						<option value="37" >&nbsp;&nbsp;&nbsp;37 - INDRE-ET-LOIRE</option>
+						<option value="41" >&nbsp;&nbsp;&nbsp;41 - LOIR-ET-CHER</option>
+						<option value="45" >&nbsp;&nbsp;&nbsp;45 - LOIRET</option>
+						<option value="201,202">CORSE</option>
+						<option value="201" >&nbsp;&nbsp;&nbsp;2a - CORSE DU SUD</option>
+						<option value="202" >&nbsp;&nbsp;&nbsp;2b - HAUTE CORSE</option>
+						<option value="971,972,973,974,975,976">DOM</option>
+						<option value="971" >&nbsp;&nbsp;&nbsp;971 - GUADELOUPE</option>
+						<option value="972" >&nbsp;&nbsp;&nbsp;972 - MARTINIQUE</option>
+						<option value="973" >&nbsp;&nbsp;&nbsp;973 - GUYANE</option>
+						<option value="974" >&nbsp;&nbsp;&nbsp;974 - REUNION</option>
+						<option value="975" >&nbsp;&nbsp;&nbsp;975 - ST PIERRE ET MIQUELON</option>
+						<option value="976" >&nbsp;&nbsp;&nbsp;976 - MAYOTTE</option>
+						<option value="8,10,51,52,54,55,57,67,68,88">GRAND EST</option>
+						<option value="8" >&nbsp;&nbsp;&nbsp;08 - ARDENNES</option>
+						<option value="10" >&nbsp;&nbsp;&nbsp;10 - AUBE</option>
+						<option value="51" >&nbsp;&nbsp;&nbsp;51 - MARNE</option>
+						<option value="52" >&nbsp;&nbsp;&nbsp;52 - HAUTE-MARNE</option>
+						<option value="54" >&nbsp;&nbsp;&nbsp;54 - MEURTHE-ET-MOSELLE</option>
+						<option value="55" >&nbsp;&nbsp;&nbsp;55 - MEUSE</option>
+						<option value="57" >&nbsp;&nbsp;&nbsp;57 - MOSELLE</option>
+						<option value="67" >&nbsp;&nbsp;&nbsp;67 - BAS-RHIN</option>
+						<option value="68" >&nbsp;&nbsp;&nbsp;68 - HAUT-RHIN</option>
+						<option value="88" >&nbsp;&nbsp;&nbsp;88 - VOSGES</option>
+						<option value="2,59,60,62,80">HAUTS-DE-FRANCE</option>
+						<option value="2" >&nbsp;&nbsp;&nbsp;02 - AISNE</option>
+						<option value="59" >&nbsp;&nbsp;&nbsp;59 - NORD</option>
+						<option value="60" >&nbsp;&nbsp;&nbsp;60 - OISE</option>
+						<option value="62" >&nbsp;&nbsp;&nbsp;62 - PAS-DE-CALAIS</option>
+						<option value="80" >&nbsp;&nbsp;&nbsp;80 - SOMME</option>
+						<option value="75,77,78,91,92,93,94,95">ILE-DE-FRANCE</option>
+						<option value="75" >&nbsp;&nbsp;&nbsp;75 - SEINE-PARIS</option>
+						<option value="77" >&nbsp;&nbsp;&nbsp;77 - SEINE-ET-MARNE</option>
+						<option value="78" >&nbsp;&nbsp;&nbsp;78 - LES YVELINES</option>
+						<option value="91" >&nbsp;&nbsp;&nbsp;91 - ESSONNE</option>
+						<option value="92" >&nbsp;&nbsp;&nbsp;92 - HAUTS-DE-SEINE</option>
+						<option value="93" >&nbsp;&nbsp;&nbsp;93 - SEINE-SAINT-DENIS</option>
+						<option value="94" >&nbsp;&nbsp;&nbsp;94 - VAL-DE-MARNE</option>
+						<option value="95" >&nbsp;&nbsp;&nbsp;95 - VAL-D'OISE</option>
+						<option value="14,27,50,61,76">NORMANDIE</option>
+						<option value="14" >&nbsp;&nbsp;&nbsp;14 - CALVADOS</option>
+						<option value="27" >&nbsp;&nbsp;&nbsp;27 - EURE</option>
+						<option value="50" >&nbsp;&nbsp;&nbsp;50 - MANCHE</option>
+						<option value="61" >&nbsp;&nbsp;&nbsp;61 - ORNE</option>
+						<option value="76" >&nbsp;&nbsp;&nbsp;76 - SEINE-MARITIME</option>
+						<option value="16,17,19,23,24,33,40,47,64,79,86,87">NOUVELLE AQUITAINE</option>
+						<option value="16" >&nbsp;&nbsp;&nbsp;16 - CHARENTE</option>
+						<option value="17" >&nbsp;&nbsp;&nbsp;17 - CHARENTE-MARITIME</option>
+						<option value="19" >&nbsp;&nbsp;&nbsp;19 - CORREZE</option>
+						<option value="23" >&nbsp;&nbsp;&nbsp;23 - CREUSE</option>
+						<option value="24" >&nbsp;&nbsp;&nbsp;24 - DORDOGNE</option>
+						<option value="33" >&nbsp;&nbsp;&nbsp;33 - GIRONDE</option>
+						<option value="40" >&nbsp;&nbsp;&nbsp;40 - LANDES</option>
+						<option value="47" >&nbsp;&nbsp;&nbsp;47 - LOT-ET-GARONNE</option>
+						<option value="64" >&nbsp;&nbsp;&nbsp;64 - PYRENEES-ATLANTIQUES</option>
+						<option value="79" >&nbsp;&nbsp;&nbsp;79 - DEUX-SEVRES</option>
+						<option value="86" >&nbsp;&nbsp;&nbsp;86 - VIENNE</option>
+						<option value="87" >&nbsp;&nbsp;&nbsp;87 - HAUTE VIENNE</option>
+						<option value="9,11,12,30,31,32,34,46,48,65,66,81,82">OCCITANIE</option>
+						<option value="9" >&nbsp;&nbsp;&nbsp;09 - ARIEGE</option>
+						<option value="11" >&nbsp;&nbsp;&nbsp;11 - AUDE</option>
+						<option value="12" >&nbsp;&nbsp;&nbsp;12 - AVEYRON</option>
+						<option value="30" >&nbsp;&nbsp;&nbsp;30 - GARD</option>
+						<option value="31" >&nbsp;&nbsp;&nbsp;31 - HAUTE-GARONNE</option>
+						<option value="32" >&nbsp;&nbsp;&nbsp;32 - GERS</option>
+						<option value="34" >&nbsp;&nbsp;&nbsp;34 - HERAULT</option>
+						<option value="46" >&nbsp;&nbsp;&nbsp;46 - LOT</option>
+						<option value="48" >&nbsp;&nbsp;&nbsp;48 - LOZERE</option>
+						<option value="65" >&nbsp;&nbsp;&nbsp;65 - HAUTES-PYRENEES</option>
+						<option value="66" >&nbsp;&nbsp;&nbsp;66 - PYRENEES-ORIENTALES</option>
+						<option value="81" >&nbsp;&nbsp;&nbsp;81 - TARN</option>
+						<option value="82" >&nbsp;&nbsp;&nbsp;82 - TARN-ET-GARONNE</option>
+						<option value="44,49,53,72,85">PAYS-DE-LOIRE</option>
+						<option value="44" >&nbsp;&nbsp;&nbsp;44 - LOIRE ATLANTIQUE</option>
+						<option value="49" >&nbsp;&nbsp;&nbsp;49 - MAINE-ET-LOIRE</option>
+						<option value="53" >&nbsp;&nbsp;&nbsp;53 - MAYENNE</option>
+						<option value="72" >&nbsp;&nbsp;&nbsp;72 - SARTHE</option>
+						<option value="85" >&nbsp;&nbsp;&nbsp;85 - VENDEE</option>
+						<option value="4,5,6,13,83,84">PROVENCE-ALPES-COTE D'AZUR</option>
+						<option value="4" >&nbsp;&nbsp;&nbsp;04 - ALPES-DE-HAUTE-PROVENCE</option>
+						<option value="5" >&nbsp;&nbsp;&nbsp;05 - HAUTES-ALPES</option>
+						<option value="6" >&nbsp;&nbsp;&nbsp;06 - ALPES-MARITIMES</option>
+						<option value="13" >&nbsp;&nbsp;&nbsp;13 - BOUCHES-DU-RHONE</option>
+						<option value="83" >&nbsp;&nbsp;&nbsp;83 - VAR</option>
+                        <option value="84"  selected="selected" >&nbsp;&nbsp;&nbsp;84 - VAUCLUSE</option>
+					</select>
+				</p>
+				<p id="prechMC">
+					<label class="flecheVert" for="motCle">Mot-clé :</label>
+					<input name="txtLibre" id="motCle" value="" class="form-control">
+				</p>
+								<p id="prechLieuxExec">
+					<label class="flecheVert" for="txtLibreVille">Lieu d'exécution :</label>
+					<input name="txtLibreLieuExec" class="form-control" id="txtLibreLieuExec" value="">
+				</p>
+				<p id="prechDateNotifDebut">
+					<label class="flecheVert" for="dateNotifDebut">Notification depuis le :</label>
+					<input type="date" name="dateNotifDebut" class="form-control" id="dateNotifDebut">
+				</p>
+				<p id="prechDateNotifFin">
+					<label class="flecheVert" for="dateNotifFin">jusqu'au :</label>
+					<input type="date" name="dateNotifFin" class="form-control" id="dateNotifFin">
+				</p>
+				<p id="prechTxtAcheteurNom">
+					<label class="flecheVert" for="txtAcheteurNom">Acheteur nom :</label>
+					<input name="txtAcheteurNom" class="form-control" id="txtAcheteurNom" value="">
+				</p>
+				<p id="prechTxtAcheteurSiret">
+					<label class="flecheVert" for="txtAcheteurSiret">SIRET acheteur :</label>
+					<input name="txtAcheteurSiret" class="form-control" id="txtAcheteurSiret" value="">
+				</p>
+				<p id="prechTxtTitulaireNom">
+					<label class="flecheVert" for="txtTitulaireNom">Titulaire nom :</label>
+					<input name="txtTitulaireNom" class="form-control" id="txtTitulaireNom" value="">
+				</p>
+				<p id="prechTxtTitulaireSiret">
+					<label class="flecheVert" for="txtTitulaireSiret">SIRET titulaire :</label>
+					<input name="txtTitulaireSiret" class="form-control" id="txtTitulaireSiret" value="">
+				</p>
+								<p id="prechAch">
+					<label class="flecheVert" for="txtLibreAcheteur">Acheteur :</label>
+					<input name="txtLibreAcheteur" class="form-control" id="txtLibreAcheteur" value="">
+				</p>
+				<p id="prechVille">
+					<label class="flecheVert" for="txtLibreVille">Ville :</label>
+					<input name="txtLibreVille" class="form-control" id="txtLibreVille" value="">
+				</p>
+				<p id="prechRef">
+					<label class="flecheVert" for="txtLibreRef">Référence de l'avis :</label>
+					<input name="txtLibreRef" class="form-control" id="txtLibreRef" value="">
+				</p>
+				<p id="prechObj">
+					<label class="flecheVert" for="txtLibreObjet">Objet de l'avis :</label>
+					<input name="txtLibreObjet" class="form-control" id="txtLibreObjet" value="">
+				</p>
+				<div class="champAlign">
+					<p id="prechPub">
+						<label class="flecheVert" for="dateParution">Date de parution :</label>
+						<select name="dateParution" id="dateParution"  size="1" class="form-control form-control">
+							<option value="">Toutes</option>
+							<option value=" = 0" >Aujourd'hui</option>
+							<option value=" = 1" >Hier</option>
+							<option value=" < 2" >2 derniers jours</option>
+							<option value=" < 8" >8 derniers jours</option>
+							<option value=" < 30" >30 derniers jours</option>
+						</select>
+					</p>
+					<p id="prechExp" >
+						<label class="flecheVert" for="dateExpiration">Date d'expiration :</label>
+						<select name="dateExpiration" id="dateExpiration" size="1" class="form-control form-control">
+							<option value="">Toutes</option>
+							<option value=" = 0" >Aujourd'hui</option>
+							<option value=" = 1" >Demain</option>
+							<option value=" < 8" >8 prochains jours</option>
+							<option value=" < 30" >30 prochains jours</option>
+							<option value=" < 60" >60 prochains jours</option>
+						</select>
+					</p>
+				</div>
+				<p id="prechAnnee" >
+					<label class="flecheVert" for="annee">Année</label>
+					<select name="annee" id="annee" size="1" class="form-control form-control-lg">
+						<option value="X">Toutes</option>
+							<option value="2005">2005</option>
+							<option value="2006">2006</option>
+							<option value="2007">2007</option>
+							<option value="2008">2008</option>
+							<option value="2009">2009</option>
+							<option value="2010">2010</option>
+							<option value="2011">2011</option>
+							<option value="2012">2012</option>
+							<option value="2013">2013</option>
+							<option value="2014">2014</option>
+							<option value="2015">2015</option>
+							<option value="2016">2016</option>
+							<option value="2017">2017</option>
+					</select>
+				</p>
+				<p id="prechCriteres">
+					<label class="flecheVert">Critéres particuliers :</label>
+					<input type="checkbox" name="Dume" value="1" id="Dume" >
+					<label for="Dume" class="labelEtroit" title="Dume">
+						<img title="Cette consultation permet la candidature DUME" src=/image/imgSearch/service-dume.gif style="width:50px;vertical-align:baseline;">
+
+					</label>
+					<input type="checkbox" name="criteresSociaux" value="1" id="criteresSociaux" >
+					<label for="criteresSociaux" class="labelEtroit">
+						<img title="Cette consultation intègre des critères sociaux" src="/image/imgSearch/ico-critere-social.png">
+						Sociaux
+					</label>
+					<input type="checkbox" name="criteresEnvironnement" value="1" id="criteresEnvironnement" >
+					<label for="criteresEnvironnement" class="labelLarge" >
+						<img title="Cette consultation intègre des critères environnementaux" src="/image/imgSearch/ico-critere-environnement.png">
+						Environnementaux
+					</label>
+				</p>
+				<p id="prechSub">
+					<label class="flecheVert" for="sub">&nbsp;</label>
+						<input type="submit" id="sub" name="Rechercher" value="Rechercher" class="buttonBleuv2" > &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;
+						<input type="reset" id="sub2" value="Mettre les champs à zero" class="btn btn-dark" style="background-color:#989898;color:white;" >
+				</p>
+			</div>
+		</form>
+	</div>
+
+        </div>
+        <div id='footer' class="blanc full ">
+            <hr class="full">
+            <div class="bootstrap-iso">
+                <div class="pull-left logoFooter"><a target="_blank" href="https://aws-france.com"><img src="/image/logo-avenue-web-systemes.png" alt="Logo" id="logoBordure"/></a></div>
+                <div class="pull-right liensFooter" >
+                <ul class="list-inline align-middle">
+                    <li><a href="/pratique-infoslegales.htm">Mentions légales</a></li>
+                    <li><a href="https://awsolutions.fr/blog/cgu/" target="_blank">C.G.U.</a></li>
+                    <li><a href="https://awsolutions.fr/blog/cgu/#RGPD" target="_blank">Données personnelles</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        	            <script src="/js/resize.js"></script>
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    var docHeight = $(window).height();
+                    var footerHeight = $('#footer').height();
+                    var footerTop = $('#footer').position().top + footerHeight;
+                    if (footerTop < docHeight)
+                        $('#footer').css('margin-top', (docHeight - footerTop) + 'px');
+
+                    $(".languagepicker > li").find("a").click(function () {
+                        // $("#menutitle").text($(this).text());
+                        // alert($(this).text()) ;
+                        $('#lang_choice').html($(this).html())
+                    });
+                });
+            </script>
+
+	<script type="text/javascript" src="/js/searchA.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			affichageChampsForm() ;
+			/*
+			* On garde les session des dates de notification
+			* des données essentielles
+			*/
+
+
+
+			sessionStorage.setItem("SessionSelectedTabsId", 0);
+		});
+	</script>
+    </body>
+</html>

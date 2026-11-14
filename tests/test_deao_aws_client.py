@@ -318,3 +318,36 @@ def test_decoupage_sans_couverture_du_badge_note_le_parent():
     resultat = site.client().rechercher()
     assert resultat.segments_en_erreur == ["13/S"]
     assert not resultat.complete
+
+
+def test_procedures_sans_resultat_ne_sont_pas_des_erreurs():
+    vide = lire("aucun_resultat.html")
+    site = FauxSite()
+    dix = liste({"s": 12}, s=[bloc(n) for n in range(10)])
+    site.poster("X", "X", "X", liste({"s": 12}))
+    site.poster("13", "X", "X", dix)
+    site.poster("13", "S", "X", dix)  # page 2 manquante : découpage par procédure
+    for code in PROCEDURES:
+        site.poster("13", "S", code, vide)
+    site.poster("13", "S", "PA", liste(s=[bloc(n) for n in range(12)]))
+    resultat = site.client().rechercher()
+    assert resultat.segments_en_erreur == []
+    assert len(resultat.avis) == 12
+    assert resultat.complete
+    # aucune procédure vide n'est postée deux fois
+    postes = [c["IDP"] for c in site.corps if c["IDN"] == "S"]
+    assert postes.count("AOE") == 1
+
+
+def test_nature_sans_resultat_non_reposte():
+    vide = lire("aucun_resultat.html")
+    site = FauxSite()
+    site.poster("X", "X", "X", liste({"t": 3}))
+    site.poster("13", "X", "X", lire("liste_trop_large.html"))
+    site.poster("13", "T", "X", liste(t=[bloc(1), bloc(2), bloc(3)]))
+    site.poster("13", "S", "X", vide)
+    site.poster("13", "F", "X", vide)
+    resultat = site.client().rechercher()
+    assert resultat.segments_en_erreur == []
+    assert [c["IDN"] for c in site.corps if c["IDR"] == "13"] == ["X", "T", "S", "F"]
+    assert resultat.complete

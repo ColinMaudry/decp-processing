@@ -13,3 +13,7 @@ Pages publiques capturées le 14/11/2026 (15 requêtes séquentielles espacées 
 
 Pas de `liste_13_S_p2.html` : `GET /Annonces/lister?pager_s=2` dans la même session
 renvoie la page du formulaire de recherche (deux essais, avec ou sans `Referer`).
+
+- `aucun_resultat.html` : POST `IDR=84`, `IDN=S`, `IDP=AOE`, recherche à 0 résultat : le site
+  renvoie le formulaire avec « Aucun résultat trouvé. Veuillez modifier votre recherche »,
+  sans badge.
