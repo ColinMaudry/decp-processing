@@ -2,6 +2,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import polars as pl
+import pytest
 
 from src.config import SourceDeao
 from src.tasks.deao.dedoublonnage import dedoublonner_sources, id_consultation_expr
@@ -282,7 +283,15 @@ def test_stricte_url_vers_plateforme_absente_pas_de_fusion():
     assert stats["seule:marches.megalis.bretagne.bzh"] == 1
 
 
-def test_fusion_exacte_aws_idm():
+@pytest.mark.parametrize(
+    "url_boamp",
+    [
+        "{aws}/mpiaws/index.cfm?fuseaction=dce.dRC&IDM=1902107",
+        "{aws}/mpiaws/index.cfm?fuseaction=dematEnt.login&type=Dce&Idm=1902107",
+    ],
+    ids=["IDM", "Idm"],
+)
+def test_fusion_exacte_aws_idm(url_boamp):
     aws = "https://www.marches-publics.info"
     registre = REGISTRE + (
         SourceDeao("www.marches-publics.info", "AWS", False, "r-aws", 1, url_base=aws),
@@ -291,7 +300,7 @@ def test_fusion_exacte_aws_idm():
         _lignes(
             "boamp",
             "26-1",
-            urlConsultation=f"{aws}/mpiaws/index.cfm?fuseaction=dce.dRC&IDM=1902107",
+            urlConsultation=url_boamp.format(aws=aws),
         ),
         _lignes(
             "www.marches-publics.info",
