@@ -204,27 +204,44 @@ class ClientAws:
     def _nom(dep: str, nature: str | None, procedure: str | None) -> str:
         return "/".join(p for p in (dep, nature, procedure) if p)
 
+    def _poster_segment(
+        self, dep: str, nature: str | None, procedure: str | None
+    ) -> str | None:
+        """HTML d'un POST exploitable (badges ou « trop de résultats »), sinon None.
+
+        Une réponse sans badge (formulaire, page d'erreur en 200, session perdue)
+        n'est pas « 0 résultat » : un seul nouvel essai, puis None.
+        """
+        nom = self._nom(dep, nature, procedure)
+        for _ in range(2):
+            try:
+                html = self._poster(dep, nature or "X", procedure or "X")
+            except httpx.HTTPError as exc:
+                logger.warning("Segment %s : %s", nom, exc)
+                continue
+            if trop_de_resultats(html) is not None or badges(html):
+                return html
+            logger.warning("Segment %s : réponse sans badge", nom)
+        return None
+
     def _segment(
         self,
         collecte: _Collecte,
         dep: str,
         nature: str | None,
         procedure: str | None,
-    ) -> None:
+    ) -> dict[str, set[str]]:
+        """Collecte un segment ; renvoie les numéros lus par onglet (enfants compris)."""
         nom = self._nom(dep, nature, procedure)
-        try:
-            html = self._poster(dep, nature or "X", procedure or "X")
-        except httpx.HTTPError as exc:
-            logger.warning("Segment %s : %s", nom, exc)
-            collecte.erreurs.append(nom)
-            return
-        if trop_de_resultats(html) is not None:
-            self._decouper(collecte, dep, nature, procedure, tous=True)
-            return
+        html = self._poster_segment(dep, nature, procedure)
+        if html is None or trop_de_resultats(html) is not None:
+            # Pas de badge pour contrôler : seul le total national sert de filet
+            return self._decouper(collecte, dep, nature, procedure, tous=True)
 
         onglets = [nature.lower()] if nature else ["t", "s", "f"]
         lus: dict[str, set[str]] = {o: set() for o in onglets}
-        manquants = self._lire(collecte, html, onglets, lus)
+        attendus: dict[str, int] = {}
+        manquants = self._lire(collecte, html, onglets, lus, attendus)
         if manquants:
             logger.info("Segment %s incomplet (%s), nouvel essai", nom, manquants)
             try:
@@ -232,9 +249,19 @@ class ClientAws:
             except httpx.HTTPError as exc:
                 logger.warning("Segment %s, nouvel essai : %s", nom, exc)
             else:
-                manquants = self._lire(collecte, html, manquants, lus)
+                if badges(html):
+                    manquants = self._lire(collecte, html, manquants, lus, attendus)
         if manquants:
-            self._decouper(collecte, dep, nature, procedure, onglets=manquants)
+            erreurs_avant = len(collecte.erreurs)
+            enfants = self._decouper(
+                collecte, dep, nature, procedure, onglets=manquants
+            )
+            for onglet in manquants:
+                lus[onglet] |= enfants.get(onglet, set())
+            incomplet = any(len(lus[o]) < attendus[o] for o in manquants)
+            if incomplet and len(collecte.erreurs) == erreurs_avant:
+                collecte.erreurs.append(nom)
+        return lus
 
     def _decouper(
         self,
@@ -244,16 +271,23 @@ class ClientAws:
         procedure: str | None,
         tous: bool = False,
         onglets: list[str] | None = None,
-    ) -> None:
-        """Segment trop large ou incomplet : un niveau de découpage de plus."""
+    ) -> dict[str, set[str]]:
+        """Un niveau de découpage de plus ; renvoie l'union des numéros lus."""
+        lus: dict[str, set[str]] = {}
         if nature is None:
-            for onglet in NATURES if tous else [o.upper() for o in onglets or []]:
-                self._segment(collecte, dep, onglet, None)
+            enfants = [
+                self._segment(collecte, dep, o, None)
+                for o in (NATURES if tous else [o.upper() for o in onglets or []])
+            ]
         elif procedure is None:
-            for code in PROCEDURES:
-                self._segment(collecte, dep, nature, code)
+            enfants = [self._segment(collecte, dep, nature, c) for c in PROCEDURES]
         else:
             collecte.erreurs.append(self._nom(dep, nature, procedure))
+            enfants = []
+        for enfant in enfants:
+            for onglet, numeros in enfant.items():
+                lus.setdefault(onglet, set()).update(numeros)
+        return lus
 
     def _lire(
         self,
@@ -261,16 +295,19 @@ class ClientAws:
         html: str,
         onglets: list[str],
         lus: dict[str, set[str]],
+        attendus: dict[str, int],
     ) -> list[str]:
         """Lit la page 1 et les suivantes des onglets ; renvoie ceux restés incomplets.
 
         Pages 2 à N lues dans la foulée du POST. Une page manquante (404, vide ou
-        formulaire) n'interrompt rien.
+        formulaire) n'interrompt rien. `attendus` garde le plus grand badge vu par
+        onglet : un nouveau POST ne peut pas faire baisser l'attendu.
         """
         compteurs = badges(html)
         incomplets: list[str] = []
         for onglet in onglets:
-            attendu = compteurs.get(onglet, 0)
+            attendu = max(attendus.get(onglet, 0), compteurs.get(onglet, 0))
+            attendus[onglet] = attendu
             if attendu == 0:
                 continue
             self._ajouter(collecte, html, onglet, lus[onglet])

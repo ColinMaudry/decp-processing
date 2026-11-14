@@ -281,3 +281,40 @@ def test_page_avis():
         limiteur=Limiteur(0),
     )
     assert client.page_avis("/Annonces/MPI-pub-1.htm") == "<html>avis</html>"
+
+
+def test_post_sans_badge_n_est_pas_zero_resultat():
+    site = FauxSite()
+    site.poster("X", "X", "X", liste({"s": 12}))
+    # le POST du département renvoie le formulaire (aucun badge), deux fois
+    site.poster("13", "X", "X", lire("rechercher.html"))
+    site.poster("13", "S", "X", lire("rechercher.html"))
+    for code in PROCEDURES:
+        site.poster("13", "S", code, lire("rechercher.html"))
+    resultat = site.client().rechercher()
+    assert not resultat.complete
+    assert resultat.segments_en_erreur == [f"13/S/{code}" for code in PROCEDURES]
+
+
+def test_nouveau_post_sans_badge_ne_fait_pas_oublier_le_badge():
+    site = FauxSite()
+    dix = liste({"s": 12}, s=[bloc(n) for n in range(10)])
+    site.poster("X", "X", "X", liste({"s": 12}))
+    site.poster("13", "X", "X", dix, lire("rechercher.html"))
+    site.poster("13", "S", "X", lire("rechercher.html"))
+    for code in PROCEDURES:
+        site.poster("13", "S", code, lire("rechercher.html"))
+    resultat = site.client().rechercher()
+    assert not resultat.complete
+    assert resultat.segments_en_erreur
+
+
+def test_decoupage_sans_couverture_du_badge_note_le_parent():
+    site = FauxSite()
+    dix = liste({"s": 12}, s=[bloc(n) for n in range(10)])
+    site.poster("X", "X", "X", liste({"s": 12}))
+    site.poster("13", "X", "X", dix)
+    site.poster("13", "S", "X", dix)  # page 2 manquante, procédures toutes vides
+    resultat = site.client().rechercher()
+    assert resultat.segments_en_erreur == ["13/S"]
+    assert not resultat.complete
