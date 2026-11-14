@@ -5,6 +5,7 @@ from collections.abc import Coroutine
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import httpx
 import polars as pl
@@ -424,6 +425,11 @@ class SourceDeao:
     skip: bool = False
     # Racine du site d'une plateforme (dédoublonnage BOAMP ↔ plateformes)
     url_base: str | None = None
+    # Logiciel de la plateforme scrapée par scrap_closed (seul connu : "atexo")
+    plateforme: str | None = None
+
+
+PLATEFORMES_DEAO = {"atexo"}
 
 
 def charger_registre_deao(path: Path) -> tuple[SourceDeao, ...]:
@@ -451,6 +457,25 @@ def charger_registre_deao(path: Path) -> tuple[SourceDeao, ...]:
                 f"Registre DEAO {path} : url_base doit commencer par https:// "
                 f"({entree['code']} : {url_base})"
             )
+        plateforme = entree.get("plateforme")
+        if plateforme is not None:
+            if plateforme not in PLATEFORMES_DEAO:
+                raise ValueError(
+                    f"Registre DEAO {path} : plateforme inconnue {plateforme} "
+                    f"({entree['code']})"
+                )
+            if url_base is None:
+                raise ValueError(
+                    f"Registre DEAO {path} : url_base requise pour une plateforme "
+                    f"({entree['code']})"
+                )
+        # Code d'une plateforme = son nom d'hôte, pour relier sans ambiguïté
+        # sourceDataset, uid, ressource data.gouv.fr et préfixe S3 des DCE au site.
+        if url_base is not None and urlsplit(str(url_base)).hostname != entree["code"]:
+            raise ValueError(
+                f"Registre DEAO {path} : le code doit être le nom d'hôte de url_base "
+                f"({entree['code']} : {url_base})"
+            )
         sources.append(
             SourceDeao(
                 code=entree["code"],
@@ -460,6 +485,7 @@ def charger_registre_deao(path: Path) -> tuple[SourceDeao, ...]:
                 min_rows=int(entree["min_rows"]),
                 skip=bool(entree.get("skip", False)),
                 url_base=str(url_base) if url_base is not None else None,
+                plateforme=plateforme,
             )
         )
     return tuple(sources)

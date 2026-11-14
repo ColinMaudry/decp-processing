@@ -142,9 +142,18 @@ def test_scraper_avec_autre_source_dataset_non_publie(env):
 
 
 def test_scrapers_atexo_enregistres():
-    from src.tasks.scrap.deao.contrat import SCRAPERS
+    from src.config import REFERENCE_DIR, charger_registre_deao
+    from src.tasks.scrap.deao.contrat import scrapers_du_registre
 
-    assert {"megalis_bretagne", "maximilien", "place"} <= set(SCRAPERS)
+    registre = charger_registre_deao(REFERENCE_DIR / "deao_sources.yaml")
+    scrapers = scrapers_du_registre(registre)
+    assert set(scrapers) == {e.code for e in registre if e.plateforme == "atexo"}
+    assert {
+        "marches.megalis.bretagne.bzh",
+        "marches.maximilien.fr",
+        "www.marches-publics.gouv.fr",
+    } <= set(scrapers)
+    assert "boamp" not in scrapers
 
 
 def test_scraper_execute_dans_le_contexte_du_flow(env, monkeypatch):

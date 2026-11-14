@@ -74,8 +74,13 @@ _COLONNES_DICTIONNAIRE = ("acheteur_nom", "acheteur_id", "acheteur_codePostal")
 # on avertit (une page de liste tronquée sans erreur ressemblerait à cela).
 _SEUIL_ANNULATIONS = 0.1
 
-# Les deux plateformes tournent en parallèle : un seul prétraitement SIRENE.
+# Les plateformes tournent en parallèle : un seul prétraitement SIRENE.
 _VERROU_SIRENE = threading.Lock()
+
+# Dictionnaire SIRET partagé par toutes les plateformes d'un passage : boamp.parquet
+# n'est téléchargé qu'une fois (succès comme échec) par jour et dossier de données.
+_VERROU_DICTIONNAIRE = threading.Lock()
+_DICTIONNAIRES: dict[tuple, pl.DataFrame | None] = {}
 
 
 def charger_referentiels() -> tuple[pl.LazyFrame, pl.LazyFrame, pl.DataFrame]:
@@ -269,6 +274,17 @@ def _collecter(
     return consultations, annoncees, lignes
 
 
+def _dictionnaire_partage(today: date) -> pl.DataFrame | None:
+    cle = (today, str(config.DEAO_DATA_DIR))
+    with _VERROU_DICTIONNAIRE:
+        if cle not in _DICTIONNAIRES:
+            _DICTIONNAIRES.clear()
+            dossier = config.DEAO_DATA_DIR / "sources" / "_dictionnaire_siret"
+            dossier.mkdir(parents=True, exist_ok=True)
+            _DICTIONNAIRES[cle] = _dictionnaire("plateformes", dossier)
+        return _DICTIONNAIRES[cle]
+
+
 def _passage(
     code: str, today: date, client_factory: Callable[[str], ClientAtexo]
 ) -> pl.DataFrame:
@@ -277,11 +293,11 @@ def _passage(
     if entree is None or not entree.url_base:
         raise ValueError(f"{code} : entrée de registre avec url_base requise.")
 
-    # Dossier propre à la source : les deux plateformes téléchargent boamp.parquet en parallèle.
+    # Dossier propre à la source : les plateformes téléchargent en parallèle.
     dossier_sources = config.DEAO_DATA_DIR / "sources" / code
     dossier_sources.mkdir(parents=True, exist_ok=True)
     precedent = _lire_precedent(entree, dossier_sources)
-    dictionnaire = _dictionnaire(code, dossier_sources)
+    dictionnaire = _dictionnaire_partage(today)
     lf_unites_legales, lf_etablissements, df_cog = _referentiels()
 
     stats: Counter = Counter()

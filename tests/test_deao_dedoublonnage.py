@@ -12,8 +12,12 @@ MAXIMILIEN = "https://marches.maximilien.fr"
 REGISTRE = (
     SourceDeao("boamp", "BOAMP", True, "r-boamp", 1),
     SourceDeao("joue", "JOUE", True, "r-joue", 1),
-    SourceDeao("megalis_bretagne", "Mégalis", False, "r-meg", 1, url_base=MEGALIS),
-    SourceDeao("maximilien", "Maximilien", False, "r-max", 1, url_base=MAXIMILIEN),
+    SourceDeao(
+        "marches.megalis.bretagne.bzh", "Mégalis", False, "r-meg", 1, url_base=MEGALIS
+    ),
+    SourceDeao(
+        "marches.maximilien.fr", "Maximilien", False, "r-max", 1, url_base=MAXIMILIEN
+    ),
 )
 PARIS = ZoneInfo("Europe/Paris")
 URL_BOAMP = (
@@ -52,7 +56,7 @@ def _plateforme_megalis(**valeurs):
         "urlDce": "https://s3/x.zip",
         **valeurs,
     }
-    return _lignes("megalis_bretagne", "242752", **valeurs)
+    return _lignes("marches.megalis.bretagne.bzh", "242752", **valeurs)
 
 
 def test_id_consultation_expr():
@@ -89,9 +93,9 @@ def test_fusion_exacte_par_url():
     assert df["id"].to_list() == ["26-1"] * 2
     assert df["urlDce"].to_list() == ["https://s3/x.zip"] * 2
     assert df["urlConsultation"][0] == URL_MEGALIS
-    assert stats["fusion_exacte:megalis_bretagne"] == 1
+    assert stats["fusion_exacte:marches.megalis.bretagne.bzh"] == 1
     assert stats["dedoublonnage_retire"] == 1
-    assert stats["seule:megalis_bretagne"] == 0
+    assert stats["seule:marches.megalis.bretagne.bzh"] == 0
 
 
 def test_fusion_exacte_plusieurs_chaines_boamp():
@@ -103,7 +107,7 @@ def test_fusion_exacte_plusieurs_chaines_boamp():
     df, stats = dedoublonner_sources(df, REGISTRE)
     assert df["sourceDataset"].to_list() == ["boamp", "boamp"]
     assert df["urlDce"].to_list() == ["https://s3/x.zip"] * 2
-    assert stats["fusion_exacte:megalis_bretagne"] == 1
+    assert stats["fusion_exacte:marches.megalis.bretagne.bzh"] == 1
     assert stats["dedoublonnage_retire"] == 1
 
 
@@ -118,8 +122,8 @@ def test_url_autre_hote_pas_de_fusion():
     )
     df, stats = dedoublonner_sources(df, REGISTRE)
     assert df.height == 2
-    assert set(df["sourceDataset"]) == {"boamp", "megalis_bretagne"}
-    assert stats["seule:megalis_bretagne"] == 1
+    assert set(df["sourceDataset"]) == {"boamp", "marches.megalis.bretagne.bzh"}
+    assert stats["seule:marches.megalis.bretagne.bzh"] == 1
     assert stats["dedoublonnage_retire"] == 0
 
 
@@ -131,7 +135,7 @@ def test_fusion_stricte():
     df = _df(
         _strict("boamp", "26-1", ref="2026 21", urlConsultation=f"{MEGALIS}/"),
         _strict(
-            "megalis_bretagne",
+            "marches.megalis.bretagne.bzh",
             "242752",
             ref="2026-21",
             urlConsultation=URL_MEGALIS,
@@ -144,8 +148,8 @@ def test_fusion_stricte():
     assert df["sourceDataset"].to_list() == ["boamp"]
     assert df["urlConsultation"].to_list() == [URL_MEGALIS]
     assert df["urlDce"].to_list() == ["https://s3/x.zip"]
-    assert stats["fusion_stricte:megalis_bretagne"] == 1
-    assert stats["fusion_exacte:megalis_bretagne"] == 0
+    assert stats["fusion_stricte:marches.megalis.bretagne.bzh"] == 1
+    assert stats["fusion_exacte:marches.megalis.bretagne.bzh"] == 0
     assert stats["dedoublonnage_retire"] == 1
 
 
@@ -153,42 +157,45 @@ def test_stricte_ambigue_pas_de_fusion():
     df = _df(
         _strict("boamp", "26-1", urlConsultation=f"{MEGALIS}/"),
         _strict("boamp", "26-2", urlConsultation=f"{MEGALIS}/"),
-        _strict("megalis_bretagne", "242752", urlConsultation=URL_MEGALIS),
+        _strict("marches.megalis.bretagne.bzh", "242752", urlConsultation=URL_MEGALIS),
     )
     df, stats = dedoublonner_sources(df, REGISTRE)
     assert df.height == 3
-    assert stats["fusion_stricte:megalis_bretagne"] == 0
-    assert stats["seule:megalis_bretagne"] == 1
+    assert stats["fusion_stricte:marches.megalis.bretagne.bzh"] == 0
+    assert stats["seule:marches.megalis.bretagne.bzh"] == 1
     assert stats["dedoublonnage_retire"] == 0
 
 
 def test_stricte_ambigue_cote_plateformes_pas_de_fusion():
     df = _df(
         _strict("boamp", "26-1"),
-        _strict("megalis_bretagne", "242752"),
-        _strict("maximilien", "777"),
+        _strict("marches.megalis.bretagne.bzh", "242752"),
+        _strict("marches.maximilien.fr", "777"),
     )
     df, stats = dedoublonner_sources(df, REGISTRE)
     assert df.height == 3
-    assert stats["seule:megalis_bretagne"] == 1 and stats["seule:maximilien"] == 1
+    assert (
+        stats["seule:marches.megalis.bretagne.bzh"] == 1
+        and stats["seule:marches.maximilien.fr"] == 1
+    )
 
 
 def test_stricte_siret_nul_pas_de_fusion():
     df = _df(
         _strict("boamp", "26-1", siret=None),
-        _strict("megalis_bretagne", "242752", siret=None),
+        _strict("marches.megalis.bretagne.bzh", "242752", siret=None),
     )
     df, stats = dedoublonner_sources(df, REGISTRE)
     assert df.height == 2
-    assert stats["fusion_stricte:megalis_bretagne"] == 0
-    assert stats["seule:megalis_bretagne"] == 1
+    assert stats["fusion_stricte:marches.megalis.bretagne.bzh"] == 0
+    assert stats["seule:marches.megalis.bretagne.bzh"] == 1
 
 
 def test_stricte_jour_different_pas_de_fusion():
     df = _df(
         _strict("boamp", "26-1"),
         _strict(
-            "megalis_bretagne",
+            "marches.megalis.bretagne.bzh",
             "242752",
             dateLimiteReponse=datetime(2026, 12, 2, 12, tzinfo=PARIS),
         ),
@@ -202,7 +209,7 @@ def test_stricte_url_boamp_vers_autre_consultation_pas_de_fusion():
     rapprochement strict, même si référence, SIRET et date concordent."""
     df = _df(
         _strict("boamp", "26-1", urlConsultation=f"{MEGALIS}/?page=x&id=111"),
-        _strict("megalis_bretagne", "242752", urlConsultation=URL_MEGALIS),
+        _strict("marches.megalis.bretagne.bzh", "242752", urlConsultation=URL_MEGALIS),
     )
     df, stats = dedoublonner_sources(df, REGISTRE)
     assert df.height == 2
@@ -245,20 +252,20 @@ def test_stricte_ambiguite_non_masquee_par_appariement_exact():
     df = _df(
         _strict("boamp", "26-1", urlConsultation=URL_BOAMP),
         _strict("boamp", "26-2", urlConsultation=f"{MEGALIS}/"),
-        _strict("megalis_bretagne", "242752", urlConsultation=URL_MEGALIS),
+        _strict("marches.megalis.bretagne.bzh", "242752", urlConsultation=URL_MEGALIS),
         _strict(
-            "megalis_bretagne",
+            "marches.megalis.bretagne.bzh",
             "999",
             urlConsultation=f"{MEGALIS}/entreprise/consultation/999",
         ),
     )
     df, stats = dedoublonner_sources(df, REGISTRE)
-    assert stats["fusion_exacte:megalis_bretagne"] == 1
-    assert stats["fusion_stricte:megalis_bretagne"] == 0
-    assert stats["seule:megalis_bretagne"] == 1
-    assert df.filter(pl.col("sourceDataset") == "megalis_bretagne")["id"].to_list() == [
-        "999"
-    ]
+    assert stats["fusion_exacte:marches.megalis.bretagne.bzh"] == 1
+    assert stats["fusion_stricte:marches.megalis.bretagne.bzh"] == 0
+    assert stats["seule:marches.megalis.bretagne.bzh"] == 1
+    assert df.filter(pl.col("sourceDataset") == "marches.megalis.bretagne.bzh")[
+        "id"
+    ].to_list() == ["999"]
     assert df.height == 3
 
 
@@ -267,9 +274,9 @@ def test_stricte_url_vers_plateforme_absente_pas_de_fusion():
     Maximilien n'est pas candidate au rapprochement strict avec Mégalis."""
     df = _df(
         _strict("boamp", "26-1", urlConsultation=f"{MAXIMILIEN}/?page=x&id=555"),
-        _strict("megalis_bretagne", "242752", urlConsultation=URL_MEGALIS),
+        _strict("marches.megalis.bretagne.bzh", "242752", urlConsultation=URL_MEGALIS),
     )
     df, stats = dedoublonner_sources(df, REGISTRE)
     assert df.height == 2
-    assert stats["fusion_stricte:megalis_bretagne"] == 0
-    assert stats["seule:megalis_bretagne"] == 1
+    assert stats["fusion_stricte:marches.megalis.bretagne.bzh"] == 0
+    assert stats["seule:marches.megalis.bretagne.bzh"] == 1

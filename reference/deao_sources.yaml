@@ -8,21 +8,249 @@
   open_data: true
   resource_id: 8fd238e4-d5ab-40d1-9b61-a07c2fdb020c
   min_rows: 10000
-- code: megalis_bretagne
+# Plateformes Atexo MPE : code = nom d'hôte de url_base (vérifié au chargement).
+- code: marches.megalis.bretagne.bzh
   name: Mégalis Bretagne (profil d'acheteur Atexo)
+  plateforme: atexo
   open_data: false
   resource_id: c5a67fe9-fe02-4c9e-b11a-ec6162ec2c76
   min_rows: 300
   url_base: https://marches.megalis.bretagne.bzh
-- code: maximilien
+- code: marches.maximilien.fr
   name: Maximilien (profil d'acheteur Atexo, Île-de-France)
+  plateforme: atexo
   open_data: false
   resource_id: e9a13bd3-b3d1-43e8-a79b-8e74e75e50d5
   min_rows: 150
   url_base: https://marches.maximilien.fr
-- code: place
+- code: www.marches-publics.gouv.fr
   name: PLACE (plateforme des achats de l'État, profil d'acheteur Atexo)
+  plateforme: atexo
   open_data: false
   resource_id: 111e3919-ec45-42c4-9c65-5d8bb6a41cb0
   min_rows: 1000
   url_base: https://www.marches-publics.gouv.fr
+- code: marchespublics596280.fr
+  name: 'Marchés Publics 596280 (acheteurs du Nord) (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: f8199f26-f346-4a85-999a-e3365abcaf07
+  min_rows: 115
+  url_base: https://marchespublics596280.fr
+- code: marchespublics.ampmetropole.fr
+  name: 'Métropole Aix-Marseille Provence (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 64977903-1d8d-407c-8578-41d77b0cfb2b
+  min_rows: 14
+  url_base: https://marchespublics.ampmetropole.fr
+- code: marches.cnes.fr
+  name: 'CNES (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 42e09c0b-6d52-4773-a547-c31857b64918
+  min_rows: 11
+  url_base: https://marches.cnes.fr
+- code: mpe-cdl-prod.local-trust.com
+  name: 'Plateforme mutualisée d''Atexo (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: de80ab3a-8143-4bac-93fa-28ff6eb200ed
+  min_rows: 1
+  url_base: https://mpe-cdl-prod.local-trust.com
+- code: marchespublics.sydne.fr
+  name: 'SYDNE (Syndicat Intercommunal de Traitement des Déchets du Nord et de l''Est, La Réunion) (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 44215cd0-628b-4fe9-abb9-b6c6c94054aa
+  min_rows: 0
+  url_base: https://marchespublics.sydne.fr
+- code: puma.cnrs.fr
+  name: 'CNRS (PUMA) (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 9132b6dc-f29b-4dc8-94b1-c3303beadcda
+  min_rows: 7
+  url_base: https://puma.cnrs.fr
+- code: marchespublics.adm76.com
+  name: 'ADM76 (Association des Maires de Seine-Maritime) (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 076a8fea-0512-45b8-8486-3c529501a57e
+  min_rows: 4
+  url_base: https://marchespublics.adm76.com
+- code: marchespublics.ain.fr
+  name: 'Acheteurs de l''Ain (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 1c1848b5-56b1-4802-97f2-a00e557bffa3
+  min_rows: 22
+  url_base: https://marchespublics.ain.fr
+- code: mpe.mairie-marseille.fr
+  name: 'Ville de Marseille (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 10ec7c44-d4de-42a0-a318-51af8f71e7d5
+  min_rows: 6
+  url_base: https://mpe.mairie-marseille.fr
+- code: portail.marchespublics.nc
+  name: 'Gouvernement de la Nouvelle-Calédonie (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 186c23b8-de6c-44fa-b7a6-05f5bbed40fa
+  min_rows: 22
+  url_base: https://portail.marchespublics.nc
+- code: marches.rhone.fr
+  name: 'Département du Rhône (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 84fab832-e688-474f-8e9d-52525dda6088
+  min_rows: 0
+  url_base: https://marches.rhone.fr
+- code: marches.achats-epide.fr
+  name: 'EPIDE (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 33d096cd-709d-49aa-916c-21b76cc6e6cd
+  min_rows: 0
+  url_base: https://marches.achats-epide.fr
+- code: marches-vendeehabitat.local-trust.com
+  name: 'Vendée Habitat (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 4c36bd10-26e8-4be6-8951-4e4e24c5d6c4
+  min_rows: 1
+  url_base: https://marches-vendeehabitat.local-trust.com
+- code: www.appel-offres.francetelevisions.fr
+  name: 'Groupe France Télévisions (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 9e8a3ae5-712b-40da-9fdf-f6c2257c1034
+  min_rows: 6
+  url_base: https://www.appel-offres.francetelevisions.fr
+- code: plateforme.alsacemarchespublics.eu
+  name: 'Alsace Marchés Publics (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 3c5db4fa-6371-417a-b6b0-c32597808835
+  min_rows: 93
+  url_base: https://plateforme.alsacemarchespublics.eu
+- code: demat-ampa.fr
+  name: 'Association Marchés Publics d''Aquitaine (AMPA) (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 48fe739d-0718-45c3-b97a-68858bfc92ec
+  min_rows: 170
+  url_base: https://demat-ampa.fr
+- code: marchespublics.eure.fr
+  name: 'Eure Normandie Numérique et Département de l''Eure (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 49c3cebf-0b30-4f35-800f-2dfd6d30870f
+  min_rows: 12
+  url_base: https://marchespublics.eure.fr
+- code: marches.mrs.aero
+  name: 'Aéroport Marseille Provence (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 6ece53e4-0285-4204-86f8-0b1ed59a89e8
+  min_rows: 2
+  url_base: https://marches.mrs.aero
+- code: cas-marseille.local-trust.com
+  name: 'CAS Marseille (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 90ee4dae-eedc-4574-9fad-88c949bb6ced
+  min_rows: 0
+  url_base: https://cas-marseille.local-trust.com
+- code: marches.departement86.fr
+  name: 'Département de la Vienne (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 4b20f8ad-1e70-4387-8b12-dad87a08b47e
+  min_rows: 0
+  url_base: https://marches.departement86.fr
+- code: marches.grandreims.fr
+  name: 'Ville et Communauté urbaine du Grand Reims (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 32464eed-a830-4495-9e38-afa8f9c083c4
+  min_rows: 0
+  url_base: https://marches.grandreims.fr
+- code: marches.montpellier3m.fr
+  name: 'Montpellier Méditerranée Métropole (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: ef5a5be2-f1fc-4dfd-afb2-88e65ccc9ee0
+  min_rows: 4
+  url_base: https://marches.montpellier3m.fr
+- code: plateforme-achats.anfh.fr
+  name: 'ANFH (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 9807a484-3ad9-48d6-b8c9-c447f2c39be8
+  min_rows: 3
+  url_base: https://plateforme-achats.anfh.fr
+- code: marches.cinor.fr
+  name: 'CINOR (Communauté intercommunale du Nord de la Réunion) (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 12789d56-7dbf-4479-9522-645abb5e48be
+  min_rows: 6
+  url_base: https://marches.cinor.fr
+- code: marches-publics.regionreunion.com
+  name: 'Région Réunion (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 025cb1e0-1389-4c54-9d65-c3f07ec75d12
+  min_rows: 6
+  url_base: https://marches-publics.regionreunion.com
+- code: marches.departement13.fr
+  name: 'Département des Bouches-du-Rhône (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 6b8a61f2-4f37-4d4b-a655-90627353aeec
+  min_rows: 10
+  url_base: https://marches.departement13.fr
+- code: marchespublics.agglo-porteduhainaut.fr
+  name: 'La Porte du Hainaut (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 2f3f3df1-41e2-497e-a7c6-7ac01c583233
+  min_rows: 0
+  url_base: https://marchespublics.agglo-porteduhainaut.fr
+- code: profilacheteur.meuse.fr
+  name: 'Département de la Meuse (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 01a3930b-8927-4550-adbd-e75f6b696dae
+  min_rows: 3
+  url_base: https://profilacheteur.meuse.fr
+- code: marchespublics.paysdelaloire.fr
+  name: 'Région Pays de la Loire (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: a71428de-9e6e-4397-a655-e52f1fb6ba3d
+  min_rows: 7
+  url_base: https://marchespublics.paysdelaloire.fr
+- code: webmarche.adullact.org
+  name: 'Adullact (WEB-Marché) (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: f81053ff-21e0-487c-845d-1b090ef24be5
+  min_rows: 13
+  url_base: https://webmarche.adullact.org
+- code: marches.loire-atlantique.fr
+  name: 'Département de Loire-Atlantique (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: 8867a0e2-8d01-47b8-9e6d-6db8a276f423
+  min_rows: 5
+  url_base: https://marches.loire-atlantique.fr
+- code: marchespublics.nantesmetropole.fr
+  name: 'Nantes Métropole (profil d''acheteur Atexo)'
+  open_data: false
+  plateforme: atexo
+  resource_id: d99f6b9b-198a-4295-8f87-04ecba6fd40e
+  min_rows: 12
+  url_base: https://marchespublics.nantesmetropole.fr

@@ -196,9 +196,10 @@ def _parse_bloc(bloc) -> ConsultationListe:
         )
     )
     code_postal = ville = None
-    m = re.fullmatch(r"(.*?)\s*\((\d[\dAB]*)\s*-\s*(.*?)\s*\)", organisme)
+    # « Nom (35000 - Rennes) » ; certaines plateformes laissent « Nom ( - ) »
+    m = re.fullmatch(r"(.*?)\s*\(\s*(\d[\dAB]*)?\s*-\s*(.*?)\s*\)", organisme)
     if m:
-        organisme, code_postal, ville = m[1], m[2], m[3] or None
+        organisme, code_postal, ville = m[1], m[2] or None, m[3] or None
 
     nb_lots = 0
     lots = _premier(bloc, './/div[@class="lots"]')

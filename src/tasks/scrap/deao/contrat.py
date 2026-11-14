@@ -5,6 +5,7 @@ from datetime import date
 
 import polars as pl
 
+from src import config
 from src.tasks.scrap.deao.atexo.scraper import scraper_atexo
 
 # Un scraper reçoit la date du run et renvoie les lignes au schéma
@@ -13,8 +14,12 @@ from src.tasks.scrap.deao.atexo.scraper import scraper_atexo
 # source comptée en erreur par scrap_closed).
 Scraper = Callable[[date], pl.DataFrame]
 
-# Un scraper s'y ajoute par son `code` de registre. Construction paresseuse : aucun
-# accès au registre, au réseau ni à S3 à l'import.
-SCRAPERS: dict[str, Scraper] = {
-    code: scraper_atexo(code) for code in ("megalis_bretagne", "maximilien", "place")
-}
+
+def scrapers_du_registre(registre: tuple[config.SourceDeao, ...]) -> dict[str, Scraper]:
+    """Un scraper par source du registre dont la `plateforme` est connue.
+
+    Construction paresseuse : aucun accès au réseau ni à S3 avant l'appel."""
+    return {e.code: scraper_atexo(e.code) for e in registre if e.plateforme == "atexo"}
+
+
+SCRAPERS: dict[str, Scraper] = scrapers_du_registre(config.DEAO_REGISTRE)

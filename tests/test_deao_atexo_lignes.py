@@ -43,11 +43,11 @@ def test_consultation_allotie_une_ligne_par_lot():
         Lot("2", "Lot deux", None, None, None),
     ]
     lignes = lignes_consultation(
-        "megalis_bretagne", BASE, _consultation(), DETAIL, lots, None
+        "marches.megalis.bretagne.bzh", BASE, _consultation(), DETAIL, lots, None
     )
     assert [x["uid"] for x in lignes] == [
-        "megalis_bretagne_242752_1",
-        "megalis_bretagne_242752_2",
+        "marches.megalis.bretagne.bzh_242752_1",
+        "marches.megalis.bretagne.bzh_242752_2",
     ]
     assert [x["codeCPV"] for x in lignes] == ["45100000", "45000000"]
     assert [x["type"] for x in lignes] == ["Travaux", "Services"]
@@ -56,7 +56,7 @@ def test_consultation_allotie_une_ligne_par_lot():
 
 def test_consultation_non_allotie():
     lignes = lignes_consultation(
-        "megalis_bretagne",
+        "marches.megalis.bretagne.bzh",
         BASE,
         _consultation(nombre_lots=0),
         DETAIL,
@@ -66,7 +66,7 @@ def test_consultation_non_allotie():
     assert len(lignes) == 1
     ligne = lignes[0]
     assert ligne["lotId"] == "0"
-    assert ligne["uid"] == "megalis_bretagne_242752_0"
+    assert ligne["uid"] == "marches.megalis.bretagne.bzh_242752_0"
     assert ligne["codeCPV"] == "45000000"
     assert ligne["id"] == "242752"
     assert ligne["idDernierAvis"] is None
@@ -77,12 +77,12 @@ def test_consultation_non_allotie():
     assert ligne["acheteur_pays"] == "FRA"
     assert ligne["acheteur_adresse_cp"] == "35000"
     assert ligne["urlDce"] == "https://s3/x.zip"
-    assert ligne["sourceDataset"] == "megalis_bretagne"
+    assert ligne["sourceDataset"] == "marches.megalis.bretagne.bzh"
 
 
 def test_urls():
     ligne = lignes_consultation(
-        "megalis_bretagne", BASE, _consultation(), None, [], None
+        "marches.megalis.bretagne.bzh", BASE, _consultation(), None, [], None
     )[0]
     assert (
         ligne["urlConsultation"]
@@ -132,7 +132,12 @@ def test_lots_depuis_precedent():
 
 def test_sans_lieu_execution_pas_de_type_de_code():
     ligne = lignes_consultation(
-        "megalis_bretagne", BASE, _consultation(lieux_execution=[]), DETAIL, [], None
+        "marches.megalis.bretagne.bzh",
+        BASE,
+        _consultation(lieux_execution=[]),
+        DETAIL,
+        [],
+        None,
     )[0]
     assert ligne["lieuExecution_code"] is None
     assert ligne["lieuExecution_typeCode"] is None
@@ -146,12 +151,14 @@ def test_acheteur_nom_depuis_entite_achat():
         None,
         "MASAF / ONF / DT MIM - Direction territoriale",
     )
-    lignes = lignes_consultation("place", BASE, _consultation(), detail, [], None)
+    lignes = lignes_consultation(
+        "www.marches-publics.gouv.fr", BASE, _consultation(), detail, [], None
+    )
     assert lignes[0]["acheteur_nom"] == "Direction territoriale"
 
 
 def test_acheteur_nom_sans_entite_achat():
     lignes = lignes_consultation(
-        "megalis_bretagne", BASE, _consultation(), DETAIL, [], None
+        "marches.megalis.bretagne.bzh", BASE, _consultation(), DETAIL, [], None
     )
     assert lignes[0]["acheteur_nom"] == _consultation().organisme

@@ -292,7 +292,7 @@
       "type": "string",
       "name": "sourceDataset",
       "title": "Source dataset",
-      "description": "Code de la source dont proviennent les données de cet appel d'offres : boamp (BOAMP, DILA), joue (Journal officiel de l'Union européenne, via TED), megalis_bretagne ou maximilien (plateformes de profil d'acheteur).",
+      "description": "Code de la source dont proviennent les données de cet appel d'offres : boamp (BOAMP, DILA), joue (Journal officiel de l'Union européenne, via TED), ou, pour une plateforme de profil d'acheteur, son nom de domaine (ex. marches.megalis.bretagne.bzh).",
       "short_title": null
     },
     {

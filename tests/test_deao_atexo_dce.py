@@ -25,13 +25,13 @@ def _dce(tmp_path):
 
 def test_cle_dce(fake_s3):
     assert (
-        dce.cle_dce("megalis_bretagne", "242752", "DCE_26190042.ZIP")
-        == "dce/megalis_bretagne/242752.zip"
+        dce.cle_dce("marches.megalis.bretagne.bzh", "242752", "DCE_26190042.ZIP")
+        == "dce/marches.megalis.bretagne.bzh/242752.zip"
     )
 
 
 def test_cle_dce_sans_extension(fake_s3):
-    assert dce.cle_dce("maximilien", "9", "dce").endswith("/9.zip")
+    assert dce.cle_dce("marches.maximilien.fr", "9", "dce").endswith("/9.zip")
 
 
 def test_url_publique(fake_s3):
@@ -124,7 +124,7 @@ def test_verifier_depot_s3(fake_s3, monkeypatch):
         reel(**kwargs)
 
     monkeypatch.setattr(fake_s3, "put_object", put_object)
-    dce.verifier_depot_s3("maximilien")
+    dce.verifier_depot_s3("marches.maximilien.fr")
     # Objet de contrôle sous le préfixe des DCE, en lecture publique, puis supprimé.
     assert deposes[0]["Key"].startswith("dce/")
     assert deposes[0]["ACL"] == "public-read"
@@ -134,7 +134,7 @@ def test_verifier_depot_s3(fake_s3, monkeypatch):
 def test_verifier_depot_s3_acl_refusee(fake_s3, monkeypatch):
     monkeypatch.setattr(fake_s3, "put_object", _refus("PutObject"))
     with pytest.raises(dce.ErreurDepotS3, match="AccessDenied"):
-        dce.verifier_depot_s3("maximilien")
+        dce.verifier_depot_s3("marches.maximilien.fr")
 
 
 def test_url_publique_base_personnalisee(fake_s3, monkeypatch):
@@ -157,9 +157,9 @@ def test_verifier_depot_s3_cle_propre_a_la_plateforme(fake_s3, monkeypatch):
         reel(**kwargs)
 
     monkeypatch.setattr(fake_s3, "put_object", put_object)
-    dce.verifier_depot_s3("maximilien")
-    dce.verifier_depot_s3("megalis_bretagne")
+    dce.verifier_depot_s3("marches.maximilien.fr")
+    dce.verifier_depot_s3("marches.megalis.bretagne.bzh")
     assert cles == [
-        "dce/.controle-depot-maximilien",
-        "dce/.controle-depot-megalis_bretagne",
+        "dce/.controle-depot-marches.maximilien.fr",
+        "dce/.controle-depot-marches.megalis.bretagne.bzh",
     ]

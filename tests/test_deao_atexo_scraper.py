@@ -18,7 +18,7 @@ from src.tasks.scrap.deao.erreurs import ScrapPartiel
 from tests.deao_fakes import FakeS3, fake_datagouv  # noqa: F401
 from tests.test_deao_enrich import COG, _lf_etab, _lf_ul
 
-CODE = "megalis_bretagne"
+CODE = "marches.megalis.bretagne.bzh"
 BASE = "https://marches.megalis.bretagne.bzh"
 TODAY = date(2026, 11, 13)
 FUTUR = datetime(2026, 12, 1, 12, 0, tzinfo=ZoneInfo("Europe/Paris"))
@@ -233,7 +233,7 @@ def test_dce_depose_si_publication(env, monkeypatch):
     _, s3, tmp_path = env
     monkeypatch.setattr(config, "DECP_PROCESSING_PUBLISH", True)
     df = _lancer(FauxClient([_cons("242752")]))
-    cle = "dce/megalis_bretagne/242752.zip"
+    cle = "dce/marches.megalis.bretagne.bzh/242752.zip"
     assert set(s3.objects) == {cle}
     assert df["urlDce"].to_list() == [dce.url_publique(cle)]
     assert _dce_tmp(tmp_path) == []
@@ -270,7 +270,7 @@ def test_dce_en_echec_retente(env, monkeypatch):
 
     _publier(datagouv, "res-megalis", premier)
     second = _lancer(FauxClient([_cons("242752")]))
-    cle = "dce/megalis_bretagne/242752.zip"
+    cle = "dce/marches.megalis.bretagne.bzh/242752.zip"
     assert set(s3.objects) == {cle}
     assert second["urlDce"].to_list() == [dce.url_publique(cle)]
 
@@ -293,7 +293,7 @@ def test_dce_modifie_meme_date_limite_retelecharge(env, monkeypatch):
     _publier(datagouv, "res-megalis", premier)
     client = FauxClient([_cons("242752")], taille="80,00 Mo")
     second = _lancer(client)
-    cle = "dce/megalis_bretagne/242752.zip"
+    cle = "dce/marches.megalis.bretagne.bzh/242752.zip"
     assert client.nb("dce") == 1
     assert set(s3.objects) == {cle}
     assert s3.objects[cle] == b"zip 80,00 Mo"
@@ -475,3 +475,23 @@ def test_telechargement_en_echec_ne_coupe_pas_le_circuit(env, monkeypatch):
     df = _lancer(client)
     assert client.nb("dce") == 2
     assert df["urlDce"].to_list() == [None, None]
+
+
+def test_dictionnaire_boamp_telecharge_une_fois_par_passage(env):
+    datagouv, _, _ = env
+    _publier(
+        datagouv,
+        "res-boamp",
+        pl.DataFrame(
+            {
+                "acheteur_nom": ["COMMUNE DE TEST"],
+                "acheteur_codePostal": ["35000"],
+                "acheteur_id": ["12345678900022"],
+            }
+        ),
+    )
+    for _ in range(2):
+        df = _lancer(FauxClient([_cons("1")]))
+        assert df["acheteur_id_source"].to_list() == ["dictionnaire"]
+    appels_boamp = [u for u in datagouv.appels if u.endswith("/resources/res-boamp/")]
+    assert len(appels_boamp) == 1

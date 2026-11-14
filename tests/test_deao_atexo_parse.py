@@ -188,3 +188,12 @@ def test_detail_megalis_sans_entite_achat():
 )
 def test_libelle_entite_achat(entite, attendu):
     assert libelle_entite_achat(entite) == attendu
+
+
+def test_resultats_organisme_sans_code_postal_ni_ville():
+    # puma.cnrs.fr, marchespublics.ampmetropole.fr… : « CNRS ( - ) »
+    html = lire("megalis_resultats.html").replace(
+        "RENNES METROPOLE (35000 - Rennes )", "CNRS ( - )"
+    )
+    c = parse_resultats(html)[0]
+    assert (c.organisme, c.code_postal, c.ville) == ("CNRS", None, None)
