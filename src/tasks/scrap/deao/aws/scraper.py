@@ -14,6 +14,7 @@ from collections.abc import Callable
 from datetime import date, datetime
 from pathlib import Path
 
+import httpx
 import polars as pl
 
 from src import config
@@ -53,6 +54,10 @@ from src.tasks.utils import get_logger
 
 # `plateformes.geocoder_adresses` et config.* sont lus à l'appel : les tests les
 # substituent (charger_referentiels et sirene_preprocess : voir `plateformes`).
+
+# Au-delà, les consultations absentes de la liste ne sont pas vérifiées une à une :
+# aucune annulation ce passage (une telle disparition signale plutôt une liste tronquée).
+MAX_VERIFICATIONS_ANNULATION = 200
 
 # Colonnes des lignes avant enrichissement : schéma publié + adresse de l'acheteur.
 # Schéma explicite : une colonne nulle sur toutes les lignes ne doit pas être inférée.
@@ -275,6 +280,90 @@ def _collecter(
     return resultat, lignes
 
 
+def _annulations_a_verifier(
+    precedent: pl.DataFrame, ids_vus: set[str], instant: datetime
+) -> list[tuple[str, str | None]]:
+    """(IDM, n° du dernier avis) des consultations que `fusionner` annulerait : connues,
+    ni closes ni annulées, absentes de la liste, à date limite future à `instant`."""
+    if not precedent.height:
+        return []
+    limite = pl.col("dateLimiteReponse")
+    candidats = precedent.filter(
+        ~pl.col("id").is_in(list(ids_vus))
+        & ~pl.col("statut").is_in(["annule", "clos"])
+        & limite.is_not_null()
+        & (
+            limite
+            > pl.lit(
+                instant.astimezone(FUSEAU), dtype=precedent.schema["dateLimiteReponse"]
+            )
+        )
+    )
+    agrege = candidats.group_by("id").agg(pl.col("idDernierAvis").drop_nulls().first())
+    return sorted(agrege.select("id", "idDernierAvis").iter_rows())
+
+
+def _toujours_en_ligne(
+    client: ClientAws, code: str, idm: str, numero: str | None, instant: datetime
+) -> bool:
+    """La page d'avis répond-elle encore avec une date limite future ? Page absente
+    (404, formulaire), illisible ou échue : False. Autre erreur : True (dans le
+    doute, on n'annule pas)."""
+    if not numero:
+        return False
+    try:
+        avis = parse_avis(client.page_avis(f"/Annonces/MPI-pub-{numero}.htm"))
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code in (404, 410):
+            return False
+        get_logger(level=config.LOG_LEVEL).warning(
+            f"{code} {idm} : vérification de l'annulation impossible ({e!r}), "
+            "consultation gardée ouverte."
+        )
+        return True
+    except ValueError:
+        return False  # formulaire ou page sans avis
+    except httpx.HTTPError as e:
+        get_logger(level=config.LOG_LEVEL).warning(
+            f"{code} {idm} : vérification de l'annulation impossible ({e!r}), "
+            "consultation gardée ouverte."
+        )
+        return True
+    return avis.date_limite is not None and avis.date_limite > instant
+
+
+def _verifier_annulations(
+    client: ClientAws,
+    code: str,
+    precedent: pl.DataFrame,
+    ids_vus: set[str],
+    complete: bool,
+    instant: datetime,
+    stats: Counter,
+) -> tuple[set[str], bool]:
+    """Relit la page d'avis des consultations ouvertes absentes de la liste avant de
+    les laisser annuler : une page en ligne à date limite future les garde (lignes
+    précédentes conservées). Renvoie (ids vus, complétude) à passer à `fusionner`."""
+    if not complete:
+        return ids_vus, complete
+    candidats = _annulations_a_verifier(precedent, ids_vus, instant)
+    if len(candidats) > MAX_VERIFICATIONS_ANNULATION:
+        get_logger(level=config.LOG_LEVEL).warning(
+            f"{code} : {len(candidats)} consultations ouvertes absentes de la liste "
+            f"(plus de {MAX_VERIFICATIONS_ANNULATION}), aucune annulation ce passage."
+        )
+        stats["annulation_non_verifiee"] += len(candidats)
+        return ids_vus, False
+    vus = set(ids_vus)
+    for idm, numero in candidats:
+        if _toujours_en_ligne(client, code, idm, numero, instant):
+            vus.add(idm)
+            stats["annulation_evitee"] += 1
+        else:
+            stats["annulation_confirmee"] += 1
+    return vus, complete
+
+
 def _passage(
     code: str, today: date, client_factory: Callable[[str], ClientAws]
 ) -> pl.DataFrame:
@@ -298,12 +387,20 @@ def _passage(
     instant = instant_du_passage(today)
     try:
         resultat, lignes = _collecter(client, entree, precedent, dossier_tmp, stats)
+        ids_vus, complete = _verifier_annulations(
+            client,
+            code,
+            precedent,
+            {a.idm for a in resultat.avis},
+            resultat.complete,
+            instant,
+            stats,
+        )
     finally:
         client.close()
         # Un téléchargement interrompu peut laisser un fichier partiel.
         shutil.rmtree(dossier_tmp, ignore_errors=True)
 
-    complete = resultat.complete
     nouvelles = pl.DataFrame(lignes, schema=_SCHEMA_LIGNES, strict=False)
     if nouvelles.height:
         nouvelles = enrich_acheteurs(
@@ -319,7 +416,7 @@ def _passage(
     df = fusionner(
         precedent,
         selection_publiee(nouvelles),
-        {a.idm for a in resultat.avis},
+        ids_vus,
         today,
         complete,
         config.DEAO_STATUT_DELAI_JOURS,
@@ -352,7 +449,9 @@ def _passage(
         f"{stats['rc_en_erreur']} en erreur ; erreurs : {stats['avis_en_erreur']} "
         f"avis, {stats['archive_illisible']} archive illisible, "
         f"{stats['lignes_en_erreur']} lignes, {stats['geocodage_en_erreur']} "
-        f"géocodage ; procédures inconnues : {inconnues or 'aucune'} ; "
+        f"géocodage ; annulations : {stats['annulation_confirmee']} confirmées, "
+        f"{stats['annulation_evitee']} évitées (page en ligne), "
+        f"{stats['annulation_non_verifiee']} non vérifiées ; procédures inconnues : {inconnues or 'aucune'} ; "
         f"{df.height} lignes, {df['id'].n_unique()} consultations, {avec_siret} "
         "lignes avec acheteur_id."
     )

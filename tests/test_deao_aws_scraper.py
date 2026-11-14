@@ -4,6 +4,7 @@ from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
+import httpx
 import polars as pl
 import pytest
 
@@ -84,6 +85,11 @@ class FauxClient:
 
     def page_avis(self, chemin):
         self.appels.append(("page_avis", chemin))
+        if chemin not in self.pages:
+            requete = httpx.Request("GET", f"{BASE}{chemin}")
+            raise httpx.HTTPStatusError(
+                "404", request=requete, response=httpx.Response(404, request=requete)
+            )
         return self.pages[chemin]
 
     def telecharger_rc(self, idm, dest_dir):
@@ -309,10 +315,47 @@ def test_depot_s3_en_panne_coupe_circuit(env, monkeypatch):
 
 def test_recherche_incomplete_pas_d_annulation(env):
     _premier(env)
-    df = _lancer(FauxClient([_liste(A2)], complete=False))
+    client = FauxClient([_liste(A2)], complete=False)
+    df = _lancer(client)
     assert set(df.filter(pl.col("id") == A1)["statut"]) == {"ouvert"}
-    df = _lancer(FauxClient([_liste(A2)]))
+    assert client.nb("page_avis") == 0
+    # Recherche complète, page d'avis absente (404) : annulée.
+    client = FauxClient([_liste(A2)])
+    del client.pages[f"/Annonces/MPI-pub-{A1}.htm"]
+    df = _lancer(client)
     assert set(df.filter(pl.col("id") == A1)["statut"]) == {"annule"}
+    assert client.appels.count(("page_avis", f"/Annonces/MPI-pub-{A1}.htm")) == 1
+
+
+def test_absente_de_la_liste_mais_page_en_ligne_reste_ouverte(env):
+    premier = _premier(env)
+    client = FauxClient([_liste(A2)])
+    df = _lancer(client)
+    assert client.appels.count(("page_avis", f"/Annonces/MPI-pub-{A1}.htm")) == 1
+    assert set(df.filter(pl.col("id") == A1)["statut"]) == {"ouvert"}
+    assert sorted(df.filter(pl.col("id") == A1)["uid"]) == sorted(
+        premier.filter(pl.col("id") == A1)["uid"]
+    )
+
+
+def test_absente_page_formulaire_annulee(env):
+    _premier(env)
+    client = FauxClient([_liste(A2)])
+    client.pages[f"/Annonces/MPI-pub-{A1}.htm"] = (
+        DOSSIER / "rechercher.html"
+    ).read_text(encoding="utf-8")
+    df = _lancer(client)
+    assert set(df.filter(pl.col("id") == A1)["statut"]) == {"annule"}
+
+
+def test_trop_de_consultations_a_verifier_aucune_annulation(env, monkeypatch):
+    _premier(env)
+    monkeypatch.setattr(scraper, "MAX_VERIFICATIONS_ANNULATION", 0)
+    client = FauxClient([_liste(A2)])
+    del client.pages[f"/Annonces/MPI-pub-{A1}.htm"]
+    df = _lancer(client)
+    assert client.nb("page_avis") == 0
+    assert set(df.filter(pl.col("id") == A1)["statut"]) == {"ouvert"}
 
 
 def test_page_avis_en_erreur_nouvelle_ignoree(env):
@@ -350,5 +393,6 @@ def test_log_de_synthese(env, monkeypatch):
         "0 cache S3",
         "2 site",
         "RC : 1 déposés, 1 en erreur",
+        "annulations : 0 confirmées, 0 évitées",
     ):
         assert attendu in synthese
