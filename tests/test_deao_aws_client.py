@@ -50,6 +50,11 @@ def liste(badges: dict[str, int] | None = None, **blocs: list[str]) -> str:
     return f"<html><body>{entete}{pied}</body></html>"
 
 
+def trop_large(n: int) -> str:
+    """Réponse « Votre recherche trouve n résultats » (sans badge)."""
+    return lire("liste_trop_large.html").replace("4093", str(n))
+
+
 FORMULAIRE = (
     '<html><body><select name="IDR"><option value="X">Toutes</option>'
     '<option value="13">13</option></select></body></html>'
@@ -108,7 +113,7 @@ class FauxSite:
 def test_decoupage_recursif():
     site = FauxSite(lire("rechercher.html"))
     site.poster("X", "X", "X", lire("liste_trop_large.html"))
-    site.poster("13", "X", "X", lire("liste_trop_large.html"))
+    site.poster("13", "X", "X", trop_large(67))
     page1 = lire("liste_13_S_p1.html")
     site.poster("13", "S", "X", page1)
     numeros_p1 = numeros_avis(page1, "s")
@@ -354,7 +359,7 @@ def test_nature_sans_resultat_non_reposte():
     vide = lire("aucun_resultat.html")
     site = FauxSite()
     site.poster("X", "X", "X", liste({"t": 3}))
-    site.poster("13", "X", "X", lire("liste_trop_large.html"))
+    site.poster("13", "X", "X", trop_large(3))
     site.poster("13", "T", "X", liste(t=[bloc(1), bloc(2), bloc(3)]))
     site.poster("13", "S", "X", vide)
     site.poster("13", "F", "X", vide)
@@ -415,4 +420,45 @@ def test_segment_avec_blocs_dl_pub_complet():
     assert resultat.segments_en_erreur == []
     assert [a.idm for a in resultat.avis] == ["1890637", "1895722"]
     assert resultat.hors_plateforme == 2
+    assert resultat.complete
+
+
+def test_decoupage_trop_large_enfants_incomplets_parent_en_erreur():
+    site = FauxSite()
+    site.poster("X", "X", "X", liste({"s": 28}))
+    site.poster("13", "X", "X", trop_large(30))
+    # les natures ne couvrent que 28 des 30 avis annoncés, sans erreur propre
+    site.poster("13", "T", "X", liste(t=[bloc(n) for n in range(8)]))
+    site.poster("13", "S", "X", liste(s=[bloc(n) for n in range(8, 18)]))
+    site.poster("13", "F", "X", liste(f=[bloc(n) for n in range(18, 28)]))
+    resultat = site.client().rechercher()
+    assert resultat.segments_en_erreur == ["13"]
+    assert len(resultat.avis) == 28
+    assert not resultat.complete
+
+
+def test_decoupage_trop_large_nature_enfants_incomplets():
+    vide = lire("aucun_resultat.html")
+    site = FauxSite()
+    site.poster("X", "X", "X", liste({"s": 5}))
+    site.poster("13", "X", "X", trop_large(30))
+    site.poster("13", "T", "X", vide)
+    site.poster("13", "F", "X", vide)
+    site.poster("13", "S", "X", trop_large(6))
+    for code in PROCEDURES:
+        site.poster("13", "S", code, vide)
+    site.poster("13", "S", "PA", liste(s=[bloc(n) for n in range(5)]))
+    resultat = site.client().rechercher()
+    assert resultat.segments_en_erreur == ["13/S", "13"]
+    assert not resultat.complete
+
+
+def test_departement_en_echec_puis_enfants_sans_reference():
+    site = FauxSite()
+    site.poster("X", "X", "X", liste({"s": 3}))
+    # POST du département en échec deux fois : pas de N, comportement inchangé
+    site.poster("13", "X", "X", lire("rechercher.html"))
+    site.poster("13", "S", "X", liste(s=[bloc(1), bloc(2), bloc(3)]))
+    resultat = site.client().rechercher()
+    assert resultat.segments_en_erreur == []
     assert resultat.complete

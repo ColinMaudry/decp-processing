@@ -16,7 +16,9 @@ recherche à la place de la page N). Stratégie :
 3. onglet encore incomplet : un nouveau POST du même segment et les pages de nouveau ;
 4. toujours incomplet : découpage par nature (segment département), puis par
    procédure (segment nature) ; un segment nature × procédure incomplet est noté dans
-   `segments_en_erreur` (`{dép}/{nature}/{procédure}`) et la collecte continue.
+   `segments_en_erreur` (`{dép}/{nature}/{procédure}`) et la collecte continue ;
+5. un segment découpé dont les enfants lisent moins d'avis distincts que son badge
+   ou que son « Votre recherche trouve N résultats » est noté en erreur lui aussi.
 
 Jamais de requête vers les URL du DCE (`dematEnt`, captcha).
 """
@@ -287,8 +289,24 @@ class ClientAws:
         if html is not None and aucun_resultat(html):
             return {}  # recherche à 0 résultat : segment valide, rien à lire
         if html is None or trop_de_resultats(html) is not None:
-            # Pas de badge pour contrôler : seul le total national sert de filet
-            return self._decouper(collecte, dep, nature, procedure, tous=True)
+            # Pas de badge : « Votre recherche trouve N résultats » donne l'attendu
+            # (POST en échec : aucun, seul le total national sert de filet).
+            attendu = trop_de_resultats(html) if html is not None else None
+            enfants = self._decouper(collecte, dep, nature, procedure, tous=True)
+            lus_enfants = set().union(*enfants.values())
+            if (
+                attendu is not None
+                and len(lus_enfants) < attendu
+                and nom not in collecte.erreurs
+            ):
+                logger.warning(
+                    "Segment %s : %s avis lus par découpage sur %s annoncés",
+                    nom,
+                    len(lus_enfants),
+                    attendu,
+                )
+                collecte.erreurs.append(nom)
+            return enfants
 
         onglets = [nature.lower()] if nature else ["t", "s", "f"]
         lus: dict[str, set[str]] = {o: set() for o in onglets}
