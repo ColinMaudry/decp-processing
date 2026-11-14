@@ -6,15 +6,17 @@ import pytest
 
 from src.tasks.deao.schema import published_schema
 from src.tasks.scrap.deao.atexo.accumulation import (
-    annulations_du_passage,
     dce_a_telecharger,
-    fusionner,
-    instant_du_passage,
     lots_a_relire,
     recherche_complete,
 )
 from src.tasks.scrap.deao.atexo.lignes import lignes_consultation
 from src.tasks.scrap.deao.atexo.parse import ConsultationListe, Lot
+from src.tasks.scrap.deao.plateformes import (
+    annulations_du_passage,
+    fusionner,
+    instant_du_passage,
+)
 
 TODAY = date(2026, 11, 13)
 PARIS = ZoneInfo("Europe/Paris")

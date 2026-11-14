@@ -11,6 +11,7 @@ from src.config import SourceDeao
 from src.tasks.deao.geocode_cache import ADRESSE_GEOCODE_SCHEMA
 from src.tasks.deao.schema import published_schema
 from src.tasks.deao.sources_publiees import FichierSourceIndisponible
+from src.tasks.scrap.deao import plateformes
 from src.tasks.scrap.deao.atexo import dce, scraper
 from src.tasks.scrap.deao.atexo.client import DceTelecharge, RechercheIncomplete
 from src.tasks.scrap.deao.atexo.parse import ConsultationListe, DetailConsultation, Lot
@@ -101,10 +102,10 @@ def env(monkeypatch, tmp_path, fake_datagouv):
     monkeypatch.setattr(config, "DEAO_DCE_S3_PREFIX", "dce")
     monkeypatch.setattr(dce, "s3_client", lambda: s3)
     monkeypatch.setattr(
-        scraper, "charger_referentiels", lambda: (_lf_ul(), _lf_etab(), COG)
+        plateformes, "charger_referentiels", lambda: (_lf_ul(), _lf_etab(), COG)
     )
     monkeypatch.setattr(
-        scraper,
+        plateformes,
         "geocoder_adresses",
         lambda adresses, today: pl.DataFrame(schema=ADRESSE_GEOCODE_SCHEMA),
     )
@@ -345,8 +346,8 @@ def test_disparue_avant_date_limite_annulee(env):
 def test_sirene_absent_lance_preprocess(env, monkeypatch, tmp_path):
     appels = []
     monkeypatch.setattr(config, "SIRENE_DATA_DIR", tmp_path / "absent")
-    monkeypatch.setattr(scraper, "sirene_preprocess", lambda: appels.append(1))
-    scraper._referentiels()
+    monkeypatch.setattr(plateformes, "sirene_preprocess", lambda: appels.append(1))
+    plateformes.referentiels_enrichissement()
     assert appels == [1]
 
 

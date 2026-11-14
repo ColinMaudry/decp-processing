@@ -7,11 +7,10 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from datetime import date, datetime
-from zoneinfo import ZoneInfo
 
 from lxml import html as lxml_html
 
-FUSEAU = ZoneInfo("Europe/Paris")
+from src.tasks.scrap.deao.plateformes import FUSEAU
 
 MOIS = {
     "jan": 1,

@@ -7,7 +7,6 @@ enrichit les acheteurs puis fusionne avec les consultations déjà connues.
 """
 
 import shutil
-import threading
 from collections import Counter
 from collections.abc import Callable
 from datetime import date
@@ -17,21 +16,13 @@ import polars as pl
 
 from src import config
 from src.config import SourceDeao
-from src.flows.sirene_preprocess import sirene_preprocess
 from src.tasks.deao import referentiels
-from src.tasks.deao.enrich import dictionnaire_depuis_publie, enrich_acheteurs
-from src.tasks.deao.geocode_cache import geocoder_adresses
+from src.tasks.deao.enrich import enrich_acheteurs
 from src.tasks.deao.schema import published_schema, selection_publiee
-from src.tasks.deao.sources_publiees import (
-    FichierSourceNonConforme,
-    publication_autorisee,
-    telecharger_fichier_source,
-)
+from src.tasks.deao.sources_publiees import publication_autorisee
+from src.tasks.scrap.deao import plateformes
 from src.tasks.scrap.deao.atexo.accumulation import (
-    annulations_du_passage,
     dce_a_telecharger,
-    fusionner,
-    instant_du_passage,
     lots_a_relire,
     recherche_complete,
 )
@@ -50,10 +41,19 @@ from src.tasks.scrap.deao.atexo.lignes import (
 )
 from src.tasks.scrap.deao.atexo.parse import ConsultationListe, DetailConsultation
 from src.tasks.scrap.deao.erreurs import ScrapPartiel
+from src.tasks.scrap.deao.plateformes import (
+    SEUIL_ANNULATIONS,
+    annulations_du_passage,
+    dictionnaire_partage,
+    fusionner,
+    instant_du_passage,
+    lire_precedent,
+    referentiels_enrichissement,
+)
 from src.tasks.utils import get_logger
 
-# Les références de module (charger_referentiels, geocoder_adresses,
-# sirene_preprocess) et config.* sont lues à l'appel : les tests les substituent.
+# `plateformes.geocoder_adresses` et config.* sont lus à l'appel : les tests les
+# substituent (charger_referentiels et sirene_preprocess : voir `plateformes`).
 
 # Colonnes des lignes avant enrichissement : schéma publié + adresse de l'acheteur.
 _SCHEMA_LIGNES = {
@@ -69,90 +69,6 @@ _SCHEMA_LIGNES = {
         )
     },
 }
-_COLONNES_DICTIONNAIRE = ("acheteur_nom", "acheteur_id", "acheteur_codePostal")
-# Part des consultations ouvertes connues annulées en un passage au-delà de laquelle
-# on avertit (une page de liste tronquée sans erreur ressemblerait à cela).
-_SEUIL_ANNULATIONS = 0.1
-
-# Les plateformes tournent en parallèle : un seul prétraitement SIRENE.
-_VERROU_SIRENE = threading.Lock()
-
-# Dictionnaire SIRET partagé par toutes les plateformes d'un passage : boamp.parquet
-# n'est téléchargé qu'une fois (succès comme échec) par jour et dossier de données.
-_VERROU_DICTIONNAIRE = threading.Lock()
-_DICTIONNAIRES: dict[tuple, pl.DataFrame | None] = {}
-
-
-def charger_referentiels() -> tuple[pl.LazyFrame, pl.LazyFrame, pl.DataFrame]:
-    return referentiels.charger_referentiels(config.SIRENE_DATA_DIR, config.DATA_DIR)
-
-
-def _referentiels() -> tuple[pl.LazyFrame, pl.LazyFrame, pl.DataFrame]:
-    """Référentiels d'enrichissement ; SIRENE du mois absent : prétraitement, comme
-    scrap_open."""
-    with _VERROU_SIRENE:
-        if not config.SIRENE_DATA_DIR.exists():
-            get_logger(level=config.LOG_LEVEL).info(
-                f"{config.SIRENE_DATA_DIR} absent, lancement de sirene_preprocess..."
-            )
-            sirene_preprocess()
-    return charger_referentiels()
-
-
-def _lire_precedent(entree: SourceDeao, dossier: Path) -> pl.DataFrame:
-    """Fichier publié de la source. Non conforme (ex. fichier provisoire déposé à la
-    création de la ressource) : départ de zéro seulement sur demande explicite. Absent,
-    en erreur ou illisible : toujours une erreur, même avec le drapeau (une panne de
-    data.gouv.fr ne doit pas écraser l'historique)."""
-    chemin = telecharger_fichier_source(entree, dossier)
-    try:
-        try:
-            precedent = selection_publiee(pl.read_parquet(chemin))
-        except pl.exceptions.PolarsError as e:
-            raise FichierSourceNonConforme(
-                f"Source {entree.code} : fichier publié non conforme au schéma ({e})"
-            ) from e
-        etrangeres = precedent.filter(
-            pl.col("sourceDataset").is_null() | (pl.col("sourceDataset") != entree.code)
-        ).height
-        if etrangeres:
-            raise FichierSourceNonConforme(
-                f"Source {entree.code} : fichier publié non conforme "
-                f"({etrangeres} ligne(s) dont sourceDataset != {entree.code})"
-            )
-        return precedent
-    except FichierSourceNonConforme as e:
-        if not config.DEAO_SCRAP_PARTIR_DE_ZERO:
-            raise
-        get_logger(level=config.LOG_LEVEL).warning(
-            f"{entree.code} : fichier publié non conforme ({e}), départ de zéro "
-            "(DEAO_SCRAP_PARTIR_DE_ZERO)."
-        )
-        return pl.DataFrame(schema=published_schema())
-
-
-def _dictionnaire(code: str, dossier: Path) -> pl.DataFrame | None:
-    """Dictionnaire SIRET appris sur `boamp.parquet` publié ; None en cas d'échec."""
-    logger = get_logger(level=config.LOG_LEVEL)
-    boamp = next((e for e in config.DEAO_REGISTRE if e.code == "boamp"), None)
-    try:
-        if boamp is None:
-            raise ValueError("source boamp absente du registre")
-        chemin = telecharger_fichier_source(boamp, dossier)
-        presentes = pl.read_parquet_schema(chemin)
-        colonnes = [c for c in _COLONNES_DICTIONNAIRE if c in presentes]
-        dictionnaire = dictionnaire_depuis_publie(
-            pl.read_parquet(chemin, columns=colonnes)
-        )
-    except Exception as e:
-        logger.warning(
-            f"{code} : pas de dictionnaire SIRET pour ce passage "
-            f"(boamp.parquet indisponible : {e!r})."
-        )
-        return None
-    # Vide si boamp.parquet n'a pas encore acheteur_codePostal.
-    logger.info(f"{code} : dictionnaire SIRET de {dictionnaire.height} entrées.")
-    return dictionnaire
 
 
 def _archiver_dce(
@@ -274,17 +190,6 @@ def _collecter(
     return consultations, annoncees, lignes
 
 
-def _dictionnaire_partage(today: date) -> pl.DataFrame | None:
-    cle = (today, str(config.DEAO_DATA_DIR))
-    with _VERROU_DICTIONNAIRE:
-        if cle not in _DICTIONNAIRES:
-            _DICTIONNAIRES.clear()
-            dossier = config.DEAO_DATA_DIR / "sources" / "_dictionnaire_siret"
-            dossier.mkdir(parents=True, exist_ok=True)
-            _DICTIONNAIRES[cle] = _dictionnaire("plateformes", dossier)
-        return _DICTIONNAIRES[cle]
-
-
 def _passage(
     code: str, today: date, client_factory: Callable[[str], ClientAtexo]
 ) -> pl.DataFrame:
@@ -296,9 +201,9 @@ def _passage(
     # Dossier propre à la source : les plateformes téléchargent en parallèle.
     dossier_sources = config.DEAO_DATA_DIR / "sources" / code
     dossier_sources.mkdir(parents=True, exist_ok=True)
-    precedent = _lire_precedent(entree, dossier_sources)
-    dictionnaire = _dictionnaire_partage(today)
-    lf_unites_legales, lf_etablissements, df_cog = _referentiels()
+    precedent = lire_precedent(entree, dossier_sources)
+    dictionnaire = dictionnaire_partage(today)
+    lf_unites_legales, lf_etablissements, df_cog = referentiels_enrichissement()
 
     stats: Counter = Counter()
     dossier_tmp = config.DEAO_DATA_DIR / "dce_tmp" / code
@@ -330,7 +235,9 @@ def _passage(
             lf_unites_legales,
             lf_etablissements,
             df_cog,
-            geocoder=referentiels.geocoder_tolerant(today, stats, geocoder_adresses),
+            geocoder=referentiels.geocoder_tolerant(
+                today, stats, plateformes.geocoder_adresses
+            ),
             dictionnaire=dictionnaire,
         )
     df = fusionner(
@@ -344,10 +251,10 @@ def _passage(
     )
 
     annulees, ouvertes = annulations_du_passage(precedent, df)
-    if ouvertes and annulees > _SEUIL_ANNULATIONS * ouvertes:
+    if ouvertes and annulees > SEUIL_ANNULATIONS * ouvertes:
         logger.warning(
             f"{code} : {annulees} consultations ouvertes sur {ouvertes} annulées "
-            f"en un passage (plus de {_SEUIL_ANNULATIONS:.0%}), à vérifier."
+            f"en un passage (plus de {SEUIL_ANNULATIONS:.0%}), à vérifier."
         )
 
     inconnues = {
