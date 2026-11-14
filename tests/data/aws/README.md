@@ -21,3 +21,7 @@ renvoie la page du formulaire de recherche (deux essais, avec ou sans `Referer`)
 - `liste_07_T_PA_dl.html` : POST `IDR=7`, `IDN=T`, `IDP=PA` (badge travaux 4) : 2 avis
   `MPI-pub-` et 2 avis `DL-pub-` dont les liens DCE/RC pointent vers
   `dl.aws-achat.info` (autre numérotation IDM).
+
+- `liste_42_T_PA_cg42.html` : POST `IDR=42`, `IDN=T`, `IDP=PA` (badge travaux 24, page 1 :
+  10 blocs dont 2 `MPI-pub-` ; les autres `CG42-pub-` pointent vers
+  `loire.marches-publics.info`).

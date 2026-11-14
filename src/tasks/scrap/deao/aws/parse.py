@@ -270,7 +270,7 @@ def numeros_avis(html: str, onglet: str | None = None) -> list[str]:
     numeros: list[str] = []
     for bloc, _ in _blocs(_arbre(html), onglet):
         for lien in bloc.xpath('.//a[contains(@href, "/Annonces/")]/@href'):
-            m = re.search(r"/Annonces/([A-Z]+)-pub-(\d+)\.htm", lien)
+            m = re.search(r"/Annonces/([A-Za-z0-9]+)-pub-(\d+)\.htm", lien)
             if m:
                 numeros.append(f"{m[1]}-{m[2]}")
                 break

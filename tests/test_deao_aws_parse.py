@@ -238,3 +238,13 @@ def test_blocs_dl_pub_comptes_mais_sans_ligne():
     avis = parse_liste(html, "t")
     assert [a.idm for a in avis] == ["1890637", "1895722"]
     assert all(a.chemin_avis.startswith("/Annonces/MPI-pub-") for a in avis)
+
+
+def test_prefixe_avec_chiffres_cg42():
+    html = lire("liste_42_T_PA_cg42.html")
+    cles = numeros_avis(html, "t")
+    assert len(set(cles)) == 10 and any(c.startswith("CG42-") for c in cles)
+    avis = parse_liste(html, "t")
+    assert len(avis) == 2
+    assert all(a.chemin_avis.startswith("/Annonces/MPI-pub-") for a in avis)
+    assert {f"MPI-{a.numero_avis}" for a in avis} <= set(cles)
